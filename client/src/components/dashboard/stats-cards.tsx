@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, FolderOpen, UserCheck, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Users, FolderOpen, UserCheck, AlertTriangle, TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import { addDays, addWeeks, addMonths, startOfDay, endOfDay } from "date-fns";
+import type { Project } from "@shared/schema";
 
 interface DashboardStats {
   totalClients: number;
@@ -9,9 +13,67 @@ interface DashboardStats {
   overdueTasks: number;
 }
 
+interface DateRange {
+  start: Date;
+  end: Date;
+  label: string;
+}
+
+const getDateRanges = (): Record<string, DateRange> => {
+  const now = new Date();
+  const today = startOfDay(now);
+
+  return {
+    "next-1-week": {
+      start: today,
+      end: endOfDay(addWeeks(today, 1)),
+      label: "Next 1 Week",
+    },
+    "next-2-weeks": {
+      start: today,
+      end: endOfDay(addWeeks(today, 2)),
+      label: "Next 2 Weeks",
+    },
+    "next-1-month": {
+      start: today,
+      end: endOfDay(addMonths(today, 1)),
+      label: "Next 1 Month",
+    },
+    "next-4-months": {
+      start: today,
+      end: endOfDay(addMonths(today, 4)),
+      label: "Next 4 Months",
+    },
+    "next-12-months": {
+      start: today,
+      end: endOfDay(addMonths(today, 12)),
+      label: "Next 12 Months",
+    },
+  };
+};
+
 export default function StatsCards() {
+  const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
+  const dateRanges = getDateRanges();
+  const currentRange = dateRanges[selectedPeriod];
+
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['/api/dashboard/stats'],
+  });
+
+  const { data: futureProjects } = useQuery<Project[]>({
+    queryKey: ['/api/dashboard/projects-due', selectedPeriod],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        startDate: currentRange.start.toISOString(),
+        endDate: currentRange.end.toISOString(),
+      });
+      const response = await fetch(`/api/dashboard/projects-due?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch future projects');
+      }
+      return response.json();
+    },
   });
 
   if (isLoading) {
@@ -44,8 +106,8 @@ export default function StatsCards() {
       changeType: "positive",
     },
     {
-      title: "Active Projects",
-      value: stats?.activeProjects || 0,
+      title: `Active Projects (${currentRange.label})`,
+      value: futureProjects?.length || 0,
       icon: FolderOpen,
       color: "bg-emerald-500",
       change: "+8%",
@@ -70,33 +132,54 @@ export default function StatsCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {statCards.map((card) => {
-        const Icon = card.icon;
-        const ChangeIcon = card.changeType === 'positive' ? TrendingUp : TrendingDown;
-        return (
-          <Card key={card.title} className="metric-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className={`flex-shrink-0 w-12 h-12 ${card.color} rounded-lg flex items-center justify-center`}>
-                  <Icon className="text-white w-6 h-6" />
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Dashboard Overview</h2>
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-muted-foreground" />
+          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(dateRanges).map(([key, range]) => (
+                <SelectItem key={key} value={key}>
+                  {range.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((card) => {
+          const Icon = card.icon;
+          const ChangeIcon = card.changeType === 'positive' ? TrendingUp : TrendingDown;
+          return (
+            <Card key={card.title} className="metric-card">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className={`flex-shrink-0 w-12 h-12 ${card.color} rounded-lg flex items-center justify-center`}>
+                    <Icon className="text-white w-6 h-6" />
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4">
-                <p className="metric-card-header">{card.title}</p>
-                <p className="metric-card-value">{card.value.toLocaleString()}</p>
-                <div className={`metric-card-change ${
-                  card.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  <ChangeIcon size={16} />
-                  <span>{card.change}</span>
-                  <span className="text-muted-foreground ml-1">vs last month</span>
+                <div className="mt-4">
+                  <p className="metric-card-header">{card.title}</p>
+                  <p className="metric-card-value">{card.value.toLocaleString()}</p>
+                  <div className={`metric-card-change ${
+                    card.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    <ChangeIcon size={16} />
+                    <span>{card.change}</span>
+                    <span className="text-muted-foreground ml-1">vs last month</span>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }
