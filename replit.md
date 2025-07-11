@@ -138,3 +138,21 @@ The application uses a comprehensive schema with the following main entities:
 - **Environment**: DATABASE_URL environment variable for connection string
 
 The architecture prioritizes type safety, developer experience, and scalability while maintaining simplicity in deployment and maintenance. The shared schema approach ensures consistency between frontend and backend, while the modular component structure supports easy feature extension and maintenance.
+
+## Recent Changes (July 2025)
+
+### Project Due Date Tracking Feature
+- **Added comprehensive project due date tracking widget** with flexible time period selection
+- **Database Enhancement**: Enhanced project storage with due date filtering methods
+- **API Endpoints**: Added `/api/dashboard/projects-due` endpoint with date range filtering
+- **Frontend Component**: Created `ProjectsDueWidget` with time period dropdown selector
+- **Time Period Options**: Next 1 week, 2 weeks, 1 month, 4 months (default), 12 months
+- **Visual Indicators**: Color-coded urgency indicators, progress tracking, and status badges
+- **User Experience**: Real-time project count display, responsive design, and smooth transitions
+
+### Professional CRM Design Implementation
+- **Design System**: Applied professional CRM color scheme with blues, grays, and clean whites
+- **Sidebar Enhancement**: Dark theme sidebar with expanded navigation menu
+- **Dashboard Metrics**: Modern metric cards with trend indicators and percentage changes
+- **Component Library**: Comprehensive CSS component system with status badges and priority indicators
+- **Responsive Layout**: Mobile-first design with proper grid systems and spacing

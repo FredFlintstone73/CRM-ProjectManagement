@@ -7,6 +7,7 @@ import RecentContacts from "@/components/dashboard/recent-contacts";
 import UpcomingTasks from "@/components/dashboard/upcoming-tasks";
 import ProjectStatus from "@/components/dashboard/project-status";
 import ActivityFeed from "@/components/dashboard/activity-feed";
+import ProjectsDueWidget from "@/components/dashboard/projects-due-widget";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -48,7 +49,7 @@ export default function Dashboard() {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
-              <RecentContacts />
+              <ProjectsDueWidget />
             </div>
             
             <div className="space-y-6">
@@ -57,7 +58,8 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <RecentContacts />
             <ActivityFeed />
           </div>
         </div>

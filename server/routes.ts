@@ -48,6 +48,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/dashboard/projects-due', isAuthenticated, async (req: any, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ message: 'Start date and end date are required' });
+      }
+      
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+      
+      const projects = await storage.getProjectsDueSoon(start, end);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching projects due soon:", error);
+      res.status(500).json({ message: "Failed to fetch projects due soon" });
+    }
+  });
+
   // Contact routes
   app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {

@@ -88,6 +88,9 @@ export interface IStorage {
     prospects: number;
     overdueTasks: number;
   }>;
+
+  // Project due date operations
+  getProjectsDueSoon(startDate: Date, endDate: Date): Promise<Project[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -435,6 +438,23 @@ export class DatabaseStorage implements IStorage {
       prospects: prospectsResult?.count || 0,
       overdueTasks: overdueTasksResult.length,
     };
+  }
+
+  // Project due date operations
+  async getProjectsDueSoon(startDate: Date, endDate: Date): Promise<Project[]> {
+    return await db
+      .select()
+      .from(projects)
+      .where(
+        and(
+          sql`${projects.dueDate} BETWEEN ${startDate} AND ${endDate}`,
+          or(
+            eq(projects.status, "planning"),
+            eq(projects.status, "active")
+          )
+        )
+      )
+      .orderBy(projects.dueDate);
   }
 }
 
