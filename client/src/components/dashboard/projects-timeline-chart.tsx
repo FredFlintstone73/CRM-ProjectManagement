@@ -214,7 +214,7 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
               {Object.entries(PROJECT_TYPE_LABELS).map(([key, label]) => (
                 <div key={key} className="text-center">
                   <div 
-                    className="w-4 h-4 rounded mx-auto mb-1 bg-[#10b981]"
+                    className="w-4 h-4 rounded mx-auto mb-1"
                     style={{ backgroundColor: PROJECT_TYPE_COLORS[key as keyof typeof PROJECT_TYPE_COLORS] }}
                   />
                   <div className="text-xs text-gray-600">{label}</div>
