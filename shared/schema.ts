@@ -60,6 +60,16 @@ export const projectStatusEnum = pgEnum("project_status", [
   "cancelled"
 ]);
 
+// Project type enum
+export const projectTypeEnum = pgEnum("project_type", [
+  "frm", // Financial Road Map Interview
+  "im",  // Implementation Meeting
+  "ipu", // Initial Progress Update
+  "csr", // Comprehensive Safety Review
+  "gpo", // Goals Progress Update
+  "tar"  // The Annual Review
+]);
+
 // Task status enum
 export const taskStatusEnum = pgEnum("task_status", [
   "todo",
@@ -100,6 +110,7 @@ export const projects = pgTable("projects", {
   description: text("description"),
   clientId: integer("client_id").references(() => contacts.id),
   status: projectStatusEnum("status").default("planning"),
+  projectType: projectTypeEnum("project_type").notNull(),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   dueDate: timestamp("due_date"),

@@ -9,17 +9,33 @@ import type { Project } from "@shared/schema";
 
 interface TimelineData {
   period: string;
-  count: number;
+  frm: number;
+  im: number;
+  ipu: number;
+  csr: number;
+  gpo: number;
+  tar: number;
+  total: number;
   projects: Project[];
-  color: string;
 }
 
-const CHART_COLORS = [
-  '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', 
-  '#d084d0', '#87d068', '#ffa500', '#ff6b6b', '#4ecdc4',
-  '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7',
-  '#a29bfe', '#fd79a8', '#e17055', '#00b894', '#00cec9'
-];
+const PROJECT_TYPE_COLORS = {
+  frm: '#3B82F6', // Blue - Financial Road Map Interview
+  im: '#10B981',  // Green - Implementation Meeting
+  ipu: '#F59E0B', // Amber - Initial Progress Update
+  csr: '#EF4444', // Red - Comprehensive Safety Review
+  gpo: '#8B5CF6', // Purple - Goals Progress Update
+  tar: '#F97316'  // Orange - The Annual Review
+};
+
+const PROJECT_TYPE_LABELS = {
+  frm: 'Financial Road Map Interview',
+  im: 'Implementation Meeting',
+  ipu: 'Initial Progress Update',
+  csr: 'Comprehensive Safety Review',
+  gpo: 'Goals Progress Update',
+  tar: 'The Annual Review'
+};
 
 interface ProjectsTimelineChartProps {
   selectedPeriod: string;
@@ -75,15 +91,24 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
       project.dueDate && isSameMonth(new Date(project.dueDate), month)
     ) || [];
     
+    const projectCounts = {
+      frm: monthProjects.filter(p => p.projectType === 'frm').length,
+      im: monthProjects.filter(p => p.projectType === 'im').length,
+      ipu: monthProjects.filter(p => p.projectType === 'ipu').length,
+      csr: monthProjects.filter(p => p.projectType === 'csr').length,
+      gpo: monthProjects.filter(p => p.projectType === 'gpo').length,
+      tar: monthProjects.filter(p => p.projectType === 'tar').length,
+    };
+    
     return {
       period: format(month, 'MMM yyyy'),
-      count: monthProjects.length,
+      ...projectCounts,
+      total: monthProjects.length,
       projects: monthProjects,
-      color: CHART_COLORS[index % CHART_COLORS.length]
     };
   });
 
-  const maxCount = Math.max(...chartData.map(d => d.count), 1);
+  const maxCount = Math.max(...chartData.map(d => d.total), 1);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -92,22 +117,25 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="font-semibold">{label}</p>
           <p className="text-sm text-gray-600">
-            {data.count} project{data.count !== 1 ? 's' : ''} due
+            {data.total} meeting{data.total !== 1 ? 's' : ''} scheduled
           </p>
-          {data.projects.length > 0 && (
-            <div className="mt-2 space-y-1">
-              {data.projects.slice(0, 3).map((project: Project) => (
-                <p key={project.id} className="text-xs text-gray-800">
-                  • {project.name}
-                </p>
-              ))}
-              {data.projects.length > 3 && (
-                <p className="text-xs text-gray-500">
-                  +{data.projects.length - 3} more...
-                </p>
-              )}
-            </div>
-          )}
+          <div className="mt-2 space-y-1">
+            {Object.entries(PROJECT_TYPE_LABELS).map(([key, label]) => {
+              const count = data[key];
+              if (count > 0) {
+                return (
+                  <div key={key} className="flex items-center gap-2 text-xs">
+                    <div 
+                      className="w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: PROJECT_TYPE_COLORS[key as keyof typeof PROJECT_TYPE_COLORS] }}
+                    />
+                    <span>{label}: {count}</span>
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
         </div>
       );
     }
@@ -149,7 +177,7 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
           <div>
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-center">
-                Projects for {selectedPeriod.replace('-', ' ').replace('next', 'next')}
+                Meeting Types for {selectedPeriod.replace('-', ' ').replace('next', 'next')}
               </h3>
             </div>
             
@@ -170,26 +198,29 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
                 <YAxis 
                   domain={[0, maxCount + 1]}
                   fontSize={12}
-                  label={{ value: 'Number of Projects', angle: -90, position: 'insideLeft' }}
+                  label={{ value: 'Number of Meetings', angle: -90, position: 'insideLeft' }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
+                <Bar dataKey="frm" stackId="a" fill={PROJECT_TYPE_COLORS.frm} />
+                <Bar dataKey="im" stackId="a" fill={PROJECT_TYPE_COLORS.im} />
+                <Bar dataKey="ipu" stackId="a" fill={PROJECT_TYPE_COLORS.ipu} />
+                <Bar dataKey="csr" stackId="a" fill={PROJECT_TYPE_COLORS.csr} />
+                <Bar dataKey="gpo" stackId="a" fill={PROJECT_TYPE_COLORS.gpo} />
+                <Bar dataKey="tar" stackId="a" fill={PROJECT_TYPE_COLORS.tar} />
               </BarChart>
             </ResponsiveContainer>
 
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {chartData.filter(d => d.count > 0).map((item, index) => (
-                <div key={index} className="text-center">
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {Object.entries(PROJECT_TYPE_LABELS).map(([key, label]) => (
+                <div key={key} className="text-center">
                   <div 
                     className="w-4 h-4 rounded mx-auto mb-1"
-                    style={{ backgroundColor: item.color }}
+                    style={{ backgroundColor: PROJECT_TYPE_COLORS[key as keyof typeof PROJECT_TYPE_COLORS] }}
                   />
-                  <div className="text-xs text-gray-600">{item.period}</div>
-                  <div className="text-sm font-semibold">{item.count}</div>
+                  <div className="text-xs text-gray-600">{label}</div>
+                  <div className="text-sm font-semibold">
+                    {chartData.reduce((sum, item) => sum + (item[key as keyof TimelineData] as number), 0)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -197,24 +228,24 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="font-semibold text-gray-700">Total Projects:</span>
+                  <span className="font-semibold text-gray-700">Total Meetings:</span>
                   <span className="ml-2">{projects?.length || 0}</span>
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">Peak Month:</span>
                   <span className="ml-2">
-                    {chartData.reduce((prev, curr) => prev.count > curr.count ? prev : curr).period}
+                    {chartData.reduce((prev, curr) => prev.total > curr.total ? prev : curr).period}
                   </span>
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">Avg per Month:</span>
                   <span className="ml-2">
-                    {(chartData.reduce((sum, item) => sum + item.count, 0) / chartData.length).toFixed(1)}
+                    {(chartData.reduce((sum, item) => sum + item.total, 0) / chartData.length).toFixed(1)}
                   </span>
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">Active Months:</span>
-                  <span className="ml-2">{chartData.filter(d => d.count > 0).length}</span>
+                  <span className="ml-2">{chartData.filter(d => d.total > 0).length}</span>
                 </div>
               </div>
             </div>
