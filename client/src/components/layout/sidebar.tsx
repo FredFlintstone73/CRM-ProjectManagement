@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +13,10 @@ export default function Sidebar() {
     { name: 'Contacts', href: '/contacts', icon: Users },
     { name: 'Projects', href: '/projects', icon: FolderOpen },
     { name: 'Tasks', href: '/tasks', icon: CheckSquare },
+    { name: 'Analytics', href: '/analytics', icon: TrendingUp },
+    { name: 'Calendar', href: '/calendar', icon: Calendar },
+    { name: 'Messages', href: '/messages', icon: MessageSquare },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
   const handleLogout = () => {
@@ -21,33 +25,30 @@ export default function Sidebar() {
 
   return (
     <div className="hidden md:flex md:w-64 md:flex-col">
-      <div className="flex flex-col flex-grow bg-white shadow-sm border-r border-gray-200">
+      <div className="sidebar-nav flex flex-col flex-grow">
         {/* Logo */}
-        <div className="flex items-center px-6 py-5 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Users className="text-white text-sm" />
+        <div className="flex items-center px-6 py-6 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Building2 size={24} className="text-primary" />
             </div>
-            <h1 className="ml-3 text-xl font-semibold text-gray-900">ClientHub</h1>
+            <div>
+              <h1 className="text-lg font-bold text-white">ClientHub</h1>
+              <p className="text-xs text-sidebar-foreground/70">CRM Platform</p>
+            </div>
           </div>
         </div>
         
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 px-4 py-6 space-y-1">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
               <Link key={item.name} href={item.href}>
-                <a
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    isActive
-                      ? 'text-primary bg-primary/10'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon className="mr-3 w-4 h-4" />
-                  {item.name}
+                <a className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
+                  <Icon size={20} />
+                  <span>{item.name}</span>
                 </a>
               </Link>
             );
@@ -55,27 +56,27 @@ export default function Sidebar() {
         </nav>
         
         {/* User Profile */}
-        <div className="px-4 py-4 border-t border-gray-200">
+        <div className="px-4 py-4 border-t border-white/10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center gap-3">
               <Avatar className="w-8 h-8">
                 <AvatarImage src={user?.profileImageUrl || ''} alt={user?.firstName || ''} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-primary/20 text-primary">
                   {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || ''}
                 </AvatarFallback>
               </Avatar>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-white">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLogout}
-              className="ml-2"
+              className="ml-2 text-sidebar-foreground/70 hover:text-white hover:bg-white/5"
             >
               <LogOut className="w-4 h-4" />
             </Button>

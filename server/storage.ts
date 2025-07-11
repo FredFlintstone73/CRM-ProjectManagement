@@ -123,7 +123,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createContact(contact: InsertContact, userId: string): Promise<Contact> {
-    const contactData = { ...contact, createdBy: userId };
+    const contactData = { ...contact, createdBy: userId } as any;
     const [newContact] = await db
       .insert(contacts)
       .values(contactData)
@@ -188,7 +188,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(project: InsertProject, userId: string): Promise<Project> {
-    const projectData = { ...project, createdBy: userId };
+    const projectData = { ...project, createdBy: userId } as any;
     const [newProject] = await db
       .insert(projects)
       .values(projectData)
@@ -238,7 +238,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(task: InsertTask, userId: string): Promise<Task> {
-    const taskData = { ...task, createdBy: userId };
+    const taskData = { ...task, createdBy: userId } as any;
     const [newTask] = await db
       .insert(tasks)
       .values(taskData)
@@ -327,7 +327,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProjectTemplate(template: InsertProjectTemplate, userId: string): Promise<ProjectTemplate> {
-    const templateData = { ...template, createdBy: userId };
+    const templateData = { ...template, createdBy: userId } as any;
     const [newTemplate] = await db
       .insert(projectTemplates)
       .values(templateData)
@@ -362,7 +362,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEmailInteraction(interaction: InsertEmailInteraction, userId: string): Promise<EmailInteraction> {
-    const interactionData = { ...interaction, createdBy: userId };
+    const interactionData = { ...interaction, createdBy: userId } as any;
     const [newInteraction] = await db
       .insert(emailInteractions)
       .values(interactionData)
@@ -384,7 +384,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCallTranscript(transcript: InsertCallTranscript, userId: string): Promise<CallTranscript> {
-    const transcriptData = { ...transcript, createdBy: userId };
+    const transcriptData = { ...transcript, createdBy: userId } as any;
     const [newTranscript] = await db
       .insert(callTranscripts)
       .values(transcriptData)
@@ -400,7 +400,7 @@ export class DatabaseStorage implements IStorage {
   async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
     const [newLog] = await db
       .insert(activityLog)
-      .values(log)
+      .values(log as any)
       .returning();
     return newLog;
   }
