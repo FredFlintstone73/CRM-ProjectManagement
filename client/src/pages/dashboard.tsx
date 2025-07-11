@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
-import StatsCards from "@/components/dashboard/stats-cards";
+
 import RecentContacts from "@/components/dashboard/recent-contacts";
 import UpcomingTasks from "@/components/dashboard/upcoming-tasks";
 import ProjectStatus from "@/components/dashboard/project-status";
@@ -47,9 +47,7 @@ export default function Dashboard() {
       
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
-          <StatsCards selectedPeriod={selectedPeriod} />
-          
-          <div className="grid grid-cols-1 gap-6 mt-8">
+          <div className="grid grid-cols-1 gap-6">
             <ProjectsTimelineChart 
               selectedPeriod={selectedPeriod} 
               onPeriodChange={setSelectedPeriod} 
