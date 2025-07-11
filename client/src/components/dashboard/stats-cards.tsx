@@ -52,8 +52,11 @@ const getDateRanges = (): Record<string, DateRange> => {
   };
 };
 
-export default function StatsCards() {
-  const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
+interface StatsCardsProps {
+  selectedPeriod: string;
+}
+
+export default function StatsCards({ selectedPeriod }: StatsCardsProps) {
   const dateRanges = getDateRanges();
   const currentRange = dateRanges[selectedPeriod];
 
@@ -132,54 +135,33 @@ export default function StatsCards() {
   ];
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Dashboard Overview</h2>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-muted-foreground" />
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select period" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(dateRanges).map(([key, range]) => (
-                <SelectItem key={key} value={key}>
-                  {range.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card) => {
-          const Icon = card.icon;
-          const ChangeIcon = card.changeType === 'positive' ? TrendingUp : TrendingDown;
-          return (
-            <Card key={card.title} className="metric-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className={`flex-shrink-0 w-12 h-12 ${card.color} rounded-lg flex items-center justify-center`}>
-                    <Icon className="text-white w-6 h-6" />
-                  </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {statCards.map((card) => {
+        const Icon = card.icon;
+        const ChangeIcon = card.changeType === 'positive' ? TrendingUp : TrendingDown;
+        return (
+          <Card key={card.title} className="metric-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className={`flex-shrink-0 w-12 h-12 ${card.color} rounded-lg flex items-center justify-center`}>
+                  <Icon className="text-white w-6 h-6" />
                 </div>
-                <div className="mt-4">
-                  <p className="metric-card-header">{card.title}</p>
-                  <p className="metric-card-value">{card.value.toLocaleString()}</p>
-                  <div className={`metric-card-change ${
-                    card.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    <ChangeIcon size={16} />
-                    <span>{card.change}</span>
-                    <span className="text-muted-foreground ml-1">vs last month</span>
-                  </div>
+              </div>
+              <div className="mt-4">
+                <p className="metric-card-header">{card.title}</p>
+                <p className="metric-card-value">{card.value.toLocaleString()}</p>
+                <div className={`metric-card-change ${
+                  card.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  <ChangeIcon size={16} />
+                  <span>{card.change}</span>
+                  <span className="text-muted-foreground ml-1">vs last month</span>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

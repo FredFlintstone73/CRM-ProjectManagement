@@ -21,14 +21,26 @@ const CHART_COLORS = [
   '#a29bfe', '#fd79a8', '#e17055', '#00b894', '#00cec9'
 ];
 
-export default function ProjectsTimelineChart() {
-  const [selectedPeriod, setSelectedPeriod] = useState("next-12-months");
+interface ProjectsTimelineChartProps {
+  selectedPeriod: string;
+  onPeriodChange: (period: string) => void;
+}
+
+export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }: ProjectsTimelineChartProps) {
   
   const getPeriodMonths = (period: string) => {
     const now = new Date();
     const start = startOfMonth(now);
     
     switch (period) {
+      case "next-1-week":
+        return [start]; // Show current month for week view
+      case "next-2-weeks":
+        return [start]; // Show current month for 2-week view
+      case "next-1-month":
+        return [start]; // Show current month
+      case "next-4-months":
+        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 3)) });
       case "next-6-months":
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 5)) });
       case "next-12-months":
@@ -114,17 +126,24 @@ export default function ProjectsTimelineChart() {
             <BarChart3 className="w-5 h-5 text-primary" />
             <CardTitle>Projects Timeline Distribution</CardTitle>
           </div>
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select period" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="next-6-months">Next 6 Months</SelectItem>
-              <SelectItem value="next-12-months">Next 12 Months</SelectItem>
-              <SelectItem value="next-18-months">Next 18 Months</SelectItem>
-              <SelectItem value="next-24-months">Next 24 Months</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            <Select value={selectedPeriod} onValueChange={onPeriodChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="next-1-week">Next 1 Week</SelectItem>
+                <SelectItem value="next-2-weeks">Next 2 Weeks</SelectItem>
+                <SelectItem value="next-1-month">Next 1 Month</SelectItem>
+                <SelectItem value="next-4-months">Next 4 Months</SelectItem>
+                <SelectItem value="next-6-months">Next 6 Months</SelectItem>
+                <SelectItem value="next-12-months">Next 12 Months</SelectItem>
+                <SelectItem value="next-18-months">Next 18 Months</SelectItem>
+                <SelectItem value="next-24-months">Next 24 Months</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

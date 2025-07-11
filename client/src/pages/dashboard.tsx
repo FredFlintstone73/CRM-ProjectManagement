@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
@@ -13,6 +13,7 @@ import ProjectsTimelineChart from "@/components/dashboard/projects-timeline-char
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -46,10 +47,13 @@ export default function Dashboard() {
       
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
-          <StatsCards />
+          <StatsCards selectedPeriod={selectedPeriod} />
           
           <div className="grid grid-cols-1 gap-6 mt-8">
-            <ProjectsTimelineChart />
+            <ProjectsTimelineChart 
+              selectedPeriod={selectedPeriod} 
+              onPeriodChange={setSelectedPeriod} 
+            />
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
