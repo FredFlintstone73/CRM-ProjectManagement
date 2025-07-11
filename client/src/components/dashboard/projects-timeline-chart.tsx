@@ -120,7 +120,7 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
-            <CardTitle>Projects Timeline Distribution</CardTitle>
+            <CardTitle>Upcoming Progress Meetings</CardTitle>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-muted-foreground" />
