@@ -45,10 +45,6 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 5)) });
       case "next-12-months":
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 11)) });
-      case "next-18-months":
-        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 17)) });
-      case "next-24-months":
-        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 23)) });
       default:
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 11)) });
     }
@@ -139,8 +135,6 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
                 <SelectItem value="next-4-months">Next 4 Months</SelectItem>
                 <SelectItem value="next-6-months">Next 6 Months</SelectItem>
                 <SelectItem value="next-12-months">Next 12 Months</SelectItem>
-                <SelectItem value="next-18-months">Next 18 Months</SelectItem>
-                <SelectItem value="next-24-months">Next 24 Months</SelectItem>
               </SelectContent>
             </Select>
           </div>
