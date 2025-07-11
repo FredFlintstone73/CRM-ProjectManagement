@@ -29,12 +29,12 @@ const PROJECT_TYPE_COLORS = {
 };
 
 const PROJECT_TYPE_LABELS = {
-  frm: 'Financial Road Map Interview',
-  im: 'Implementation Meeting',
-  ipu: 'Initial Progress Update',
-  csr: 'Comprehensive Safety Review',
-  gpo: 'Goals Progress Update',
-  tar: 'The Annual Review'
+  frm: 'FRM',
+  im: 'IM',
+  ipu: 'IPU',
+  csr: 'CSR',
+  gpo: 'GPO',
+  tar: 'TAR'
 };
 
 interface ProjectsTimelineChartProps {
