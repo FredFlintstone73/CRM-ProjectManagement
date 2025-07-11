@@ -8,6 +8,7 @@ import UpcomingTasks from "@/components/dashboard/upcoming-tasks";
 import ProjectStatus from "@/components/dashboard/project-status";
 import ActivityFeed from "@/components/dashboard/activity-feed";
 import ProjectsDueWidget from "@/components/dashboard/projects-due-widget";
+import ProjectsTimelineChart from "@/components/dashboard/projects-timeline-chart";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -46,6 +47,10 @@ export default function Dashboard() {
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
           <StatsCards />
+          
+          <div className="grid grid-cols-1 gap-6 mt-8">
+            <ProjectsTimelineChart />
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
