@@ -11,7 +11,7 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6">
             <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
@@ -23,8 +23,25 @@ export default function Landing() {
           </p>
         </div>
 
+        {/* Get Started Today - Moved to top */}
+        <div className="text-center mb-16">
+          <Card className="max-w-md mx-auto">
+            <CardHeader>
+              <CardTitle>Get Started Today</CardTitle>
+              <CardDescription>
+                Start managing your contacts and projects more efficiently
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleLogin} className="w-full" size="lg">
+                Sign In to Continue
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Features */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           <Card className="text-center">
             <CardHeader>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -82,22 +99,7 @@ export default function Landing() {
           </Card>
         </div>
 
-        {/* CTA */}
-        <div className="text-center">
-          <Card className="max-w-md mx-auto">
-            <CardHeader>
-              <CardTitle>Get Started Today</CardTitle>
-              <CardDescription>
-                Start managing your contacts and projects more efficiently
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={handleLogin} className="w-full" size="lg">
-                Sign In to Continue
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+
       </div>
     </div>
   );
