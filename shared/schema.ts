@@ -260,21 +260,18 @@ export const insertContactSchema = createInsertSchema(contacts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-  createdBy: true,
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-  createdBy: true,
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-  createdBy: true,
   completedAt: true,
 });
 
@@ -282,19 +279,16 @@ export const insertProjectTemplateSchema = createInsertSchema(projectTemplates).
   id: true,
   createdAt: true,
   updatedAt: true,
-  createdBy: true,
 });
 
 export const insertEmailInteractionSchema = createInsertSchema(emailInteractions).omit({
   id: true,
   createdAt: true,
-  createdBy: true,
 });
 
 export const insertCallTranscriptSchema = createInsertSchema(callTranscripts).omit({
   id: true,
   createdAt: true,
-  createdBy: true,
 });
 
 export const insertActivityLogSchema = createInsertSchema(activityLog).omit({

@@ -123,9 +123,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createContact(contact: InsertContact, userId: string): Promise<Contact> {
+    const contactData = { ...contact, createdBy: userId };
     const [newContact] = await db
       .insert(contacts)
-      .values({ ...contact, createdBy: userId })
+      .values(contactData)
       .returning();
     
     // Log activity
@@ -134,7 +135,7 @@ export class DatabaseStorage implements IStorage {
       action: "created_contact",
       entityType: "contact",
       entityId: newContact.id,
-      metadata: { contactName: `${contact.firstName} ${contact.lastName}` },
+      metadata: { contactName: `${newContact.firstName} ${newContact.lastName}` },
     });
 
     return newContact;
@@ -187,9 +188,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(project: InsertProject, userId: string): Promise<Project> {
+    const projectData = { ...project, createdBy: userId };
     const [newProject] = await db
       .insert(projects)
-      .values({ ...project, createdBy: userId })
+      .values(projectData)
       .returning();
     
     // Log activity
@@ -198,7 +200,7 @@ export class DatabaseStorage implements IStorage {
       action: "created_project",
       entityType: "project",
       entityId: newProject.id,
-      metadata: { projectName: project.name },
+      metadata: { projectName: newProject.name },
     });
 
     return newProject;
@@ -236,9 +238,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(task: InsertTask, userId: string): Promise<Task> {
+    const taskData = { ...task, createdBy: userId };
     const [newTask] = await db
       .insert(tasks)
-      .values({ ...task, createdBy: userId })
+      .values(taskData)
       .returning();
     
     // Log activity
@@ -247,7 +250,7 @@ export class DatabaseStorage implements IStorage {
       action: "created_task",
       entityType: "task",
       entityId: newTask.id,
-      metadata: { taskTitle: task.title },
+      metadata: { taskTitle: newTask.title },
     });
 
     return newTask;
@@ -324,9 +327,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProjectTemplate(template: InsertProjectTemplate, userId: string): Promise<ProjectTemplate> {
+    const templateData = { ...template, createdBy: userId };
     const [newTemplate] = await db
       .insert(projectTemplates)
-      .values({ ...template, createdBy: userId })
+      .values(templateData)
       .returning();
     return newTemplate;
   }
@@ -358,9 +362,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEmailInteraction(interaction: InsertEmailInteraction, userId: string): Promise<EmailInteraction> {
+    const interactionData = { ...interaction, createdBy: userId };
     const [newInteraction] = await db
       .insert(emailInteractions)
-      .values({ ...interaction, createdBy: userId })
+      .values(interactionData)
       .returning();
     return newInteraction;
   }
@@ -379,9 +384,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCallTranscript(transcript: InsertCallTranscript, userId: string): Promise<CallTranscript> {
+    const transcriptData = { ...transcript, createdBy: userId };
     const [newTranscript] = await db
       .insert(callTranscripts)
-      .values({ ...transcript, createdBy: userId })
+      .values(transcriptData)
       .returning();
     return newTranscript;
   }
