@@ -237,20 +237,7 @@ export default function ContactDetail() {
             </Card>
           )}
 
-          {/* Marriage Information */}
-          {contact.marriageDate && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Marriage Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Marriage Date:</p>
-                  <p className="text-sm">{formatDate(contact.marriageDate)}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
           {/* Edit Client Button */}
           <Button 
@@ -285,6 +272,20 @@ export default function ContactDetail() {
 
         {/* Main Content */}
         <div className="flex-1 p-6">
+          {/* Marriage Information */}
+          {contact.marriageDate && (
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Marriage Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Marriage Date:</p>
+                  <p className="text-sm">{formatDate(contact.marriageDate)}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
@@ -323,6 +324,10 @@ export default function ContactDetail() {
                     <div className="flex justify-between">
                       <span className="font-medium">Date of Birth:</span>
                       <span>{formatDate(contact.dateOfBirth)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Date of Death:</span>
+                      <span>{formatDate(contact.dateOfDeath) || "Not specified"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">SSN:</span>
@@ -385,8 +390,12 @@ export default function ContactDetail() {
                       <span>{formatDate(contact.spouseDateOfBirth)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-medium">Marriage Date:</span>
-                      <span>{formatDate(contact.marriageDate)}</span>
+                      <span className="font-medium">Date of Death:</span>
+                      <span>{formatDate(contact.spouseDateOfDeath) || "Not specified"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">SSN:</span>
+                      <span>{contact.spouseSSN || "Not specified"}</span>
                     </div>
                   </div>
                   
