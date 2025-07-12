@@ -160,6 +160,8 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       onSuccess?.();
     },
     onError: (error) => {
+      console.error('Mutation error:', error);
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -171,9 +173,13 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
         }, 500);
         return;
       }
+      
+      // Get the actual error message from the server response
+      const errorMessage = error.message || "An unknown error occurred";
+      
       toast({
         title: "Error",
-        description: contact ? "Failed to update contact. Please try again." : "Failed to create contact. Please try again.",
+        description: `${contact ? "Failed to update contact" : "Failed to create contact"}: ${errorMessage}`,
         variant: "destructive",
       });
     },
@@ -182,7 +188,20 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   const onSubmit = (data: InsertContact) => {
     console.log('Form submitted with data:', data);
     console.log('Mutation state:', { isPending: mutation.isPending, error: mutation.error });
-    mutation.mutate(data);
+    
+    // Clean up the data to handle undefined/null values and convert dates
+    const cleanedData = Object.fromEntries(
+      Object.entries(data).map(([key, value]) => {
+        // Convert Date objects to ISO strings for the server
+        if (value instanceof Date) {
+          return [key, value.toISOString()];
+        }
+        return [key, value];
+      }).filter(([_, value]) => value !== undefined && value !== null && value !== "")
+    ) as InsertContact;
+    
+    console.log('Cleaned data being sent:', cleanedData);
+    mutation.mutate(cleanedData);
   };
 
   const handleSameAsMailingAddress = (value: string) => {
