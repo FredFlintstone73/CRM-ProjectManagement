@@ -372,7 +372,7 @@ export default function Contacts() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <Avatar>
-                          <AvatarImage src="" alt={`${contact.firstName} ${contact.lastName}`} />
+                          <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
                           <AvatarFallback>
                             {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
                           </AvatarFallback>
@@ -507,7 +507,7 @@ export default function Contacts() {
                       <TableCell>
                         <div className="flex items-center space-x-3">
                           <Avatar className="w-8 h-8">
-                            <AvatarImage src="" alt={`${contact.firstName} ${contact.lastName}`} />
+                            <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
                             <AvatarFallback className="text-xs">
                               {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
                             </AvatarFallback>
