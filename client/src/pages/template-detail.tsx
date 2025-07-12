@@ -36,38 +36,38 @@ interface TaskTemplate {
   estimatedDays: number;
 }
 
-// Group tasks by workflow phase for better organization
+// Group tasks by workflow phase based on the actual CSV sections
 const groupTasksByPhase = (tasks: TaskTemplate[]) => {
   const phases = {
-    'Scheduling & Setup': [] as TaskTemplate[],
-    'Information Gathering': [] as TaskTemplate[],
-    'Team Coordination': [] as TaskTemplate[],
-    'Report Generation': [] as TaskTemplate[],
-    'Meeting Preparation': [] as TaskTemplate[],
-    'Meeting Execution': [] as TaskTemplate[],
-    'Post-Meeting': [] as TaskTemplate[]
+    'Confirming & Scheduling Meeting Dates & Times': [] as TaskTemplate[],
+    'Preparing for & Gathering Information for Meetings': [] as TaskTemplate[],
+    'Preparing for DRPM': [] as TaskTemplate[],
+    'Team Coordination & Deliverables': [] as TaskTemplate[],
+    'Client Service Rep Tasks': [] as TaskTemplate[],
+    'Progress Meeting': [] as TaskTemplate[],
+    'Post-Meeting Tasks': [] as TaskTemplate[]
   };
 
   tasks.forEach(task => {
     const taskName = task.name.toLowerCase();
     
-    if (taskName.includes('confirm') || taskName.includes('schedule') || taskName.includes('date') || taskName.includes('expectation email #1')) {
-      phases['Scheduling & Setup'].push(task);
-    } else if (taskName.includes('gather') || taskName.includes('request') || taskName.includes('items still needed') || taskName.includes('download')) {
-      phases['Information Gathering'].push(task);
-    } else if (taskName.includes('estate attorney') || taskName.includes('financial planner') || taskName.includes('insurance') || taskName.includes('tax planner') || taskName.includes('money manager') || taskName.includes('consolidate') || taskName.includes('sme')) {
-      phases['Team Coordination'].push(task);
-    } else if (taskName.includes('report') || taskName.includes('chart') || taskName.includes('csr0') || taskName.includes('generate') || taskName.includes('packet')) {
-      phases['Report Generation'].push(task);
-    } else if (taskName.includes('drpm') || taskName.includes('prep') || taskName.includes('correction') || taskName.includes('sealed')) {
-      phases['Meeting Preparation'].push(task);
-    } else if (taskName.includes('csr meeting') || taskName.includes('meeting')) {
-      phases['Meeting Execution'].push(task);
-    } else if (taskName.includes('post') || taskName.includes('archive') || taskName.includes('notes')) {
-      phases['Post-Meeting'].push(task);
+    if (taskName.includes('confirm meeting') || taskName.includes('enter dates') || taskName.includes('submit proposed dates') || taskName.includes('update new meeting') || taskName.includes('expectation email # 1')) {
+      phases['Confirming & Scheduling Meeting Dates & Times'].push(task);
+    } else if (taskName.includes('items still needed') || taskName.includes('consolidate items') || taskName.includes('consolidate highest priority') || taskName.includes('request account values') || taskName.includes('request actions taken') || taskName.includes('download account values')) {
+      phases['Preparing for & Gathering Information for Meetings'].push(task);
+    } else if (taskName.includes('circle chart') || taskName.includes('expectation letter # 2') || taskName.includes('confirm date of drpm') || taskName.includes('generate reports') || taskName.includes('submit critical reports') || taskName.includes('trust advisor review') || taskName.includes('preliminary packet') || taskName.includes('expectation letter # 3') || taskName.includes('nominations and deliverable')) {
+      phases['Preparing for DRPM'].push(task);
+    } else if (taskName.includes('estate attorney') || taskName.includes('financial planner') || taskName.includes('insurance planner') || taskName.includes('money manager') || taskName.includes('tax planner') || taskName.includes('sme')) {
+      phases['Team Coordination & Deliverables'].push(task);
+    } else if (taskName.includes('csr0') || taskName.includes('client service rep') || taskName.includes('administrative manager') || taskName.includes('am01') || taskName.includes('meeting packets')) {
+      phases['Client Service Rep Tasks'].push(task);
+    } else if (taskName.includes('csr meeting') || taskName.includes('progress meeting') || taskName.includes('meeting execution')) {
+      phases['Progress Meeting'].push(task);
+    } else if (taskName.includes('post') || taskName.includes('archive') || taskName.includes('notes') || taskName.includes('follow up') || taskName.includes('after meeting')) {
+      phases['Post-Meeting Tasks'].push(task);
     } else {
       // Default to team coordination for uncategorized tasks
-      phases['Team Coordination'].push(task);
+      phases['Team Coordination & Deliverables'].push(task);
     }
   });
 
