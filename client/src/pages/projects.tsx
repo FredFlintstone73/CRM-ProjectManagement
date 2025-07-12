@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -202,7 +203,14 @@ export default function Projects() {
                 <Card key={project.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <CardTitle className="text-lg">
+                        <Link 
+                          href={`/projects/${project.id}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                        >
+                          {project.name}
+                        </Link>
+                      </CardTitle>
                     </div>
                     {project.description && (
                       <p className="text-sm text-gray-600 mt-2">{project.description}</p>
@@ -266,7 +274,14 @@ export default function Projects() {
                     <TableRow key={project.id}>
                       <TableCell className="font-medium">
                         <div>
-                          <div className="font-semibold">{project.name}</div>
+                          <div className="font-semibold">
+                            <Link 
+                              href={`/projects/${project.id}`}
+                              className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                            >
+                              {project.name}
+                            </Link>
+                          </div>
                           {project.description && (
                             <div className="text-sm text-gray-600 mt-1">{project.description}</div>
                           )}

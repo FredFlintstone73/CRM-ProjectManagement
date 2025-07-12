@@ -2,68 +2,75 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { insertTaskSchema, type InsertTask, type Project } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
+import { insertTaskSchema, type InsertTask, type Task, type Contact } from "@shared/schema";
 
 interface TaskFormProps {
+  task?: Task | null;
+  projectId: number;
   onSuccess?: () => void;
 }
 
-export default function TaskForm({ onSuccess }: TaskFormProps) {
+export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) {
   const { toast } = useToast();
-  
+  const [dueDate, setDueDate] = useState<Date | undefined>(
+    task?.dueDate ? new Date(task.dueDate) : undefined
+  );
+
+  const { data: contacts } = useQuery<Contact[]>({
+    queryKey: ['/api/contacts'],
+  });
+
+  // Filter contacts to only show team members
+  const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
+
   const form = useForm<InsertTask>({
     resolver: zodResolver(insertTaskSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      projectId: null,
-      assignedTo: null,
-      status: "todo",
-      priority: "medium",
-      dueDate: null,
+      title: task?.title || '',
+      description: task?.description || '',
+      projectId: projectId,
+      assigneeId: task?.assigneeId || '',
+      priority: task?.priority || 'medium',
+      status: task?.status || 'todo',
+      dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
     },
-  });
-
-  const { data: projects } = useQuery<Project[]>({
-    queryKey: ['/api/projects'],
   });
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: InsertTask) => {
-      const response = await apiRequest("POST", "/api/tasks", data);
-      return response.json();
+      const url = task ? `/api/tasks/${task.id}` : '/api/tasks';
+      const method = task ? 'PATCH' : 'POST';
+      return await apiRequest(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       toast({
-        title: "Success",
-        description: "Task created successfully",
+        title: task ? "Task updated successfully" : "Task created successfully",
       });
-      form.reset();
       onSuccess?.();
     },
     onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
       toast({
-        title: "Error",
-        description: "Failed to create task",
+        title: task ? "Failed to update task" : "Failed to create task",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -72,147 +79,134 @@ export default function TaskForm({ onSuccess }: TaskFormProps) {
   const onSubmit = (data: InsertTask) => {
     const processedData = {
       ...data,
-      dueDate: data.dueDate ? new Date(data.dueDate) : null,
-      projectId: data.projectId || null,
+      dueDate: dueDate ? dueDate.toISOString() : undefined,
+      projectId: projectId,
     };
     createTaskMutation.mutate(processedData);
   };
 
   return (
-    <Form {...form}>
+    <div className="space-y-4">
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Task Title *</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} rows={3} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="projectId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Project</FormLabel>
-              <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {projects?.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="todo">To Do</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+        <div className="space-y-2">
+          <Label htmlFor="title">Task Title</Label>
+          <Input
+            id="title"
+            {...form.register('title')}
+            placeholder="Enter task title"
           />
-          
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Priority</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {form.formState.errors.title && (
+            <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
+          )}
         </div>
-        
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Due Date</FormLabel>
-              <FormControl>
-                <Input
-                  type="datetime-local"
-                  {...field}
-                  value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            {...form.register('description')}
+            placeholder="Enter task description"
+            rows={3}
+          />
+          {form.formState.errors.description && (
+            <p className="text-sm text-red-600">{form.formState.errors.description.message}</p>
           )}
-        />
-        
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button 
-            type="submit" 
-            disabled={createTaskMutation.isPending}
-            className="bg-primary hover:bg-primary/90"
-          >
-            {createTaskMutation.isPending ? "Creating..." : "Create Task"}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="assigneeId">Assign To</Label>
+            <Select
+              value={form.watch('assigneeId') || ''}
+              onValueChange={(value) => form.setValue('assigneeId', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select team member" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
+                {teamMembers.map((member) => (
+                  <SelectItem key={member.id} value={member.id.toString()}>
+                    {member.firstName} {member.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="priority">Priority</Label>
+            <Select
+              value={form.watch('priority')}
+              onValueChange={(value) => form.setValue('priority', value as 'low' | 'medium' | 'high')}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={form.watch('status')}
+              onValueChange={(value) => form.setValue('status', value as 'todo' | 'in_progress' | 'completed' | 'cancelled')}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todo">To Do</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Due Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <Button type="submit" disabled={createTaskMutation.isPending}>
+            {createTaskMutation.isPending ? 
+              (task ? "Updating..." : "Creating...") : 
+              (task ? "Update Task" : "Create Task")
+            }
           </Button>
         </div>
       </form>
-    </Form>
+    </div>
   );
 }

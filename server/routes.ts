@@ -216,6 +216,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Project tasks route
+  app.get('/api/projects/:id/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const tasks = await storage.getTasksByProject(projectId);
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching project tasks:", error);
+      res.status(500).json({ message: "Failed to fetch project tasks" });
+    }
+  });
+
   // Project comment routes
   app.get('/api/projects/:id/comments', isAuthenticated, async (req: any, res) => {
     try {
@@ -295,6 +307,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const taskData = insertTaskSchema.partial().parse(req.body);
+      const task = await storage.updateTask(parseInt(req.params.id), taskData);
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ message: "Failed to update task" });
+    }
+  });
+
+  app.patch('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
     try {
       const taskData = insertTaskSchema.partial().parse(req.body);
       const task = await storage.updateTask(parseInt(req.params.id), taskData);

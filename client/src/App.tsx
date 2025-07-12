@@ -10,6 +10,7 @@ import Dashboard from "@/pages/dashboard";
 import Contacts from "@/pages/contacts";
 import ContactDetail from "@/pages/contact-detail";
 import Projects from "@/pages/projects";
+import ProjectDetail from "@/pages/project-detail";
 import Templates from "@/pages/templates";
 import Tasks from "@/pages/tasks";
 import Sidebar from "@/components/layout/sidebar";
@@ -39,6 +40,7 @@ function Router() {
                 <Route path="/contacts" component={Contacts} />
                 <Route path="/contacts/:id" component={ContactDetail} />
                 <Route path="/projects" component={Projects} />
+                <Route path="/projects/:id" component={ProjectDetail} />
                 <Route path="/templates" component={Templates} />
                 <Route path="/tasks" component={Tasks} />
                 <Route component={NotFound} />
