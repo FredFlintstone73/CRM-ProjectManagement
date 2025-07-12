@@ -355,10 +355,31 @@ export default function Projects() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Project Name</TableHead>
-                    <TableHead>Family Name</TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-gray-50 select-none"
+                      onClick={() => handleSort('name')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Project Name {getSortIcon('name')}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-gray-50 select-none"
+                      onClick={() => handleSort('family')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Family Name {getSortIcon('family')}
+                      </div>
+                    </TableHead>
                     <TableHead>Progress</TableHead>
-                    <TableHead>Meeting Date</TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-gray-50 select-none"
+                      onClick={() => handleSort('date')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Meeting Date {getSortIcon('date')}
+                      </div>
+                    </TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
