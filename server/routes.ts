@@ -195,6 +195,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create project from template with due date calculations
+  app.post('/api/projects/from-template', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { templateId, projectName, clientId, meetingDate, drpmDate, description } = req.body;
+      
+      // Get the template
+      const template = await storage.getProjectTemplate(templateId);
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+
+      // Create the project
+      const projectData = {
+        name: projectName,
+        clientId: parseInt(clientId),
+        description: description || template.description,
+        status: 'active' as const,
+        priority: 'medium' as const,
+        projectType: 'csr_meeting' as const,
+        estimatedDays: 90,
+        dueDate: meetingDate ? new Date(meetingDate) : null
+      };
+
+      const newProject = await storage.createProject(projectData, userId);
+
+      // Parse template tasks and create project tasks with calculated due dates
+      const templateTasks = JSON.parse(template.tasks || '[]');
+      const baseMeetingDate = new Date(meetingDate);
+      const baseDrpmDate = drpmDate ? new Date(drpmDate) : null;
+
+      const createdTasks = [];
+      for (const templateTask of templateTasks) {
+        // Calculate actual due date based on formula
+        let calculatedDueDate = null;
+        if (templateTask.daysFromMeeting !== undefined) {
+          calculatedDueDate = new Date(baseMeetingDate);
+          calculatedDueDate.setDate(calculatedDueDate.getDate() + templateTask.daysFromMeeting);
+        }
+
+        const taskData = {
+          title: templateTask.name,
+          description: templateTask.description || '',
+          projectId: newProject.id,
+          status: 'pending' as const,
+          priority: (templateTask.priority || 'medium') as const,
+          estimatedDays: templateTask.estimatedDays || 1,
+          dueDate: calculatedDueDate,
+          assignedTo: null, // Will be assigned later
+          comments: templateTask.comments || ''
+        };
+
+        const task = await storage.createTask(taskData, userId);
+        createdTasks.push(task);
+      }
+
+      res.status(201).json({
+        project: newProject,
+        tasks: createdTasks,
+        message: `Created project with ${createdTasks.length} tasks from template`
+      });
+    } catch (error: any) {
+      console.error("Error creating project from template:", error);
+      res.status(500).json({ message: "Failed to create project from template" });
+    }
+  });
+
   app.put('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
       const projectData = insertProjectSchema.partial().parse(req.body);
@@ -490,6 +557,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating template tasks:", error);
       res.status(500).json({ message: "Failed to update template tasks" });
+    }
+  });
+
+  // Replace entire template with new data
+  app.put('/api/project-templates/:id/replace', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const templateData = req.body;
+      
+      const updatedTemplate = await storage.updateProjectTemplate(parseInt(id), {
+        name: templateData.name,
+        description: templateData.description,
+        tasks: JSON.stringify(templateData.tasks)
+      });
+      
+      res.json(updatedTemplate);
+    } catch (error) {
+      console.error("Error replacing template:", error);
+      res.status(500).json({ message: "Failed to replace template" });
     }
   });
 

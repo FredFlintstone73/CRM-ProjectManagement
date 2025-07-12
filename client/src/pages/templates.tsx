@@ -12,8 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Plus, FileText, Edit, Trash2, MoreHorizontal, Copy, Eye } from "lucide-react";
+import { Search, Plus, FileText, Edit, Trash2, MoreHorizontal, Copy, Eye, Rocket } from "lucide-react";
 import ProjectTemplateForm from "@/components/projects/project-template-form";
+import CreateFromTemplateDialog from "@/components/projects/create-from-template-dialog";
 import type { ProjectTemplate } from "@shared/schema";
 import { Link } from "wouter";
 
@@ -213,6 +214,15 @@ export default function Templates() {
                               View Details
                             </DropdownMenuItem>
                           </Link>
+                          <CreateFromTemplateDialog 
+                            template={template}
+                            trigger={
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Rocket className="h-4 w-4 mr-2" />
+                                Create Project
+                              </DropdownMenuItem>
+                            }
+                          />
                           <DropdownMenuItem onClick={() => handleEditClick(template)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
