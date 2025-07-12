@@ -134,6 +134,36 @@ export default function Contacts() {
     }
   };
 
+  const formatContactType = (type: string) => {
+    switch (type) {
+      case 'client':
+        return 'Client';
+      case 'prospect':
+        return 'Prospect';
+      case 'team_member':
+        return 'Team Member';
+      case 'strategic_partner':
+        return 'Strategic Partner';
+      default:
+        return type;
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'Active';
+      case 'inactive':
+        return 'Inactive';
+      case 'follow_up':
+        return 'Follow Up';
+      case 'converted':
+        return 'Converted';
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
+
   const getContactTypeColor = (type: string) => {
     switch (type) {
       case 'client':
@@ -285,7 +315,7 @@ export default function Contacts() {
                       </div>
                       <div className="flex gap-2">
                         <Badge className={getContactTypeColor(contact.contactType)}>
-                          {contact.contactType.replace('_', ' ')}
+                          {formatContactType(contact.contactType)}
                         </Badge>
                       </div>
                     </div>
@@ -311,7 +341,7 @@ export default function Contacts() {
                     )}
                     <div className="flex items-center justify-between pt-2">
                       <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
-                        {contact.status || 'active'}
+                        {formatStatus(contact.status || 'active')}
                       </Badge>
                       <Button
                         variant="destructive"
@@ -362,7 +392,7 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <Badge className={getContactTypeColor(contact.contactType)}>
-                          {contact.contactType.replace('_', ' ')}
+                          {formatContactType(contact.contactType)}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -387,7 +417,7 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
-                          {contact.status || 'active'}
+                          {formatStatus(contact.status || 'active')}
                         </Badge>
                       </TableCell>
                       <TableCell>
