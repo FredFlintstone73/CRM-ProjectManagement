@@ -241,7 +241,7 @@ export const tasks = pgTable("tasks", {
   title: varchar("title").notNull(),
   description: text("description"),
   projectId: integer("project_id").references(() => projects.id),
-  assignedTo: varchar("assigned_to").references(() => users.id),
+  assignedTo: integer("assigned_to").references(() => contacts.id),
   status: taskStatusEnum("status").default("todo"),
   priority: taskPriorityEnum("priority").default("medium"),
   dueDate: timestamp("due_date"),
@@ -346,9 +346,9 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
     fields: [tasks.projectId],
     references: [projects.id],
   }),
-  assignedTo: one(users, {
+  assignedTo: one(contacts, {
     fields: [tasks.assignedTo],
-    references: [users.id],
+    references: [contacts.id],
   }),
   createdBy: one(users, {
     fields: [tasks.createdBy],

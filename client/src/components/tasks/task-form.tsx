@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
-import { insertTaskSchema, type InsertTask, type Task } from "@shared/schema";
+import { insertTaskSchema, type InsertTask, type Task, type Contact } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
 interface TaskFormProps {
@@ -31,13 +31,20 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     task?.dueDate ? new Date(task.dueDate) : undefined
   );
 
+  const { data: contacts } = useQuery<Contact[]>({
+    queryKey: ['/api/contacts'],
+  });
+
+  // Filter contacts to only show team members
+  const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
+
   const form = useForm<InsertTask>({
     resolver: zodResolver(insertTaskSchema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assignedTo: task?.assignedTo || user?.id || '',
+      assignedTo: task?.assignedTo ? `team_${task.assignedTo}` : 'unassigned',
       priority: task?.priority || 'medium',
       status: task?.status || 'todo',
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
@@ -107,7 +114,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         <div className="space-y-2">
           <Label htmlFor="assignedTo">Assign To</Label>
           <Select
-            value={form.watch('assignedTo') || user?.id || 'unassigned'}
+            value={form.watch('assignedTo') || 'unassigned'}
             onValueChange={(value) => form.setValue('assignedTo', value === 'unassigned' ? '' : value)}
           >
             <SelectTrigger>
@@ -115,11 +122,11 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unassigned">Unassigned</SelectItem>
-              {user && (
-                <SelectItem value={user.id}>
-                  {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email}
+              {teamMembers.map((member) => (
+                <SelectItem key={member.id} value={`team_${member.id}`}>
+                  {member.firstName} {member.lastName}
                 </SelectItem>
-              )}
+              ))}
             </SelectContent>
           </Select>
         </div>

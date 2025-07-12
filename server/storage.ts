@@ -324,6 +324,21 @@ export class DatabaseStorage implements IStorage {
       processedTask.dueDate = null;
     }
     
+    // Handle assignment - convert team_xxx to contact ID, or create a user contact if needed
+    if (processedTask.assignedTo && typeof processedTask.assignedTo === 'string') {
+      if (processedTask.assignedTo.startsWith('team_')) {
+        // Extract contact ID from team_xxx format
+        const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
+        processedTask.assignedTo = contactId;
+      } else if (processedTask.assignedTo !== 'unassigned' && processedTask.assignedTo !== '') {
+        // This is a user ID, we need to find or create a corresponding contact
+        // For now, set to null since we don't have a direct user->contact mapping
+        processedTask.assignedTo = null;
+      } else {
+        processedTask.assignedTo = null;
+      }
+    }
+    
     const taskData = { ...processedTask, createdBy: userId } as any;
     const [newTask] = await db
       .insert(tasks)
@@ -349,6 +364,21 @@ export class DatabaseStorage implements IStorage {
       processedTask.dueDate = new Date(processedTask.dueDate);
     } else if (processedTask.dueDate === '') {
       processedTask.dueDate = null;
+    }
+    
+    // Handle assignment - convert team_xxx to contact ID, or create a user contact if needed
+    if (processedTask.assignedTo && typeof processedTask.assignedTo === 'string') {
+      if (processedTask.assignedTo.startsWith('team_')) {
+        // Extract contact ID from team_xxx format
+        const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
+        processedTask.assignedTo = contactId;
+      } else if (processedTask.assignedTo !== 'unassigned' && processedTask.assignedTo !== '') {
+        // This is a user ID, we need to find or create a corresponding contact
+        // For now, set to null since we don't have a direct user->contact mapping
+        processedTask.assignedTo = null;
+      } else {
+        processedTask.assignedTo = null;
+      }
     }
     
     const [updatedTask] = await db
