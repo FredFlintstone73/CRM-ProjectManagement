@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Plus, Calendar, User } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Search, Plus, Calendar, User, Grid3X3, List } from "lucide-react";
 import ProjectForm from "@/components/projects/project-form";
 import type { Project, Contact } from "@shared/schema";
 
@@ -21,6 +22,7 @@ export default function Projects() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -140,75 +142,155 @@ export default function Projects() {
                 className="pl-10"
               />
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Meeting
+            <div className="flex gap-2">
+              <div className="flex rounded-md border border-gray-200 overflow-hidden">
+                <Button
+                  variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                  className="rounded-none"
+                >
+                  <Grid3X3 className="w-4 h-4" />
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Schedule New Meeting</DialogTitle>
-                </DialogHeader>
-                <ProjectForm onSuccess={handleProjectCreated} />
-              </DialogContent>
-            </Dialog>
+                <Button
+                  variant={viewMode === 'table' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                  className="rounded-none"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Meeting
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Schedule New Meeting</DialogTitle>
+                  </DialogHeader>
+                  <ProjectForm onSuccess={handleProjectCreated} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
-          {/* Projects Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredProjects.map((project) => (
-              <Card key={project.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <Badge className={getProjectStatusColor(project.status || 'planning')}>
-                      {project.status?.replace('_', ' ') || 'planning'}
-                    </Badge>
-                  </div>
-                  {project.description && (
-                    <p className="text-sm text-gray-600 mt-2">{project.description}</p>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <User className="w-4 h-4" />
-                    <span>{getClientName(project.clientId)}</span>
-                  </div>
-                  
-                  {project.dueDate && (
+          {/* Projects Display */}
+          {viewMode === 'cards' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredProjects.map((project) => (
+                <Card key={project.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <Badge className={getProjectStatusColor(project.status || 'planning')}>
+                        {project.status?.replace('_', ' ') || 'planning'}
+                      </Badge>
+                    </div>
+                    {project.description && (
+                      <p className="text-sm text-gray-600 mt-2">{project.description}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      <span>Due: {new Date(project.dueDate).toLocaleDateString()}</span>
+                      <User className="w-4 h-4" />
+                      <span>{getClientName(project.clientId)}</span>
                     </div>
-                  )}
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Progress</span>
-                      <span>{project.progress || 0}%</span>
+                    
+                    {project.dueDate && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4" />
+                        <span>Due: {new Date(project.dueDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Progress</span>
+                        <span>{project.progress || 0}%</span>
+                      </div>
+                      <Progress value={project.progress || 0} className="h-6" />
                     </div>
-                    <Progress value={project.progress || 0} className="h-6" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-sm text-gray-500">
-                      Created: {new Date(project.createdAt || '').toLocaleDateString()}
-                    </span>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteProjectMutation.mutate(project.id)}
-                      disabled={deleteProjectMutation.isPending}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-sm text-gray-500">
+                        Created: {new Date(project.createdAt || '').toLocaleDateString()}
+                      </span>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteProjectMutation.mutate(project.id)}
+                        disabled={deleteProjectMutation.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Project Name</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Progress</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProjects.map((project) => (
+                    <TableRow key={project.id}>
+                      <TableCell className="font-medium">
+                        <div>
+                          <div className="font-semibold">{project.name}</div>
+                          {project.description && (
+                            <div className="text-sm text-gray-600 mt-1">{project.description}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>{getClientName(project.clientId)}</TableCell>
+                      <TableCell>
+                        <Badge className={getProjectStatusColor(project.status || 'planning')}>
+                          {project.status?.replace('_', ' ') || 'planning'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Progress value={project.progress || 0} className="h-2 w-20" />
+                          <span className="text-sm">{project.progress || 0}%</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'Not set'}
+                      </TableCell>
+                      <TableCell>
+                        {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'Unknown'}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteProjectMutation.mutate(project.id)}
+                          disabled={deleteProjectMutation.isPending}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
           {filteredProjects.length === 0 && (
             <div className="text-center py-12">
