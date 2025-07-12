@@ -118,7 +118,7 @@ export default function TaskDetail() {
   const form = useForm<z.infer<typeof taskUpdateSchema>>({
     resolver: zodResolver(taskUpdateSchema),
     defaultValues: {
-      assignedTo: task?.assignedTo || "",
+      assignedTo: task?.assignedTo || "unassigned",
       dueDate: task?.dueDate || "",
       comments: task?.comments || "",
     },
@@ -280,7 +280,7 @@ export default function TaskDetail() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">Unassigned</SelectItem>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
                               {teamMembers?.map((member) => (
                                 <SelectItem key={member.id} value={member.id.toString()}>
                                   {member.firstName} {member.lastName}

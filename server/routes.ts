@@ -402,7 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         task = {
           id: taskId,
           ...tasks[taskIndex],
-          assignedTo: '',
+          assignedTo: 'unassigned',
           assignedToName: '',
           dueDate: '',
           comments: '',
@@ -421,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: mainTask.description,
           priority: mainTask.priority,
           estimatedDays: Math.ceil(mainTask.estimatedDays / 3), // Estimated subtask duration
-          assignedTo: '',
+          assignedTo: 'unassigned',
           assignedToName: '',
           dueDate: '',
           comments: '',
