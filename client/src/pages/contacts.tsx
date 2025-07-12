@@ -29,6 +29,22 @@ export default function Contacts() {
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // Handle URL query parameters for contact type filtering
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get('type');
+    
+    if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner'].includes(typeParam)) {
+      // Show only the selected type from URL
+      setVisibleTypes({
+        client: typeParam === 'client',
+        prospect: typeParam === 'prospect',
+        team_member: typeParam === 'team_member',
+        strategic_partner: typeParam === 'strategic_partner'
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({

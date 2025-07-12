@@ -1,22 +1,37 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState, useEffect } from "react";
 
 export default function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
+  const [isContactsExpanded, setIsContactsExpanded] = useState(false);
+
+  // Auto-expand contacts when on contacts page
+  useEffect(() => {
+    if (location.startsWith('/contacts')) {
+      setIsContactsExpanded(true);
+    }
+  }, [location]);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },
-    { name: 'Contacts', href: '/contacts', icon: Users },
     { name: 'Projects', href: '/projects', icon: FolderOpen },
     { name: 'Tasks', href: '/tasks', icon: CheckSquare },
     { name: 'Analytics', href: '/analytics', icon: TrendingUp },
     { name: 'Calendar', href: '/calendar', icon: Calendar },
     { name: 'Messages', href: '/messages', icon: MessageSquare },
     { name: 'Settings', href: '/settings', icon: Settings },
+  ];
+
+  const contactSubCategories = [
+    { name: 'Clients', href: '/contacts?type=client', icon: UserCheck },
+    { name: 'Prospects', href: '/contacts?type=prospect', icon: UserPlus },
+    { name: 'Team Members', href: '/contacts?type=team_member', icon: UserCog },
+    { name: 'Strategic Partners', href: '/contacts?type=strategic_partner', icon: Handshake },
   ];
 
   const handleLogout = () => {
@@ -53,6 +68,39 @@ export default function Sidebar() {
               </Link>
             );
           })}
+          
+          {/* Contacts with Sub-categories */}
+          <div className="space-y-1">
+            <button
+              onClick={() => setIsContactsExpanded(!isContactsExpanded)}
+              className={`sidebar-nav-item w-full ${location.startsWith('/contacts') ? 'active' : ''}`}
+            >
+              <Users size={20} />
+              <span>Contacts</span>
+              {isContactsExpanded ? (
+                <ChevronDown size={16} className="ml-auto" />
+              ) : (
+                <ChevronRight size={16} className="ml-auto" />
+              )}
+            </button>
+            
+            {isContactsExpanded && (
+              <div className="ml-4 space-y-1">
+                {contactSubCategories.map((subItem) => {
+                  const SubIcon = subItem.icon;
+                  const isSubActive = location === subItem.href;
+                  return (
+                    <Link key={subItem.name} href={subItem.href}>
+                      <a className={`sidebar-nav-item text-sm ${isSubActive ? 'active' : ''}`}>
+                        <SubIcon size={16} />
+                        <span>{subItem.name}</span>
+                      </a>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </nav>
         
         {/* User Profile */}
