@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { CalendarDays, User, Clock, Plus, Edit3, Trash2, CheckCircle, Circle, Settings, ArrowLeft } from "lucide-react";
+import { CalendarDays, User, Clock, Plus, Edit3, Trash2, CheckCircle, Circle, Settings, ArrowLeft, ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
 import TaskForm from "@/components/tasks/task-form";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Project, Task, Contact } from "@shared/schema";
 
 interface ProjectDetailParams {
@@ -31,6 +32,7 @@ export default function ProjectDetail() {
   const [showProjectEdit, setShowProjectEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [sortBy, setSortBy] = useState<'assignee' | 'dueDate' | 'created'>('created');
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id],
@@ -159,9 +161,9 @@ export default function ProjectDetail() {
     return client ? (client.familyName || `${client.firstName} ${client.lastName}`) : 'Unknown family';
   };
 
-  const getAssigneeName = (assignedTo: string | null) => {
+  const getAssigneeName = (assignedTo: number | null) => {
     if (!assignedTo || !contacts) return 'Unassigned';
-    const assignee = contacts.find(c => c.id === assignedTo && c.contactType === 'team_member');
+    const assignee = contacts.find(c => c.id === assignedTo);
     return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown assignee';
   };
 
@@ -202,6 +204,22 @@ export default function ProjectDetail() {
     queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
     toast({ title: "Project updated successfully" });
   };
+
+  const sortedTasks = tasks ? [...tasks].sort((a, b) => {
+    if (sortBy === 'assignee') {
+      const aAssignee = getAssigneeName(a.assignedTo);
+      const bAssignee = getAssigneeName(b.assignedTo);
+      return aAssignee.localeCompare(bAssignee);
+    } else if (sortBy === 'dueDate') {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    } else {
+      // Default sort by created date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+  }) : [];
 
   if (projectLoading || tasksLoading) {
     return (
@@ -353,7 +371,24 @@ export default function ProjectDetail() {
       {/* Tasks Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Tasks</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Tasks</CardTitle>
+            {tasks && tasks.length > 0 && (
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-4 h-4 text-gray-500" />
+                <Select value={sortBy} onValueChange={(value: 'assignee' | 'dueDate' | 'created') => setSortBy(value)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="created">Created Date</SelectItem>
+                    <SelectItem value="assignee">Assignee</SelectItem>
+                    <SelectItem value="dueDate">Due Date</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {!tasks || tasks.length === 0 ? (
@@ -362,7 +397,7 @@ export default function ProjectDetail() {
             </div>
           ) : (
             <div className="space-y-4">
-              {tasks.map((task) => (
+              {sortedTasks.map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
@@ -384,12 +419,6 @@ export default function ProjectDetail() {
                         <h3 className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
                           {task.title}
                         </h3>
-                        <Badge className={getTaskStatusColor(task.status)}>
-                          {task.status.replace('_', ' ')}
-                        </Badge>
-                        <Badge className={getPriorityColor(task.priority)}>
-                          {task.priority}
-                        </Badge>
                       </div>
                       
                       {task.description && (
