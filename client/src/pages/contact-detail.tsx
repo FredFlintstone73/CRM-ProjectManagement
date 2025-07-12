@@ -229,13 +229,41 @@ export default function ContactDetail() {
       const previewUrl = URL.createObjectURL(file);
       setProfileImageUrl(previewUrl);
 
-      // Convert file to base64 and save to database
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64String = e.target?.result as string;
-        uploadPhotoMutation.mutate(base64String);
+      // Compress and convert file to base64
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Set max dimensions (reduce file size)
+        const maxWidth = 400;
+        const maxHeight = 400;
+        let { width, height } = img;
+
+        // Calculate new dimensions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+
+        // Set canvas size and draw compressed image
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with compression (0.8 quality)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        uploadPhotoMutation.mutate(compressedBase64);
       };
-      reader.readAsDataURL(file);
+      
+      img.src = previewUrl;
     }
   };
 
