@@ -11,6 +11,13 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+
+  const handleCustomDateChange = (startDate: string, endDate: string) => {
+    setCustomStartDate(startDate);
+    setCustomEndDate(endDate);
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -46,13 +53,20 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 gap-6">
             <ProjectsTimelineChart 
               selectedPeriod={selectedPeriod} 
-              onPeriodChange={setSelectedPeriod} 
+              onPeriodChange={setSelectedPeriod}
+              customStartDate={customStartDate}
+              customEndDate={customEndDate}
+              onCustomDateChange={handleCustomDateChange}
             />
           </div>
           
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-3">
-              <ProjectsDueWidget selectedPeriod={selectedPeriod} />
+              <ProjectsDueWidget 
+                selectedPeriod={selectedPeriod} 
+                customStartDate={customStartDate}
+                customEndDate={customEndDate}
+              />
             </div>
             <div className="lg:col-span-1">
               <ActionCard />

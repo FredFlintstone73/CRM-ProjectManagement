@@ -2,8 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { Calendar, BarChart3 } from "lucide-react";
+import { Calendar, BarChart3, CalendarDays } from "lucide-react";
 import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth } from "date-fns";
 import type { Project } from "@shared/schema";
 
@@ -40,9 +44,20 @@ const PROJECT_TYPE_LABELS = {
 interface ProjectsTimelineChartProps {
   selectedPeriod: string;
   onPeriodChange: (period: string) => void;
+  customStartDate?: string;
+  customEndDate?: string;
+  onCustomDateChange?: (startDate: string, endDate: string) => void;
 }
 
-export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }: ProjectsTimelineChartProps) {
+export default function ProjectsTimelineChart({ 
+  selectedPeriod, 
+  onPeriodChange, 
+  customStartDate, 
+  customEndDate, 
+  onCustomDateChange 
+}: ProjectsTimelineChartProps) {
+  const [tempStartDate, setTempStartDate] = useState(customStartDate || format(new Date(), 'yyyy-MM-dd'));
+  const [tempEndDate, setTempEndDate] = useState(customEndDate || format(addMonths(new Date(), 1), 'yyyy-MM-dd'));
   
   const getPeriodMonths = (period: string) => {
     const now = new Date();
@@ -60,14 +75,16 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
       case "next-12-months":
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 11)) });
       case "custom-range":
-        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 3)) }); // Default to 4 months for custom range
+        const customStart = customStartDate ? new Date(customStartDate) : start;
+        const customEnd = customEndDate ? new Date(customEndDate) : addMonths(start, 3);
+        return eachMonthOfInterval({ start: startOfMonth(customStart), end: endOfMonth(customEnd) });
       default:
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 3)) });
     }
   };
 
   const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ['/api/dashboard/projects-due', selectedPeriod],
+    queryKey: ['/api/dashboard/projects-due', selectedPeriod, customStartDate, customEndDate],
     queryFn: async () => {
       const months = getPeriodMonths(selectedPeriod);
       const startDate = months[0];
@@ -165,6 +182,58 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
                 <SelectItem value="custom-range">Custom Date Range</SelectItem>
               </SelectContent>
             </Select>
+            {selectedPeriod === "custom-range" && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-10">
+                    <CalendarDays className="w-4 h-4 mr-2" />
+                    Set Dates
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium leading-none">Custom Date Range</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Select your custom start and end dates
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                      <div className="grid grid-cols-3 items-center gap-4">
+                        <Label htmlFor="start-date">Start Date</Label>
+                        <Input
+                          id="start-date"
+                          type="date"
+                          value={tempStartDate}
+                          onChange={(e) => setTempStartDate(e.target.value)}
+                          className="col-span-2 h-8"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 items-center gap-4">
+                        <Label htmlFor="end-date">End Date</Label>
+                        <Input
+                          id="end-date"
+                          type="date"
+                          value={tempEndDate}
+                          onChange={(e) => setTempEndDate(e.target.value)}
+                          className="col-span-2 h-8"
+                        />
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => {
+                        if (onCustomDateChange) {
+                          onCustomDateChange(tempStartDate, tempEndDate);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      Apply Date Range
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
       </CardHeader>

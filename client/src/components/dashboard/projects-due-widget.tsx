@@ -14,6 +14,8 @@ interface DateRange {
 
 interface ProjectsDueWidgetProps {
   selectedPeriod: string;
+  customStartDate?: string;
+  customEndDate?: string;
 }
 
 const getDateRanges = (): Record<string, DateRange> => {
@@ -54,16 +56,24 @@ const getDateRanges = (): Record<string, DateRange> => {
   };
 };
 
-export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetProps) {
+export default function ProjectsDueWidget({ selectedPeriod, customStartDate, customEndDate }: ProjectsDueWidgetProps) {
   const dateRanges = getDateRanges();
   const currentRange = dateRanges[selectedPeriod] || dateRanges["next-4-months"];
 
+  // Use custom dates if available and period is custom-range
+  const actualStartDate = selectedPeriod === "custom-range" && customStartDate 
+    ? new Date(customStartDate) 
+    : currentRange.start;
+  const actualEndDate = selectedPeriod === "custom-range" && customEndDate 
+    ? new Date(customEndDate) 
+    : currentRange.end;
+
   const { data: projects, isLoading, error } = useQuery<Project[]>({
-    queryKey: ['/api/dashboard/projects-due', selectedPeriod],
+    queryKey: ['/api/dashboard/projects-due', selectedPeriod, customStartDate, customEndDate],
     queryFn: async () => {
       const params = new URLSearchParams({
-        startDate: currentRange.start.toISOString(),
-        endDate: currentRange.end.toISOString(),
+        startDate: actualStartDate.toISOString(),
+        endDate: actualEndDate.toISOString(),
       });
       const response = await fetch(`/api/dashboard/projects-due?${params}`);
       if (!response.ok) {
