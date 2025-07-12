@@ -69,24 +69,7 @@ export default function ContactDetail() {
     },
   });
 
-  if (contactLoading) {
-    return (
-      <div className="flex-1 p-6">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-      </div>
-    );
-  }
 
-  if (!contact) {
-    return (
-      <div className="flex-1 p-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Contact Not Found</h2>
-          <Button onClick={() => navigate("/contacts")}>Back to Contacts</Button>
-        </div>
-      </div>
-    );
-  }
 
   const getContactTypeColor = (type: string) => {
     switch (type) {
@@ -228,6 +211,21 @@ export default function ContactDetail() {
       setProfileImageUrl(contact.profileImageUrl);
     }
   }, [contact]);
+
+  // Authentication redirect - but only after all hooks are called
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
 
   // Loading state
   if (isLoading || contactLoading) {
