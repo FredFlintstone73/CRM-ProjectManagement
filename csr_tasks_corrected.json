@@ -1,0 +1,1584 @@
+[
+  {
+    "name": "Confirm Meeting Date & Time with Client and Any Questions Regarding Implementation Plan or Items Due From Last Meeting",
+    "description": "Confirm Meeting Date & Time with Client and Any Questions Regarding Implementation Plan or Items Due From Last Meeting",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Enter Dates into ASANA",
+    "description": "Enter Dates into ASANA",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Submit Proposed Dates/Time for DRPM",
+    "description": "Submit Proposed Dates/Time for DRPM",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Update New Meeting in ASANA and Create Meeting",
+    "description": "Update New Meeting in ASANA and Create Meeting",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Send Out Expectation Email # 1 to Team Through Asana",
+    "description": "Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Submit Your Items Still Needed & Initial Highest Priority Conversation Reports",
+    "description": "Click on subtask below for description",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Estate Attorney",
+    "description": "Enter the Items Still Needed and your Highest Priority Conversation below in the comments area",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Submit Your Items Still Needed & Initial Highest Priority Conversation Reports"
+  },
+  {
+    "name": "Financial Planner",
+    "description": "Enter the Items Still Needed and your Highest Priority Conversation below in the comments area",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Submit Your Items Still Needed & Initial Highest Priority Conversation Reports"
+  },
+  {
+    "name": "Insurance Planner - Life",
+    "description": "Insurance Planner - Life",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Enter the Items Still Needed and your Highest Priority Conversation below in the comments area"
+  },
+  {
+    "name": "Insurance Planner - P&C",
+    "description": "Insurance Planner - P&C",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Insurance Planner - Health",
+    "description": "Insurance Planner - Health",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Submit Your Items Still Needed & Initial Highest Priority Conversation Reports"
+  },
+  {
+    "name": "Money Manager",
+    "description": "Enter the Items Still Needed and your Highest Priority Conversation below in the comments area",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Submit Your Items Still Needed & Initial Highest Priority Conversation Reports"
+  },
+  {
+    "name": "Tax Planner",
+    "description": "Enter the Items Still Needed and your Highest Priority Conversation below in the comments area",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Submit Your Items Still Needed & Initial Highest Priority Conversation Reports"
+  },
+  {
+    "name": "Consolidate Items Still Needed and Send to SMEs",
+    "description": "Consolidate Items Still Needed and Send to SMEs",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Consolidate Highest Priority Conversations & Update Meeting Agenda",
+    "description": "Consolidate Highest Priority Conversations & Update Meeting Agenda",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Communicate the Team's Highest Priorities to each SME (e.g. @Chad or @Ted",
+    "description": "Communicate the Team's Highest Priorities to each SME (e.g. @Chad or @Ted",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Request Account Values for Any Outside Accounts and Transactions",
+    "description": "Request Account Values for Any Outside Accounts and Transactions",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Request Actions Taken Since Last Meeting by Team and Client",
+    "description": "Request Actions Taken Since Last Meeting by Team and Client",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Create Initial Client Agenda",
+    "description": "Create Initial Client Agenda",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Request Actions Taken Since Last Meeting by Team and Client"
+  },
+  {
+    "name": "Download Account Values & Transactions for Growth Accounts",
+    "description": "Download Account Values & Transactions for Growth Accounts",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Create Circle Chart",
+    "description": "Create Circle Chart",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Financial Planner Review Circle Chart",
+    "description": "Financial Planner Review Circle Chart",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Provide Circle Chart to Team with Expectation Letter # 2 to Team Through Asana",
+    "description": "Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Confirm date of DRPM",
+    "description": "Confirm date of DRPM",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Provide Circle Chart to Team with Expectation Letter # 2 to Team Through Asana"
+  },
+  {
+    "name": "Financial Roadmap Updated",
+    "description": "Financial Roadmap Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Implementation Plan (GPS) Updated",
+    "description": "Implementation Plan (GPS) Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Paperwork Sources Updated",
+    "description": "Paperwork Sources Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Behind the Numbers Report Generated",
+    "description": "Behind the Numbers Report Generated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Numbers History Report Updated",
+    "description": "Numbers History Report Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Since Inception Report Updated",
+    "description": "Since Inception Report Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Goal Progress Report",
+    "description": "Goal Progress Report",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Growth Progress Since Last Meeting Generated",
+    "description": "Growth Progress Since Last Meeting Generated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Growth Progress Since Inception Generated",
+    "description": "Growth Progress Since Inception Generated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Annual Income From Current Assets Report Generated",
+    "description": "Annual Income From Current Assets Report Generated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Total Progress Report Generated",
+    "description": "Total Progress Report Generated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "The Master Goal Tracker Updated",
+    "description": "The Master Goal Tracker Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Generate Reports in Database"
+  },
+  {
+    "name": "Submit Critical Reports and Final Highest Priority Conversation",
+    "description": "Click on subtask below for list of reports",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Estate Attorney",
+    "description": "Estate Attorney",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "The Legacy Flow Chart Updated",
+    "description": "The Legacy Flow Chart Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Estate Attorney"
+  },
+  {
+    "name": "POA Summary Updated",
+    "description": "POA Summary Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Estate Attorney"
+  },
+  {
+    "name": "Asset Titling Report Updated",
+    "description": "Asset Titling Report Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Estate Attorney"
+  },
+  {
+    "name": "Financial Planner",
+    "description": "Critical Reports - Upload to ASANA",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "The Goal Blueprint Updated",
+    "description": "The Goal Blueprint Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Financial Planner"
+  },
+  {
+    "name": "Lifetime Capital Projection",
+    "description": "Lifetime Capital Projection",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Financial Planner"
+  },
+  {
+    "name": "Multiple Scenario Projections",
+    "description": "Multiple Scenario Projections",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Financial Planner"
+  },
+  {
+    "name": "Insurance Planner - Life",
+    "description": "Insurance Planner - Life",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "—"
+  },
+  {
+    "name": "Insurance Grid Updated",
+    "description": "Insurance Grid Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Life"
+  },
+  {
+    "name": "Insurance Planner - P&C",
+    "description": "Insurance Planner - P&C",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Insurance Grid Updated",
+    "description": "Insurance Grid Updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - P&C"
+  },
+  {
+    "name": "Insurance Planner - Health",
+    "description": "Insurance Planner - Health",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Submit Critical Reports and Final Highest Priority Conversation"
+  },
+  {
+    "name": "Money Managers",
+    "description": "Money Managers",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Tax Planner",
+    "description": "Critical Reports - Upload to ASANA",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Annual Tax Projection Completed",
+    "description": "Annual Tax Projection Completed",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Tax Planner"
+  },
+  {
+    "name": "Copy of Last Tax Return Filed on Record",
+    "description": "Copy of Last Tax Return Filed on Record",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Tax Planner"
+  },
+  {
+    "name": "Trust Advisor Review of Preliminary Packet",
+    "description": "Trust Advisor Review of Preliminary Packet",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Preliminary Packet Distributed to Team with Expectation Letter # 3 to Team Through Asana",
+    "description": "Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Nominations and Deliverable Checkpoints Due",
+    "description": "—Click on subtask below for more details",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Administrative Manager",
+    "description": "Administrative Manager",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "AM01 Confirm Date of Meeting With Client 80 Days Prior",
+    "description": "AM01 Confirm Date of Meeting With Client 80 Days Prior",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": "Administrative Manager"
+  },
+  {
+    "name": "Client Service Rep - Meeting Packets",
+    "description": "Client Service Rep - Meeting Packets",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "CSR01  Confirm Status of Last Meeting's Action Items",
+    "description": "CSR01  Confirm Status of Last Meeting's Action Items",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": "Client Service Rep - Meeting Packets"
+  },
+  {
+    "name": "CSR02 Implementation Plan-of-Action Updated",
+    "description": "The comprehensive written lifetime financial strategy for this client has been reviewed within the last four months and",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": "action items and recommendations have been added"
+  },
+  {
+    "name": "internal team notes",
+    "description": "internal team notes",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR03  Unfinished Recommendations are Updated",
+    "description": "Any and all uncompleted action items on The Greatest Probability Strategy:tm: (GPS) have been updated with new target dates and the impact has been reflected and updated in the lifetime capital projection within the past four months.",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": "Client Service Rep - Meeting Packets"
+  },
+  {
+    "name": "CSR04  Debts are Updated on The Circle Chart",
+    "description": "The Circle Chart:tm: (TCC)",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": "listing"
+  },
+  {
+    "name": "including",
+    "description": "including",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "even if they will not be earmarked to fund future goals.  This includes the primary residence.",
+    "description": "even if they will not be earmarked to fund future goals.  This includes the primary residence.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR05 The Since Inception Report Completed",
+    "description": "Prior to every Client Progress Meeting a single-page report called  The Progress Since Inception Report:tm: of this client’s relationship with our firm listing these specific amounts:",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR06 The Growth Progress Since Last Meeting Report Completed",
+    "description": "This report is called The Progress Report Since Last Meeting:tm:.  Instructions to create this report are found here...",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR07 The Growth Progress Since Inception Report Completed",
+    "description": "CSR07 The Growth Progress Since Inception Report Completed",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": "Client Service Rep - Meeting Packets"
+  },
+  {
+    "name": "CSR08 The Goals Progress Report Completed",
+    "description": "This report is entitled The Goals Progress Report:tm:.  Instructions to create this report are found here...",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR09  The Numbers History Report Completed",
+    "description": "This report is called The Numbers History:tm:.  To see a sample of this report go to The CORRECTED Client Prep Packet:tm: in one of the script binders (here's a link to The Goal Progress Outlook:tm: The Client Prep Packet:tm:).",
+    "priority": "high",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "ignore transfers between accounts which balance out and don't represent client additions or withdrawals.  Only include instances where your client would agree I added funds or I withdrew funds.",
+    "description": "ignore transfers between accounts which balance out and don't represent client additions or withdrawals.  Only include instances where your client would agree I added funds or I withdrew funds.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR10 The Circle Chart Completed",
+    "description": "The Circle Chart:tm: (TCC)",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "listing"
+  },
+  {
+    "name": "including",
+    "description": "including",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "even if they will not be earmarked to fund future goals.  This includes the primary residence.",
+    "description": "even if they will not be earmarked to fund future goals.  This includes the primary residence.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR11  The Comprehensive Safety Review Exercise Completed",
+    "description": "Within the past twelve months the Deliverables Team has fully discussed every danger and threat to the comprehensive written lifetime financial plan with strategies developed for each",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "not before.",
+    "description": "not before.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "it is important that our Subject Matter Experts understand that",
+    "description": "it is important that our Subject Matter Experts understand that",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "building scenarios",
+    "description": "building scenarios",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "the only information due before The Dry-Run Prep Meeting:tm: deadline could be",
+    "description": "Client Service Rep - Meeting Packets",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Deliverable Teams Coordinator",
+    "description": "Deliverable Teams Coordinator",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "DTC01 Send Expectations Letter to All SMEs 69 Days in Advance of Progress Meeting",
+    "description": "DTC01 Send Expectations Letter to All SMEs 69 Days in Advance of Progress Meeting",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Deliverable Teams Coordinator"
+  },
+  {
+    "name": "DTC02 Consolidate Any Items Needed by SMEs",
+    "description": "DTC02 Consolidate Any Items Needed by SMEs",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Deliverable Teams Coordinator"
+  },
+  {
+    "name": "DTC03 All Deliverables Team Members Attend DRPM",
+    "description": "DTC03 All Deliverables Team Members Attend DRPM",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Deliverable Teams Coordinator"
+  },
+  {
+    "name": "DTC04 No Overdue Action Items or Recommendations",
+    "description": "DTC04 No Overdue Action Items or Recommendations",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Deliverable Teams Coordinator"
+  },
+  {
+    "name": "DTC05 Deliverables Team Members Submit Action Items by Due Date",
+    "description": "DTC05 Deliverables Team Members Submit Action Items by Due Date",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Deliverable Teams Coordinator"
+  },
+  {
+    "name": "DTC06 The Insurance Grid is Completed",
+    "description": "DTC06 The Insurance Grid is Completed",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Deliverable Teams Coordinator"
+  },
+  {
+    "name": "DTC07 Consolidate Highest Priority Conversations",
+    "description": "DTC07 Consolidate Highest Priority Conversations",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Deliverable Teams Coordinator"
+  },
+  {
+    "name": "Estate Planner",
+    "description": "Estate Planner",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "EP06  Determine if Tax Laws or Client Situations Have an Effect on a Client's Estate Plan",
+    "description": "Estate plan has been thoroughly reviewed by estate attorney",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "within four months of any significant change in estate or relevant tax laws or circumstances within this client’s estate."
+  },
+  {
+    "name": "EP07  Determine the Necessity of a Life Insurance Trust",
+    "description": "Trust ownership is considered for all current and future life insurance otherwise owned by this client.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "including:",
+    "description": "including:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "such as estate taxes",
+    "description": "such as estate taxes",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "so more of your Ideal Client's estate can go to their heirs.",
+    "description": "so more of your Ideal Client's estate can go to their heirs.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "the worry is that the life insurance policy will pay out into the estate",
+    "description": "the worry is that the life insurance policy will pay out into the estate",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "all of which will be detailed in writing as a result of considering this Deliverables Checkpoint:tm:",
+    "description": "all of which will be detailed in writing as a result of considering this Deliverables Checkpoint:tm:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Financial Planner",
+    "description": "Financial Planner",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "FP01  Establish Cash Reserves Amount",
+    "description": "The Cash Reserves Target amount",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "has been calculated and updated at least annually and spot-checked every four months.  Also referred to as Emergency Fund or Contingency Fund."
+  },
+  {
+    "name": "FP05  Establish Strategy for the Purchase of Next Major Asset",
+    "description": "Point of View (POV): You should be aware of the target date and timing of discussions prior to every major purchase by a client as well as client goals and reach-out to Ideal Clients prior to every goal target date (at the preceding client progress meetings).  Note this client's next major purchase and schedule those discussions on The Greatest Probability Strategy:tm: (GPS).",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "least expensive and time saving method of acquiring the next major purchase (e.g. vehicle sales process) has been recommended to this client well in-advance of every major purchase.",
+    "description": "least expensive and time saving method of acquiring the next major purchase (e.g. vehicle sales process) has been recommended to this client well in-advance of every major purchase.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "such as financial independence require substantially longer lead-time to set up the goal funding distributions.  Your job is to set the number of meetings prior to the goal target date that goal funding distributions discussions need to begin.  Once set",
+    "description": "such as financial independence require substantially longer lead-time to set up the goal funding distributions.  Your job is to set the number of meetings prior to the goal target date that goal funding distributions discussions need to begin.  Once set",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "as Financial Planning Subject Matter Expert do a little research and use your skill",
+    "description": "as Financial Planning Subject Matter Expert do a little research and use your skill",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP07  Actions from the Debt Reduction Plan Added to the Implementation Plan",
+    "description": "The smartest payoff schedule has been created and is updated at least every twelve (12) months to establish that the plan is being followed (client accountability).",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "specific recommended payment amounts for each specific debt are clearly described on The Greatest Probability Strategy:tm:.",
+    "description": "specific recommended payment amounts for each specific debt are clearly described on The Greatest Probability Strategy:tm:.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "the new recommended payment amounts for each specific debt are clearly described on The Greatest Probability Strategy:tm:; a detailed schedule of all debts are maintained on a separate document(s).",
+    "description": "the new recommended payment amounts for each specific debt are clearly described on The Greatest Probability Strategy:tm:; a detailed schedule of all debts are maintained on a separate document(s).",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP08  Least Complicated Account Design Established",
+    "description": "At least three times over the past year",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP11  Projected vs. Actual Spending Reviewed",
+    "description": "A review has been made comparing the actual figures with the previously projected figures. An impact review of “actual v. projected” inflows & outflows (e.g. planned and unplanned personal income & expenditures) has been performed within the past 12 months (spot-checked prior to every Client Progress Meeting) to determine if revenues and expenses are on-track or off-track as compared to the most recent personal expense projection provided by this client.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Financial Planner"
+  },
+  {
+    "name": "FP14  Collateral Values Established",
+    "description": "All Collateral for debts have been studied",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "at least annually. Check for market risk: Is there any risk that a reduction in the values of collateral could trigger a need for increased collateral or other problems?"
+  },
+  {
+    "name": "or debt agreement",
+    "description": "or debt agreement",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP16  Minimum Cash Levels Calculated for Each Account",
+    "description": "Point of View (POV): Several accounts for this client may have cash equivalent balances within them.  We need to be certain that the cash balances in those accounts are at the level required (for planned distributions",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "etc).  To ensure the right amount of cash is in each account"
+  },
+  {
+    "name": "cash (or cash equivalents)",
+    "description": "cash (or cash equivalents)",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "like this",
+    "description": "like this",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "par level is the specified amount of inventory an enterprise wishes to have at a certain location.  In this context",
+    "description": "Index funds",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP17  Verify No Identity Theft has Occurred",
+    "description": "Deliverables Checkpoint:tm:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "usually for financial gain. Identity Theft is the crime of obtaining the personal or financial information of another person for the sole purpose of assuming that person's name or identity in order to make transactions or purchases.",
+    "description": "usually for financial gain. Identity Theft is the crime of obtaining the personal or financial information of another person for the sole purpose of assuming that person's name or identity in order to make transactions or purchases.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP18  Credit Reports Checked for Inaccuracy & Fraud",
+    "description": "Point of View (POV): If ever this client needs to borrow money an exceptional credit report will result in lower interest rates.  Since any errors on the credit report or fraudulent use of this client's credit will serve as demerits staining this client's credit reputation",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "if any individual",
+    "description": "if any individual",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP19  Confirm Future Income Streams",
+    "description": "Within the past year (16+ months when possible)",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP20  Cash Reserves Plan Includes Insurance Deductibles",
+    "description": "Point of View (POV): If recommended by our Insurance Subject Matter Expert",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "but utilized only if triggered by a loss.",
+    "description": "but utilized only if triggered by a loss.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "FP21  Establish Whether Client Will Likely Provide Assistance to Others",
+    "description": "A financial impact review of individuals who may potentially be supported financially (aging relatives or young people with financial needs) has been reviewed within the past twelve months.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Financial Planner"
+  },
+  {
+    "name": "FP51 Analyze Whether Client Should Do a Balance Transfer of Debt",
+    "description": "FP51 Analyze Whether Client Should Do a Balance Transfer of Debt",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Financial Planner"
+  },
+  {
+    "name": "Insurance Planner - Life",
+    "description": "Insurance Planner - Life",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "—"
+  },
+  {
+    "name": "INC1  Analyze Long Term Care Insurance Need",
+    "description": "Long-Term Care Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "or other type of insurance.",
+    "description": "or other type of insurance.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INC2  Determine Most Beneficial Riders Associated with Long Term Care Insurance",
+    "description": "INC2  Determine Most Beneficial Riders Associated with Long Term Care Insurance",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Life"
+  },
+  {
+    "name": "IND1  Analyze Disability Insurance Need",
+    "description": "Disability Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INH1  Analyze Health Insurance Need",
+    "description": "Health Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INH2 Determine Need for Medicare Supplement Insurance",
+    "description": "Medicare Supplement Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INL1  Analyze Life Insurance Need",
+    "description": "All insurance (currently owned and potentially owned) has been reviewed as a part of the full insurance review conducted at least once over the past 12-months.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Life Insurance has been analyzed within the past twelve months to determine:",
+    "description": "Life Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INL2  Analyze Accidental Death Insurance Need",
+    "description": "Accidental Death and Dismemberment Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INL3  Analyze Need for Key Man Insurance",
+    "description": "Key-Man Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INS1  Insurance Premiums Analyzed for Better Prices",
+    "description": "A full review of all insurance premiums has been conducted",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "” within the past 36 months (insurance company changes can represent risk"
+  },
+  {
+    "name": "INS2  Frequency of Premium Payments Analyzed",
+    "description": "A review of insurance premium payments has been made within the past twelve months to identify the smartest",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "method of payment for each policy."
+  },
+  {
+    "name": "INS3  Analyze All Other Types of Insurance Needed by Client",
+    "description": "Every insurance policy has been reviewed for need",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INS4  Calculate the Most Cost Effective Deductible Levels",
+    "description": "All deductibles and waiting period on every existing policy has been analyzed for suitability (and premium savings) within the past twelve months.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Life"
+  },
+  {
+    "name": "IN04  Determine Which Insurance Discounts are Available",
+    "description": "All potential insurance discounts allowable by the insurance companies and the state laws have been reviewed within the past twelve months and none have been overlooked.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Life"
+  },
+  {
+    "name": "Insurance Planner - Property & Casualty",
+    "description": "Insurance Planner - Property & Casualty",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN01 Insurance for Sizable Items Calculated Before Purchasing",
+    "description": "IN01 Insurance for Sizable Items Calculated Before Purchasing",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "IN02 Analyze Need for Umbrella Insurance",
+    "description": "Umbrella Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN03 Determine Needs from Foreign Travel",
+    "description": "Point of View (POV): If this client travels abroad",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "insurance coverage should be reviewed."
+  },
+  {
+    "name": "are there limitations or reporting requirements? Deliverables Checkpoint",
+    "description": "are there limitations or reporting requirements? Deliverables Checkpoint",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "this client has been asked to disclose any future plans to foreign travel or travel to exotic places abroad where the quality of health care may be a concern and other risks should be assessed by an Insurance Subject Matter Expert (SME).",
+    "description": "this client has been asked to disclose any future plans to foreign travel or travel to exotic places abroad where the quality of health care may be a concern and other risks should be assessed by an Insurance Subject Matter Expert (SME).",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN04 Determine Which Insurance Discounts are Available",
+    "description": "IN04 Determine Which Insurance Discounts are Available",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "IN05 Determine Extent of Property & Casualty Risk to Financial Plan",
+    "description": "IN05 Determine Extent of Property & Casualty Risk to Financial Plan",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "IN06 Determine Extent of Business Risks to Financial Plan",
+    "description": "IN06 Determine Extent of Business Risks to Financial Plan",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "IN07 Check Vehicle & Driver Usage Against Policy Coverage",
+    "description": "IN07 Check Vehicle & Driver Usage Against Policy Coverage",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "IN08 Determine Extent of Errors & Omissions or Malpractice Insurance Need",
+    "description": "E&O Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN10  Assets Inventoried & Future Disposition Established",
+    "description": "Point of View (POV): If this client's residence burns down and the insurance company wants details of everything lost in the fire",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "kept offsite or in the cloud"
+  },
+  {
+    "name": "a narrated video of the residence contents has been updated (or pictures have been taken)",
+    "description": "a narrated video of the residence contents has been updated (or pictures have been taken)",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "furniture",
+    "description": "furniture",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN11 Uncommon Liabilities or Risks Assessed",
+    "description": "In the past twelve months all activities (lifestyle and business related) have been systematically reviewed by a property and casualty expert to ensure that all risks (e.g. Community and volunteer involvements) have been anticipated by the comprehensive written lifetime financial plan.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "IN14 Determine Need for Renter's Insurance",
+    "description": "Renter's Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN15 Determine Need for Earthquake Insurance",
+    "description": "Earthquake Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN16 Determine Need for Art & Collectibles Insurance",
+    "description": "Art & Collectibles Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN17 Determine Need for Flood Insurance",
+    "description": "Flood Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "IN18 Determine Need for Jewelry Insurance",
+    "description": "Jewelry Insurance has been analyzed within the past twelve months to determine:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "exactly how much is necessary",
+    "description": "exactly how much is necessary",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "INS1 Insurance Premiums Analyzed for Better Prices",
+    "description": "INS1 Insurance Premiums Analyzed for Better Prices",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "INS2 Frequency of Premium Payments Analyzed",
+    "description": "INS2 Frequency of Premium Payments Analyzed",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "INS3 Analyze All Other Types of Insurance Needed by Client",
+    "description": "INS3 Analyze All Other Types of Insurance Needed by Client",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "INS4 Calculate the Most Cost Effective Deductible Levels",
+    "description": "INS4 Calculate the Most Cost Effective Deductible Levels",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Insurance Planner - Property & Casualty"
+  },
+  {
+    "name": "Insurance Planner - Health",
+    "description": "Insurance Planner - Health",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "Money Manager",
+    "description": "Money Manager",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "MM01  Asset Allocation Reviewed",
+    "description": "The simplest",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "and optimal asset allocation necessary to accomplish the results outlined in the comprehensive written lifetime financial strategy plan of action has been reviewed"
+  },
+  {
+    "name": "MM02  Returns For Growth Assets Calculated",
+    "description": "Total return for every individual investment as well as the overall portfolio has been calculated and reviewed for action within the past (and every) four months",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "for all the following periods:"
+  },
+  {
+    "name": "and",
+    "description": "and",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "a best in class Money Management Subject Matter Expert should be regularly producing and reviewing these additional measures for each investment holding as well as for the overall portfolio:",
+    "description": "a best in class Money Management Subject Matter Expert should be regularly producing and reviewing these additional measures for each investment holding as well as for the overall portfolio:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "peer benchmarks",
+    "description": "peer benchmarks",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "the investment is promptly red-flagged for review",
+    "description": "the investment is promptly red-flagged for review",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "MM04  All Accounts Reconciled",
+    "description": "Every growth asset account statement (securities",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "such as this one",
+    "description": "such as this one",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "use debit cards",
+    "description": "use debit cards",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "but it is clearly your job to make sure it gets done.  This rule applies to nearly every Deliverables Checkpoint:tm:",
+    "description": "but it is clearly your job to make sure it gets done.  This rule applies to nearly every Deliverables Checkpoint:tm:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "MM06  Benchmarks Updated",
+    "description": "Set best investment benchmark against which to compare each investment holding as well as the overall portfolio allocation.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "established by this client",
+    "description": "established by this client",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "it is our job to understand why the benchmark has changed. A notification is provided to the Trusted Advisor",
+    "description": "it is our job to understand why the benchmark has changed. A notification is provided to the Trusted Advisor",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "MM07  Proper Amounts of Cash in Each Account Established",
+    "description": "The exact amount of investment cash needed as a part of the portfolio investment allocation has been calculated and funded every four months.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "or cash reserves.",
+    "description": "or cash reserves.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "if there are systematic withdrawals from any account",
+    "description": "if there are systematic withdrawals from any account",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "MM13  Taxable Equivalent Yields Determined",
+    "description": "Taxable v. Tax-free equivalent rates are regularly calculated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "MM14  Realized & Unrealized Gains Shared with Team",
+    "description": "All realized and unrealized capital gains have been calculated by a Tax Subject Matter Expert (SME)",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "money managers"
+  },
+  {
+    "name": "MM23  Scour the Market for the Highest Yields For Cash",
+    "description": "Point of View (POV): We want to be certain that this client is getting the highest yields on money market funds and cash equivalents across all the accounts",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "MM26  Scrutinize Each Account Transaction",
+    "description": "All trades (transactions) have been reviewed and reconciled for accuracy",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "MM27  Scrutinize Modified Quality or Credit Ratings for Bonds",
+    "description": "All fixed-income investment holding’s quality or credit rating changes (upgrades or downgrades) have been updated",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "risk"
+  },
+  {
+    "name": "MM28  Systematic Deposits and Withdrawals Established for Reducing Transaction Fees",
+    "description": "MM28  Systematic Deposits and Withdrawals Established for Reducing Transaction Fees",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Money Manager"
+  },
+  {
+    "name": "Tax Planner",
+    "description": "Tax Planner",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "TX03  Double Check Each Tax Reporting Document",
+    "description": "Before tax returns are prepared",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "(e.g. W2"
+  },
+  {
+    "name": "TX04  Confirm with Client if There are Any Possible",
+    "description": "TX04  Confirm with Client if There are Any Possible",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "this client has been asked to disclose all threatened"
+  },
+  {
+    "name": "expert",
+    "description": "expert",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "TX05  Detemine Any Asset Protection Needs",
+    "description": "Point of View (POV): If this client has significant exposures to potential asset losses or law suits",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "S Corp",
+    "description": "S Corp",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "TX22  Analyze Most Beneficial Education Funding Method",
+    "description": "TX22  Analyze Most Beneficial Education Funding Method",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Tax Planner"
+  },
+  {
+    "name": "TX23  Determine if Client Desires to Fund Education Expenses for Others",
+    "description": "TX23  Determine if Client Desires to Fund Education Expenses for Others",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Tax Planner"
+  },
+  {
+    "name": "Trusted Advisor",
+    "description": "Trusted Advisor",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": "Nominations and Deliverable Checkpoints Due"
+  },
+  {
+    "name": "TA11 The Comprehensive Safety Review Exercise Completed",
+    "description": "Within the past twelve months the Deliverables Team has fully discussed every danger and threat to the comprehensive written lifetime financial plan with strategies developed for each",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "not before.",
+    "description": "not before.",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "it is important that our Subject Matter Experts understand that",
+    "description": "it is important that our Subject Matter Experts understand that",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "building scenarios",
+    "description": "building scenarios",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "the only information due before The Dry-Run Prep Meeting™️ deadline could be",
+    "description": "Trusted Advisor",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Implementation Plan Updated and Expectation Letter # 4 Sent to Team Through Asana",
+    "description": "Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "DRPM 0@",
+    "description": "FATHOM MEETING LINK:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "and ask for any clarification",
+    "description": "and ask for any clarification",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "so that they can take action",
+    "description": "so that they can take action",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "is there anything else you want to bring up?",
+    "description": "is there anything else you want to bring up?",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Corrections from DRPM Notes Made to Packet",
+    "description": "Corrections from DRPM Notes Made to Packet",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Packet Sealed and Made Available to TA",
+    "description": "Packet Sealed and Made Available to TA",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "CSR Meeting @",
+    "description": "Intro:",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "but before we get to that",
+    "description": "but before we get to that",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Send Post Meeting Notes and Action Items",
+    "description": "Send Post Meeting Notes and Action Items",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  },
+  {
+    "name": "Archive Meeting and Create Next Meeting Project in ASANA",
+    "description": "Archive Meeting and Create Next Meeting Project in ASANA",
+    "priority": "medium",
+    "estimatedDays": 1,
+    "parentTask": null
+  }
+]

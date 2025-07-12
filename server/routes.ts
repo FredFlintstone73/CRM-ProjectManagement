@@ -476,6 +476,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update template with corrected tasks
+  app.post('/api/project-templates/:id/update-tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { tasks } = req.body;
+      
+      const updatedTemplate = await storage.updateProjectTemplate(parseInt(id), {
+        tasks: JSON.stringify(tasks)
+      });
+      
+      res.json(updatedTemplate);
+    } catch (error) {
+      console.error("Error updating template tasks:", error);
+      res.status(500).json({ message: "Failed to update template tasks" });
+    }
+  });
+
   app.post('/api/project-templates', isAuthenticated, async (req: any, res) => {
     try {
       const templateData = insertProjectTemplateSchema.parse(req.body);
