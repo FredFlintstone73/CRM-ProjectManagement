@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Mail, Phone, Building, Grid, List, MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Mail, Phone, Building, Grid, List, MoreHorizontal, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import ContactForm from "@/components/contacts/contact-form";
 import type { Contact } from "@shared/schema";
 
@@ -37,6 +37,10 @@ export default function Contacts() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof Contact | null;
+    direction: 'asc' | 'desc';
+  }>({ key: null, direction: 'asc' });
 
   // Handle URL query parameters for contact type filtering
   useEffect(() => {
@@ -113,9 +117,33 @@ export default function Contacts() {
       contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       contact.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       contact.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.company?.toLowerCase().includes(searchQuery.toLowerCase());
+      contact.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (contact.familyName && contact.familyName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (contact.personalEmail && contact.personalEmail.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (contact.spousePersonalEmail && contact.spousePersonalEmail.toLowerCase().includes(searchQuery.toLowerCase()));
     
     return isTypeVisible && matchesSearch;
+  }).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+    
+    // Handle null/undefined values
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+    
+    // Convert to strings for comparison
+    const aStr = String(aValue).toLowerCase();
+    const bStr = String(bValue).toLowerCase();
+    
+    if (aStr < bStr) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (aStr > bStr) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
   }) || [];
 
   const toggleContactType = (type: keyof typeof visibleTypes) => {
@@ -227,6 +255,23 @@ export default function Contacts() {
 
   const handleEditClick = (contact: Contact) => {
     setEditingContact(contact);
+  };
+
+  const handleSort = (key: keyof Contact) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (columnKey: keyof Contact) => {
+    if (sortConfig.key !== columnKey) {
+      return <ArrowUpDown className="w-4 h-4" />;
+    }
+    return sortConfig.direction === 'asc' ? 
+      <ArrowUp className="w-4 h-4" /> : 
+      <ArrowDown className="w-4 h-4" />;
   };
 
   if (isLoading || contactsLoading) {
@@ -403,11 +448,56 @@ export default function Contacts() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('familyName')}
+                        className="h-auto p-0 font-medium hover:bg-transparent"
+                      >
+                        Name
+                        {getSortIcon('familyName')}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('contactType')}
+                        className="h-auto p-0 font-medium hover:bg-transparent"
+                      >
+                        Type
+                        {getSortIcon('contactType')}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('personalEmail')}
+                        className="h-auto p-0 font-medium hover:bg-transparent"
+                      >
+                        Email
+                        {getSortIcon('personalEmail')}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('cellPhone')}
+                        className="h-auto p-0 font-medium hover:bg-transparent"
+                      >
+                        Phone
+                        {getSortIcon('cellPhone')}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleSort('status')}
+                        className="h-auto p-0 font-medium hover:bg-transparent"
+                      >
+                        Status
+                        {getSortIcon('status')}
+                      </Button>
+                    </TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
