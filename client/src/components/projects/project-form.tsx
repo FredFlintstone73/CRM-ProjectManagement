@@ -34,7 +34,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
   });
 
   const { data: contacts } = useQuery<Contact[]>({
-    queryKey: ['/api/contacts', '?type=client'],
+    queryKey: ['/api/contacts'],
   });
 
   const createProjectMutation = useMutation({
@@ -132,18 +132,17 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
           name="clientId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Client</FormLabel>
+              <FormLabel>Family Name</FormLabel>
               <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a client" />
+                    <SelectValue placeholder="Select a family" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   {contacts?.map((contact) => (
                     <SelectItem key={contact.id} value={contact.id.toString()}>
-                      {contact.firstName} {contact.lastName}
-                      {contact.company && ` - ${contact.company}`}
+                      {contact.familyName || `${contact.firstName} ${contact.lastName}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
