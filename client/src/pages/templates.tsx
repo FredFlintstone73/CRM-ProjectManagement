@@ -42,12 +42,19 @@ export default function Templates() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: templates, isLoading: templatesLoading } = useQuery<ProjectTemplate[]>({
+  const { data: templates, isLoading: templatesLoading, refetch } = useQuery<ProjectTemplate[]>({
     queryKey: ['/api/project-templates'],
     enabled: isAuthenticated,
     staleTime: 0, // Always fetch fresh data
     cacheTime: 0, // Don't cache
   });
+
+  // Force refresh when authenticated status changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      refetch();
+    }
+  }, [isAuthenticated, refetch]);
 
   const deleteTemplateMutation = useMutation({
     mutationFn: async (templateId: number) => {
@@ -83,6 +90,12 @@ export default function Templates() {
     },
   });
 
+  // Add refresh button for testing
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
+    refetch();
+  };
+  
   const filteredTemplates = templates?.filter((template) =>
     searchQuery === "" ||
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -163,24 +176,33 @@ export default function Templates() {
                 className="pl-10"
               />
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Template
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Create New Template</DialogTitle>
-                </DialogHeader>
-                <ProjectTemplateForm onSuccess={handleTemplateCreated} />
-              </DialogContent>
-            </Dialog>
+            <div className="flex gap-2">
+              <Button onClick={handleRefresh} variant="outline">
+                Refresh
+              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Template
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create New Template</DialogTitle>
+                  </DialogHeader>
+                  <ProjectTemplateForm onSuccess={handleTemplateCreated} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           {/* Templates Display */}
-          {filteredTemplates.length === 0 ? (
+          {templatesLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : filteredTemplates.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
                 <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
