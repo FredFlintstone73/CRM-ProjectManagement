@@ -7,7 +7,7 @@ import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Toggle } from "@/components/ui/toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,7 +21,12 @@ export default function Contacts() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
+  const [visibleTypes, setVisibleTypes] = useState({
+    client: true,
+    prospect: true,
+    team_member: true,
+    strategic_partner: true
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -39,7 +44,7 @@ export default function Contacts() {
   }, [isAuthenticated, isLoading, toast]);
 
   const { data: contacts, isLoading: contactsLoading } = useQuery<Contact[]>({
-    queryKey: ['/api/contacts', selectedType !== 'all' ? `?type=${selectedType}` : ''],
+    queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
   });
 
@@ -74,13 +79,41 @@ export default function Contacts() {
     },
   });
 
-  const filteredContacts = contacts?.filter((contact) =>
-    searchQuery === "" ||
-    contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contact.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contact.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contact.company?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredContacts = contacts?.filter((contact) => {
+    // Filter by visible types
+    const isTypeVisible = visibleTypes[contact.contactType as keyof typeof visibleTypes];
+    
+    // Filter by search query
+    const matchesSearch = searchQuery === "" ||
+      contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.company?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return isTypeVisible && matchesSearch;
+  }) || [];
+
+  const toggleContactType = (type: keyof typeof visibleTypes) => {
+    setVisibleTypes(prev => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+  };
+
+  const getContactTypeLabel = (type: string) => {
+    switch (type) {
+      case 'client':
+        return 'Clients';
+      case 'prospect':
+        return 'Prospects';
+      case 'team_member':
+        return 'Team Members';
+      case 'strategic_partner':
+        return 'Strategic Partners';
+      default:
+        return type;
+    }
+  };
 
   const getContactTypeColor = (type: string) => {
     switch (type) {
@@ -136,42 +169,49 @@ export default function Contacts() {
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
           {/* Search and Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search contacts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="flex flex-col gap-4 mb-6">
+            {/* Search and New Contact Button */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search contacts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Contact
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Add New Contact</DialogTitle>
+                  </DialogHeader>
+                  <ContactForm onSuccess={handleContactCreated} />
+                </DialogContent>
+              </Dialog>
             </div>
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="client">Clients</SelectItem>
-                <SelectItem value="prospect">Prospects</SelectItem>
-                <SelectItem value="team_member">Team Members</SelectItem>
-                <SelectItem value="strategic_partner">Strategic Partners</SelectItem>
-              </SelectContent>
-            </Select>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Contact
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Add New Contact</DialogTitle>
-                </DialogHeader>
-                <ContactForm onSuccess={handleContactCreated} />
-              </DialogContent>
-            </Dialog>
+            
+            {/* Category Toggles */}
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Show:</span>
+              {Object.entries(visibleTypes).map(([type, isVisible]) => (
+                <Toggle
+                  key={type}
+                  pressed={isVisible}
+                  onPressedChange={() => toggleContactType(type as keyof typeof visibleTypes)}
+                  variant="outline"
+                  className="data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800"
+                >
+                  {getContactTypeLabel(type)}
+                </Toggle>
+              ))}
+            </div>
           </div>
 
           {/* Contacts Grid */}
