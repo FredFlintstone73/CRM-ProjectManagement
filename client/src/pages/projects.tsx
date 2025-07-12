@@ -189,7 +189,7 @@ export default function Projects() {
                       <span>Progress</span>
                       <span>{project.progress || 0}%</span>
                     </div>
-                    <Progress value={project.progress || 0} className="h-2" />
+                    <Progress value={project.progress || 0} className="h-6" />
                   </div>
                   
                   <div className="flex items-center justify-between pt-2">

@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Clock, FolderOpen } from "lucide-react";
+import { Calendar, Clock, FolderOpen, User } from "lucide-react";
 import { format, addDays, addWeeks, addMonths, startOfDay, endOfDay } from "date-fns";
-import type { Project } from "@shared/schema";
+import type { Project, Contact } from "@shared/schema";
 
 interface DateRange {
   start: Date;
@@ -67,6 +66,10 @@ export default function ProjectsDueWidget() {
     },
   });
 
+  const { data: contacts } = useQuery<Contact[]>({
+    queryKey: ['/api/contacts'],
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'planning':
@@ -90,6 +93,12 @@ export default function ProjectsDueWidget() {
     const diffTime = due.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  };
+
+  const getClientName = (clientId: number | null) => {
+    if (!clientId || !contacts) return 'No client assigned';
+    const client = contacts.find(c => c.id === clientId);
+    return client ? `${client.firstName} ${client.lastName}` : 'Unknown client';
   };
 
   return (
@@ -164,15 +173,16 @@ export default function ProjectsDueWidget() {
                         <div>
                           <p className="font-medium text-sm">{project.name}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge className={`status-badge ${getStatusColor(project.status)}`}>
-                              {project.status.replace('_', ' ')}
-                            </Badge>
                             {project.dueDate && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
                                 <span>Due {format(new Date(project.dueDate), 'MMM dd, yyyy')}</span>
                               </div>
                             )}
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <User className="w-3 h-3" />
+                              <span>{getClientName(project.clientId)}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -189,7 +199,7 @@ export default function ProjectsDueWidget() {
                              daysUntilDue > 0 ? `${daysUntilDue} days left` :
                              `${Math.abs(daysUntilDue)} days overdue`}
                           </div>
-                          <div className="space-y-1 mt-2 w-24">
+                          <div className="space-y-1 mt-2 w-72">
                             <div className="flex justify-between text-xs">
                               <span>Progress</span>
                               <span>{project.progress}%</span>
