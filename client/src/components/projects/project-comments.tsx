@@ -34,6 +34,7 @@ export default function ProjectComments({ projectId, projectName, isOpen, onClos
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'comments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects/comment-counts'] });
       setNewComment("");
       toast({
         title: "Comment added",

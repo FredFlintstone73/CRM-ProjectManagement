@@ -50,6 +50,33 @@ export default function Projects() {
     enabled: isAuthenticated,
   });
 
+  // Query for comment counts for all projects
+  const { data: projectCommentCounts = {} } = useQuery<Record<number, number>>({
+    queryKey: ['/api/projects/comment-counts'],
+    enabled: isAuthenticated && !!projects,
+    queryFn: async () => {
+      if (!projects) return {};
+      
+      const counts: Record<number, number> = {};
+      await Promise.all(
+        projects.map(async (project) => {
+          try {
+            const response = await fetch(`/api/projects/${project.id}/comments`, {
+              credentials: 'include',
+            });
+            if (response.ok) {
+              const comments = await response.json();
+              counts[project.id] = comments.length;
+            }
+          } catch (error) {
+            counts[project.id] = 0;
+          }
+        })
+      );
+      return counts;
+    },
+  });
+
 
 
   const filteredProjects = projects?.filter((project) =>
@@ -193,6 +220,11 @@ export default function Projects() {
                       >
                         <MessageCircle className="w-4 h-4 mr-1" />
                         Comments
+                        {projectCommentCounts[project.id] > 0 && (
+                          <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            {projectCommentCounts[project.id]}
+                          </span>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -241,6 +273,11 @@ export default function Projects() {
                         >
                           <MessageCircle className="w-4 h-4 mr-1" />
                           Comments
+                          {projectCommentCounts[project.id] > 0 && (
+                            <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                              {projectCommentCounts[project.id]}
+                            </span>
+                          )}
                         </Button>
                       </TableCell>
                     </TableRow>
