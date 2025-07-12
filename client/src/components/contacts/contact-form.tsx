@@ -30,7 +30,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   );
 
   const form = useForm<InsertContact>({
-    // resolver: zodResolver(insertContactSchema.partial()),
+    resolver: zodResolver(insertContactSchema.partial()),
     mode: "onChange",
     defaultValues: contact ? {
       familyName: contact.familyName || "",

@@ -173,9 +173,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateContact(id: number, contact: Partial<InsertContact>): Promise<Contact> {
+    // Process date fields - convert string dates to Date objects
+    const processedContact = { ...contact };
+    const dateFields = [
+      'dateOfBirth', 'dateOfDeath', 'govIdExpiration',
+      'spouseDateOfBirth', 'spouseDateOfDeath', 'spouseGovIdExpiration',
+      'marriageDate',
+      'child1DateOfBirth', 'child1DateOfDeath',
+      'child2DateOfBirth', 'child2DateOfDeath',
+      'child3DateOfBirth', 'child3DateOfDeath',
+      'child4DateOfBirth', 'child4DateOfDeath',
+      'child5DateOfBirth', 'child5DateOfDeath',
+      'child6DateOfBirth', 'child6DateOfDeath',
+      'child7DateOfBirth', 'child7DateOfDeath'
+    ];
+    
+    dateFields.forEach(field => {
+      if (processedContact[field] && processedContact[field].trim()) {
+        processedContact[field] = new Date(processedContact[field]);
+      } else {
+        processedContact[field] = null;
+      }
+    });
+    
     const [updatedContact] = await db
       .update(contacts)
-      .set({ ...contact, updatedAt: new Date() })
+      .set({ ...processedContact, updatedAt: new Date() })
       .where(eq(contacts.id, id))
       .returning();
     return updatedContact;
