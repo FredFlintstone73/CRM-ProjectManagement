@@ -15,7 +15,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
-import { insertTaskSchema, type InsertTask, type Task, type Contact } from "@shared/schema";
+import { insertTaskSchema, type InsertTask, type Task } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 
 interface TaskFormProps {
   task?: Task | null;
@@ -25,16 +26,10 @@ interface TaskFormProps {
 
 export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [dueDate, setDueDate] = useState<Date | undefined>(
     task?.dueDate ? new Date(task.dueDate) : undefined
   );
-
-  const { data: contacts } = useQuery<Contact[]>({
-    queryKey: ['/api/contacts'],
-  });
-
-  // Filter contacts to only show team members
-  const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
 
   const form = useForm<InsertTask>({
     resolver: zodResolver(insertTaskSchema),
@@ -42,7 +37,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assignedTo: task?.assignedTo || '',
+      assignedTo: task?.assignedTo || user?.id || '',
       priority: task?.priority || 'medium',
       status: task?.status || 'todo',
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
@@ -112,19 +107,19 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         <div className="space-y-2">
           <Label htmlFor="assignedTo">Assign To</Label>
           <Select
-            value={form.watch('assignedTo') || 'unassigned'}
+            value={form.watch('assignedTo') || user?.id || 'unassigned'}
             onValueChange={(value) => form.setValue('assignedTo', value === 'unassigned' ? '' : value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select team member" />
+              <SelectValue placeholder="Select assignee" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unassigned">Unassigned</SelectItem>
-              {teamMembers.map((member) => (
-                <SelectItem key={member.id} value={member.id.toString()}>
-                  {member.firstName} {member.lastName}
+              {user && (
+                <SelectItem value={user.id}>
+                  {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email}
                 </SelectItem>
-              ))}
+              )}
             </SelectContent>
           </Select>
         </div>
