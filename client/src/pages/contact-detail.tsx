@@ -107,45 +107,118 @@ export default function ContactDetail() {
         showActions={false}
       />
       
-      <div className="p-6 space-y-6">
-        {/* Back Button */}
-        <Button 
-          variant="outline" 
-          onClick={() => navigate("/contacts")}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Contacts
-        </Button>
+      <div className="flex h-full">
+        {/* Left Sidebar */}
+        <div className="w-80 bg-white border-r p-6 space-y-6">
+          {/* Back Button */}
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/contacts")}
+            className="w-full"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Contacts
+          </Button>
 
-        {/* Header Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-2xl mb-2">
-                  {contact.familyName || `${contact.firstName} ${contact.lastName}`}
-                </CardTitle>
-                <Badge className={getContactTypeColor(contact.contactType)}>
-                  {formatContactType(contact.contactType)}
-                </Badge>
+          {/* Client Photo */}
+          <div className="text-center">
+            <div className="w-32 h-32 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+              <div className="text-center">
+                <Users className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Client Photo</p>
               </div>
-              <Button>CREATE CLIENT</Button>
             </div>
-          </CardHeader>
-        </Card>
+            <Button variant="outline" size="sm">Upload Photo</Button>
+          </div>
 
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="interaction" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="interaction">Interaction</TabsTrigger>
-            <TabsTrigger value="client">Client</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="files">Files</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
-          </TabsList>
+          {/* Family Name */}
+          <div className="text-center">
+            <h2 className="text-xl font-bold mb-2">
+              {contact.familyName || `${contact.firstName} ${contact.lastName}`}
+            </h2>
+            <Badge className={getContactTypeColor(contact.contactType)}>
+              {formatContactType(contact.contactType)}
+            </Badge>
+          </div>
 
-          <TabsContent value="interaction" className="space-y-4">
+          {/* Client 1 Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Client 1</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div>
+                <p className="font-medium">{contact.firstName} {contact.lastName}</p>
+                {contact.nickname && <p className="text-sm text-gray-600">"{contact.nickname}"</p>}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
+                <p className="text-sm">{contact.preferredContactMethod || "Not specified"}</p>
+                {contact.preferredContactMethod === "Cell Phone" && contact.cellPhone && (
+                  <p className="text-sm text-blue-600">{contact.cellPhone}</p>
+                )}
+                {contact.preferredContactMethod === "Personal Email" && contact.personalEmail && (
+                  <p className="text-sm text-blue-600">{contact.personalEmail}</p>
+                )}
+                {contact.preferredContactMethod === "Work Phone" && contact.workPhone && (
+                  <p className="text-sm text-blue-600">{contact.workPhone}</p>
+                )}
+                {contact.preferredContactMethod === "Work Email" && contact.workEmail && (
+                  <p className="text-sm text-blue-600">{contact.workEmail}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Client 2 Information (Spouse) */}
+          {contact.spouseFirstName && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Client 2 (Spouse)</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div>
+                  <p className="font-medium">{contact.spouseFirstName} {contact.spouseLastName}</p>
+                  {contact.spouseNickname && <p className="text-sm text-gray-600">"{contact.spouseNickname}"</p>}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
+                  <p className="text-sm">{contact.spousePreferredContactMethod || "Not specified"}</p>
+                  {contact.spousePreferredContactMethod === "Cell Phone" && contact.spouseCellPhone && (
+                    <p className="text-sm text-blue-600">{contact.spouseCellPhone}</p>
+                  )}
+                  {contact.spousePreferredContactMethod === "Personal Email" && contact.spousePersonalEmail && (
+                    <p className="text-sm text-blue-600">{contact.spousePersonalEmail}</p>
+                  )}
+                  {contact.spousePreferredContactMethod === "Work Phone" && contact.spouseWorkPhone && (
+                    <p className="text-sm text-blue-600">{contact.spouseWorkPhone}</p>
+                  )}
+                  {contact.spousePreferredContactMethod === "Work Email" && contact.spouseWorkEmail && (
+                    <p className="text-sm text-blue-600">{contact.spouseWorkEmail}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Create Client Button */}
+          <Button className="w-full">CREATE CLIENT</Button>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 p-6">
+
+          {/* Main Content Tabs */}
+          <Tabs defaultValue="client" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="client">Client</TabsTrigger>
+              <TabsTrigger value="interaction">Interaction</TabsTrigger>
+              <TabsTrigger value="projects">Projects</TabsTrigger>
+              <TabsTrigger value="files">Files</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+            </TabsList>
+
+          <TabsContent value="client" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Contact 1 Information */}
               <Card>
@@ -390,14 +463,14 @@ export default function ContactDetail() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="client" className="space-y-4">
+          <TabsContent value="interaction" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Client Information</CardTitle>
+                <CardTitle>Interaction History</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-gray-500 text-center py-8">
-                  Client information will be displayed here
+                  Interaction history will be displayed here
                 </div>
               </CardContent>
             </Card>
@@ -441,7 +514,8 @@ export default function ContactDetail() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
