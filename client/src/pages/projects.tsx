@@ -109,6 +109,11 @@ export default function Projects() {
     return client ? (client.familyName || `${client.firstName} ${client.lastName}`) : 'Unknown family';
   };
 
+  const getClientContact = (clientId: number | null) => {
+    if (!clientId || !contacts) return null;
+    return contacts.find(c => c.id === clientId);
+  };
+
   const handleProjectCreated = () => {
     setIsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
@@ -217,8 +222,18 @@ export default function Projects() {
                     )}
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <User className="w-4 h-4" />
+                    <div className="flex items-center space-x-3 text-sm text-gray-600">
+                      {getClientContact(project.clientId)?.profileImageUrl ? (
+                        <img 
+                          src={getClientContact(project.clientId)?.profileImageUrl} 
+                          alt={getFamilyName(project.clientId)}
+                          className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                          <User className="w-4 h-4 text-gray-500" />
+                        </div>
+                      )}
                       {project.clientId ? (
                         <Link 
                           href={`/contacts/${project.clientId}`}
@@ -297,16 +312,29 @@ export default function Projects() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {project.clientId ? (
-                          <Link 
-                            href={`/contacts/${project.clientId}`}
-                            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                          >
-                            {getFamilyName(project.clientId)}
-                          </Link>
-                        ) : (
-                          <span>{getFamilyName(project.clientId)}</span>
-                        )}
+                        <div className="flex items-center space-x-3">
+                          {getClientContact(project.clientId)?.profileImageUrl ? (
+                            <img 
+                              src={getClientContact(project.clientId)?.profileImageUrl} 
+                              alt={getFamilyName(project.clientId)}
+                              className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                              <User className="w-4 h-4 text-gray-500" />
+                            </div>
+                          )}
+                          {project.clientId ? (
+                            <Link 
+                              href={`/contacts/${project.clientId}`}
+                              className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                            >
+                              {getFamilyName(project.clientId)}
+                            </Link>
+                          ) : (
+                            <span>{getFamilyName(project.clientId)}</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

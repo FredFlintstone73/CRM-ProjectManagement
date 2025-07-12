@@ -296,9 +296,9 @@ export default function ProjectDetail() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-3">
-              {projectContact?.profilePhoto ? (
+              {projectContact?.profileImageUrl ? (
                 <img 
-                  src={projectContact.profilePhoto} 
+                  src={projectContact.profileImageUrl} 
                   alt={getFamilyName(project.clientId)}
                   className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
                 />
