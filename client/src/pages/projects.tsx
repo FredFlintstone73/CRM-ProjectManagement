@@ -128,7 +128,6 @@ export default function Projects() {
         subtitle="Manage your client projects and track progress"
         showActions={false}
       />
-      
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
           {/* Search and Actions Bar */}
@@ -234,7 +233,7 @@ export default function Projects() {
                     <TableHead>Project Name</TableHead>
                     <TableHead>Client</TableHead>
                     <TableHead>Progress</TableHead>
-                    <TableHead>Due Date</TableHead>
+                    <TableHead>Meeting Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
