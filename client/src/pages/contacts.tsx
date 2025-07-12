@@ -291,16 +291,16 @@ export default function Contacts() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {contact.spousePersonalEmail && (
+                    {(contact.spousePersonalEmail || contact.personalEmail) && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Mail className="w-4 h-4" />
-                        <span>{contact.spousePersonalEmail}</span>
+                        <span>{contact.spousePersonalEmail || contact.personalEmail}</span>
                       </div>
                     )}
-                    {contact.spouseCellPhone && (
+                    {(contact.spouseCellPhone || contact.cellPhone) && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Phone className="w-4 h-4" />
-                        <span>{contact.spouseCellPhone}</span>
+                        <span>{contact.spouseCellPhone || contact.cellPhone}</span>
                       </div>
                     )}
                     {contact.position && (
@@ -367,20 +367,20 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {contact.spousePersonalEmail && (
+                          {(contact.spousePersonalEmail || contact.personalEmail) && (
                             <>
                               <Mail className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.spousePersonalEmail}</span>
+                              <span className="text-sm">{contact.spousePersonalEmail || contact.personalEmail}</span>
                             </>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {contact.spouseCellPhone && (
+                          {(contact.spouseCellPhone || contact.cellPhone) && (
                             <>
                               <Phone className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.spouseCellPhone}</span>
+                              <span className="text-sm">{contact.spouseCellPhone || contact.cellPhone}</span>
                             </>
                           )}
                         </div>
