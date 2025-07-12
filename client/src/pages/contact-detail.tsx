@@ -157,18 +157,12 @@ export default function ContactDetail() {
               </div>
               <div className="space-y-1">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">DOB:</p>
-                  <p className="text-sm">{formatDate(contact.dateOfBirth)}</p>
+                  <p className="text-sm font-medium text-gray-700">Cell Phone:</p>
+                  <p className="text-sm">{contact.cellPhone || "Not specified"}</p>
                 </div>
-                {contact.dateOfDeath && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">DOD:</p>
-                    <p className="text-sm">{formatDate(contact.dateOfDeath)}</p>
-                  </div>
-                )}
                 <div>
-                  <p className="text-sm font-medium text-gray-700">SSN:</p>
-                  <p className="text-sm">{contact.ssn || "Not specified"}</p>
+                  <p className="text-sm font-medium text-gray-700">Email:</p>
+                  <p className="text-sm">{contact.personalEmail || contact.workEmail || "Not specified"}</p>
                 </div>
               </div>
               <div>
@@ -203,18 +197,12 @@ export default function ContactDetail() {
                 </div>
                 <div className="space-y-1">
                   <div>
-                    <p className="text-sm font-medium text-gray-700">DOB:</p>
-                    <p className="text-sm">{formatDate(contact.spouseDateOfBirth)}</p>
+                    <p className="text-sm font-medium text-gray-700">Cell Phone:</p>
+                    <p className="text-sm">{contact.spouseCellPhone || "Not specified"}</p>
                   </div>
-                  {contact.spouseDateOfDeath && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">DOD:</p>
-                      <p className="text-sm">{formatDate(contact.spouseDateOfDeath)}</p>
-                    </div>
-                  )}
                   <div>
-                    <p className="text-sm font-medium text-gray-700">SSN:</p>
-                    <p className="text-sm">{contact.spouseSSN || "Not specified"}</p>
+                    <p className="text-sm font-medium text-gray-700">Email:</p>
+                    <p className="text-sm">{contact.spousePersonalEmail || contact.spouseWorkEmail || "Not specified"}</p>
                   </div>
                 </div>
                 <div>
