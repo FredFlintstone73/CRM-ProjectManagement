@@ -5,6 +5,7 @@ import Header from "@/components/layout/header";
 
 import ProjectsDueWidget from "@/components/dashboard/projects-due-widget";
 import ProjectsTimelineChart from "@/components/dashboard/projects-timeline-chart";
+import ActionCard from "@/components/dashboard/action-card";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -38,7 +39,6 @@ export default function Dashboard() {
       <Header 
         title="Dashboard" 
         subtitle="Welcome back! Here's what's happening today."
-        showActions={true}
       />
       
       <main className="flex-1 overflow-y-auto bg-gray-50">
@@ -50,8 +50,13 @@ export default function Dashboard() {
             />
           </div>
           
-          <div className="mt-8">
-            <ProjectsDueWidget selectedPeriod={selectedPeriod} />
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-3">
+              <ProjectsDueWidget selectedPeriod={selectedPeriod} />
+            </div>
+            <div className="lg:col-span-1">
+              <ActionCard />
+            </div>
           </div>
         </div>
       </main>
