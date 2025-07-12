@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit } from "lucide-react";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
@@ -155,6 +155,22 @@ export default function ContactDetail() {
                 <p className="font-medium">{contact.firstName} {contact.lastName}</p>
                 {contact.nickname && <p className="text-sm text-gray-600">"{contact.nickname}"</p>}
               </div>
+              <div className="space-y-1">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">DOB:</p>
+                  <p className="text-sm">{formatDate(contact.dateOfBirth)}</p>
+                </div>
+                {contact.dateOfDeath && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">DOD:</p>
+                    <p className="text-sm">{formatDate(contact.dateOfDeath)}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-medium text-gray-700">SSN:</p>
+                  <p className="text-sm">{contact.ssn || "Not specified"}</p>
+                </div>
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
                 <p className="text-sm">{contact.preferredContactMethod || "Not specified"}</p>
@@ -185,6 +201,22 @@ export default function ContactDetail() {
                   <p className="font-medium">{contact.spouseFirstName} {contact.spouseLastName}</p>
                   {contact.spouseNickname && <p className="text-sm text-gray-600">"{contact.spouseNickname}"</p>}
                 </div>
+                <div className="space-y-1">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">DOB:</p>
+                    <p className="text-sm">{formatDate(contact.spouseDateOfBirth)}</p>
+                  </div>
+                  {contact.spouseDateOfDeath && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">DOD:</p>
+                      <p className="text-sm">{formatDate(contact.spouseDateOfDeath)}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">SSN:</p>
+                    <p className="text-sm">{contact.spouseSSN || "Not specified"}</p>
+                  </div>
+                </div>
                 <div>
                   <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
                   <p className="text-sm">{contact.spousePreferredContactMethod || "Not specified"}</p>
@@ -205,6 +237,21 @@ export default function ContactDetail() {
             </Card>
           )}
 
+          {/* Marriage Information */}
+          {contact.marriageDate && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Marriage Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Marriage Date:</p>
+                  <p className="text-sm">{formatDate(contact.marriageDate)}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Edit Client Button */}
           <Button 
             className="w-full" 
@@ -219,6 +266,9 @@ export default function ContactDetail() {
             <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Edit Client Information</DialogTitle>
+                <DialogDescription>
+                  Update the client's personal information, contact details, and family information.
+                </DialogDescription>
               </DialogHeader>
               <ContactForm 
                 contact={contact} 

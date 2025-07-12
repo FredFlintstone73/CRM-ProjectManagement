@@ -24,7 +24,7 @@ interface ContactFormProps {
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [sameAsMailingAddress, setSameAsMailingAddress] = useState(
     contact ? contact.sameAsMailingAddress === "yes" : false
   );
@@ -175,9 +175,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   });
 
   const onSubmit = (data: InsertContact) => {
-    setIsSubmitting(true);
     mutation.mutate(data);
-    setIsSubmitting(false);
   };
 
   const handleSameAsMailingAddress = (value: string) => {
@@ -916,10 +914,10 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
         <Button 
           type="submit" 
-          disabled={isSubmitting || mutation.isPending}
+          disabled={mutation.isPending}
           className="w-full"
         >
-          {isSubmitting || mutation.isPending ? 
+          {mutation.isPending ? 
             (contact ? "Updating..." : "Creating...") : 
             (contact ? "Update Contact" : "Create Contact")
           }
