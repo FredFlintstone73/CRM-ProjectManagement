@@ -291,16 +291,16 @@ export default function Contacts() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {contact.personalEmail && (
+                    {contact.spousePersonalEmail && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Mail className="w-4 h-4" />
-                        <span>{contact.personalEmail}</span>
+                        <span>{contact.spousePersonalEmail}</span>
                       </div>
                     )}
-                    {contact.cellPhone && (
+                    {contact.spouseCellPhone && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Phone className="w-4 h-4" />
-                        <span>{contact.cellPhone}</span>
+                        <span>{contact.spouseCellPhone}</span>
                       </div>
                     )}
                     {contact.position && (
@@ -367,20 +367,20 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {contact.personalEmail && (
+                          {contact.spousePersonalEmail && (
                             <>
                               <Mail className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.personalEmail}</span>
+                              <span className="text-sm">{contact.spousePersonalEmail}</span>
                             </>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {contact.cellPhone && (
+                          {contact.spouseCellPhone && (
                             <>
                               <Phone className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.cellPhone}</span>
+                              <span className="text-sm">{contact.spouseCellPhone}</span>
                             </>
                           )}
                         </div>
