@@ -290,8 +290,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                     <SelectContent>
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="follow_up">Follow Up</SelectItem>
-                      <SelectItem value="converted">Converted</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
