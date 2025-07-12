@@ -30,7 +30,8 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   );
 
   const form = useForm<InsertContact>({
-    resolver: zodResolver(insertContactSchema),
+    // resolver: zodResolver(insertContactSchema.partial()),
+    mode: "onChange",
     defaultValues: contact ? {
       familyName: contact.familyName || "",
       firstName: contact.firstName || "",
@@ -187,6 +188,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
   const onSubmit = (data: InsertContact) => {
     console.log('Form submitted with data:', data);
+    console.log('Form validation errors:', form.formState.errors);
     console.log('Mutation state:', { isPending: mutation.isPending, error: mutation.error });
     
     // Clean up the data to handle undefined/null values and convert dates
