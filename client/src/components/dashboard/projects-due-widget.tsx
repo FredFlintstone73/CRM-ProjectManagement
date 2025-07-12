@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, FolderOpen } from "lucide-react";
 import { format, addDays, addWeeks, addMonths, startOfDay, endOfDay } from "date-fns";
 import type { Project } from "@shared/schema";
@@ -188,8 +189,12 @@ export default function ProjectsDueWidget() {
                              daysUntilDue > 0 ? `${daysUntilDue} days left` :
                              `${Math.abs(daysUntilDue)} days overdue`}
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {project.progress}% complete
+                          <div className="space-y-1 mt-2 w-24">
+                            <div className="flex justify-between text-xs">
+                              <span>Progress</span>
+                              <span>{project.progress}%</span>
+                            </div>
+                            <Progress value={project.progress || 0} className="h-1" />
                           </div>
                         </div>
                       )}
