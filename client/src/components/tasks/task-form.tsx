@@ -117,14 +117,14 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
           <div className="space-y-2">
             <Label htmlFor="assigneeId">Assign To</Label>
             <Select
-              value={form.watch('assigneeId') || ''}
-              onValueChange={(value) => form.setValue('assigneeId', value)}
+              value={form.watch('assigneeId') || 'unassigned'}
+              onValueChange={(value) => form.setValue('assigneeId', value === 'unassigned' ? '' : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select team member" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
                 {teamMembers.map((member) => (
                   <SelectItem key={member.id} value={member.id.toString()}>
                     {member.firstName} {member.lastName}
