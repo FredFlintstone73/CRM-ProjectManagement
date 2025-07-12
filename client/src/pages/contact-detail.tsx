@@ -164,18 +164,6 @@ export default function ContactDetail() {
                   <p className="text-sm font-medium text-gray-700">Email:</p>
                   <p className="text-sm">{contact.personalEmail || contact.workEmail || "Not specified"}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">ID Type:</p>
-                  <p className="text-sm">{contact.govIdType || "Not specified"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">ID Number:</p>
-                  <p className="text-sm">{contact.govIdNumber || "Not specified"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">ID Expiration:</p>
-                  <p className="text-sm">{formatDate(contact.govIdExpiration) || "Not specified"}</p>
-                </div>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
@@ -218,18 +206,6 @@ export default function ContactDetail() {
                   <div>
                     <p className="text-sm font-medium text-gray-700">Email:</p>
                     <p className="text-sm">{contact.spousePersonalEmail || contact.spouseWorkEmail || "Not specified"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">ID Type:</p>
-                    <p className="text-sm">{contact.spouseGovIdType || "Not specified"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">ID Number:</p>
-                    <p className="text-sm">{contact.spouseGovIdNumber || "Not specified"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">ID Expiration:</p>
-                    <p className="text-sm">{formatDate(contact.spouseGovIdExpiration) || "Not specified"}</p>
                   </div>
                 </div>
                 <div>
@@ -339,6 +315,24 @@ export default function ContactDetail() {
                   </div>
                   
                   <div className="pt-4 border-t">
+                    <h4 className="font-semibold mb-2">ID Information</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Type:</span>
+                        <span>{contact.govIdType || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Number:</span>
+                        <span>{contact.govIdNumber || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Expiration:</span>
+                        <span>{formatDate(contact.govIdExpiration) || "Not specified"}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
                     <h4 className="font-semibold mb-2">Contact Information</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between">
@@ -399,6 +393,24 @@ export default function ContactDetail() {
                     <div className="flex justify-between">
                       <span className="font-medium">SSN:</span>
                       <span>{contact.spouseSSN || "Not specified"}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <h4 className="font-semibold mb-2">ID Information</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Type:</span>
+                        <span>{contact.spouseGovIdType || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Number:</span>
+                        <span>{contact.spouseGovIdNumber || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Expiration:</span>
+                        <span>{formatDate(contact.spouseGovIdExpiration) || "Not specified"}</span>
+                      </div>
                     </div>
                   </div>
                   
