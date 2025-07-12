@@ -34,10 +34,41 @@ interface TaskTemplate {
   description: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   estimatedDays: number;
+  parentTask?: string;
+  subtasks?: TaskTemplate[];
 }
 
-// Group tasks by workflow phase based on the actual CSV sections
+// Create hierarchical task structure and group by workflow phase
 const groupTasksByPhase = (tasks: TaskTemplate[]) => {
+  // First, create a hierarchical structure
+  const hierarchicalTasks: TaskTemplate[] = [];
+  const taskMap = new Map<string, TaskTemplate>();
+  
+  // Create task map for easier lookup
+  tasks.forEach((task, index) => {
+    const taskWithId = { ...task, id: index.toString() };
+    taskMap.set(task.name, taskWithId);
+  });
+
+  // Build hierarchy
+  tasks.forEach((task, index) => {
+    const currentTask = { ...task, id: index.toString(), subtasks: [] };
+    
+    if (task.parentTask) {
+      const parentTask = taskMap.get(task.parentTask);
+      if (parentTask) {
+        if (!parentTask.subtasks) parentTask.subtasks = [];
+        parentTask.subtasks.push(currentTask);
+      } else {
+        // If parent not found, treat as top-level task
+        hierarchicalTasks.push(currentTask);
+      }
+    } else {
+      hierarchicalTasks.push(currentTask);
+    }
+  });
+
+  // Now group the hierarchical tasks by phase
   const phases = {
     'Confirming & Scheduling Meeting Dates & Times': [] as TaskTemplate[],
     'Preparing for & Gathering Information for Meetings': [] as TaskTemplate[],
@@ -48,7 +79,7 @@ const groupTasksByPhase = (tasks: TaskTemplate[]) => {
     'Post-Meeting Tasks': [] as TaskTemplate[]
   };
 
-  tasks.forEach(task => {
+  hierarchicalTasks.forEach(task => {
     const taskName = task.name.toLowerCase();
     
     if (taskName.includes('confirm meeting') || taskName.includes('enter dates') || taskName.includes('submit proposed dates') || taskName.includes('update new meeting') || taskName.includes('expectation email # 1')) {
@@ -300,27 +331,56 @@ export default function TemplateDetail() {
                         <Separator className="mb-4" />
                         <div className="space-y-3">
                           {phaseTasks.map((task, taskIndex) => (
-                            <div key={taskIndex} className="border rounded-lg p-4 bg-white">
-                              <div className="flex items-start justify-between mb-2">
-                                <h4 className="font-medium text-gray-900">{task.name}</h4>
-                                <div className="flex items-center gap-2 ml-4">
-                                  <Badge className={getPriorityColor(task.priority)}>
-                                    {getPriorityIcon(task.priority)}
-                                    <span className="ml-1 capitalize">{task.priority}</span>
-                                  </Badge>
-                                  {task.estimatedDays && (
-                                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                                      <Clock className="w-3 h-3" />
-                                      {task.estimatedDays} day{task.estimatedDays !== 1 ? 's' : ''}
-                                    </div>
-                                  )}
+                            <div key={taskIndex} className="space-y-2">
+                              {/* Main Task */}
+                              <div className="border rounded-lg p-4 bg-white">
+                                <div className="flex items-start justify-between mb-2">
+                                  <Link href={`/templates/${id}/tasks/${taskIndex}`}>
+                                    <h4 className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer transition-colors">
+                                      {task.name}
+                                    </h4>
+                                  </Link>
+                                  <div className="flex items-center gap-2 ml-4">
+                                    <Badge className={getPriorityColor(task.priority)}>
+                                      {getPriorityIcon(task.priority)}
+                                      <span className="ml-1 capitalize">{task.priority}</span>
+                                    </Badge>
+                                    {task.estimatedDays && (
+                                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Clock className="w-3 h-3" />
+                                        {task.estimatedDays} day{task.estimatedDays !== 1 ? 's' : ''}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                               
-                              {task.description && (
-                                <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                                  {task.description}
-                                </p>
+                              {/* Subtasks */}
+                              {task.subtasks && task.subtasks.length > 0 && (
+                                <div className="ml-6 space-y-2">
+                                  {task.subtasks.map((subtask, subtaskIndex) => (
+                                    <div key={subtaskIndex} className="border rounded-lg p-3 bg-gray-50 border-l-4 border-l-blue-200">
+                                      <div className="flex items-start justify-between">
+                                        <Link href={`/templates/${id}/tasks/${taskIndex}-${subtaskIndex}`}>
+                                          <h5 className="text-sm font-medium text-gray-800 hover:text-blue-600 cursor-pointer transition-colors">
+                                            {subtask.name}
+                                          </h5>
+                                        </Link>
+                                        <div className="flex items-center gap-2 ml-4">
+                                          <Badge variant="outline" className="text-xs">
+                                            {subtask.priority}
+                                          </Badge>
+                                          {subtask.estimatedDays && (
+                                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                                              <Clock className="w-3 h-3" />
+                                              {subtask.estimatedDays} day{subtask.estimatedDays !== 1 ? 's' : ''}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               )}
                             </div>
                           ))}

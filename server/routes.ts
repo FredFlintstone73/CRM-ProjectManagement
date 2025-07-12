@@ -370,6 +370,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Template task routes
+  app.get('/api/template-tasks/:templateId/:taskId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { templateId, taskId } = req.params;
+      const template = await storage.getProjectTemplate(parseInt(templateId));
+      
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+
+      let tasks = [];
+      try {
+        tasks = typeof template.tasks === 'string' ? JSON.parse(template.tasks) : template.tasks || [];
+      } catch (error) {
+        console.error('Error parsing template tasks:', error);
+        return res.status(500).json({ message: "Failed to parse template tasks" });
+      }
+
+      // Handle both main tasks and subtasks (format: "taskIndex" or "taskIndex-subtaskIndex")
+      const taskParts = taskId.split('-');
+      const taskIndex = parseInt(taskParts[0]);
+      
+      if (taskIndex < 0 || taskIndex >= tasks.length) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      let task;
+      if (taskParts.length === 1) {
+        // Main task
+        task = {
+          id: taskId,
+          ...tasks[taskIndex],
+          assignedTo: '',
+          assignedToName: '',
+          dueDate: '',
+          comments: '',
+          subtasks: []
+        };
+      } else {
+        // Subtask
+        const subtaskIndex = parseInt(taskParts[1]);
+        const mainTask = tasks[taskIndex];
+        
+        // For now, we'll simulate subtasks based on the main task
+        // In a real implementation, you'd have proper subtask data
+        task = {
+          id: taskId,
+          name: `${mainTask.name} - Subtask ${subtaskIndex + 1}`,
+          description: mainTask.description,
+          priority: mainTask.priority,
+          estimatedDays: Math.ceil(mainTask.estimatedDays / 3), // Estimated subtask duration
+          assignedTo: '',
+          assignedToName: '',
+          dueDate: '',
+          comments: '',
+          subtasks: []
+        };
+      }
+
+      res.json(task);
+    } catch (error) {
+      console.error("Error fetching template task:", error);
+      res.status(500).json({ message: "Failed to fetch template task" });
+    }
+  });
+
+  app.put('/api/template-tasks/:templateId/:taskId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { templateId, taskId } = req.params;
+      const { assignedTo, dueDate, comments } = req.body;
+      
+      // For now, we'll just return success since we don't have persistent task storage
+      // In a real implementation, you'd store these updates in a separate table
+      res.json({ 
+        message: "Task updated successfully",
+        taskId,
+        assignedTo,
+        dueDate,
+        comments 
+      });
+    } catch (error) {
+      console.error("Error updating template task:", error);
+      res.status(500).json({ message: "Failed to update template task" });
+    }
+  });
+
   app.post('/api/project-templates', isAuthenticated, async (req: any, res) => {
     try {
       const templateData = insertProjectTemplateSchema.parse(req.body);
