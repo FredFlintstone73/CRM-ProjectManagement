@@ -399,11 +399,43 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="marriageDate">Marriage Date</Label>
+                  <Label htmlFor="spouseSSN">SSN</Label>
                   <Input
-                    id="marriageDate"
+                    id="spouseSSN"
+                    {...form.register("spouseSSN")}
+                    placeholder="Enter SSN"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="spouseGovIdType">ID Type</Label>
+                  <Select value={form.watch("spouseGovIdType")} onValueChange={(value) => form.setValue("spouseGovIdType", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select ID type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="drivers_license">Driver's License</SelectItem>
+                      <SelectItem value="passport">Passport</SelectItem>
+                      <SelectItem value="state_id">State ID</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="spouseGovIdNumber">ID Number</Label>
+                  <Input
+                    id="spouseGovIdNumber"
+                    {...form.register("spouseGovIdNumber")}
+                    placeholder="Enter ID number"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="spouseGovIdExpiration">ID Expiration</Label>
+                  <Input
+                    id="spouseGovIdExpiration"
                     type="date"
-                    {...form.register("marriageDate")}
+                    {...form.register("spouseGovIdExpiration")}
                   />
                 </div>
               </div>
@@ -418,12 +450,57 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="spouseWorkPhone">Work Phone</Label>
+                  <Input
+                    id="spouseWorkPhone"
+                    {...form.register("spouseWorkPhone")}
+                    placeholder="Enter work phone"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
                   <Label htmlFor="spousePersonalEmail">Personal Email</Label>
                   <Input
                     id="spousePersonalEmail"
                     type="email"
                     {...form.register("spousePersonalEmail")}
-                    placeholder="Enter email"
+                    placeholder="Enter personal email"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="spouseWorkEmail">Work Email</Label>
+                  <Input
+                    id="spouseWorkEmail"
+                    type="email"
+                    {...form.register("spouseWorkEmail")}
+                    placeholder="Enter work email"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="spousePreferredContactMethod">Preferred Contact Method</Label>
+                  <Select value={form.watch("spousePreferredContactMethod")} onValueChange={(value) => form.setValue("spousePreferredContactMethod", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select preferred method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cell">Cell Phone</SelectItem>
+                      <SelectItem value="work_phone">Work Phone</SelectItem>
+                      <SelectItem value="personal_email">Personal Email</SelectItem>
+                      <SelectItem value="work_email">Work Email</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="marriageDate">Marriage Date</Label>
+                  <Input
+                    id="marriageDate"
+                    type="date"
+                    {...form.register("marriageDate")}
                   />
                 </div>
               </div>
