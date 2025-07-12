@@ -53,11 +53,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     mutationFn: async (data: InsertTask) => {
       const url = task ? `/api/tasks/${task.id}` : '/api/tasks';
       const method = task ? 'PATCH' : 'POST';
-      return await apiRequest(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      return await apiRequest(method, url, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
