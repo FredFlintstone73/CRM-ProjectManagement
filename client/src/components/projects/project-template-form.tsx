@@ -29,9 +29,20 @@ interface TaskTemplate {
 export default function ProjectTemplateForm({ template, onSuccess }: ProjectTemplateFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [tasks, setTasks] = useState<TaskTemplate[]>(
-    template?.tasks ? JSON.parse(template.tasks as string) : []
-  );
+  const [tasks, setTasks] = useState<TaskTemplate[]>(() => {
+    if (!template?.tasks) return [];
+    
+    try {
+      // Handle both string and object formats
+      const tasksData = typeof template.tasks === 'string' 
+        ? JSON.parse(template.tasks) 
+        : template.tasks;
+      return Array.isArray(tasksData) ? tasksData : [];
+    } catch (error) {
+      console.error('Error parsing tasks:', error);
+      return [];
+    }
+  });
 
   const form = useForm<InsertProjectTemplate>({
     resolver: zodResolver(insertProjectTemplateSchema),

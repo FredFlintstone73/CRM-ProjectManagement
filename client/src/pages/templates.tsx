@@ -12,9 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Plus, FileText, Edit, Trash2, MoreHorizontal, Copy } from "lucide-react";
+import { Search, Plus, FileText, Edit, Trash2, MoreHorizontal, Copy, Eye } from "lucide-react";
 import ProjectTemplateForm from "@/components/projects/project-template-form";
 import type { ProjectTemplate } from "@shared/schema";
+import { Link } from "wouter";
 
 export default function Templates() {
   const { toast } = useToast();
@@ -196,7 +197,9 @@ export default function Templates() {
                 <Card key={template.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg line-clamp-1">{template.name}</CardTitle>
+                      <Link href={`/templates/${template.id}`}>
+                        <CardTitle className="text-lg line-clamp-1 hover:text-blue-600 transition-colors cursor-pointer">{template.name}</CardTitle>
+                      </Link>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
@@ -204,6 +207,12 @@ export default function Templates() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <Link href={`/templates/${template.id}`}>
+                            <DropdownMenuItem>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                          </Link>
                           <DropdownMenuItem onClick={() => handleEditClick(template)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit

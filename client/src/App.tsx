@@ -12,6 +12,7 @@ import ContactDetail from "@/pages/contact-detail";
 import Projects from "@/pages/projects";
 import ProjectDetail from "@/pages/project-detail";
 import Templates from "@/pages/templates";
+import TemplateDetail from "@/pages/template-detail";
 import Tasks from "@/pages/tasks";
 import Sidebar from "@/components/layout/sidebar";
 
@@ -42,6 +43,7 @@ function Router() {
                 <Route path="/projects" component={Projects} />
                 <Route path="/projects/:id" component={ProjectDetail} />
                 <Route path="/templates" component={Templates} />
+                <Route path="/templates/:id" component={TemplateDetail} />
                 <Route path="/tasks" component={Tasks} />
                 <Route component={NotFound} />
               </Switch>
