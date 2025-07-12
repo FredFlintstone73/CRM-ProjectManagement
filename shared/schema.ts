@@ -212,6 +212,7 @@ export const contacts = pgTable("contacts", {
   status: contactStatusEnum("status").default("active"),
   notes: text("notes"),
   applicationComplete: varchar("application_complete"),
+  profileImageUrl: varchar("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   createdBy: varchar("created_by").references(() => users.id),

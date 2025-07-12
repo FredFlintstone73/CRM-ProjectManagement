@@ -135,6 +135,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/contacts/:id/photo', isAuthenticated, async (req: any, res) => {
+    try {
+      const { imageUrl } = req.body;
+      if (!imageUrl) {
+        return res.status(400).json({ message: "Image URL is required" });
+      }
+      
+      const contactId = parseInt(req.params.id);
+      const contact = await storage.updateContact(contactId, { profileImageUrl: imageUrl });
+      res.json(contact);
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      res.status(500).json({ message: "Failed to upload photo" });
+    }
+  });
+
   // Project routes
   app.get('/api/projects', isAuthenticated, async (req: any, res) => {
     try {

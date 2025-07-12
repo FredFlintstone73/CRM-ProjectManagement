@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera } from "lucide-react";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
@@ -169,6 +170,38 @@ export default function ContactDetail() {
     fileInputRef.current?.click();
   };
 
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async (imageUrl: string) => {
+      await apiRequest('POST', `/api/contacts/${id}/photo`, { imageUrl });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+      toast({
+        title: "Success",
+        description: "Profile photo updated successfully",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to upload photo",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -192,16 +225,17 @@ export default function ContactDetail() {
         return;
       }
 
-      // Create a preview URL
+      // Create a preview URL and save it
       const previewUrl = URL.createObjectURL(file);
       setProfileImageUrl(previewUrl);
 
-      // In a real app, you would upload the file to a server
-      // For now, we'll just show the preview
-      toast({
-        title: "Success",
-        description: "Profile photo updated successfully",
-      });
+      // Convert file to base64 and save to database
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target?.result as string;
+        uploadPhotoMutation.mutate(base64String);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -267,23 +301,22 @@ export default function ContactDetail() {
 
           {/* Client Photo */}
           <div className="text-center">
-            <div className="w-32 h-32 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden">
-              {profileImageUrl ? (
-                <img 
-                  src={profileImageUrl} 
-                  alt="Client Photo" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="text-center">
-                  <Camera className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">Client Photo</p>
-                </div>
-              )}
+            <div className="w-32 h-32 mx-auto mb-4 relative">
+              <Avatar className="w-full h-full border-2 border-dashed border-gray-300">
+                <AvatarImage src={profileImageUrl || ""} alt="Client Photo" className="object-cover" />
+                <AvatarFallback className="text-2xl bg-gray-100">
+                  {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
             </div>
-            <Button variant="outline" size="sm" onClick={handlePhotoUpload}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handlePhotoUpload}
+              disabled={uploadPhotoMutation.isPending}
+            >
               <Upload className="h-4 w-4 mr-2" />
-              Upload Photo
+              {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
             </Button>
             <Input
               ref={fileInputRef}
