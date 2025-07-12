@@ -30,80 +30,51 @@ interface TemplateDetailParams {
 }
 
 interface TaskTemplate {
+  id: number;
   name: string;
   description: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   estimatedDays: number;
-  parentTask?: string;
+  daysFromMeeting: number;
+  parentTaskId?: number | null;
+  assignedTo?: string | null;
+  comments: string;
   subtasks?: TaskTemplate[];
 }
 
-// Create hierarchical task structure and group by workflow phase
-const groupTasksByPhase = (tasks: TaskTemplate[]) => {
-  // First, create a hierarchical structure
-  const hierarchicalTasks: TaskTemplate[] = [];
-  const taskMap = new Map<string, TaskTemplate>();
+// Create hierarchical task structure using actual parentTaskId
+const buildTaskHierarchy = (tasks: TaskTemplate[]) => {
+  // Create a map for quick lookup
+  const taskMap = new Map<number, TaskTemplate>();
   
-  // Create task map for easier lookup
-  tasks.forEach((task, index) => {
-    const taskWithId = { ...task, id: index.toString() };
-    taskMap.set(task.name, taskWithId);
+  // Initialize all tasks with empty subtasks array
+  tasks.forEach(task => {
+    taskMap.set(task.id, { ...task, subtasks: [] });
   });
-
-  // Build hierarchy
-  tasks.forEach((task, index) => {
-    const currentTask = { ...task, id: index.toString(), subtasks: [] };
+  
+  // Build hierarchy by linking children to parents
+  const rootTasks: TaskTemplate[] = [];
+  
+  tasks.forEach(task => {
+    const currentTask = taskMap.get(task.id)!;
     
-    if (task.parentTask) {
-      const parentTask = taskMap.get(task.parentTask);
+    if (task.parentTaskId === null || task.parentTaskId === undefined) {
+      // Root level task
+      rootTasks.push(currentTask);
+    } else {
+      // Child task - add to parent's subtasks
+      const parentTask = taskMap.get(task.parentTaskId);
       if (parentTask) {
         if (!parentTask.subtasks) parentTask.subtasks = [];
         parentTask.subtasks.push(currentTask);
       } else {
-        // If parent not found, treat as top-level task
-        hierarchicalTasks.push(currentTask);
+        // If parent not found, treat as root task
+        rootTasks.push(currentTask);
       }
-    } else {
-      hierarchicalTasks.push(currentTask);
     }
   });
-
-  // Now group the hierarchical tasks by phase
-  const phases = {
-    'Confirming & Scheduling Meeting Dates & Times': [] as TaskTemplate[],
-    'Preparing for & Gathering Information for Meetings': [] as TaskTemplate[],
-    'Preparing for DRPM': [] as TaskTemplate[],
-    'Team Coordination & Deliverables': [] as TaskTemplate[],
-    'Client Service Rep Tasks': [] as TaskTemplate[],
-    'Progress Meeting': [] as TaskTemplate[],
-    'Post-Meeting Tasks': [] as TaskTemplate[]
-  };
-
-  hierarchicalTasks.forEach(task => {
-    const taskName = task.name.toLowerCase();
-    
-    if (taskName.includes('confirm meeting') || taskName.includes('enter dates') || taskName.includes('submit proposed dates') || taskName.includes('update new meeting') || taskName.includes('expectation email # 1')) {
-      phases['Confirming & Scheduling Meeting Dates & Times'].push(task);
-    } else if (taskName.includes('items still needed') || taskName.includes('consolidate items') || taskName.includes('consolidate highest priority') || taskName.includes('request account values') || taskName.includes('request actions taken') || taskName.includes('download account values')) {
-      phases['Preparing for & Gathering Information for Meetings'].push(task);
-    } else if (taskName.includes('circle chart') || taskName.includes('expectation letter # 2') || taskName.includes('confirm date of drpm') || taskName.includes('generate reports') || taskName.includes('submit critical reports') || taskName.includes('trust advisor review') || taskName.includes('preliminary packet') || taskName.includes('expectation letter # 3') || taskName.includes('nominations and deliverable')) {
-      phases['Preparing for DRPM'].push(task);
-    } else if (taskName.includes('estate attorney') || taskName.includes('financial planner') || taskName.includes('insurance planner') || taskName.includes('money manager') || taskName.includes('tax planner') || taskName.includes('sme')) {
-      phases['Team Coordination & Deliverables'].push(task);
-    } else if (taskName.includes('csr0') || taskName.includes('client service rep') || taskName.includes('administrative manager') || taskName.includes('am01') || taskName.includes('meeting packets')) {
-      phases['Client Service Rep Tasks'].push(task);
-    } else if (taskName.includes('csr meeting') || taskName.includes('progress meeting') || taskName.includes('meeting execution')) {
-      phases['Progress Meeting'].push(task);
-    } else if (taskName.includes('post') || taskName.includes('archive') || taskName.includes('notes') || taskName.includes('follow up') || taskName.includes('after meeting')) {
-      phases['Post-Meeting Tasks'].push(task);
-    } else {
-      // Default to team coordination for uncategorized tasks
-      phases['Team Coordination & Deliverables'].push(task);
-    }
-  });
-
-  // Filter out empty phases
-  return Object.entries(phases).filter(([_, tasks]) => tasks.length > 0);
+  
+  return rootTasks;
 };
 
 const getPriorityColor = (priority: string) => {
@@ -217,23 +188,18 @@ export default function TemplateDetail() {
       ? JSON.parse(template.tasks) 
       : template.tasks || [];
     
-    // Convert sectioned data to flat array format
-    if (taskData.sections) {
-      tasks = Object.values(taskData.sections).flat().map((task: any) => ({
-        name: task.title,
-        description: task.description,
-        priority: task.priority,
-        estimatedDays: task.estimatedDays || 1,
-        parentTask: task.parentTask
-      }));
-    } else if (Array.isArray(taskData)) {
-      // Already in flat array format
+    if (Array.isArray(taskData)) {
+      // Use the proper structure from the template
       tasks = taskData.map((task: any) => ({
-        name: task.title || task.name,
+        id: task.id,
+        name: task.name,
         description: task.description,
         priority: task.priority,
         estimatedDays: task.estimatedDays || 1,
-        parentTask: task.parentTask
+        daysFromMeeting: task.daysFromMeeting || 0,
+        parentTaskId: task.parentTaskId,
+        assignedTo: task.assignedTo,
+        comments: task.comments || ''
       }));
     }
   } catch (error) {
@@ -241,16 +207,15 @@ export default function TemplateDetail() {
     tasks = [];
   }
 
-  const groupedTasks = groupTasksByPhase(tasks);
+  const hierarchicalTasks = buildTaskHierarchy(tasks);
   const totalTasks = tasks.length;
   const totalDays = tasks.reduce((sum, task) => sum + (task.estimatedDays || 0), 0);
   
   // Create a global task index mapping for proper routing
-  let globalTaskIndex = 0;
-  const taskIndexMap = new Map<string, number>();
+  const taskIndexMap = new Map<number, number>();
   
   tasks.forEach((task, index) => {
-    taskIndexMap.set(task.name, index);
+    taskIndexMap.set(task.id, index);
   });
 
   return (
@@ -311,8 +276,8 @@ export default function TemplateDetail() {
                       <Users className="w-4 h-4 text-purple-600" />
                     </div>
                     <div>
-                      <p className="font-medium">{groupedTasks.length}</p>
-                      <p className="text-sm text-gray-500">Workflow Phases</p>
+                      <p className="font-medium">{hierarchicalTasks.length}</p>
+                      <p className="text-sm text-gray-500">Main Milestones</p>
                     </div>
                   </div>
                 </div>
@@ -320,17 +285,28 @@ export default function TemplateDetail() {
             </Card>
           </div>
 
-          {/* Workflow Phases */}
+          {/* Task Hierarchy */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Workflow Phases</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Task Hierarchy</h2>
             
-            {groupedTasks.map(([phaseName, phaseTasks], index) => {
-              const isOpen = openPhases.includes(phaseName);
-              const phaseEstimatedDays = phaseTasks.reduce((sum, task) => sum + (task.estimatedDays || 0), 0);
+            {hierarchicalTasks.map((task, index) => {
+              const isOpen = openPhases.includes(task.name);
+              const getTaskCount = (task: TaskTemplate): number => {
+                let count = 1;
+                if (task.subtasks) {
+                  task.subtasks.forEach(subtask => {
+                    count += getTaskCount(subtask);
+                  });
+                }
+                return count;
+              };
+              
+              const taskCount = getTaskCount(task);
+              const globalIndex = taskIndexMap.get(task.id) || 0;
               
               return (
-                <Card key={phaseName} className="overflow-hidden">
-                  <Collapsible open={isOpen} onOpenChange={() => togglePhase(phaseName)}>
+                <Card key={task.id} className="overflow-hidden">
+                  <Collapsible open={isOpen} onOpenChange={() => togglePhase(task.name)}>
                     <CollapsibleTrigger asChild>
                       <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
@@ -341,14 +317,14 @@ export default function TemplateDetail() {
                               <ChevronRight className="w-5 h-5 text-gray-500" />
                             )}
                             <div>
-                              <CardTitle className="text-lg">{phaseName}</CardTitle>
+                              <CardTitle className="text-lg">{task.name}</CardTitle>
                               <p className="text-sm text-gray-500 mt-1">
-                                {phaseTasks.length} tasks • {phaseEstimatedDays} estimated days
+                                {taskCount} tasks • {task.estimatedDays} estimated days
                               </p>
                             </div>
                           </div>
                           <Badge variant="secondary" className="ml-2">
-                            Phase {index + 1}
+                            Milestone {index + 1}
                           </Badge>
                         </div>
                       </CardHeader>
@@ -358,64 +334,92 @@ export default function TemplateDetail() {
                       <CardContent className="pt-0">
                         <Separator className="mb-4" />
                         <div className="space-y-3">
-                          {phaseTasks.map((task, taskIndex) => {
-                            const globalIndex = taskIndexMap.get(task.name) || 0;
+                          {task.subtasks && task.subtasks.map((subtask, subtaskIndex) => {
+                            const subtaskGlobalIndex = taskIndexMap.get(subtask.id) || 0;
                             return (
-                            <div key={taskIndex} className="space-y-2">
-                              {/* Main Task */}
-                              <div className="border rounded-lg p-4 bg-white">
-                                <div className="flex items-start justify-between mb-2">
-                                  <Link href={`/templates/${id}/tasks/${globalIndex}`}>
-                                    <h4 className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer transition-colors">
-                                      {task.name}
-                                    </h4>
-                                  </Link>
-                                  <div className="flex items-center gap-2 ml-4">
-                                    <Badge className={getPriorityColor(task.priority)}>
-                                      {getPriorityIcon(task.priority)}
-                                      <span className="ml-1 capitalize">{task.priority}</span>
-                                    </Badge>
-                                    {task.estimatedDays && (
-                                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                                        <Clock className="w-3 h-3" />
-                                        {task.estimatedDays} day{task.estimatedDays !== 1 ? 's' : ''}
-                                      </div>
-                                    )}
+                              <div key={subtask.id} className="space-y-2">
+                                {/* Main Task */}
+                                <div className="border rounded-lg p-4 bg-white">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <Link href={`/templates/${id}/tasks/${subtaskGlobalIndex}`}>
+                                      <h4 className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer transition-colors">
+                                        {subtask.name}
+                                      </h4>
+                                    </Link>
+                                    <div className="flex items-center gap-2 ml-4">
+                                      <Badge className={getPriorityColor(subtask.priority)}>
+                                        {getPriorityIcon(subtask.priority)}
+                                        <span className="ml-1 capitalize">{subtask.priority}</span>
+                                      </Badge>
+                                      {subtask.estimatedDays && (
+                                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                                          <Clock className="w-3 h-3" />
+                                          {subtask.estimatedDays} day{subtask.estimatedDays !== 1 ? 's' : ''}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
+                                  {subtask.description && (
+                                    <p className="text-sm text-gray-600 mt-2">{subtask.description}</p>
+                                  )}
                                 </div>
-                              </div>
-                              
-                              {/* Subtasks */}
-                              {task.subtasks && task.subtasks.length > 0 && (
-                                <div className="ml-6 space-y-2">
-                                  {task.subtasks.map((subtask, subtaskIndex) => {
-                                    const subtaskGlobalIndex = taskIndexMap.get(subtask.name) || globalIndex;
-                                    return (
-                                    <div key={subtaskIndex} className="border rounded-lg p-3 bg-gray-50 border-l-4 border-l-blue-200">
-                                      <div className="flex items-start justify-between">
-                                        <Link href={`/templates/${id}/tasks/${subtaskGlobalIndex}`}>
-                                          <h5 className="text-sm font-medium text-gray-800 hover:text-blue-600 cursor-pointer transition-colors">
-                                            {subtask.name}
-                                          </h5>
-                                        </Link>
-                                        <div className="flex items-center gap-2 ml-4">
-                                          <Badge variant="outline" className="text-xs">
-                                            {subtask.priority}
-                                          </Badge>
-                                          {subtask.estimatedDays && (
-                                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                                              <Clock className="w-3 h-3" />
-                                              {subtask.estimatedDays} day{subtask.estimatedDays !== 1 ? 's' : ''}
+                                
+                                {/* Sub-subtasks */}
+                                {subtask.subtasks && subtask.subtasks.length > 0 && (
+                                  <div className="ml-6 space-y-2">
+                                    {subtask.subtasks.map((subsubtask, subsubtaskIndex) => {
+                                      const subsubtaskGlobalIndex = taskIndexMap.get(subsubtask.id) || 0;
+                                      return (
+                                        <div key={subsubtask.id} className="border rounded-lg p-3 bg-gray-50 border-l-4 border-l-blue-200">
+                                          <div className="flex items-start justify-between">
+                                            <Link href={`/templates/${id}/tasks/${subsubtaskGlobalIndex}`}>
+                                              <h5 className="text-sm font-medium text-gray-800 hover:text-blue-600 cursor-pointer transition-colors">
+                                                {subsubtask.name}
+                                              </h5>
+                                            </Link>
+                                            <div className="flex items-center gap-2 ml-4">
+                                              <Badge variant="outline" className="text-xs">
+                                                {subsubtask.priority}
+                                              </Badge>
+                                              {subsubtask.estimatedDays && (
+                                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                  <Clock className="w-3 h-3" />
+                                                  {subsubtask.estimatedDays} day{subsubtask.estimatedDays !== 1 ? 's' : ''}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                          {subsubtask.description && (
+                                            <p className="text-xs text-gray-600 mt-1">{subsubtask.description}</p>
+                                          )}
+                                          
+                                          {/* Sub-sub-subtasks */}
+                                          {subsubtask.subtasks && subsubtask.subtasks.length > 0 && (
+                                            <div className="ml-4 mt-2 space-y-1">
+                                              {subsubtask.subtasks.map((subsubsubtask) => {
+                                                const subsubsubtaskGlobalIndex = taskIndexMap.get(subsubsubtask.id) || 0;
+                                                return (
+                                                  <div key={subsubsubtask.id} className="border rounded-lg p-2 bg-white border-l-4 border-l-green-200">
+                                                    <Link href={`/templates/${id}/tasks/${subsubsubtaskGlobalIndex}`}>
+                                                      <h6 className="text-xs font-medium text-gray-700 hover:text-blue-600 cursor-pointer transition-colors">
+                                                        {subsubsubtask.name}
+                                                      </h6>
+                                                    </Link>
+                                                    {subsubsubtask.description && (
+                                                      <p className="text-xs text-gray-500 mt-1">{subsubsubtask.description}</p>
+                                                    )}
+                                                  </div>
+                                                );
+                                              })}
                                             </div>
                                           )}
                                         </div>
-                                      </div>
-                                    </div>
-                                  )})}
-                                </div>
-                              )}
-                            </div>
-                          );
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            );
                           })}
                         </div>
                       </CardContent>
