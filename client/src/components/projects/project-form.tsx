@@ -37,8 +37,22 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
     queryKey: ['/api/contacts'],
   });
 
-  // Filter to only show clients
-  const clientContacts = contacts?.filter(contact => contact.contactType === 'client') || [];
+  // Get the current meeting type to determine which contacts to show
+  const selectedMeetingType = form.watch('projectType');
+  
+  // Filter contacts based on meeting type
+  const filteredContacts = contacts?.filter(contact => {
+    // Only show active contacts
+    if (contact.status !== 'active') return false;
+    
+    // For FRM meetings, show prospects
+    if (selectedMeetingType === 'frm') {
+      return contact.contactType === 'prospect';
+    }
+    
+    // For all other meeting types, show clients
+    return contact.contactType === 'client';
+  }) || [];
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: InsertProject) => {
@@ -143,7 +157,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {clientContacts.map((contact) => (
+                  {filteredContacts.map((contact) => (
                     <SelectItem key={contact.id} value={contact.id.toString()}>
                       {contact.familyName || `${contact.firstName} ${contact.lastName}`}
                     </SelectItem>
