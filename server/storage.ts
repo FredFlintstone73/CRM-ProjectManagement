@@ -316,7 +316,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(task: InsertTask, userId: string): Promise<Task> {
-    const taskData = { ...task, createdBy: userId } as any;
+    // Process date field - convert string date to Date object
+    const processedTask = { ...task };
+    if (processedTask.dueDate && typeof processedTask.dueDate === 'string' && processedTask.dueDate.trim()) {
+      processedTask.dueDate = new Date(processedTask.dueDate);
+    } else if (processedTask.dueDate === '') {
+      processedTask.dueDate = null;
+    }
+    
+    const taskData = { ...processedTask, createdBy: userId } as any;
     const [newTask] = await db
       .insert(tasks)
       .values(taskData)
@@ -335,9 +343,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, task: Partial<InsertTask>): Promise<Task> {
+    // Process date field - convert string date to Date object
+    const processedTask = { ...task };
+    if (processedTask.dueDate && typeof processedTask.dueDate === 'string' && processedTask.dueDate.trim()) {
+      processedTask.dueDate = new Date(processedTask.dueDate);
+    } else if (processedTask.dueDate === '') {
+      processedTask.dueDate = null;
+    }
+    
     const [updatedTask] = await db
       .update(tasks)
-      .set({ ...task, updatedAt: new Date() })
+      .set({ ...processedTask, updatedAt: new Date() })
       .where(eq(tasks.id, id))
       .returning();
     return updatedTask;

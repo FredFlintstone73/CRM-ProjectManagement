@@ -451,6 +451,9 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   createdAt: true,
   updatedAt: true,
   completedAt: true,
+}).extend({
+  // Handle string date inputs from forms
+  dueDate: z.string().optional(),
 });
 
 export const insertProjectTemplateSchema = createInsertSchema(projectTemplates).omit({
