@@ -88,19 +88,37 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
   });
 
   const onSubmit = (data: InsertProject) => {
-    // Generate project name based on meeting type
-    const meetingTypeNames = {
-      frm: "Financial Road Map Interview",
-      im: "Implementation Meeting",
-      ipu: "Initial Progress Update",
-      csr: "Comprehensive Safety Review",
-      gpo: "Goals Progress Update",
-      tar: "The Annual Review",
+    // Generate project name based on meeting type, family name, and date
+    const meetingTypeAbbreviations = {
+      frm: "FRM",
+      im: "IM",
+      ipu: "IPU",
+      csr: "CSR",
+      gpo: "GPO",
+      tar: "TAR",
     };
+    
+    // Get family name from selected contact
+    const selectedContact = filteredContacts.find(contact => contact.id === data.clientId);
+    const familyName = selectedContact ? (selectedContact.familyName || `${selectedContact.firstName} ${selectedContact.lastName}`) : 'Unknown Family';
+    
+    // Format date as MM-DD-YY
+    let dateString = '';
+    if (data.dueDate) {
+      const date = new Date(data.dueDate);
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = String(date.getFullYear()).slice(-2);
+      dateString = `${month}-${day}-${year}`;
+    }
+    
+    // Generate project name: "TYPE - Family Name (MM-DD-YY)"
+    const meetingType = meetingTypeAbbreviations[data.projectType as keyof typeof meetingTypeAbbreviations];
+    const projectName = `${meetingType} - ${familyName}${dateString ? ` (${dateString})` : ''}`;
     
     const processedData = {
       ...data,
-      name: meetingTypeNames[data.projectType as keyof typeof meetingTypeNames],
+      name: projectName,
       clientId: data.clientId || null,
     };
     createProjectMutation.mutate(processedData);
