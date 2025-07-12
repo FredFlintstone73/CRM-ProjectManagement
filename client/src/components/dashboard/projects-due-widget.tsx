@@ -97,7 +97,7 @@ export default function ProjectsDueWidget() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-primary" />
-            <CardTitle>Projects Due Soon</CardTitle>
+            <CardTitle>Status - Upcoming Progress Meetings</CardTitle>
           </div>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
             <SelectTrigger className="w-[180px]">
