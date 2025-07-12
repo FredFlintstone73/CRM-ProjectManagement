@@ -218,7 +218,7 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
                     className="w-4 h-4 rounded mx-auto mb-1"
                     style={{ backgroundColor: PROJECT_TYPE_COLORS[key as keyof typeof PROJECT_TYPE_COLORS] }}
                   />
-                  <div className="text-xs text-gray-600 font-bold">{label}</div>
+                  <div className="text-gray-600 font-bold text-[18px]">{label}</div>
                   <div className="text-sm font-semibold">
                     {chartData.reduce((sum, item) => sum + (item[key as keyof TimelineData] as number), 0)}
                   </div>
