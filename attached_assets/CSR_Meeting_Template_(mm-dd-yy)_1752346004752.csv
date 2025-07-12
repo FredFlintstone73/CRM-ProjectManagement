@@ -1,0 +1,457 @@
+﻿Task ID,Name,Section/Column,Assignee,Assignee Email,Start Date,Due Date,Tags,Notes,Projects,Parent task,Blocked By (Dependencies),Blocking (Dependencies),Touchpoints ,Touchpoint
+1.21021E+15,Confirm Meeting Date & Time with Client and Any Questions Regarding Implementation Plan or Items Due From Last Meeting,Confirming & Scheduling Meeting Dates & Times,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21036E+15,Enter Dates into ASANA,Confirming & Scheduling Meeting Dates & Times,,,,,,,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Submit Proposed Dates/Time for DRPM,Confirming & Scheduling Meeting Dates & Times,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21036E+15,Update New Meeting in ASANA and Create Meeting ,Confirming & Scheduling Meeting Dates & Times,,,,,,,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15, Send Out Expectation Email # 1 to Team Through Asana,Confirming & Scheduling Meeting Dates & Times,,,,,,Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,Preparing for & Gathering Information for Meetings,,,,,,Click on subtask below for description ,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Estate Attorney,,,,,,,Enter the Items Still Needed and your Highest Priority Conversation below in the comments area,,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,,,,
+1.21021E+15,Financial Planner,,,,,,,Enter the Items Still Needed and your Highest Priority Conversation below in the comments area,,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,,,,
+1.21021E+15,"Insurance Planner - Life, LTC, Disability",,,,,,,Enter the Items Still Needed and your Highest Priority Conversation below in the comments area,,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,,,,
+1.21036E+15,"Insurance Planner - P&C, Business",,,,,,,Enter the Items Still Needed and your Highest Priority Conversation below in the comments area,,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,,,,
+1.21057E+15,Insurance Planner - Health,,,,,,,,,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,,,,
+1.21021E+15,Money Manager,,,,,,,Enter the Items Still Needed and your Highest Priority Conversation below in the comments area,,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,,,,
+1.21021E+15,Tax Planner,,,,,,,Enter the Items Still Needed and your Highest Priority Conversation below in the comments area,,Submit Your Items Still Needed & Initial Highest Priority Conversation Reports,,,,
+1.21021E+15,Consolidate Items Still Needed and Send to SMEs,Preparing for & Gathering Information for Meetings,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Consolidate Highest Priority Conversations & Update Meeting Agenda,Preparing for & Gathering Information for Meetings,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,"Communicate the Team's Highest Priorities to each SME (e.g. @Chad or @Ted, etc)",,,,,,,—,,Consolidate Highest Priority Conversations & Update Meeting Agenda,,,,
+1.21021E+15,Request Account Values for Any Outside Accounts and Transactions,Preparing for & Gathering Information for Meetings,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Request Actions Taken Since Last Meeting by Team and Client,Preparing for & Gathering Information for Meetings,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Create Initial Client Agenda,,,,,,,—,,Request Actions Taken Since Last Meeting by Team and Client,,,,
+1.21021E+15,Download Account Values & Transactions for Growth Accounts,Preparing for & Gathering Information for Meetings,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Create Circle Chart,Preparing for DRPM,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21023E+15,Financial Planner Review Circle Chart,Preparing for DRPM,,,,,,,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Provide Circle Chart to Team with Expectation Letter # 2 to Team Through Asana,Preparing for DRPM,,,,,,Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Confirm date of DRPM,,,,,,,—,,Provide Circle Chart to Team with Expectation Letter # 2 to Team Through Asana,,,,
+1.21021E+15,"Generate Reports in Database, Documents Due for Preliminary Packet",Preparing for DRPM,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Financial Roadmap Updated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Implementation Plan (GPS) Updated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Paperwork Sources Updated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Behind the Numbers Report Generated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Numbers History Report Updated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Since Inception Report Updated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Goal Progress Report,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Growth Progress Since Last Meeting Generated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Growth Progress Since Inception Generated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Annual Income From Current Assets Report Generated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Total Progress Report Generated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,The Master Goal Tracker Updated,,,,,,,—,,"Generate Reports in Database, Documents Due for Preliminary Packet",,,,
+1.21021E+15,Submit Critical Reports and Final Highest Priority Conversation,Preparing for DRPM,,,,,,"Click on subtask below for list of reports 
+Critical Reports - Upload to ASANA
+Highest Priority Conversation add in comment section ",CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Estate Attorney,,,,,,,"—
+Critical Reports - Upload to ASANA
+Highest Priority Conversation add in comment section ",,Submit Critical Reports and Final Highest Priority Conversation,,,,
+1.21021E+15,The Legacy Flow Chart Updated,,,,,,,—,,Estate Attorney,,,,
+1.21021E+15,POA Summary Updated,,,,,,,—,,Estate Attorney,,,,
+1.21021E+15,Asset Titling Report Updated,,,,,,,—,,Estate Attorney,,,,
+1.21021E+15,Financial Planner,,,,,,,"Critical Reports - Upload to ASANA
+Highest Priority Conversation add in comment section ",,Submit Critical Reports and Final Highest Priority Conversation,,,,
+1.21021E+15,The Goal Blueprint Updated,,,,,,,—,,Financial Planner,,,,
+1.21021E+15,Lifetime Capital Projection,,,,,,,—,,Financial Planner,,,,
+1.21021E+15,Multiple Scenario Projections,,,,,,,—,,Financial Planner,,,,
+1.21021E+15,"Insurance Planner - Life, LTC, Disability ",,,,,,,"—
+Critical Reports - Upload to ASANA
+Highest Priority Conversation add in comment section ",,Submit Critical Reports and Final Highest Priority Conversation,,,,
+1.21021E+15,Insurance Grid Updated,,,,,,,—,,"Insurance Planner - Life, LTC, Disability ",,,,
+1.21035E+15,"Insurance Planner - P&C, Business",,,,,,,"Critical Reports - Upload to ASANA
+Highest Priority Conversation add in comment section ",,Submit Critical Reports and Final Highest Priority Conversation,,,,
+1.21035E+15,Insurance Grid Updated,,,,,,,,,"Insurance Planner - P&C, Business",,,,
+1.21057E+15,Insurance Planner - Health ,,,,,,,,,Submit Critical Reports and Final Highest Priority Conversation,,,,
+1.21021E+15,Money Managers,,,,,,,"—
+Critical Reports - Upload to ASANA
+Highest Priority Conversation add in comment section ",,Submit Critical Reports and Final Highest Priority Conversation,,,,
+1.21021E+15,Tax Planner,,,,,,,"Critical Reports - Upload to ASANA
+Highest Priority Conversation add in comment section ",,Submit Critical Reports and Final Highest Priority Conversation,,,,
+1.21021E+15,Annual Tax Projection Completed,,,,,,,—,,Tax Planner,,,,
+1.21021E+15,Copy of Last Tax Return Filed on Record,,,,,,,—,,Tax Planner,,,,
+1.21021E+15,Trust Advisor Review of Preliminary Packet,Preparing for DRPM,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Preliminary Packet Distributed to Team with Expectation Letter # 3 to Team Through Asana,Preparing for DRPM,,,,,,Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Nominations and Deliverable Checkpoints Due,Preparing for DRPM,,,,,,—Click on subtask below for more details ,CSR Meeting Template (mm-dd-yy),,,,,
+1.21035E+15,Administrative Manager,,,,,,,,,Nominations and Deliverable Checkpoints Due,,,,
+1.21036E+15,AM01 Confirm Date of Meeting With Client 80 Days Prior,,,,,,,,,Administrative Manager,,,,
+1.21021E+15,Client Service Rep - Meeting Packets ,,,,,,,—,,Nominations and Deliverable Checkpoints Due,,,,
+1.21021E+15,CSR01  Confirm Status of Last Meeting's Action Items,,,,,,,—,,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR02 Implementation Plan-of-Action Updated,,,,,,,"The comprehensive written lifetime financial strategy for this client has been reviewed within the last four months and, as a result, action items and recommendations have been added, deleted or amended on The Greatest Probability Strategy:tm: (GPS) step-by-step implementation plan-of-action.
+Nothing other than action items or recommendations are to be placed on The Greatest Probability Strategy:tm: (GPS); no ""client updates,"" internal team notes, client-education or other information are allowed onto this document.",,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR03  Unfinished Recommendations are Updated,,,,,,,Any and all uncompleted action items on The Greatest Probability Strategy:tm: (GPS) have been updated with new target dates and the impact has been reflected and updated in the lifetime capital projection within the past four months.,,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR04  Debts are Updated on The Circle Chart,,,,,,,"The Circle Chart:tm: (TCC), a one-page report, listing
+    Both spouses' names,
+    Dates of birth,
+    Current age,
+    Every growth/goal asset,
+    Every investment or financial account, including
+        account number,
+        cash position within a larger account
+        maturity date
+        top holdings (symbols) if there is space available within that circle
+    all personal debt/liabilities including
+        Interest rate and
+        Payoff date),
+    All inflows and outflows
+        such as a person's
+            Income/salary
+            Regular
+        Including
+            frequency and
+            taxes withheld (or prepaid) noted
+The Circle Chart:tm: has been updated prior to every Dry-Run Prep Meeting:tm: (within the past four months).
+PREFERENCE: It is preferable to include all real estate properties on The Circle Chart:tm:, even if they will not be earmarked to fund future goals.  This includes the primary residence.",,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR05 The Since Inception Report Completed,,,,,,,"Prior to every Client Progress Meeting a single-page report called  The Progress Since Inception Report:tm: of this client’s relationship with our firm listing these specific amounts:
+    Initial Growth Asset Value Total (with date of initial deposit),
+    Current Growth/Goal Asset Value (every asset and account earmarked for a future goal),
+    Total Value of All Subsequent Deposits,
+    Total Value of All Client Withdrawals (flows between accounts are ignored) has been updated within the past four months.
+This completed report is to be included in The Client Prep Packet:tm:.",,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR06 The Growth Progress Since Last Meeting Report Completed,,,,,,,"This report is called The Progress Report Since Last Meeting:tm:.  Instructions to create this report are found here...
+Prior to every Client Progress Meeting complete The Progress Since Last Meeting Report:tm: listing these specific amounts:
+    Growth/Goal Asset Value Total reported at the last Client Progress Meeting (with date of the last Client Progress Meeting),
+    Current Growth Asset Value,
+    Total Value of All Subsequent Deposits since the last meeting date,
+    Total Value of All Client Withdrawals since the last meeting (flows between accounts are ignored)
+These values have been updated within the past four months.
+This completed report is to be included in The Client Prep Packet:tm:",,Client Service Rep - Meeting Packets ,,,,
+1.2104E+15,CSR07 The Growth Progress Since Inception Report Completed,,,,,,,,,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR08 The Goals Progress Report Completed,,,,,,,"This report is entitled The Goals Progress Report:tm:.  Instructions to create this report are found here...
+Prior to every Client Progress Meeting a single-page report called  The Goal Progress Report:tm: has been updated for this client within the past four months listing the amount (in dollars) required for the accomplishment of each goal benchmarked against the current value of the growth assets.
+This completed report is to be included in The Client Prep Packet:tm:.",,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR09  The Numbers History Report Completed,,,,,,,"This report is called The Numbers History:tm:.  To see a sample of this report go to The CORRECTED Client Prep Packet:tm: in one of the script binders (here's a link to The Goal Progress Outlook:tm: The Client Prep Packet:tm:).
+Prior to every Client Progress Meeting a single page report called “The Numbers History:tm:” has been updated (every four months); for every client meeting date the following total values are updated:
+    Cash Reserves,
+    Growth/Goal Assets (all assets and accounts earmarked for funding a future goal)
+    Debt.
+Also noted on this report for every client meeting date are the numbers explaining the difference in value of growth asset since the last meeting:
+    This client added (or withdrew) $?.?? (dollars), ignore transfers between accounts which balance out and don't represent client additions or withdrawals.  Only include instances where your client would agree ""I added funds"" or ""I withdrew funds.""
+    The market added (or extracted or removed) $?.?? (dollars)
+This completed report is to be included in The Client Prep Packet:tm:",,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR10 The Circle Chart Completed,,,,,,,"The Circle Chart:tm: (TCC), a one-page report, listing
+    Both spouses' names,
+    Dates of birth,
+    Current age,
+    Every growth/goal asset,
+    Every investment or financial account, including
+        account number,
+        cash position within a larger account
+        maturity date
+        top holdings (symbols) if there is space available within that circle
+    all personal debt/liabilities including
+        Interest rate and
+        Payoff date),
+    All inflows and outflows
+        such as a person's
+            Income/salary
+            Regular
+        Including
+            frequency and
+            taxes withheld (or prepaid) noted
+The Circle Chart:tm: has been updated prior to every Dry-Run Prep Meeting:tm: (within the past four months).
+PREFERENCE: It is preferable to include all real estate properties on The Circle Chart:tm:, even if they will not be earmarked to fund future goals.  This includes the primary residence.",,Client Service Rep - Meeting Packets ,,,,
+1.21021E+15,CSR11  The Comprehensive Safety Review Exercise Completed,,,,,,,"Within the past twelve months the Deliverables Team has fully discussed every danger and threat to the comprehensive written lifetime financial plan with strategies developed for each, to include a discussion with every Subject Matter Expert (SME) advising this client.
+This particular Deliverables Checkpoint:tm: is one of a very few which will actually occur at the client progress meeting, not before.  
+
+Since this checkpoint will bring-in our Ideal Clients to this conversation to identify risks, it is important that our Subject Matter Experts understand that, even after their thorough insurance review, there may be new information or risks which need to be considered after this client progress meeting
+    The Financial Planning Subject Matter Expert has coordinated with the Insurance Subject Matter Expert (and other Deliverables Team Members) to identify all significant risks to this client's plan, building scenarios, projections and strategies for each
+    Trusted Advisor completes The Comprehensive Safety Review Exercise :tm: with each client to harvest their views of the most significant risks to their plan (often completely different issues)
+        Download the exercise here. Read more...
+        Read the CSR client progress meeting script to grasp how to facilitate the The Comprehensive Safety Review Exercise:tm:. Read More...
+NOTE:
+    Trusted Advisor is primary and facilitates The Comprehensive Safety Review Exercise:tm: with each client during The Comprehensive Safety Review:tm:Client Progress Meeting.
+    The Financial Planning Subject Matter Expert is responsible for taking the results of this client-exercise and coordinating any and all resulting action items with the rest of the Deliverables Team
+Since this Deliverables Checkpoint:tm: exercise will occur at this client progress meeting, the only information due before The Dry-Run Prep Meeting:tm: deadline could be, for example, to alert the team if this exercise might be skipped during the meeting.  For example, if this client is embroiled in a crisis or perhaps is in the middle of a major planning situation (sale of business, etc), then The Comprehensive Safety Review Exercise:tm: might be preempted and deferred to the following client progress meeting.",,Client Service Rep - Meeting Packets ,,,,
+1.21035E+15,Deliverable Teams Coordinator,,,,,,,,,Nominations and Deliverable Checkpoints Due,,,,
+1.21036E+15,DTC01 Send Expectations Letter to All SMEs 69 Days in Advance of Progress Meeting ,,,,,,,,,Deliverable Teams Coordinator,,,,
+1.21036E+15,DTC02 Consolidate Any Items Needed by SMEs,,,,,,,,,Deliverable Teams Coordinator,,,,
+1.21036E+15,DTC03 All Deliverables Team Members Attend DRPM,,,,,,,,,Deliverable Teams Coordinator,,,,
+1.21036E+15,DTC04 No Overdue Action Items or Recommendations ,,,,,,,,,Deliverable Teams Coordinator,,,,
+1.21036E+15,DTC05 Deliverables Team Members Submit Action Items by Due Date ,,,,,,,,,Deliverable Teams Coordinator,,,,
+1.21036E+15,DTC06 The Insurance Grid is Completed,,,,,,,,,Deliverable Teams Coordinator,,,,
+1.21043E+15,DTC07 Consolidate Highest Priority Conversations,,,,,,,,,Deliverable Teams Coordinator,,,,
+1.21021E+15,Estate Planner,,,,,,,—,,Nominations and Deliverable Checkpoints Due,,,,
+1.21021E+15,EP06  Determine if Tax Laws or Client Situations Have an Effect on a Client's Estate Plan,,,,,,,"Estate plan has been thoroughly reviewed by estate attorney, in consultation with the Tax SME, within four months of any significant change in estate or relevant tax laws or circumstances within this client’s estate.",,Estate Planner,,,,
+1.21021E+15,EP07  Determine the Necessity of a Life Insurance Trust,,,,,,,"Trust ownership is considered for all current and future life insurance otherwise owned by this client.
+Life insurance trusts may be established for a variety of estate planning purposes, including:
+
+To provide security for an Ideal Client's family after the death of the insured while providing control over how the death proceeds are invested or distributed to their beneficiaries
+To provide liquidity to your Ideal Client's estate to pay debts and obligations, such as estate taxes
+Life insurance trusts may be either revocable or irrevocable
+It is possible that placing life insurance in an irrevocable life insurance trust could give Ideal Clients more control over their insurance policies and the money that is paid from them. It also may reduce or even eliminate estate taxes in some parts of the world, so more of your Ideal Client's estate can go to their heirs.
+Often the goal of an irrevocable life insurance trust is to reduce or eliminate estate taxes. For Ideal Clients who have a large life insurance policy, the worry is that the life insurance policy will pay out into the estate, increasing the size of the taxable estate – and the possibility that the estate may owe estate taxes.  Sometimes these life policies can be placed into an irrevocable life insurance trust so that the proceeds of the life insurance are not added to your Ideal Client's estate upon death (reducing the size of the estate for estate-tax purposes)
+Life Insurance Trusts have both advantages and disadvantages, all of which will be detailed in writing as a result of considering this Deliverables Checkpoint:tm:",,Estate Planner,,,,
+1.21021E+15,Financial Planner,,,,,,,—,,Nominations and Deliverable Checkpoints Due,,,,
+1.21021E+15,FP01  Establish Cash Reserves Amount,,,,,,,"The Cash Reserves Target amount, which is the exact amount of cash reserves needed for the unexpected, has been calculated and updated at least annually and spot-checked every four months.  Also referred to as Emergency Fund or Contingency Fund.",,Financial Planner,,,,
+1.21021E+15,FP05  Establish Strategy for the Purchase of Next Major Asset,,,,,,,"Point of View (POV): You should be aware of the target date and timing of discussions prior to every major purchase by a client as well as client goals and reach-out to Ideal Clients prior to every goal target date (at the preceding client progress meetings).  Note this client's next major purchase and schedule those discussions on The Greatest Probability Strategy:tm: (GPS).
+Ensure that the study of the quickest, least expensive and time saving method of acquiring the next major purchase (e.g. vehicle sales process) has been recommended to this client well in-advance of every major purchase.
+Smaller goals may be discussed just two client progress meetings prior to the goal target date.  Certain ""huge"" goals, such as ""financial independence"" require substantially longer lead-time to set up the goal funding distributions.  Your job is to set the number of meetings prior to the goal target date that goal funding distributions discussions need to begin.  Once set, document these planned discussions on both The Greatest Probability Strategy:tm: (GPS) and The Goal Blueprint:tm: for each goal.
+Your Tax Planning Subject Matter Expert is the back-up for this checkpoint because there are often tax issues which need to be considered prior to many major purchases
+You have an opportunity here to make life easier for your clients, as Financial Planning Subject Matter Expert do a little research and use your skill, experience and special knowledge to document a process for each of the following scenarios using The Best Way:tm: method:
+    Vehicle purchasing (discussed more specifically in 8D8 & 7V6)
+    Boat purchasing
+    Recreational Vehicle purchasing
+    Vacation or 2nd home purchasing
+    Jewelry purchasing
+    Fine Art / Collectible purchasing
+    Private Jet travel program purchasing
+etc. etc.",,Financial Planner,,,,
+1.21021E+15,FP07  Actions from the Debt Reduction Plan Added to the Implementation Plan,,,,,,,"The smartest payoff schedule has been created and is updated at least every twelve (12) months to establish that the plan is being followed (client accountability).
+If a recommendation is made to make payments other than specified by the debt agreement, specific recommended payment amounts for each specific debt are clearly described on The Greatest Probability Strategy:tm:.
+If there is a recommendation to make payments other than specified by the debt agreement, the new recommended payment amounts for each specific debt are clearly described on The Greatest Probability Strategy:tm:; a detailed schedule of all debts are maintained on a separate document(s).",,Financial Planner,,,,
+1.21021E+15,FP08  Least Complicated Account Design Established,,,,,,,"At least three times over the past year, it has been reviewed and established that the fewest number of accounts exist (simplicity) necessary to accomplish the results outlined in the comprehensive written lifetime financial strategy.",,Financial Planner,,,,
+1.21021E+15,"FP11  ""Projected"" vs. ""Actual"" Spending Reviewed",,,,,,,"A review has been made comparing the ""actual figures"" with the ""previously projected figures."" An impact review of “actual v. projected” inflows & outflows (e.g. planned and unplanned personal income & expenditures) has been performed within the past 12 months (spot-checked prior to every Client Progress Meeting) to determine if revenues and expenses are on-track or off-track as compared to the most recent personal expense projection provided by this client.",,Financial Planner,,,,
+1.21021E+15,FP14  Collateral Values Established,,,,,,,"All Collateral for debts have been studied, checking loan to value requirements within the loan agreement, at least annually. Check for market risk: Is there any risk that a reduction in the values of collateral could trigger a need for increased collateral or other problems?
+NOTE: If assets are pledged as collateral the loan document, or debt agreement, may specify the frequency and means for valuing the collateral.  If collateral values drop, then the loan agreement may require additional collateral.  Proactive planning will eliminate any surprises (unexpected request for additional collateral).",,Financial Planner,,,,
+1.21021E+15,FP16  Minimum Cash Levels Calculated for Each Account,,,,,,,"Point of View (POV): Several accounts for this client may have ""cash equivalent"" balances within them.  We need to be certain that the cash balances in those accounts are at the level required (for planned distributions, as a part of the investment asset allocation, etc).  To ensure the right amount of ""cash"" is in each account, we will set a target amount for ""cash"" in every one of these accounts.  We'll call this target cash balance the ""par level"" since the balance will often vary above & below that target amount.
+Deliverables Checkpoint:tm:
+The proper amount of “cushion”, cash (or cash equivalents), needed in each and every financial asset account (including the checking (operating) accounts, has been calculated and funded within the past four months.
+If regular or systematic withdrawals are being made from any account ensure there is adequate ""cash"" in each account to cover those distributions until the next cash ""par level"" review. EXAMPLE: ""If an account has a monthly systematic withdrawal established and there is not enough cash to fulfill those automatic monthly withdrawals prior to the next review, like this, of the cash-par levels, then the cash target for this hypothetical account needs to be increased to accommodate the automatic withdrawals as well as an action item to actually increase the ""cash"" in that account to the new target par level""
+Definition of ""Par Level"": A term often used in inventory accounting, ""par level"" is the specified amount of inventory an enterprise wishes to have at a certain location.  In this context, think of every financial account belonging to this client as a certain location where there exists and inventory of, often various, holdings.  The inventory could be stocks, bonds, mutual funds, Exchange Traded Funds (ETFs), Index funds, and cash (or cash equivalents).  Some accounts only hold cash (or cash equivalents). So the ""Cash"" Par-level for this account is the ""cash"" target amount set by the Subject Matter Expert for each account to be able to determine quickly whether each account possesses sufficient ""cash""  until the next ""Cash"" Par-level review.",,Financial Planner,,,,
+1.21021E+15,"FP17  Verify No ""Identity Theft"" has Occurred",,,,,,,"Deliverables Checkpoint:tm:
+Identity theft risk has been evaluated by an Insurance Subject Matter Expert (SME) within the past 12 months.
+Definition:
+""Identity Theft"" is the fraudulent acquisition and use of a person's private identifying information, usually for financial gain. ""Identity Theft"" is the crime of obtaining the personal or financial information of another person for the sole purpose of assuming that person's name or identity in order to make transactions or purchases.
+NOTE: Analyze suitable services available to alert to potential ""Identity Theft"" problems in ""real time.""",,Financial Planner,,,,
+1.21021E+15,FP18  Credit Reports Checked for Inaccuracy & Fraud,,,,,,,"Point of View (POV): If ever this client needs to borrow money an exceptional credit report will result in lower interest rates.  Since any errors on the credit report or fraudulent use of this client's credit will serve as demerits staining this client's credit reputation, an annual spot-check of the credit report is called-for.
+Also, if any individual, or business entity, owes this client a significant amount of money then that person's credit rating should be spot-checked to re-assess our confidence that the money will be repaid.
+Deliverables Checkpoint:tm:
+    Credit reports have been reviewed for errors and fraud protection within the past twelve months.
+Reports should be reviewed for every person or entity for which funding is anticipated for future goals.",,Financial Planner,,,,
+1.21021E+15,FP19  Confirm Future Income Streams,,,,,,,"Within the past year (16+ months when possible), due diligence has been thoughtfully performed on the veracity and integrity of all sources of future income streams anticipated by the plan (specific amounts and frequency of payments) with contingency strategies being developed to increase safety in the event any projected income (utilized in the lifetime capital projection) becomes unavailable.",,Financial Planner,,,,
+1.21021E+15,FP20  Cash Reserves Plan Includes Insurance Deductibles,,,,,,,"Point of View (POV): If recommended by our Insurance Subject Matter Expert, we are comfortable with increasing the deductibles on all insurance policies because we fund the cash reserves accounts with additional amounts for all insurance deductibles and ""waiting periods.""
+Deliverables Checkpoint:tm:
+The optimal amount has been calculated and funded annually as a part of cash reserves to fund potential insurance deductibles, but utilized only if triggered by a loss.",,Financial Planner,,,,
+1.21021E+15,FP21  Establish Whether Client Will Likely Provide Assistance to Others,,,,,,,A financial impact review of individuals who may potentially be supported financially (aging relatives or young people with financial needs) has been reviewed within the past twelve months.,,Financial Planner,,,,
+1.21021E+15,FP51 Analyze Whether Client Should Do a Balance Transfer of Debt,,,,,,,—,,Financial Planner,,,,
+1.21021E+15,"Insurance Planner - Life, LTC, Disability",,,,,,,—,,Nominations and Deliverable Checkpoints Due,,,,
+1.21021E+15,INC1  Analyze Long Term Care Insurance Need,,,,,,,"Long-Term Care Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What’s the right kind of Long-Term Care Insurance for this situation
+Long-Term Care Insurance helps provide for the cost of long-term care beyond a predetermined period and covers care generally not covered by health insurance, or other type of insurance.",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INC2  Determine Most Beneficial Riders Associated with Long Term Care Insurance,,,,,,,—,,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,IND1  Analyze Disability Insurance Need,,,,,,,"Disability Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Disability Insurance for this situation",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INH1  Analyze Health Insurance Need,,,,,,,"Health Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Health Insurance for this situation",,"Insurance Planner - Life, LTC, Disability",,,,
+1.2104E+15,INH2 Determine Need for Medicare Supplement Insurance,,,,,,,"Medicare Supplement Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Medicare Supplement Insurance for this situation",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INL1  Analyze Life Insurance Need,,,,,,,"All insurance (currently owned and potentially owned) has been reviewed as a part of the full insurance review conducted at least once over the past 12-months.
+As a part of that review, Life Insurance has been analyzed within the past twelve months to determine:
+(1) If it is needed right now
+(2) If needed, exactly how much is necessary, and
+(3) What’s the right kind of Life Insurance for this situation",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INL2  Analyze Accidental Death Insurance Need,,,,,,,"Accidental Death and Dismemberment Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What’s the right kind of Accidental Death and Dismemberment Insurance for this situation",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,"INL3  Analyze Need for ""Key Man"" Insurance",,,,,,,"Key-Man Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Key-Man Insurance for this situation",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INS1  Insurance Premiums Analyzed for Better Prices,,,,,,,"A full review of all insurance premiums has been conducted, and “shopped,” within the past 36 months (insurance company changes can represent risk, should be rare, and only made if all factors have been fully considered).",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INS2  Frequency of Premium Payments Analyzed,,,,,,," A review of insurance premium payments has been made within the past twelve months to identify the smartest, most suitable, method of payment for each policy.",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INS3  Analyze All Other Types of Insurance Needed by Client,,,,,,,"Every insurance policy has been reviewed for need, coverage gaps and cost/benefit within the past twelve months.
+Coverage other than those below (covered by other Deliverables Checkpoints:tm:)
+    Disability Insurance
+    Health Insurance
+    Life Insurance
+    Umbrella Liability Coverage
+    Long Term Care Insurance
+    Errors & Omissions or ""Malpractice"" Insurance
+    Business Insurance
+    Property & Casualty Insurance
+    Accidental Death & Dismemberment Insurance
+       Specialty Insurance currently offered or available by client's institutions or through existing policies",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,INS4  Calculate the Most Cost Effective Deductible Levels,,,,,,,"All deductibles and ""waiting period"" on every existing policy has been analyzed for suitability (and premium savings) within the past twelve months.",,"Insurance Planner - Life, LTC, Disability",,,,
+1.21021E+15,IN04  Determine Which Insurance Discounts are Available,,,,,,,All potential insurance discounts allowable by the insurance companies and the state laws have been reviewed within the past twelve months and none have been overlooked.,,"Insurance Planner - Life, LTC, Disability",,,,
+1.21035E+15,"Insurance Planner - Property & Casualty, Business ",,,,,,,,,Nominations and Deliverable Checkpoints Due,,,,
+1.21036E+15,IN01 Insurance for Sizable Items Calculated Before Purchasing ,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,IN02 Analyze Need for Umbrella Insurance ,,,,,,,"Umbrella Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Umbrella Insurance for this situation",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21021E+15,IN03 Determine Needs from Foreign Travel,,,,,,,"Point of View (POV): If this client travels abroad, especially to remote areas, insurance coverage should be reviewed.  
+For example, 
+
+How would a health emergency be handled?
+How would emergency medical evacuation be handled?
+How would car accidents or other liabilities be handled in each of the countries?
+Is trip cancellation insurance recommended?
+If this client's personal property is stolen abroad, are there limitations or reporting requirements? Deliverables Checkpoint
+At least annually, this client has been asked to disclose any future plans to foreign travel or travel to exotic places abroad where the quality of health care may be a concern and other risks should be assessed by an Insurance Subject Matter Expert (SME).",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,IN04 Determine Which Insurance Discounts are Available ,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,IN05 Determine Extent of Property & Casualty Risk to Financial Plan ,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,IN06 Determine Extent of Business Risks to Financial Plan ,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,IN07 Check Vehicle & Driver Usage Against Policy Coverage,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,IN08 Determine Extent of Errors & Omissions or Malpractice Insurance Need,,,,,,,"E&O Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of E&O Insurance for this situation",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21021E+15,IN10  Assets Inventoried & Future Disposition Established,,,,,,,"Point of View (POV): If this client's residence burns down and the insurance company wants details of everything lost in the fire, an inventory of personal property, kept offsite or ""in the cloud,"" describing each item of value along with original cost & condition will help when the claim is filed.  A professional can help with this task.  Until that can be done, it would help if this client were to walk through the house with a video camera, opening closets & drawers, describing everything in sight (including original costs) so the insurance company can see that ""these suits are Armani, the handbags are Chanel & Hermes, oh... and that Picaso on the wall is an original.""
+Deliverables Checkpoint:tm: 
+Method of storage and ease of theft has been assessed (along with updated ""protection plan"") within the past twelve months for the most valuable personal property. 
+Within the past 36 months, a narrated video of the residence contents has been updated (or pictures have been taken), along with a detailed inventory describing content values (with instructions for disposition upon death) for use in the event of a major loss and to be referenced in the estate plan as evidence of the decedent’s wishes regarding personal property. This is kept off-premises (e.g. safety deposit box).
+The ""Masking Tape"" Method: Even if this client were to put masking tape with the names of heirs along with signature & date on the backs of personal property (fine art, furniture, jewelry boxes, etc), that could some day help the estate administrators identify which items are described in the estate plan.",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21021E+15,IN11 Uncommon Liabilities or Risks Assessed,,,,,,,In the past twelve months all activities (lifestyle and business related) have been systematically reviewed by a property and casualty expert to ensure that all risks (e.g. Community and volunteer involvements) have been anticipated by the comprehensive written lifetime financial plan.,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.2104E+15,IN14 Determine Need for Renter's Insurance ,,,,,,,"Renter's Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Renter's Insurance for this situation",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.2104E+15,IN15 Determine Need for Earthquake Insurance,,,,,,,"Earthquake Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of earthquake Insurance for this situation",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.2104E+15,IN16 Determine Need for Art & Collectibles Insurance,,,,,,,"Art & Collectibles Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Art & Collectibles Insurance for this situation",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.2104E+15,IN17 Determine Need for Flood Insurance,,,,,,,"Flood Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Flood Insurance for this situation",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.2104E+15,IN18 Determine Need for Jewelry Insurance,,,,,,,"Jewelry Insurance has been analyzed within the past twelve months to determine: 
+(1) If it is needed right now 
+(2) If needed, exactly how much is necessary, and 
+(3) What's the right kind of Jewelry Insurance for this situation",,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,INS1 Insurance Premiums Analyzed for Better Prices,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,INS2 Frequency of Premium Payments Analyzed,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,INS3 Analyze All Other Types of Insurance Needed by Client ,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21036E+15,INS4 Calculate the Most Cost Effective Deductible Levels ,,,,,,,,,"Insurance Planner - Property & Casualty, Business ",,,,
+1.21057E+15,Insurance Planner - Health ,,,,,,,,,Nominations and Deliverable Checkpoints Due,,,,
+1.21021E+15,Money Manager,,,,,,,—,,Nominations and Deliverable Checkpoints Due,,,,
+1.21021E+15,MM01  Asset Allocation Reviewed,,,,,,,"The simplest, most streamlined, and optimal asset allocation necessary to accomplish the results outlined in the comprehensive written lifetime financial strategy plan of action has been reviewed, thoughtfully contemplated, updated and re-established at least three times over the past twelve months.",,Money Manager,,,,
+1.21021E+15,MM02  Returns For Growth Assets Calculated,,,,,,,"Total return for every individual investment as well as the overall portfolio has been calculated and reviewed for action within the past (and every) four months, at a minimum, for all the following periods:
+    YTD,
+    Since Inception,
+    1-month,
+    3- month,
+    1-year,
+    3-year,
+    5-year,
+    10- year,
+    rolling 3-year periods, and
+    rolling 5-year periods
+In addition to the performance measures above, a best in class Money Management Subject Matter Expert should be regularly producing and reviewing these additional measures for each investment holding as well as for the overall portfolio:
+    Risk measures
+    Risk adjusted return
+    Performance comparisons are consistent 
+    (against relevant benchmarks: industry benchmarks, peer benchmarks, market benchmarks) 
+    NOTE: If the benchmarks change, the investment is promptly red-flagged for review
+    Valuation measures & ratios
+
+NOTE: A Growth/Goal Asset is any asset earmarked for funding a future financial goal",,Money Manager,,,,
+1.21021E+15,MM04  All Accounts Reconciled,,,,,,,"Every growth asset account statement (securities, bank or other custodian) has been reconciled and balanced “to the penny” to ensure no errors or fraud within the past (and every) four months.
+HELPFUL NOTE: Even without a best in class Deliverables Team of Subject Matter Experts, such as this one, in-place, it is common practice for clients to ""balance bank statements"" every month to reconcile the numbers ensuring the numbers and balances are correct.
+Let's all agree that this same procedure should be done for every account this client owns.  At least quarterly every account should be ""reconciled to the penny.""  It is common for firms to reconcile the following for investment accounts:
+    Trade (buy or sell) settlements
+    Transfers between accounts
+    Dividend & Capital gain distributions
+Since clients sometimes make deposits & withdrawals (write checks, use debit cards, etc), in addition, please check to ensure that all of the following are also ""reconciled to the penny:""
+    Every account debit
+    Every account credit
+VERY IMPORTANT CONCEPT: It's not necessarily the job of this team to do this reconciliation, but it is clearly your job to ""make sure it gets done.""  This rule applies to nearly every Deliverables Checkpoint:tm:",,Money Manager,,,,
+1.21021E+15,MM06  Benchmarks Updated,,,,,,,"Set best investment benchmark against which to compare each investment holding as well as the overall portfolio allocation.
+Consistent with goals, established by this client, the investment allocation benchmark has been updated and reviewed for suitability and performance within the past four months (prior to every Client Progress Meeting) for any deviations, and action by the Financial Planning Subject Matter Expert or Money Management Subject Matter Expert (SME) with rationale and evidence (a document) supplied to the Deliverables Team (DT).
+Any change in benchmark utilized is ""red flagged"" for further in-depth review, it is our job to understand why the benchmark has changed. A notification is provided to the Trusted Advisor, through the Administrative Manager, of all benchmark changes prior to every client progress meeting.",,Money Manager,,,,
+1.21021E+15,MM07  Proper Amounts of Cash in Each Account Established,,,,,,,"The exact amount of investment ""cash"" needed as a part of the portfolio investment allocation has been calculated and funded every four months.
+    This ""cash"" is a part of the investment allocations.
+    This “cash"" portion of the accounts should not be available for routine cash needs, or cash reserves.
+    This ""cash"" allocation percentage is established for the overall allocation as well as each individual financial asset account.
+IMPORTANT: Ensure that there is enough ""cash"" to cover any and all distributions for the next eight (8) months (two meeting cycles).  Example, if there are systematic withdrawals from any account, be sure there is enough ""cash"" to cover these scheduled distributions",,Money Manager,,,,
+1.21021E+15,MM13  Taxable Equivalent Yields Determined,,,,,,,"Taxable v. Tax-free equivalent rates are regularly calculated, “shopped” and assessed for each “cash account” to ensure the smartest and most favorable rates have been ascertained prior to every client progress meeting.",,Money Manager,,,,
+1.21021E+15,MM14  Realized & Unrealized Gains Shared with Team,,,,,,,"All realized and unrealized capital gains have been calculated by a Tax Subject Matter Expert (SME), with resulting reports submitted to all relevant advisors to this client (tax preparer, money managers, financial planner and Trusted Advisor) within the past three months along with a commitment to distribute this information quarterly (at least once every four months).",,Money Manager,,,,
+1.21021E+15,MM23  Scour the Market for the Highest Yields For Cash,,,,,,,"Point of View (POV): We want to be certain that this client is getting the highest yields on money market funds and cash equivalents across all the accounts, so we will routinely ""shop around"" for higher interest rates on these ""cash equivalent"" accounts.
+Deliverables Checkpoint:tm:
+The highest yields for all cash positions have been “shopped” over the past four months and funds have been reassigned to maximize the yield to the most suitable account positions.",,Money Manager,,,,
+1.21021E+15,MM26  Scrutinize Each Account Transaction,,,,,,,"All trades (transactions) have been reviewed and reconciled for accuracy, cost and suitability within the past (and every) four months.",,Money Manager,,,,
+1.21021E+15,MM27  Scrutinize Modified Quality or Credit Ratings for Bonds,,,,,,,"All fixed-income investment holding’s quality or credit rating changes (upgrades or downgrades) have been updated, noted and assessed for suitability, risk, and possible action within the past four months.",,Money Manager,,,,
+1.21021E+15,MM28  Systematic Deposits and Withdrawals Established for Reducing Transaction Fees,,,,,,,—,,Money Manager,,,,
+1.21021E+15,Tax Planner,,,,,,,—,,Nominations and Deliverable Checkpoints Due,,,,
+1.21021E+15,TX03  Double Check Each Tax Reporting Document,,,,,,,"Before tax returns are prepared, all tax reporting documents, (e.g. W2, 1099, etc), have been reconciled to determine that they were accurately reported against actual receipts.",,Tax Planner,,,,
+1.21021E+15,"TX04  Confirm with Client if There are Any Possible, Ongoing or Concluded Litigations",,,,,,,"At least annually, this client has been asked to disclose all threatened, outstanding and concluded litigation and any arbitration proceedings pending, threatened or concluded including all consent decrees, court or administrative judgments or orders, settlements, etc.
+EXAMPLE: All future court-ordered distributions by a divorced client have been considered by each Subject Matter Expert and accounted-for in the lifetime capital projections and this client's comprehensive written lifetime financial strategy.
+USEFUL TIP: As you ask this client questions and have important conversations you have a great place to record this information called the MISC Organizer:
+
+Have you ever been married before (divorced)?
+Have you ever sued anyone?
+Have you ever been sued?
+Have you ever been involved with a lawsuit (witness, expert, class action lawsuit)
+Have you ever ""almost"" sued someone?  What drove your thinking?",,Tax Planner,,,,
+1.21021E+15,TX05  Detemine Any Asset Protection Needs,,,,,,,"Point of View (POV): If this client has significant exposures to potential ""asset losses"" or law suits, then an assessment is to be made annually to consider any and all recommendations and action items advisable to protect assets.  Also necessary changes of the form of this client's business entities should be also be considered.
+Deliverables Checkpoint:tm:
+A liability review of optimal entity choice (C Corp, S Corp, LLC, etc.) has been reviewed by a Legal Subject Matter Expert (SME) for suitability for every “going concern” within the past fiscal year to determine if any risks (assets) need further segregating.",,Tax Planner,,,,
+1.21021E+15,TX22  Analyze Most Beneficial Education Funding Method,,,,,,,—,,Tax Planner,,,,
+1.21021E+15,TX23  Determine if Client Desires to Fund Education Expenses for Others,,,,,,,—,,Tax Planner,,,,
+1.21021E+15,Trusted Advisor,,,,,,,,,Nominations and Deliverable Checkpoints Due,,,,
+1.21041E+15,TA11 The Comprehensive Safety Review Exercise Completed,,,,,,,"Within the past twelve months the Deliverables Team has fully discussed every danger and threat to the comprehensive written lifetime financial plan with strategies developed for each, to include a discussion with every Subject Matter Expert (SME) advising this client.
+This particular Deliverables Checkpoint™️ is one of a very few which will actually occur at the client progress meeting, not before.  
+
+Since this checkpoint will bring-in our Ideal Clients to this conversation to identify risks, it is important that our Subject Matter Experts understand that, even after their thorough insurance review, there may be new information or risks which need to be considered after this client progress meeting
+    The Financial Planning Subject Matter Expert has coordinated with the Insurance Subject Matter Expert (and other Deliverables Team Members) to identify all significant risks to this client's plan, building scenarios, projections and strategies for each
+    Trusted Advisor completes The Comprehensive Safety Review Exercise ™️ with each client to harvest their views of the most significant risks to their plan (often completely different issues)
+        Download the exercise here. Read more...
+        Read the CSR client progress meeting script to grasp how to facilitate the The Comprehensive Safety Review Exercise™️. Read More...
+NOTE:
+    Trusted Advisor is primary and facilitates The Comprehensive Safety Review Exercise™️ with each client during The Comprehensive Safety Review™️Client Progress Meeting.
+    The Financial Planning Subject Matter Expert is responsible for taking the results of this client-exercise and coordinating any and all resulting action items with the rest of the Deliverables Team
+Since this Deliverables Checkpoint™️ exercise will occur at this client progress meeting, the only information due before The Dry-Run Prep Meeting™️ deadline could be, for example, to alert the team if this exercise might be skipped during the meeting.  For example, if this client is embroiled in a crisis or perhaps is in the middle of a major planning situation (sale of business, etc), then The Comprehensive Safety Review Exercise™️ might be preempted and deferred to the following client progress meeting.",,Trusted Advisor,,,,
+1.21021E+15,Implementation Plan Updated and Expectation Letter # 4 Sent to Team Through Asana,Preparing for DRPM,,,,,,Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,DRPM 0@ ,Preparing for Progress Meeting,,,,,,"FATHOM MEETING LINK:    
+
+    Review each Team member's HPCs, and ask for any clarification, concerns, or confirmation? 
+  
+    Are there any other big issues in your area of expertise that the TA needs to be aware of? 
+        CPA -  
+        CFP -  
+        EA -  
+        MM -  
+        INS 1 -  
+        INS2 -  
+ 
+    What is the biggest issue for the client that the TA needs to discuss with the client, so that they can take action, giving them the greatest impact on their plan? 
+        CPA -  
+        CFP -  
+        EA -  
+        MM -  
+        INS 1 -  
+        INS2 -  
+        TA - Meeting presenter: Ask the TA ""Are you clear about the details regarding the HPCs you need to have with the client in your upcoming meeting?"" 
+ 
+    Now that we have had a chance to discuss many topics today, is there anything else you want to bring up?
+
+    Review GPS with team and make sure it is in priority order.
+ 
+    To Do:
+
+
+Be sure to add the team members in this Followers Section at the bottom",CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Corrections from DRPM Notes Made to Packet,Preparing for Progress Meeting,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Packet Sealed and Made Available to TA,Preparing for Progress Meeting,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,CSR Meeting @,Preparing for Progress Meeting,,,,,,"Intro:   
+The goal of the meeting is to give you an overwhelming sense of progress and confidence. 
+We have a full agenda, but before we get to that, what issues do you have on your agenda for today? 
+Her - 
+Him - 
+ 
+Extro: 
+The objective was to help you leave the meeting with an overwhelming sense of progress and confidence. How did we do? 
+Her - 
+Him - 
+ 
+What would you say we accomplished today? 
+Her -
+Him -
+ 
+Is there anything outstanding that we owe you?  So you would say that we are caught up on all of our commitments?  
+ 
+    Goal Changes
+
+    Meeting Notes
+
+    To Do:",CSR Meeting Template (mm-dd-yy),,,,,
+1.21036E+15,Send Post Meeting Notes and Action Items ,After Progress Meeting,,,,,,,CSR Meeting Template (mm-dd-yy),,,,,
+1.21021E+15,Archive Meeting and Create Next Meeting Project in ASANA,After Progress Meeting,,,,,,—,CSR Meeting Template (mm-dd-yy),,,,,

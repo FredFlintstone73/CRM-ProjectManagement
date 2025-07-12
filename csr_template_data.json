@@ -1,0 +1,225 @@
+{
+  "name": "CSR Meeting Template",
+  "description": "Comprehensive Safety Review Meeting Template - A detailed workflow for managing client progress meetings with all deliverables, checkpoints, and team coordination tasks.",
+  "sections": {
+    "Confirming & Scheduling Meeting Dates & Times": [
+      {
+        "title": "Confirm Meeting Date & Time with Client",
+        "description": "Confirm Meeting Date & Time with Client and Any Questions Regarding Implementation Plan or Items Due From Last Meeting",
+        "priority": "high"
+      },
+      {
+        "title": "Enter Dates into ASANA",
+        "description": "Enter meeting dates and times into project management system",
+        "priority": "medium"
+      },
+      {
+        "title": "Submit Proposed Dates/Time for DRPM",
+        "description": "Submit proposed dates and times for Dry-Run Prep Meeting",
+        "priority": "high"
+      },
+      {
+        "title": "Update New Meeting in ASANA and Create Meeting",
+        "description": "Update meeting details and create new meeting entry",
+        "priority": "medium"
+      },
+      {
+        "title": "Send Out Expectation Email #1 to Team Through Asana",
+        "description": "Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email",
+        "priority": "high"
+      }
+    ],
+    "Preparing for & Gathering Information for Meetings": [
+      {
+        "title": "Submit Your Items Still Needed & Initial Highest Priority Conversation Reports",
+        "description": "Click on subtask below for description - coordinate with all team members",
+        "priority": "high"
+      },
+      {
+        "title": "Consolidate Items Still Needed and Send to SMEs",
+        "description": "Gather all outstanding items from team members and distribute to Subject Matter Experts",
+        "priority": "high"
+      },
+      {
+        "title": "Consolidate Highest Priority Conversations & Update Meeting Agenda",
+        "description": "Compile priority conversations from all team members and update meeting agenda accordingly",
+        "priority": "high"
+      },
+      {
+        "title": "Request Account Values for Any Outside Accounts and Transactions",
+        "description": "Obtain current account values and recent transaction history for external accounts",
+        "priority": "medium"
+      },
+      {
+        "title": "Request Actions Taken Since Last Meeting by Team and Client",
+        "description": "Gather updates on completed actions from both team members and client",
+        "priority": "medium"
+      },
+      {
+        "title": "Download Account Values & Transactions for Growth Accounts",
+        "description": "Retrieve and compile account values and transaction data for growth-focused accounts",
+        "priority": "medium"
+      }
+    ],
+    "Preparing for DRPM": [
+      {
+        "title": "Create Circle Chart",
+        "description": "Generate comprehensive Circle Chart showing all client assets, liabilities, and cash flows",
+        "priority": "high"
+      },
+      {
+        "title": "Financial Planner Review Circle Chart",
+        "description": "Have Financial Planner review and approve Circle Chart accuracy",
+        "priority": "high"
+      },
+      {
+        "title": "Provide Circle Chart to Team with Expectation Letter #2",
+        "description": "Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email",
+        "priority": "high"
+      },
+      {
+        "title": "Generate Reports in Database, Documents Due for Preliminary Packet",
+        "description": "Create all required reports and documentation for the preliminary meeting packet",
+        "priority": "high"
+      },
+      {
+        "title": "Trust Advisor Review of Preliminary Packet",
+        "description": "Have Trust Advisor review and approve preliminary packet contents",
+        "priority": "high"
+      },
+      {
+        "title": "Preliminary Packet Distributed to Team with Expectation Letter #3",
+        "description": "Be sure to add the team members in this Followers Section at the bottom when you copy and paste the Expectations Email",
+        "priority": "high"
+      },
+      {
+        "title": "Nominations and Deliverable Checkpoints Due",
+        "description": "Click on subtask below for more details - coordinate all team deliverables",
+        "priority": "high"
+      }
+    ],
+    "Team Coordination & Deliverables": [
+      {
+        "title": "Estate Attorney Deliverables",
+        "description": "Complete Legacy Flow Chart, POA Summary, and Asset Titling Report updates",
+        "priority": "high"
+      },
+      {
+        "title": "Financial Planner Deliverables",
+        "description": "Update Goal Blueprint, Lifetime Capital Projection, and Multiple Scenario Projections",
+        "priority": "high"
+      },
+      {
+        "title": "Insurance Planner Deliverables - Life, LTC, Disability",
+        "description": "Update Insurance Grid and complete insurance analysis",
+        "priority": "high"
+      },
+      {
+        "title": "Insurance Planner Deliverables - P&C, Business",
+        "description": "Update Insurance Grid for Property & Casualty and Business insurance",
+        "priority": "high"
+      },
+      {
+        "title": "Tax Planner Deliverables",
+        "description": "Complete Annual Tax Projection and ensure Last Tax Return is on file",
+        "priority": "high"
+      },
+      {
+        "title": "Money Manager Deliverables",
+        "description": "Provide investment reports and portfolio analysis",
+        "priority": "medium"
+      }
+    ],
+    "Client Service Rep - Meeting Packets": [
+      {
+        "title": "CSR01 - Confirm Status of Last Meeting's Action Items",
+        "description": "Verify completion status of all action items from previous meeting",
+        "priority": "high"
+      },
+      {
+        "title": "CSR02 - Implementation Plan-of-Action Updated",
+        "description": "The comprehensive written lifetime financial strategy for this client has been reviewed within the last four months and, as a result, action items and recommendations have been added, deleted or amended on The Greatest Probability Strategy (GPS) step-by-step implementation plan-of-action.",
+        "priority": "high"
+      },
+      {
+        "title": "CSR03 - Unfinished Recommendations are Updated",
+        "description": "Any and all uncompleted action items on The Greatest Probability Strategy (GPS) have been updated with new target dates and the impact has been reflected and updated in the lifetime capital projection within the past four months.",
+        "priority": "high"
+      },
+      {
+        "title": "CSR04 - Debts are Updated on The Circle Chart",
+        "description": "The Circle Chart (TCC), a one-page report, listing both spouses' names, dates of birth, current age, every growth/goal asset, every investment or financial account, all personal debt/liabilities, and all inflows and outflows has been updated prior to every Dry-Run Prep Meeting (within the past four months).",
+        "priority": "high"
+      },
+      {
+        "title": "CSR05 - The Since Inception Report Completed",
+        "description": "Prior to every Client Progress Meeting a single-page report called The Progress Since Inception Report of this client's relationship with our firm has been updated within the past four months. This completed report is to be included in The Client Prep Packet.",
+        "priority": "high"
+      },
+      {
+        "title": "CSR06 - The Growth Progress Since Last Meeting Report Completed",
+        "description": "Complete The Progress Report Since Last Meeting listing Growth/Goal Asset Value Total, Current Growth Asset Value, Total Value of All Subsequent Deposits, and Total Value of All Client Withdrawals since the last meeting.",
+        "priority": "high"
+      },
+      {
+        "title": "CSR07 - The Growth Progress Since Inception Report Completed",
+        "description": "Generate comprehensive progress report showing growth from inception to current date",
+        "priority": "high"
+      },
+      {
+        "title": "CSR08 - The Goals Progress Report Completed",
+        "description": "Prior to every Client Progress Meeting a single-page report called The Goal Progress Report has been updated for this client within the past four months listing the amount (in dollars) required for the accomplishment of each goal benchmarked against the current value of the growth assets.",
+        "priority": "high"
+      },
+      {
+        "title": "CSR09 - The Numbers History Report Completed",
+        "description": "Prior to every Client Progress Meeting a single page report called The Numbers History has been updated (every four months) showing Cash Reserves, Growth/Goal Assets, and Debt for every client meeting date.",
+        "priority": "high"
+      },
+      {
+        "title": "CSR10 - The Circle Chart Completed",
+        "description": "Complete comprehensive Circle Chart showing all client financial information",
+        "priority": "high"
+      },
+      {
+        "title": "CSR11 - The Comprehensive Safety Review Exercise Completed",
+        "description": "Within the past twelve months the Deliverables Team has fully discussed every danger and threat to the comprehensive written lifetime financial plan with strategies developed for each, to include a discussion with every Subject Matter Expert (SME) advising this client.",
+        "priority": "high"
+      }
+    ],
+    "Preparing for Progress Meeting": [
+      {
+        "title": "DRPM Meeting",
+        "description": "Conduct Dry-Run Prep Meeting with all team members. Review HPCs, discuss biggest issues, review GPS with team and ensure priority order. FATHOM MEETING LINK included.",
+        "priority": "high"
+      },
+      {
+        "title": "Corrections from DRPM Notes Made to Packet",
+        "description": "Make all necessary corrections to meeting packet based on DRPM feedback",
+        "priority": "high"
+      },
+      {
+        "title": "Packet Sealed and Made Available to TA",
+        "description": "Finalize and distribute completed packet to Trusted Advisor",
+        "priority": "high"
+      },
+      {
+        "title": "CSR Meeting",
+        "description": "Conduct Comprehensive Safety Review Meeting with client. Goal: give client an overwhelming sense of progress and confidence. Includes intro and extro scripts, goal changes, meeting notes, and action items.",
+        "priority": "high"
+      }
+    ],
+    "After Progress Meeting": [
+      {
+        "title": "Send Post Meeting Notes and Action Items",
+        "description": "Distribute meeting notes and action items to all relevant parties",
+        "priority": "high"
+      },
+      {
+        "title": "Archive Meeting and Create Next Meeting Project in ASANA",
+        "description": "Archive completed meeting and set up next meeting project template",
+        "priority": "medium"
+      }
+    ]
+  }
+}
