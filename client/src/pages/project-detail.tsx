@@ -11,6 +11,8 @@ import { useState } from "react";
 import TaskForm from "@/components/tasks/task-form";
 import ProjectForm from "@/components/projects/project-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,6 +29,8 @@ export default function ProjectDetail() {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showProjectEdit, setShowProjectEdit] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id],
@@ -182,8 +186,14 @@ export default function ProjectDetail() {
   };
 
   const handleDeleteProject = () => {
-    if (confirm('Are you sure you want to delete this project? This action cannot be undone and will also delete all associated tasks.')) {
-      deleteProjectMutation.mutate(parseInt(id!));
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (project && deleteConfirmText === "DELETE") {
+      deleteProjectMutation.mutate(project.id);
+      setDeleteDialogOpen(false);
+      setDeleteConfirmText("");
     }
   };
 
@@ -418,6 +428,43 @@ export default function ProjectDetail() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{project?.name}"? This action cannot be undone and will also delete all associated tasks.
+              <br /><br />
+              Type <strong>DELETE</strong> to confirm:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="my-4">
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE to confirm"
+              className="w-full"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteDialogOpen(false);
+              setDeleteConfirmText("");
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteConfirmText !== "DELETE" || deleteProjectMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleteProjectMutation.isPending ? "Deleting..." : "Delete Project"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
