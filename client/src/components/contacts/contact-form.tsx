@@ -122,6 +122,52 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <Label htmlFor="contactType">Contact Type</Label>
+                  <Select 
+                    value={form.watch("contactType")} 
+                    onValueChange={(value) => form.setValue("contactType", value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select contact type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="client">Client</SelectItem>
+                      <SelectItem value="prospect">Prospect</SelectItem>
+                      <SelectItem value="team_member">Team Member</SelectItem>
+                      <SelectItem value="strategic_partner">Strategic Partner</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select 
+                    value={form.watch("status")} 
+                    onValueChange={(value) => form.setValue("status", value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="follow_up">Follow Up</SelectItem>
+                      <SelectItem value="converted">Converted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact 1 Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact 1</CardTitle>
+              <CardDescription>Primary contact information</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
                   <Label htmlFor="firstName">First Name *</Label>
                   <Input
                     id="firstName"
@@ -230,52 +276,6 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="contactType">Contact Type</Label>
-                  <Select 
-                    value={form.watch("contactType")} 
-                    onValueChange={(value) => form.setValue("contactType", value as any)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select contact type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="client">Client</SelectItem>
-                      <SelectItem value="prospect">Prospect</SelectItem>
-                      <SelectItem value="team_member">Team Member</SelectItem>
-                      <SelectItem value="strategic_partner">Strategic Partner</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select 
-                    value={form.watch("status")} 
-                    onValueChange={(value) => form.setValue("status", value as any)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="follow_up">Follow Up</SelectItem>
-                      <SelectItem value="converted">Converted</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Contact Information Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
-              <CardDescription>Phone numbers and email addresses</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
                   <Label htmlFor="cellPhone">Cell Phone</Label>
                   <Input
                     id="cellPhone"
@@ -331,43 +331,43 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
             </CardContent>
           </Card>
 
-          {/* Spouse Information Section */}
+          {/* Contact 2 Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Spouse Information</CardTitle>
-              <CardDescription>Details about the client's spouse</CardDescription>
+              <CardTitle>Contact 2</CardTitle>
+              <CardDescription>Spouse/partner information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="spouseFirstName">Spouse First Name</Label>
+                  <Label htmlFor="spouseFirstName">First Name</Label>
                   <Input
                     id="spouseFirstName"
                     {...form.register("spouseFirstName")}
-                    placeholder="Enter spouse first name"
+                    placeholder="Enter first name"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="spouseLastName">Spouse Last Name</Label>
+                  <Label htmlFor="spouseLastName">Last Name</Label>
                   <Input
                     id="spouseLastName"
                     {...form.register("spouseLastName")}
-                    placeholder="Enter spouse last name"
+                    placeholder="Enter last name"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="spouseNickname">Spouse Nickname</Label>
+                  <Label htmlFor="spouseNickname">Nickname</Label>
                   <Input
                     id="spouseNickname"
                     {...form.register("spouseNickname")}
-                    placeholder="Enter spouse nickname"
+                    placeholder="Enter nickname"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="spouseGender">Spouse Gender</Label>
+                  <Label htmlFor="spouseGender">Gender</Label>
                   <Select value={form.watch("spouseGender")} onValueChange={(value) => form.setValue("spouseGender", value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
@@ -383,7 +383,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="spouseDateOfBirth">Spouse Date of Birth</Label>
+                  <Label htmlFor="spouseDateOfBirth">Date of Birth</Label>
                   <Input
                     id="spouseDateOfBirth"
                     type="date"
@@ -391,7 +391,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="spouseDateOfDeath">Spouse Date of Death</Label>
+                  <Label htmlFor="spouseDateOfDeath">Date of Death</Label>
                   <Input
                     id="spouseDateOfDeath"
                     type="date"
@@ -410,20 +410,20 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="spouseCellPhone">Spouse Cell Phone</Label>
+                  <Label htmlFor="spouseCellPhone">Cell Phone</Label>
                   <Input
                     id="spouseCellPhone"
                     {...form.register("spouseCellPhone")}
-                    placeholder="Enter spouse cell phone"
+                    placeholder="Enter cell phone"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="spousePersonalEmail">Spouse Personal Email</Label>
+                  <Label htmlFor="spousePersonalEmail">Personal Email</Label>
                   <Input
                     id="spousePersonalEmail"
                     type="email"
                     {...form.register("spousePersonalEmail")}
-                    placeholder="Enter spouse email"
+                    placeholder="Enter email"
                   />
                 </div>
               </div>
