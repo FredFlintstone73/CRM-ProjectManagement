@@ -448,7 +448,7 @@ export default function ContactDetail() {
                 <CardContent className="p-6 pt-6 text-center text-[20px]">
                   <div>
                     <p className="font-medium text-gray-700 text-[16px]">Marriage Date:</p>
-                    <p className="text-sm">{formatDate(contact.marriageDate)}</p>
+                    <p className="text-[16px]">{formatDate(contact.marriageDate)}</p>
                   </div>
                 </CardContent>
               </Card>
