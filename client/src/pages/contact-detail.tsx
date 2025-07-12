@@ -22,6 +22,7 @@ interface ContactDetailParams {
 }
 
 export default function ContactDetail() {
+  // All hooks must be called in the same order every time
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const { id } = useParams<ContactDetailParams>();
@@ -30,20 +31,6 @@ export default function ContactDetail() {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
 
   const { data: contact, isLoading: contactLoading } = useQuery<Contact>({
     queryKey: ['/api/contacts', id],
@@ -220,6 +207,24 @@ export default function ContactDetail() {
       setProfileImageUrl(contact.profileImageUrl);
     }
   }, [contact]);
+
+  // Loading state
+  if (isLoading || contactLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Contact not found
+  if (!contact) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-lg">Contact not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-auto">
