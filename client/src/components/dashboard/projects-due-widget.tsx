@@ -174,14 +174,9 @@ export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetP
                           </div>
                         </div>
                       </div>
-                      
                       {daysUntilDue !== null && (
                         <div className="text-right">
-                          <div className={`text-xs font-medium ${
-                            daysUntilDue <= 7 ? 'text-red-600' : 
-                            daysUntilDue <= 14 ? 'text-orange-600' : 
-                            'text-green-600'
-                          }`}>
+                          <div className="font-medium text-orange-600 text-[14px]">
                             {daysUntilDue === 0 ? 'Meeting today' :
                              daysUntilDue === 1 ? 'Meeting tomorrow' :
                              daysUntilDue > 0 ? `${daysUntilDue} days left` :
