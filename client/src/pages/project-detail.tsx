@@ -1,17 +1,19 @@
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { CalendarDays, User, Clock, Plus, Edit3, Trash2, CheckCircle, Circle } from "lucide-react";
+import { CalendarDays, User, Clock, Plus, Edit3, Trash2, CheckCircle, Circle, Settings, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
 import TaskForm from "@/components/tasks/task-form";
+import ProjectForm from "@/components/projects/project-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import type { Project, Task, Contact } from "@shared/schema";
 
 interface ProjectDetailParams {
@@ -20,9 +22,11 @@ interface ProjectDetailParams {
 
 export default function ProjectDetail() {
   const { id } = useParams<ProjectDetailParams>();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [showProjectEdit, setShowProjectEdit] = useState(false);
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id],
@@ -78,6 +82,22 @@ export default function ProjectDetail() {
     },
     onError: () => {
       toast({ title: "Failed to update task", variant: "destructive" });
+    },
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: number) => {
+      await apiRequest(`/api/projects/${projectId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({ title: "Project deleted successfully" });
+      setLocation('/projects');
+    },
+    onError: () => {
+      toast({ title: "Failed to delete project", variant: "destructive" });
     },
   });
 
@@ -158,6 +178,18 @@ export default function ProjectDetail() {
     toggleTaskMutation.mutate({ taskId, completed: !isCompleted });
   };
 
+  const handleDeleteProject = () => {
+    if (confirm('Are you sure you want to delete this project? This action cannot be undone and will also delete all associated tasks.')) {
+      deleteProjectMutation.mutate(parseInt(id!));
+    }
+  };
+
+  const handleProjectUpdated = () => {
+    setShowProjectEdit(false);
+    queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
+    toast({ title: "Project updated successfully" });
+  };
+
   if (projectLoading || tasksLoading) {
     return (
       <div className="flex-1 space-y-4 p-4 pt-6">
@@ -185,41 +217,74 @@ export default function ProjectDetail() {
     <div className="flex-1 space-y-4 p-4 pt-6">
       {/* Project Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-          <p className="text-gray-600">Project Details & Task Management</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation('/projects')}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Projects
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+            <p className="text-gray-600">Project Details & Task Management</p>
+          </div>
         </div>
-        <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditingTask(null)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Task
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingTask ? 'Edit Task' : 'Add New Task'}
-              </DialogTitle>
-            </DialogHeader>
-            <TaskForm
-              task={editingTask}
-              projectId={parseInt(id!)}
-              onSuccess={handleTaskCreated}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2">
+          <Dialog open={showProjectEdit} onOpenChange={setShowProjectEdit}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Settings className="w-4 h-4 mr-2" />
+                Edit Project
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Project</DialogTitle>
+              </DialogHeader>
+              <ProjectForm 
+                project={project} 
+                onSuccess={handleProjectUpdated} 
+              />
+            </DialogContent>
+          </Dialog>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteProject}
+            disabled={deleteProjectMutation.isPending}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Project
+          </Button>
+          <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setEditingTask(null)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Task
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingTask ? 'Edit Task' : 'Add New Task'}
+                </DialogTitle>
+              </DialogHeader>
+              <TaskForm
+                task={editingTask}
+                projectId={parseInt(id!)}
+                onSuccess={handleTaskCreated}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Project Info Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Project Information</span>
-            <Badge className={getStatusColor(project.status)}>
-              {project.status.replace('_', ' ')}
-            </Badge>
-          </CardTitle>
+          <CardTitle>Project Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {project.description && (
