@@ -446,7 +446,7 @@ export default function ContactDetail() {
             {/* Marriage Information */}
             {contact.marriageDate && (
               <Card className="mb-6">
-                <CardContent className="pt-6">
+                <CardContent className="p-6 pt-6 text-center text-[20px]">
                   <div>
                     <p className="text-sm font-medium text-gray-700">Marriage Date:</p>
                     <p className="text-sm">{formatDate(contact.marriageDate)}</p>
