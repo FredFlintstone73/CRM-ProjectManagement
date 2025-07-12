@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,9 +42,11 @@ export default function Contacts() {
     direction: 'asc' | 'desc';
   }>({ key: null, direction: 'asc' });
 
+  const searchString = useSearch();
+  
   // Handle URL query parameters for contact type filtering
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(searchString);
     const typeParam = urlParams.get('type');
     
     if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner'].includes(typeParam)) {
@@ -55,8 +57,39 @@ export default function Contacts() {
         team_member: typeParam === 'team_member',
         strategic_partner: typeParam === 'strategic_partner'
       });
+    } else {
+      // Reset to show all types when no type parameter is present
+      setVisibleTypes({
+        client: true,
+        prospect: true,
+        team_member: true,
+        strategic_partner: true
+      });
     }
-  }, []);
+  }, [searchString]);
+
+  // Get the current filtered type from URL
+  const getCurrentFilteredType = () => {
+    const urlParams = new URLSearchParams(searchString);
+    return urlParams.get('type');
+  };
+
+  // Get page title and subtitle based on filtered type
+  const getPageTitleAndSubtitle = () => {
+    const currentType = getCurrentFilteredType();
+    switch (currentType) {
+      case 'client':
+        return { title: 'Clients', subtitle: 'Manage your active clients and their information' };
+      case 'prospect':
+        return { title: 'Prospects', subtitle: 'Track potential clients and opportunities' };
+      case 'team_member':
+        return { title: 'Team Members', subtitle: 'Manage your team and internal contacts' };
+      case 'strategic_partner':
+        return { title: 'Strategic Partners', subtitle: 'Manage partnerships and strategic relationships' };
+      default:
+        return { title: 'Contacts', subtitle: 'Manage your clients, prospects, team members, and strategic partners' };
+    }
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -282,11 +315,13 @@ export default function Contacts() {
     );
   }
 
+  const { title, subtitle } = getPageTitleAndSubtitle();
+
   return (
     <>
       <Header 
-        title="Contacts" 
-        subtitle="Manage your clients, prospects, team members, and strategic partners"
+        title={title} 
+        subtitle={subtitle}
         showActions={false}
       />
       
