@@ -75,11 +75,14 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   });
 
   const onSubmit = (data: InsertTask) => {
+    console.log('Form data:', data);
+    console.log('Form errors:', form.formState.errors);
     const processedData = {
       ...data,
       dueDate: dueDate ? dueDate.toISOString() : undefined,
       projectId: projectId,
     };
+    console.log('Processed data:', processedData);
     createTaskMutation.mutate(processedData);
   };
 
