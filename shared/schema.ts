@@ -182,6 +182,15 @@ export const activityLog = pgTable("activity_log", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Project comments table
+export const projectComments = pgTable("project_comments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  projectId: integer("project_id").references(() => projects.id),
+  userId: varchar("user_id").references(() => users.id),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   contacts: many(contacts),
@@ -191,6 +200,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   emailInteractions: many(emailInteractions),
   callTranscripts: many(callTranscripts),
   activityLog: many(activityLog),
+  projectComments: many(projectComments),
 }));
 
 export const contactsRelations = relations(contacts, ({ one, many }) => ({
@@ -213,6 +223,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     references: [users.id],
   }),
   tasks: many(tasks),
+  comments: many(projectComments),
 }));
 
 export const tasksRelations = relations(tasks, ({ one }) => ({
@@ -266,6 +277,17 @@ export const activityLogRelations = relations(activityLog, ({ one }) => ({
   }),
 }));
 
+export const projectCommentsRelations = relations(projectComments, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectComments.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [projectComments.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertContactSchema = createInsertSchema(contacts).omit({
   id: true,
@@ -307,6 +329,11 @@ export const insertActivityLogSchema = createInsertSchema(activityLog).omit({
   createdAt: true,
 });
 
+export const insertProjectCommentSchema = createInsertSchema(projectComments).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -324,3 +351,5 @@ export type CallTranscript = typeof callTranscripts.$inferSelect;
 export type InsertCallTranscript = z.infer<typeof insertCallTranscriptSchema>;
 export type ActivityLog = typeof activityLog.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+export type ProjectComment = typeof projectComments.$inferSelect;
+export type InsertProjectComment = z.infer<typeof insertProjectCommentSchema>;

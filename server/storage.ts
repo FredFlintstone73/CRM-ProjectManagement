@@ -7,6 +7,7 @@ import {
   emailInteractions,
   callTranscripts,
   activityLog,
+  projectComments,
   type User,
   type UpsertUser,
   type Contact,
@@ -23,6 +24,8 @@ import {
   type InsertCallTranscript,
   type ActivityLog,
   type InsertActivityLog,
+  type ProjectComment,
+  type InsertProjectComment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
@@ -91,6 +94,10 @@ export interface IStorage {
 
   // Project due date operations
   getProjectsDueSoon(startDate: Date, endDate: Date): Promise<Project[]>;
+
+  // Project comment operations
+  getProjectComments(projectId: number): Promise<ProjectComment[]>;
+  createProjectComment(comment: InsertProjectComment, userId: string): Promise<ProjectComment>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -455,6 +462,24 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(projects.dueDate);
+  }
+
+  // Project comment operations
+  async getProjectComments(projectId: number): Promise<ProjectComment[]> {
+    return await db.select().from(projectComments)
+      .where(eq(projectComments.projectId, projectId))
+      .orderBy(desc(projectComments.createdAt));
+  }
+
+  async createProjectComment(comment: InsertProjectComment, userId: string): Promise<ProjectComment> {
+    const [newComment] = await db
+      .insert(projectComments)
+      .values({
+        ...comment,
+        userId,
+      })
+      .returning();
+    return newComment;
   }
 }
 

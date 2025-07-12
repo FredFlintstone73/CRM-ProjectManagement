@@ -12,8 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Calendar, User, Grid3X3, List } from "lucide-react";
+import { Search, Plus, Calendar, User, Grid3X3, List, MessageCircle } from "lucide-react";
 import ProjectForm from "@/components/projects/project-form";
+import ProjectComments from "@/components/projects/project-comments";
 import type { Project, Contact } from "@shared/schema";
 
 export default function Projects() {
@@ -23,6 +24,7 @@ export default function Projects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [commentsProject, setCommentsProject] = useState<Project | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -48,36 +50,7 @@ export default function Projects() {
     enabled: isAuthenticated,
   });
 
-  const deleteProjectMutation = useMutation({
-    mutationFn: async (projectId: number) => {
-      await apiRequest('DELETE', `/api/projects/${projectId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      toast({
-        title: "Success",
-        description: "Project deleted successfully",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to delete project",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const filteredProjects = projects?.filter((project) =>
     searchQuery === "" ||
@@ -213,12 +186,13 @@ export default function Projects() {
                     
                     <div className="flex items-center justify-end pt-2">
                       <Button
-                        variant="destructive"
+                        variant="outline"
                         size="sm"
-                        onClick={() => deleteProjectMutation.mutate(project.id)}
-                        disabled={deleteProjectMutation.isPending}
+                        onClick={() => setCommentsProject(project)}
+                        className="text-blue-600 hover:text-blue-800 border-blue-200 hover:border-blue-300"
                       >
-                        Delete
+                        <MessageCircle className="w-4 h-4 mr-1" />
+                        Comments
                       </Button>
                     </div>
                   </CardContent>
@@ -260,12 +234,13 @@ export default function Projects() {
                       </TableCell>
                       <TableCell>
                         <Button
-                          variant="destructive"
+                          variant="outline"
                           size="sm"
-                          onClick={() => deleteProjectMutation.mutate(project.id)}
-                          disabled={deleteProjectMutation.isPending}
+                          onClick={() => setCommentsProject(project)}
+                          className="text-blue-600 hover:text-blue-800 border-blue-200 hover:border-blue-300"
                         >
-                          Delete
+                          <MessageCircle className="w-4 h-4 mr-1" />
+                          Comments
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -282,6 +257,16 @@ export default function Projects() {
           )}
         </div>
       </main>
+
+      {/* Project Comments Dialog */}
+      {commentsProject && (
+        <ProjectComments
+          projectId={commentsProject.id}
+          projectName={commentsProject.name}
+          isOpen={!!commentsProject}
+          onClose={() => setCommentsProject(null)}
+        />
+      )}
     </>
   );
 }

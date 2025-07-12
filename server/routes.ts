@@ -8,7 +8,8 @@ import {
   insertTaskSchema,
   insertProjectTemplateSchema,
   insertEmailInteractionSchema,
-  insertCallTranscriptSchema
+  insertCallTranscriptSchema,
+  insertProjectCommentSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -196,6 +197,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting project:", error);
       res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
+  // Project comment routes
+  app.get('/api/projects/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const comments = await storage.getProjectComments(projectId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching project comments:", error);
+      res.status(500).json({ message: "Failed to fetch project comments" });
+    }
+  });
+
+  app.post('/api/projects/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const commentData = insertProjectCommentSchema.parse({
+        ...req.body,
+        projectId,
+      });
+      const comment = await storage.createProjectComment(commentData, userId);
+      res.json(comment);
+    } catch (error) {
+      console.error("Error creating project comment:", error);
+      res.status(500).json({ message: "Failed to create project comment" });
     }
   });
 
