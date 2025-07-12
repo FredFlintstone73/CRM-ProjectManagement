@@ -77,7 +77,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="basic">Basic</TabsTrigger>
-          <TabsTrigger value="contact">Contact</TabsTrigger>
+          <TabsTrigger value="contact">Contact 1</TabsTrigger>
           <TabsTrigger value="spouse">Spouse</TabsTrigger>
           <TabsTrigger value="address">Address</TabsTrigger>
           <TabsTrigger value="children">Children</TabsTrigger>
@@ -630,7 +630,6 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
           </Card>
         </TabsContent>
       </Tabs>
-
       <div className="space-y-4">
         <div>
           <Label htmlFor="notes">Notes</Label>
