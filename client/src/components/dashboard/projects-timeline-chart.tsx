@@ -226,7 +226,7 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
               ))}
             </div>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg text-[18px]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
                   <span className="font-semibold text-gray-700">Total Meetings:</span>
