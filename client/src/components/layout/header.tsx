@@ -43,7 +43,7 @@ export default function Header({ title, subtitle, showActions = false }: HeaderP
                   New Contact
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Add New Contact</DialogTitle>
                 </DialogHeader>
@@ -58,7 +58,7 @@ export default function Header({ title, subtitle, showActions = false }: HeaderP
                   New Project
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create New Project</DialogTitle>
                 </DialogHeader>
