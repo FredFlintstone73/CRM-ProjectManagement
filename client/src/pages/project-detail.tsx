@@ -159,9 +159,9 @@ export default function ProjectDetail() {
     return client ? (client.familyName || `${client.firstName} ${client.lastName}`) : 'Unknown family';
   };
 
-  const getAssigneeName = (assigneeId: string | null) => {
-    if (!assigneeId || !contacts) return 'Unassigned';
-    const assignee = contacts.find(c => c.id === assigneeId && c.contactType === 'team_member');
+  const getAssigneeName = (assignedTo: string | null) => {
+    if (!assignedTo || !contacts) return 'Unassigned';
+    const assignee = contacts.find(c => c.id === assignedTo && c.contactType === 'team_member');
     return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown assignee';
   };
 
@@ -397,7 +397,7 @@ export default function ProjectDetail() {
                       )}
                       
                       <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span>Assigned to: {getAssigneeName(task.assigneeId)}</span>
+                        <span>Assigned to: {getAssigneeName(task.assignedTo)}</span>
                         {task.dueDate && (
                           <span>Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
                         )}

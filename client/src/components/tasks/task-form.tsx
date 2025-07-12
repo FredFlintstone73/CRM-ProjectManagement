@@ -42,7 +42,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assigneeId: task?.assigneeId || '',
+      assignedTo: task?.assignedTo || '',
       priority: task?.priority || 'medium',
       status: task?.status || 'todo',
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
@@ -114,10 +114,10 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="assigneeId">Assign To</Label>
+          <Label htmlFor="assignedTo">Assign To</Label>
           <Select
-            value={form.watch('assigneeId') || 'unassigned'}
-            onValueChange={(value) => form.setValue('assigneeId', value === 'unassigned' ? '' : value)}
+            value={form.watch('assignedTo') || 'unassigned'}
+            onValueChange={(value) => form.setValue('assignedTo', value === 'unassigned' ? '' : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select team member" />
