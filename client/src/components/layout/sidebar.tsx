@@ -30,8 +30,8 @@ export default function Sidebar() {
   const contactSubCategories = [
     { name: 'Clients', href: '/contacts?type=client', icon: UserCheck },
     { name: 'Prospects', href: '/contacts?type=prospect', icon: UserPlus },
-    { name: 'Team Members', href: '/contacts?type=team_member', icon: UserCog },
     { name: 'Strategic Partners', href: '/contacts?type=strategic_partner', icon: Handshake },
+    { name: 'Team Members', href: '/contacts?type=team_member', icon: UserCog },
   ];
 
   const handleLogout = () => {
@@ -56,19 +56,14 @@ export default function Sidebar() {
         
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            return (
-              <Link key={item.name} href={item.href}>
-                <a className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
-                  <Icon size={20} />
-                  <span>{item.name}</span>
-                </a>
-              </Link>
-            );
-          })}
-          
+          {/* Dashboard */}
+          <Link href="/">
+            <a className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}>
+              <BarChart3 size={20} />
+              <span>Dashboard</span>
+            </a>
+          </Link>
+
           {/* Contacts with Sub-categories */}
           <div className="space-y-1">
             <button
@@ -101,6 +96,20 @@ export default function Sidebar() {
               </div>
             )}
           </div>
+
+          {/* Other navigation items */}
+          {navigation.slice(1).map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.href;
+            return (
+              <Link key={item.name} href={item.href}>
+                <a className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
+                  <Icon size={20} />
+                  <span>{item.name}</span>
+                </a>
+              </Link>
+            );
+          })}
         </nav>
         
         {/* User Profile */}
