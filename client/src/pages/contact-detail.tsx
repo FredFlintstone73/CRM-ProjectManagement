@@ -146,6 +146,27 @@ export default function ContactDetail() {
     return value;
   };
 
+  const formatPreferredContactMethod = (method: string | null | undefined) => {
+    if (!method) return "Not specified";
+    
+    switch (method.toLowerCase()) {
+      case 'cell phone':
+        return 'Cell Phone';
+      case 'text':
+        return 'Text';
+      case 'personal email':
+        return 'Personal Email';
+      case 'work phone':
+        return 'Work Phone';
+      case 'work email':
+        return 'Work Email';
+      case 'mail':
+        return 'Mail';
+      default:
+        return method.charAt(0).toUpperCase() + method.slice(1);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -329,7 +350,7 @@ export default function ContactDetail() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
-                <p className="text-sm">{contact.preferredContactMethod || "Not specified"}</p>
+                <p className="text-sm">{formatPreferredContactMethod(contact.preferredContactMethod)}</p>
                 {contact.preferredContactMethod === "Cell Phone" && contact.cellPhone && (
                   <p className="text-sm text-blue-600">{contact.cellPhone}</p>
                 )}
@@ -372,7 +393,7 @@ export default function ContactDetail() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
-                  <p className="text-sm">{contact.spousePreferredContactMethod || "Not specified"}</p>
+                  <p className="text-sm">{formatPreferredContactMethod(contact.spousePreferredContactMethod)}</p>
                   {contact.spousePreferredContactMethod === "Cell Phone" && contact.spouseCellPhone && (
                     <p className="text-sm text-blue-600">{contact.spouseCellPhone}</p>
                   )}
