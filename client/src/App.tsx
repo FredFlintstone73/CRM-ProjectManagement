@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Contacts from "@/pages/contacts";
+import ContactDetail from "@/pages/contact-detail";
 import Projects from "@/pages/projects";
 import Tasks from "@/pages/tasks";
 import Sidebar from "@/components/layout/sidebar";
@@ -35,6 +36,7 @@ function Router() {
               <Switch>
                 <Route path="/" component={Dashboard} />
                 <Route path="/contacts" component={Contacts} />
+                <Route path="/contacts/:id" component={ContactDetail} />
                 <Route path="/projects" component={Projects} />
                 <Route path="/tasks" component={Tasks} />
                 <Route component={NotFound} />

@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -245,7 +246,9 @@ export default function Contacts() {
                       </Avatar>
                       <div>
                         <CardTitle className="text-lg">
-                          {contact.firstName} {contact.lastName}
+                          <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer">
+                            {contact.familyName || `${contact.firstName} ${contact.lastName}`}
+                          </Link>
                         </CardTitle>
                         {contact.company && (
                           <p className="text-sm text-gray-600">{contact.company}</p>
