@@ -4,14 +4,15 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { useParams, useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera } from "lucide-react";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
 import type { Contact } from "@shared/schema";
@@ -26,6 +27,8 @@ export default function ContactDetail() {
   const { id } = useParams<ContactDetailParams>();
   const [, navigate] = useLocation();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -171,6 +174,53 @@ export default function ContactDetail() {
     updateStatusMutation.mutate(newStatus);
   };
 
+  const handlePhotoUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "File size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select a valid image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setProfileImageUrl(previewUrl);
+
+      // In a real app, you would upload the file to a server
+      // For now, we'll just show the preview
+      toast({
+        title: "Success",
+        description: "Profile photo updated successfully",
+      });
+    }
+  };
+
+  // Set initial profile image if contact has one
+  useEffect(() => {
+    if (contact?.profileImageUrl) {
+      setProfileImageUrl(contact.profileImageUrl);
+    }
+  }, [contact]);
+
   return (
     <div className="flex-1 overflow-auto">
       <Header
@@ -193,13 +243,31 @@ export default function ContactDetail() {
 
           {/* Client Photo */}
           <div className="text-center">
-            <div className="w-32 h-32 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-              <div className="text-center">
-                <Users className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">Client Photo</p>
-              </div>
+            <div className="w-32 h-32 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden">
+              {profileImageUrl ? (
+                <img 
+                  src={profileImageUrl} 
+                  alt="Client Photo" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-center">
+                  <Camera className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">Client Photo</p>
+                </div>
+              )}
             </div>
-            <Button variant="outline" size="sm">Upload Photo</Button>
+            <Button variant="outline" size="sm" onClick={handlePhotoUpload}>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Photo
+            </Button>
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
 
           {/* Family Name */}
