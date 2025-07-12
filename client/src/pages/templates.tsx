@@ -45,6 +45,8 @@ export default function Templates() {
   const { data: templates, isLoading: templatesLoading } = useQuery<ProjectTemplate[]>({
     queryKey: ['/api/project-templates'],
     enabled: isAuthenticated,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache
   });
 
   const deleteTemplateMutation = useMutation({
