@@ -50,6 +50,9 @@ export default function ProjectDetail() {
     queryKey: ['/api/contacts'],
   });
 
+  // Get the specific contact for this project
+  const projectContact = contacts?.find(c => c.id === project?.clientId);
+
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: number) => {
       const response = await fetch(`/api/tasks/${taskId}`, {
@@ -292,9 +295,22 @@ export default function ProjectDetail() {
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">{getFamilyName(project.clientId)}</span>
+            <div className="flex items-center gap-3">
+              {projectContact?.profilePhoto ? (
+                <img 
+                  src={projectContact.profilePhoto} 
+                  alt={getFamilyName(project.clientId)}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="w-5 h-5 text-gray-500" />
+                </div>
+              )}
+              <div>
+                <span className="text-sm font-medium text-gray-900">{getFamilyName(project.clientId)}</span>
+                <div className="text-xs text-gray-500">Family</div>
+              </div>
             </div>
             
             {project.dueDate && (
