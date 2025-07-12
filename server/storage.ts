@@ -242,7 +242,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(project: InsertProject, userId: string): Promise<Project> {
-    const projectData = { ...project, createdBy: userId } as any;
+    // Process date fields - convert string dates to Date objects
+    const processedProject = { ...project };
+    const dateFields = ['startDate', 'endDate', 'dueDate'];
+    
+    dateFields.forEach(field => {
+      if (processedProject[field] && typeof processedProject[field] === 'string' && processedProject[field].trim()) {
+        processedProject[field] = new Date(processedProject[field]);
+      } else if (processedProject[field] === '') {
+        processedProject[field] = null;
+      }
+    });
+    
+    const projectData = { ...processedProject, createdBy: userId } as any;
     const [newProject] = await db
       .insert(projects)
       .values(projectData)
@@ -261,9 +273,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProject(id: number, project: Partial<InsertProject>): Promise<Project> {
+    // Process date fields - convert string dates to Date objects
+    const processedProject = { ...project };
+    const dateFields = ['startDate', 'endDate', 'dueDate'];
+    
+    dateFields.forEach(field => {
+      if (processedProject[field] && typeof processedProject[field] === 'string' && processedProject[field].trim()) {
+        processedProject[field] = new Date(processedProject[field]);
+      } else if (processedProject[field] === '') {
+        processedProject[field] = null;
+      }
+    });
+    
     const [updatedProject] = await db
       .update(projects)
-      .set({ ...project, updatedAt: new Date() })
+      .set({ ...processedProject, updatedAt: new Date() })
       .where(eq(projects.id, id))
       .returning();
     return updatedProject;

@@ -101,7 +101,6 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
     const processedData = {
       ...data,
       name: meetingTypeNames[data.projectType as keyof typeof meetingTypeNames],
-      dueDate: data.dueDate ? new Date(data.dueDate) : null,
       clientId: data.clientId || null,
     };
     createProjectMutation.mutate(processedData);
@@ -178,8 +177,8 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
               <FormControl>
                 <Input
                   type="date"
-                  {...field}
                   value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               <FormMessage />
