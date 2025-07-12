@@ -897,12 +897,10 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             </CardHeader>
             <CardContent className="space-y-6">
               {[
-                { key: "investment", label: "Investment Advisor" },
-                { key: "tax", label: "Tax Professional" },
-                { key: "estateAtty", label: "Estate Attorney" },
-                { key: "pnc", label: "Property & Casualty Insurance" },
-                { key: "lifeIns", label: "Life Insurance Agent" },
-                { key: "other", label: "Other Professional" },
+                { key: "investmentAdvisor", label: "Investment Advisor" },
+                { key: "taxProfessional", label: "Tax Professional" },
+                { key: "attorney", label: "Attorney" },
+                { key: "insuranceAgent", label: "Insurance Agent" },
               ].map((professional) => (
                 <div key={professional.key} className="space-y-4 p-4 border rounded-lg">
                   <h4 className="font-semibold">{professional.label}</h4>
