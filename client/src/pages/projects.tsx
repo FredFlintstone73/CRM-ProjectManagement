@@ -144,12 +144,12 @@ export default function Projects() {
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
-                  New Project
+                  New Meeting
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Create New Project</DialogTitle>
+                  <DialogTitle>Schedule New Meeting</DialogTitle>
                 </DialogHeader>
                 <ProjectForm onSuccess={handleProjectCreated} />
               </DialogContent>

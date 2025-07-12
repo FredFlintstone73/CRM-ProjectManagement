@@ -8,7 +8,6 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { insertProjectSchema, type InsertProject, type Contact } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
@@ -26,6 +25,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
       description: "",
       clientId: null,
       status: "planning",
+      projectType: "frm",
       startDate: null,
       endDate: null,
       dueDate: null,
@@ -45,7 +45,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Project created successfully",
+        description: "Meeting created successfully",
       });
       form.reset();
       onSuccess?.();
@@ -64,49 +64,64 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
       }
       toast({
         title: "Error",
-        description: "Failed to create project",
+        description: "Failed to create meeting",
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: InsertProject) => {
+    // Generate project name based on meeting type
+    const meetingTypeNames = {
+      frm: "Financial Road Map Interview",
+      im: "Implementation Meeting",
+      ipu: "Initial Progress Update",
+      csr: "Comprehensive Safety Review",
+      gpo: "Goals Progress Update",
+      tar: "The Annual Review",
+    };
+    
     const processedData = {
       ...data,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      endDate: data.endDate ? new Date(data.endDate) : null,
+      name: meetingTypeNames[data.projectType as keyof typeof meetingTypeNames],
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
       clientId: data.clientId || null,
     };
     createProjectMutation.mutate(processedData);
   };
 
+  const meetingTypeOptions = [
+    { value: "frm", label: "Financial Road Map Interview (FRM)" },
+    { value: "im", label: "Implementation Meeting (IM)" },
+    { value: "ipu", label: "Initial Progress Update (IPU)" },
+    { value: "csr", label: "Comprehensive Safety Review (CSR)" },
+    { value: "gpo", label: "Goals Progress Update (GPO)" },
+    { value: "tar", label: "The Annual Review (TAR)" },
+  ];
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="name"
+          name="projectType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Project Name *</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} rows={3} />
-              </FormControl>
+              <FormLabel>Meeting Type *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select meeting type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {meetingTypeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -140,82 +155,15 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
         
         <FormField
           control={form.control}
-          name="status"
+          name="dueDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="planning">Planning</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="on_hold">On Hold</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Date</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="dueDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Due Date</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="progress"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Progress (%)</FormLabel>
+              <FormLabel>Meeting Date *</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
-                  min="0"
-                  max="100"
+                  type="date"
                   {...field}
-                  value={field.value || 0}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
                 />
               </FormControl>
               <FormMessage />
@@ -223,13 +171,9 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
           )}
         />
         
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button 
-            type="submit" 
-            disabled={createProjectMutation.isPending}
-            className="bg-emerald-600 hover:bg-emerald-700"
-          >
-            {createProjectMutation.isPending ? "Creating..." : "Create Project"}
+        <div className="flex justify-end space-x-2">
+          <Button type="submit" disabled={createProjectMutation.isPending}>
+            {createProjectMutation.isPending ? "Creating..." : "Create Meeting"}
           </Button>
         </div>
       </form>
