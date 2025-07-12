@@ -75,14 +75,11 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   });
 
   const onSubmit = (data: InsertTask) => {
-    console.log('Form data:', data);
-    console.log('Form errors:', form.formState.errors);
     const processedData = {
       ...data,
       dueDate: dueDate ? dueDate.toISOString() : undefined,
       projectId: projectId,
     };
-    console.log('Processed data:', processedData);
     createTaskMutation.mutate(processedData);
   };
 
@@ -125,6 +122,11 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unassigned">Unassigned</SelectItem>
+              {user && (
+                <SelectItem value={`me_${user.id}`}>
+                  Assign to Me ({user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})
+                </SelectItem>
+              )}
               {teamMembers.map((member) => (
                 <SelectItem key={member.id} value={`team_${member.id}`}>
                   {member.firstName} {member.lastName}

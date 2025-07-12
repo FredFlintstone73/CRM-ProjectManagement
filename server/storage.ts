@@ -324,12 +324,18 @@ export class DatabaseStorage implements IStorage {
       processedTask.dueDate = null;
     }
     
-    // Handle assignment - convert team_xxx to contact ID, or create a user contact if needed
+    // Handle assignment - convert team_xxx to contact ID, or handle me_xxx for current user
     if (processedTask.assignedTo && typeof processedTask.assignedTo === 'string') {
       if (processedTask.assignedTo.startsWith('team_')) {
         // Extract contact ID from team_xxx format
         const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
         processedTask.assignedTo = contactId;
+      } else if (processedTask.assignedTo.startsWith('me_')) {
+        // Handle "Assign to Me" - create or find user contact
+        const currentUserId = processedTask.assignedTo.replace('me_', '');
+        // Find or create a contact for the current user
+        const userContact = await this.findOrCreateUserContact(currentUserId);
+        processedTask.assignedTo = userContact.id;
       } else if (processedTask.assignedTo !== 'unassigned' && processedTask.assignedTo !== '') {
         // This is a user ID, we need to find or create a corresponding contact
         // For now, set to null since we don't have a direct user->contact mapping
@@ -366,12 +372,18 @@ export class DatabaseStorage implements IStorage {
       processedTask.dueDate = null;
     }
     
-    // Handle assignment - convert team_xxx to contact ID, or create a user contact if needed
+    // Handle assignment - convert team_xxx to contact ID, or handle me_xxx for current user
     if (processedTask.assignedTo && typeof processedTask.assignedTo === 'string') {
       if (processedTask.assignedTo.startsWith('team_')) {
         // Extract contact ID from team_xxx format
         const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
         processedTask.assignedTo = contactId;
+      } else if (processedTask.assignedTo.startsWith('me_')) {
+        // Handle "Assign to Me" - create or find user contact
+        const currentUserId = processedTask.assignedTo.replace('me_', '');
+        // Find or create a contact for the current user
+        const userContact = await this.findOrCreateUserContact(currentUserId);
+        processedTask.assignedTo = userContact.id;
       } else if (processedTask.assignedTo !== 'unassigned' && processedTask.assignedTo !== '') {
         // This is a user ID, we need to find or create a corresponding contact
         // For now, set to null since we don't have a direct user->contact mapping
@@ -594,6 +606,33 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return newComment;
+  }
+
+  // Helper method to find or create a contact for a user
+  async findOrCreateUserContact(userId: string): Promise<Contact> {
+    // First, try to find an existing contact for this user
+    const existingContact = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.createdBy, userId))
+      .limit(1);
+    
+    if (existingContact.length > 0) {
+      return existingContact[0];
+    }
+    
+    // If no contact exists, create a new one
+    // Get user information
+    const user = await this.getUser(userId);
+    const newContact = await this.createContact({
+      contactType: 'team_member',
+      firstName: user?.firstName || 'User',
+      lastName: user?.lastName || userId,
+      familyName: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : `User ${userId}`,
+      email: user?.email || '',
+    }, userId);
+    
+    return newContact;
   }
 }
 
