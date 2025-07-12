@@ -78,7 +78,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="basic">Basic</TabsTrigger>
           <TabsTrigger value="contact">Contact 1</TabsTrigger>
-          <TabsTrigger value="spouse">Spouse</TabsTrigger>
+          <TabsTrigger value="spouse">Contact 2</TabsTrigger>
           <TabsTrigger value="address">Address</TabsTrigger>
           <TabsTrigger value="children">Children</TabsTrigger>
           <TabsTrigger value="professionals">Professionals</TabsTrigger>
