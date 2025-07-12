@@ -162,10 +162,6 @@ export default function ContactDetail() {
         return 'bg-green-100 text-green-800';
       case 'inactive':
         return 'bg-gray-100 text-gray-800';
-      case 'follow_up':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'converted':
-        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -232,8 +228,6 @@ export default function ContactDetail() {
                   <SelectContent>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
-                    <SelectItem value="follow_up">Follow Up</SelectItem>
-                    <SelectItem value="converted">Converted</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
