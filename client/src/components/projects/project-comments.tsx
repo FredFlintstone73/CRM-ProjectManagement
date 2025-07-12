@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Send, User, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,13 +30,7 @@ export default function ProjectComments({ projectId, projectName, isOpen, onClos
 
   const createCommentMutation = useMutation({
     mutationFn: async (commentData: InsertProjectComment) => {
-      await apiRequest(`/api/projects/${projectId}/comments`, {
-        method: "POST",
-        body: JSON.stringify(commentData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await apiRequest("POST", `/api/projects/${projectId}/comments`, commentData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'comments'] });
@@ -94,6 +88,9 @@ export default function ProjectComments({ projectId, projectName, isOpen, onClos
             <MessageCircle className="w-5 h-5" />
             Comments for {projectName}
           </DialogTitle>
+          <DialogDescription>
+            View and add comments to track project progress and communication.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex-1 overflow-hidden flex flex-col">
