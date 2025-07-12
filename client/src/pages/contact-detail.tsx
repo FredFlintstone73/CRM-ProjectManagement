@@ -13,7 +13,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
 import type { Contact } from "@shared/schema";
@@ -286,20 +285,17 @@ export default function ContactDetail() {
           {/* Family Name with Avatar */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-3 mb-2">
-              <Avatar className="w-16 h-16">
-                <AvatarImage src={profileImageUrl || ""} alt="Family Photo" />
-                <AvatarFallback className="bg-gray-100 border-2 border-dashed border-gray-300">
-                  {profileImageUrl ? (
-                    <img 
-                      src={profileImageUrl} 
-                      alt="Family Photo" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Camera className="h-6 w-6 text-gray-400" />
-                  )}
-                </AvatarFallback>
-              </Avatar>
+              <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                {profileImageUrl ? (
+                  <img 
+                    src={profileImageUrl} 
+                    alt="Family Photo" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Camera className="h-6 w-6 text-gray-400" />
+                )}
+              </div>
               <h2 className="text-xl font-bold">
                 {contact.familyName || `${contact.firstName} ${contact.lastName}`}
               </h2>
