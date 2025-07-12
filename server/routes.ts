@@ -338,6 +338,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/project-templates/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const templateData = insertProjectTemplateSchema.partial().parse(req.body);
+      const template = await storage.updateProjectTemplate(parseInt(req.params.id), templateData);
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating project template:", error);
+      res.status(500).json({ message: "Failed to update project template" });
+    }
+  });
+
+  app.delete('/api/project-templates/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteProjectTemplate(parseInt(req.params.id));
+      res.json({ message: "Project template deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting project template:", error);
+      res.status(500).json({ message: "Failed to delete project template" });
+    }
+  });
+
   // Email interaction routes
   app.get('/api/email-interactions', isAuthenticated, async (req: any, res) => {
     try {
