@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Calendar, User, Grid3X3, List, MessageCircle } from "lucide-react";
+import { Search, Plus, Calendar, User, Grid3X3, List, MessageCircle, RefreshCw } from "lucide-react";
 import ProjectForm from "@/components/projects/project-form";
 import ProjectComments from "@/components/projects/project-comments";
 import type { Project, Contact } from "@shared/schema";
@@ -113,6 +113,15 @@ export default function Projects() {
     queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
   };
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/projects/comment-counts'] });
+    toast({
+      title: "Projects refreshed",
+      description: "Project data has been updated",
+    });
+  };
+
   if (isLoading || projectsLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -142,6 +151,15 @@ export default function Projects() {
               />
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
               <div className="flex rounded-md border border-gray-200 overflow-hidden">
                 <Button
                   variant={viewMode === 'cards' ? 'default' : 'ghost'}
