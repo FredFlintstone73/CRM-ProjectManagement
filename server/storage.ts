@@ -631,7 +631,10 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(contacts)
         .where(and(
-          eq(contacts.email, user.email),
+          or(
+            eq(contacts.personalEmail, user.email),
+            eq(contacts.workEmail, user.email)
+          ),
           eq(contacts.contactType, 'team_member')
         ))
         .limit(1);
@@ -647,7 +650,8 @@ export class DatabaseStorage implements IStorage {
       firstName: user?.firstName || 'User',
       lastName: user?.lastName || userId,
       familyName: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : `User ${userId}`,
-      email: user?.email || '',
+      personalEmail: user?.email || '',
+      status: 'active',
     }, userId);
     
     return newContact;
