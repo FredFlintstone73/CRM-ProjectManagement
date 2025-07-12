@@ -159,7 +159,7 @@ export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetP
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-primary rounded-full"></div>
                         <div>
-                          <p className="font-medium text-sm">{project.name}</p>
+                          <p className="font-medium text-[16px]">{project.name}</p>
                           <div className="flex items-center gap-2 mt-1">
                             {project.dueDate && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
