@@ -1,7 +1,6 @@
-import { useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, FolderOpen, User } from "lucide-react";
 import { format, addDays, addWeeks, addMonths, startOfDay, endOfDay } from "date-fns";
@@ -11,6 +10,10 @@ interface DateRange {
   start: Date;
   end: Date;
   label: string;
+}
+
+interface ProjectsDueWidgetProps {
+  selectedPeriod: string;
 }
 
 const getDateRanges = (): Record<string, DateRange> => {
@@ -46,8 +49,7 @@ const getDateRanges = (): Record<string, DateRange> => {
   };
 };
 
-export default function ProjectsDueWidget() {
-  const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
+export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetProps) {
   const dateRanges = getDateRanges();
   const currentRange = dateRanges[selectedPeriod];
 
@@ -104,23 +106,9 @@ export default function ProjectsDueWidget() {
   return (
     <Card className="col-span-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            <CardTitle>Status - Upcoming Progress Meetings</CardTitle>
-          </div>
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select period" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(dateRanges).map(([key, range]) => (
-                <SelectItem key={key} value={key}>
-                  {range.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-primary" />
+          <CardTitle>Status - Upcoming Progress Meetings ({currentRange.label})</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
