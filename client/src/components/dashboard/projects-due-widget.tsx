@@ -46,12 +46,17 @@ const getDateRanges = (): Record<string, DateRange> => {
       end: endOfDay(addMonths(today, 12)),
       label: "Next 12 Months",
     },
+    "custom-range": {
+      start: today,
+      end: endOfDay(addMonths(today, 1)),
+      label: "Custom Date Range",
+    },
   };
 };
 
 export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetProps) {
   const dateRanges = getDateRanges();
-  const currentRange = dateRanges[selectedPeriod];
+  const currentRange = dateRanges[selectedPeriod] || dateRanges["next-4-months"];
 
   const { data: projects, isLoading, error } = useQuery<Project[]>({
     queryKey: ['/api/dashboard/projects-due', selectedPeriod],

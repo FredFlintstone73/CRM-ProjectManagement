@@ -201,3 +201,10 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Better Error Handling**: Enhanced error messages and logging for deletion failures
 - **Frontend Improvements**: Better error feedback and cache invalidation after deletion
 - **Database Integrity**: Ensures clean deletion without orphaned records
+
+### Dashboard Dropdown Update (July 12, 2025)
+- **Removed 6 Months Option**: Removed "Next 6 Months" from dashboard dropdown as requested
+- **Added Custom Date Range**: Added "Custom Date Range" option to dashboard dropdown
+- **Error Handling**: Fixed undefined range error in ProjectsDueWidget component
+- **Timeline Chart Update**: Updated ProjectsTimelineChart to handle new dropdown options
+- **Default Handling**: Improved fallback handling for undefined period selections

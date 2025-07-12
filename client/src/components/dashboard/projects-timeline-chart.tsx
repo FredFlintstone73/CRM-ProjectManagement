@@ -57,12 +57,12 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
         return [start]; // Show current month
       case "next-4-months":
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 3)) });
-      case "next-6-months":
-        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 5)) });
       case "next-12-months":
         return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 11)) });
+      case "custom-range":
+        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 3)) }); // Default to 4 months for custom range
       default:
-        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 11)) });
+        return eachMonthOfInterval({ start, end: endOfMonth(addMonths(start, 3)) });
     }
   };
 
@@ -161,8 +161,8 @@ export default function ProjectsTimelineChart({ selectedPeriod, onPeriodChange }
                 <SelectItem value="next-2-weeks">Next 2 Weeks</SelectItem>
                 <SelectItem value="next-1-month">Next 1 Month</SelectItem>
                 <SelectItem value="next-4-months">Next 4 Months</SelectItem>
-                <SelectItem value="next-6-months">Next 6 Months</SelectItem>
                 <SelectItem value="next-12-months">Next 12 Months</SelectItem>
+                <SelectItem value="custom-range">Custom Date Range</SelectItem>
               </SelectContent>
             </Select>
           </div>
