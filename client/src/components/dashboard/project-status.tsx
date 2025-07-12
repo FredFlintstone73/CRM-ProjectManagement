@@ -14,6 +14,38 @@ export default function ProjectStatus() {
     queryKey: ['/api/contacts'],
   });
 
+  // Query for task data to calculate progress
+  const { data: projectTaskData = {} } = useQuery<Record<number, { total: number; completed: number; progress: number }>>({
+    queryKey: ['/api/dashboard/project-task-progress'],
+    enabled: !!projects,
+    queryFn: async () => {
+      if (!projects) return {};
+      
+      const taskData: Record<number, { total: number; completed: number; progress: number }> = {};
+      const activeProjectIds = projects.filter(p => p.status === 'active').slice(0, 3).map(p => p.id);
+      
+      await Promise.all(
+        activeProjectIds.map(async (projectId) => {
+          try {
+            const response = await fetch(`/api/projects/${projectId}/tasks`, {
+              credentials: 'include',
+            });
+            if (response.ok) {
+              const tasks = await response.json();
+              const totalTasks = tasks.length;
+              const completedTasks = tasks.filter((task: any) => task.status === 'completed').length;
+              const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+              taskData[projectId] = { total: totalTasks, completed: completedTasks, progress };
+            }
+          } catch (error) {
+            taskData[projectId] = { total: 0, completed: 0, progress: 0 };
+          }
+        })
+      );
+      return taskData;
+    },
+  });
+
   const activeProjects = projects?.filter(p => p.status === 'active').slice(0, 3) || [];
 
   const getFamilyName = (clientId: number | null) => {
@@ -79,9 +111,9 @@ export default function ProjectStatus() {
               <div key={project.id} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-gray-900">{project.name}</p>
-                  <span className="text-xs text-gray-500">{project.progress || 0}%</span>
+                  <span className="text-xs text-gray-500">{projectTaskData[project.id]?.progress || 0}%</span>
                 </div>
-                <Progress value={project.progress || 0} className="h-2" />
+                <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2" />
                 <p className="text-xs text-gray-500">
                   Family: {getFamilyName(project.clientId)}
                 </p>

@@ -80,6 +80,36 @@ export default function Projects() {
     },
   });
 
+  // Query for task counts for all projects to calculate progress
+  const { data: projectTaskData = {} } = useQuery<Record<number, { total: number; completed: number; progress: number }>>({
+    queryKey: ['/api/projects/task-progress'],
+    enabled: isAuthenticated && !!projects,
+    queryFn: async () => {
+      if (!projects) return {};
+      
+      const taskData: Record<number, { total: number; completed: number; progress: number }> = {};
+      await Promise.all(
+        projects.map(async (project) => {
+          try {
+            const response = await fetch(`/api/projects/${project.id}/tasks`, {
+              credentials: 'include',
+            });
+            if (response.ok) {
+              const tasks = await response.json();
+              const totalTasks = tasks.length;
+              const completedTasks = tasks.filter((task: any) => task.status === 'completed').length;
+              const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+              taskData[project.id] = { total: totalTasks, completed: completedTasks, progress };
+            }
+          } catch (error) {
+            taskData[project.id] = { total: 0, completed: 0, progress: 0 };
+          }
+        })
+      );
+      return taskData;
+    },
+  });
+
   // Helper functions
   const getProjectStatusColor = (status: string) => {
     switch (status) {
@@ -325,9 +355,9 @@ export default function Projects() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span>Progress</span>
-                        <span>{project.progress || 0}%</span>
+                        <span>{projectTaskData[project.id]?.progress || 0}%</span>
                       </div>
-                      <Progress value={project.progress || 0} className="h-6" />
+                      <Progress value={projectTaskData[project.id]?.progress || 0} className="h-6" />
                     </div>
                     
                     <div className="flex items-center justify-end pt-2">
@@ -428,8 +458,8 @@ export default function Projects() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Progress value={project.progress || 0} className="h-2 w-20" />
-                          <span className="text-sm">{project.progress || 0}%</span>
+                          <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2 w-20" />
+                          <span className="text-sm">{projectTaskData[project.id]?.progress || 0}%</span>
                         </div>
                       </TableCell>
                       <TableCell>

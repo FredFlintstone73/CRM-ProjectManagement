@@ -209,6 +209,15 @@ export default function ProjectDetail() {
     toast({ title: "Project updated successfully" });
   };
 
+  // Calculate progress based on completed tasks
+  const calculateProgress = () => {
+    if (!tasks || tasks.length === 0) return 0;
+    const completedTasks = tasks.filter(task => task.status === 'completed').length;
+    return Math.round((completedTasks / tasks.length) * 100);
+  };
+
+  const currentProgress = calculateProgress();
+
   const sortedTasks = tasks ? [...tasks].sort((a, b) => {
     if (sortBy === 'assignee') {
       const aAssignee = getAssigneeName(a.assignedTo);
@@ -363,9 +372,9 @@ export default function ProjectDetail() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Progress</span>
-              <span>{project.progress || 0}%</span>
+              <span>{currentProgress}%</span>
             </div>
-            <Progress value={project.progress || 0} className="h-2" />
+            <Progress value={currentProgress} className="h-2" />
           </div>
         </CardContent>
       </Card>
