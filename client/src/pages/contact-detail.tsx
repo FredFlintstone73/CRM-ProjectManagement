@@ -272,21 +272,6 @@ export default function ContactDetail() {
 
         {/* Main Content */}
         <div className="flex-1 p-6">
-          {/* Marriage Information */}
-          {contact.marriageDate && (
-            <Card className="mb-6">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Marriage Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Marriage Date:</p>
-                  <p className="text-sm">{formatDate(contact.marriageDate)}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
@@ -368,7 +353,7 @@ export default function ContactDetail() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
-                    Contact 2 (Spouse)
+                    Contact 2
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -427,6 +412,21 @@ export default function ContactDetail() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Marriage Information */}
+            {contact.marriageDate && (
+              <Card className="mb-6">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Marriage Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Marriage Date:</p>
+                    <p className="text-sm">{formatDate(contact.marriageDate)}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Address Information */}
             <Card>
