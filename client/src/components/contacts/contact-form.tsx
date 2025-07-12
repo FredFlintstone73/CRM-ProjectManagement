@@ -462,6 +462,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cell">Cell Phone</SelectItem>
+                    <SelectItem value="text">Text</SelectItem>
                     <SelectItem value="work_phone">Work Phone</SelectItem>
                     <SelectItem value="personal_email">Personal Email</SelectItem>
                     <SelectItem value="work_email">Work Email</SelectItem>
@@ -629,6 +630,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="cell">Cell Phone</SelectItem>
+                      <SelectItem value="text">Text</SelectItem>
                       <SelectItem value="work_phone">Work Phone</SelectItem>
                       <SelectItem value="personal_email">Personal Email</SelectItem>
                       <SelectItem value="work_email">Work Email</SelectItem>

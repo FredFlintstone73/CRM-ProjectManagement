@@ -164,11 +164,26 @@ export default function ContactDetail() {
                   <p className="text-sm font-medium text-gray-700">Email:</p>
                   <p className="text-sm">{contact.personalEmail || contact.workEmail || "Not specified"}</p>
                 </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">ID Type:</p>
+                  <p className="text-sm">{contact.govIdType || "Not specified"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">ID Number:</p>
+                  <p className="text-sm">{contact.govIdNumber || "Not specified"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">ID Expiration:</p>
+                  <p className="text-sm">{formatDate(contact.govIdExpiration) || "Not specified"}</p>
+                </div>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
                 <p className="text-sm">{contact.preferredContactMethod || "Not specified"}</p>
                 {contact.preferredContactMethod === "Cell Phone" && contact.cellPhone && (
+                  <p className="text-sm text-blue-600">{contact.cellPhone}</p>
+                )}
+                {contact.preferredContactMethod === "Text" && contact.cellPhone && (
                   <p className="text-sm text-blue-600">{contact.cellPhone}</p>
                 )}
                 {contact.preferredContactMethod === "Personal Email" && contact.personalEmail && (
@@ -204,11 +219,26 @@ export default function ContactDetail() {
                     <p className="text-sm font-medium text-gray-700">Email:</p>
                     <p className="text-sm">{contact.spousePersonalEmail || contact.spouseWorkEmail || "Not specified"}</p>
                   </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">ID Type:</p>
+                    <p className="text-sm">{contact.spouseGovIdType || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">ID Number:</p>
+                    <p className="text-sm">{contact.spouseGovIdNumber || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">ID Expiration:</p>
+                    <p className="text-sm">{formatDate(contact.spouseGovIdExpiration) || "Not specified"}</p>
+                  </div>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
                   <p className="text-sm">{contact.spousePreferredContactMethod || "Not specified"}</p>
                   {contact.spousePreferredContactMethod === "Cell Phone" && contact.spouseCellPhone && (
+                    <p className="text-sm text-blue-600">{contact.spouseCellPhone}</p>
+                  )}
+                  {contact.spousePreferredContactMethod === "Text" && contact.spouseCellPhone && (
                     <p className="text-sm text-blue-600">{contact.spouseCellPhone}</p>
                   )}
                   {contact.spousePreferredContactMethod === "Personal Email" && contact.spousePersonalEmail && (
