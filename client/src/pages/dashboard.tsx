@@ -3,10 +3,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
 
-import RecentContacts from "@/components/dashboard/recent-contacts";
-import UpcomingTasks from "@/components/dashboard/upcoming-tasks";
-import ProjectStatus from "@/components/dashboard/project-status";
-import ActivityFeed from "@/components/dashboard/activity-feed";
 import ProjectsDueWidget from "@/components/dashboard/projects-due-widget";
 import ProjectsTimelineChart from "@/components/dashboard/projects-timeline-chart";
 
@@ -54,20 +50,8 @@ export default function Dashboard() {
             />
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-            <div className="lg:col-span-2">
-              <ProjectsDueWidget />
-            </div>
-            
-            <div className="space-y-6">
-              <UpcomingTasks />
-              <ProjectStatus />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <RecentContacts />
-            <ActivityFeed />
+          <div className="mt-8">
+            <ProjectsDueWidget />
           </div>
         </div>
       </main>
