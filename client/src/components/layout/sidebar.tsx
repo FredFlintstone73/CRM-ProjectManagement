@@ -57,11 +57,9 @@ export default function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
           {/* Dashboard */}
-          <Link href="/">
-            <a className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}>
-              <BarChart3 size={20} />
-              <span>Dashboard</span>
-            </a>
+          <Link href="/" className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}>
+            <BarChart3 size={20} />
+            <span>Dashboard</span>
           </Link>
 
           {/* Contacts with Sub-categories */}
@@ -85,11 +83,9 @@ export default function Sidebar() {
                   const SubIcon = subItem.icon;
                   const isSubActive = location === subItem.href;
                   return (
-                    <Link key={subItem.name} href={subItem.href}>
-                      <a className={`sidebar-nav-item text-sm ${isSubActive ? 'active' : ''}`}>
-                        <SubIcon size={16} />
-                        <span>{subItem.name}</span>
-                      </a>
+                    <Link key={subItem.name} href={subItem.href} className={`sidebar-nav-item text-sm ${isSubActive ? 'active' : ''}`}>
+                      <SubIcon size={16} />
+                      <span>{subItem.name}</span>
                     </Link>
                   );
                 })}
@@ -102,11 +98,9 @@ export default function Sidebar() {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
-              <Link key={item.name} href={item.href}>
-                <a className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
-                  <Icon size={20} />
-                  <span>{item.name}</span>
-                </a>
+              <Link key={item.name} href={item.href} className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
+                <Icon size={20} />
+                <span>{item.name}</span>
               </Link>
             );
           })}

@@ -138,9 +138,14 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: InsertContact) => {
+      console.log('Mutation function called with data:', data);
+      console.log('Contact exists:', !!contact);
+      
       if (contact) {
+        console.log('Making PUT request to:', `/api/contacts/${contact.id}`);
         await apiRequest("PUT", `/api/contacts/${contact.id}`, data);
       } else {
+        console.log('Making POST request to:', "/api/contacts");
         await apiRequest("POST", "/api/contacts", data);
       }
     },
@@ -175,6 +180,8 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   });
 
   const onSubmit = (data: InsertContact) => {
+    console.log('Form submitted with data:', data);
+    console.log('Mutation state:', { isPending: mutation.isPending, error: mutation.error });
     mutation.mutate(data);
   };
 
