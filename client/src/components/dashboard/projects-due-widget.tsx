@@ -164,12 +164,12 @@ export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetP
                             {project.dueDate && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
-                                <span>Meeting {format(new Date(project.dueDate), 'MMM dd, yyyy')}</span>
+                                <span className="text-[14px]">Meeting {format(new Date(project.dueDate), 'MMM dd, yyyy')}</span>
                               </div>
                             )}
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <User className="w-3 h-3" />
-                              <span>{getClientName(project.clientId)}</span>
+                              <span className="text-[14px]">{getClientName(project.clientId)}</span>
                             </div>
                           </div>
                         </div>
