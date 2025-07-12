@@ -2,15 +2,18 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { insertContactSchema, type InsertContact } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { insertContactSchema, type InsertContact } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { isUnauthorizedError } from "@/lib/authUtils";
 
 interface ContactFormProps {
   onSuccess?: () => void;
@@ -18,31 +21,27 @@ interface ContactFormProps {
 
 export default function ContactForm({ onSuccess }: ContactFormProps) {
   const { toast } = useToast();
-  
+  const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<InsertContact>({
     resolver: zodResolver(insertContactSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
-      email: "",
-      phone: "",
-      company: "",
-      position: "",
       contactType: "client",
       status: "active",
-      notes: "",
     },
   });
 
-  const createContactMutation = useMutation({
+  const mutation = useMutation({
     mutationFn: async (data: InsertContact) => {
-      const response = await apiRequest("POST", "/api/contacts", data);
-      return response.json();
+      await apiRequest("POST", "/api/contacts", data);
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Contact created successfully",
+        title: "Contact created",
+        description: "The contact has been successfully created.",
       });
       form.reset();
       onSuccess?.();
@@ -61,176 +60,572 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       }
       toast({
         title: "Error",
-        description: "Failed to create contact",
+        description: "Failed to create contact. Please try again.",
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: InsertContact) => {
-    createContactMutation.mutate(data);
+    setIsSubmitting(true);
+    mutation.mutate(data);
+    setIsSubmitting(false);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>First Name *</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Last Name *</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <Tabs defaultValue="basic" className="w-full">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="basic">Basic</TabsTrigger>
+          <TabsTrigger value="contact">Contact</TabsTrigger>
+          <TabsTrigger value="spouse">Spouse</TabsTrigger>
+          <TabsTrigger value="address">Address</TabsTrigger>
+          <TabsTrigger value="children">Children</TabsTrigger>
+          <TabsTrigger value="professionals">Professionals</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="basic" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+              <CardDescription>Essential client information</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="familyName">Family Name</Label>
+                <Input
+                  id="familyName"
+                  {...form.register("familyName")}
+                  placeholder="Enter family name"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    {...form.register("firstName")}
+                    placeholder="Enter first name"
+                  />
+                  {form.formState.errors.firstName && (
+                    <p className="text-sm text-red-500">{form.formState.errors.firstName.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    {...form.register("lastName")}
+                    placeholder="Enter last name"
+                  />
+                  {form.formState.errors.lastName && (
+                    <p className="text-sm text-red-500">{form.formState.errors.lastName.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="nickname">Nickname</Label>
+                  <Input
+                    id="nickname"
+                    {...form.register("nickname")}
+                    placeholder="Enter nickname"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="gender">Gender</Label>
+                  <Select value={form.watch("gender")} onValueChange={(value) => form.setValue("gender", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    {...form.register("dateOfBirth")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ssn">SSN</Label>
+                  <Input
+                    id="ssn"
+                    {...form.register("ssn")}
+                    placeholder="Enter SSN"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="govIdType">ID Type</Label>
+                  <Select value={form.watch("govIdType")} onValueChange={(value) => form.setValue("govIdType", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select ID type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="drivers_license">Driver's License</SelectItem>
+                      <SelectItem value="passport">Passport</SelectItem>
+                      <SelectItem value="state_id">State ID</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="govIdNumber">ID Number</Label>
+                  <Input
+                    id="govIdNumber"
+                    {...form.register("govIdNumber")}
+                    placeholder="Enter ID number"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="govIdExpiration">ID Expiration</Label>
+                  <Input
+                    id="govIdExpiration"
+                    type="date"
+                    {...form.register("govIdExpiration")}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="contactType">Contact Type</Label>
+                  <Select 
+                    value={form.watch("contactType")} 
+                    onValueChange={(value) => form.setValue("contactType", value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select contact type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="client">Client</SelectItem>
+                      <SelectItem value="prospect">Prospect</SelectItem>
+                      <SelectItem value="team_member">Team Member</SelectItem>
+                      <SelectItem value="strategic_partner">Strategic Partner</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select 
+                    value={form.watch("status")} 
+                    onValueChange={(value) => form.setValue("status", value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="follow_up">Follow Up</SelectItem>
+                      <SelectItem value="converted">Converted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contact" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+              <CardDescription>Phone numbers and email addresses</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="cellPhone">Cell Phone</Label>
+                  <Input
+                    id="cellPhone"
+                    {...form.register("cellPhone")}
+                    placeholder="Enter cell phone"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workPhone">Work Phone</Label>
+                  <Input
+                    id="workPhone"
+                    {...form.register("workPhone")}
+                    placeholder="Enter work phone"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="personalEmail">Personal Email</Label>
+                  <Input
+                    id="personalEmail"
+                    type="email"
+                    {...form.register("personalEmail")}
+                    placeholder="Enter personal email"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workEmail">Work Email</Label>
+                  <Input
+                    id="workEmail"
+                    type="email"
+                    {...form.register("workEmail")}
+                    placeholder="Enter work email"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="preferredContactMethod">Preferred Contact Method</Label>
+                <Select value={form.watch("preferredContactMethod")} onValueChange={(value) => form.setValue("preferredContactMethod", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select preferred method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cell">Cell Phone</SelectItem>
+                    <SelectItem value="work_phone">Work Phone</SelectItem>
+                    <SelectItem value="personal_email">Personal Email</SelectItem>
+                    <SelectItem value="work_email">Work Email</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="spouse" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Spouse Information</CardTitle>
+              <CardDescription>Details about the client's spouse</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="spouseFirstName">Spouse First Name</Label>
+                  <Input
+                    id="spouseFirstName"
+                    {...form.register("spouseFirstName")}
+                    placeholder="Enter spouse first name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="spouseLastName">Spouse Last Name</Label>
+                  <Input
+                    id="spouseLastName"
+                    {...form.register("spouseLastName")}
+                    placeholder="Enter spouse last name"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="spouseNickname">Spouse Nickname</Label>
+                  <Input
+                    id="spouseNickname"
+                    {...form.register("spouseNickname")}
+                    placeholder="Enter spouse nickname"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="spouseGender">Spouse Gender</Label>
+                  <Select value={form.watch("spouseGender")} onValueChange={(value) => form.setValue("spouseGender", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="spouseDateOfBirth">Spouse Date of Birth</Label>
+                  <Input
+                    id="spouseDateOfBirth"
+                    type="date"
+                    {...form.register("spouseDateOfBirth")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="marriageDate">Marriage Date</Label>
+                  <Input
+                    id="marriageDate"
+                    type="date"
+                    {...form.register("marriageDate")}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="spouseCellPhone">Spouse Cell Phone</Label>
+                  <Input
+                    id="spouseCellPhone"
+                    {...form.register("spouseCellPhone")}
+                    placeholder="Enter spouse cell phone"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="spousePersonalEmail">Spouse Personal Email</Label>
+                  <Input
+                    id="spousePersonalEmail"
+                    type="email"
+                    {...form.register("spousePersonalEmail")}
+                    placeholder="Enter spouse email"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="address" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Address Information</CardTitle>
+              <CardDescription>Mailing and home addresses</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <h4 className="font-semibold">Mailing Address</h4>
+                <div>
+                  <Label htmlFor="mailingAddressStreet1">Street Address</Label>
+                  <Input
+                    id="mailingAddressStreet1"
+                    {...form.register("mailingAddressStreet1")}
+                    placeholder="Enter street address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="mailingAddressStreet2">Street Address 2</Label>
+                  <Input
+                    id="mailingAddressStreet2"
+                    {...form.register("mailingAddressStreet2")}
+                    placeholder="Apartment, suite, etc."
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="mailingAddressCity">City</Label>
+                    <Input
+                      id="mailingAddressCity"
+                      {...form.register("mailingAddressCity")}
+                      placeholder="Enter city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="mailingAddressState">State</Label>
+                    <Input
+                      id="mailingAddressState"
+                      {...form.register("mailingAddressState")}
+                      placeholder="Enter state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="mailingAddressZip">ZIP Code</Label>
+                    <Input
+                      id="mailingAddressZip"
+                      {...form.register("mailingAddressZip")}
+                      placeholder="Enter ZIP code"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-semibold">Home Address</h4>
+                <div>
+                  <Label htmlFor="homeAddressStreet1">Street Address</Label>
+                  <Input
+                    id="homeAddressStreet1"
+                    {...form.register("homeAddressStreet1")}
+                    placeholder="Enter street address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="homeAddressStreet2">Street Address 2</Label>
+                  <Input
+                    id="homeAddressStreet2"
+                    {...form.register("homeAddressStreet2")}
+                    placeholder="Apartment, suite, etc."
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="homeAddressCity">City</Label>
+                    <Input
+                      id="homeAddressCity"
+                      {...form.register("homeAddressCity")}
+                      placeholder="Enter city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="homeAddressState">State</Label>
+                    <Input
+                      id="homeAddressState"
+                      {...form.register("homeAddressState")}
+                      placeholder="Enter state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="homeAddressZip">ZIP Code</Label>
+                    <Input
+                      id="homeAddressZip"
+                      {...form.register("homeAddressZip")}
+                      placeholder="Enter ZIP code"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="children" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Children Information</CardTitle>
+              <CardDescription>Details about the client's children</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {[1, 2, 3, 4, 5, 6, 7].map((childNum) => (
+                <div key={childNum} className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-semibold">Child {childNum}</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor={`child${childNum}FirstName`}>First Name</Label>
+                      <Input
+                        id={`child${childNum}FirstName`}
+                        {...form.register(`child${childNum}FirstName` as keyof InsertContact)}
+                        placeholder="Enter first name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`child${childNum}LastName`}>Last Name</Label>
+                      <Input
+                        id={`child${childNum}LastName`}
+                        {...form.register(`child${childNum}LastName` as keyof InsertContact)}
+                        placeholder="Enter last name"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor={`child${childNum}Gender`}>Gender</Label>
+                      <Select value={form.watch(`child${childNum}Gender` as keyof InsertContact)} onValueChange={(value) => form.setValue(`child${childNum}Gender` as keyof InsertContact, value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor={`child${childNum}DateOfBirth`}>Date of Birth</Label>
+                      <Input
+                        id={`child${childNum}DateOfBirth`}
+                        type="date"
+                        {...form.register(`child${childNum}DateOfBirth` as keyof InsertContact)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="professionals" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Professional Contacts</CardTitle>
+              <CardDescription>Related professionals and service providers</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {[
+                { key: "investment", label: "Investment Advisor" },
+                { key: "tax", label: "Tax Professional" },
+                { key: "estateAtty", label: "Estate Attorney" },
+                { key: "pnc", label: "Property & Casualty Insurance" },
+                { key: "lifeIns", label: "Life Insurance Agent" },
+                { key: "other", label: "Other Professional" },
+              ].map((professional) => (
+                <div key={professional.key} className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-semibold">{professional.label}</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor={`${professional.key}Name`}>Name</Label>
+                      <Input
+                        id={`${professional.key}Name`}
+                        {...form.register(`${professional.key}Name` as keyof InsertContact)}
+                        placeholder="Enter name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`${professional.key}Email`}>Email</Label>
+                      <Input
+                        id={`${professional.key}Email`}
+                        type="email"
+                        {...form.register(`${professional.key}Email` as keyof InsertContact)}
+                        placeholder="Enter email"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`${professional.key}Phone`}>Phone</Label>
+                      <Input
+                        id={`${professional.key}Phone`}
+                        {...form.register(`${professional.key}Phone` as keyof InsertContact)}
+                        placeholder="Enter phone"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="notes">Notes</Label>
+          <Textarea
+            id="notes"
+            {...form.register("notes")}
+            placeholder="Enter any additional notes"
+            rows={3}
           />
         </div>
-        
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone</FormLabel>
-              <FormControl>
-                <Input type="tel" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="company"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="position"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Position</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="contactType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contact Type *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select contact type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="client">Client</SelectItem>
-                  <SelectItem value="prospect">Prospect</SelectItem>
-                  <SelectItem value="team_member">Team Member</SelectItem>
-                  <SelectItem value="strategic_partner">Strategic Partner</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="follow_up">Follow Up</SelectItem>
-                  <SelectItem value="converted">Converted</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} rows={3} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button 
-            type="submit" 
-            disabled={createContactMutation.isPending}
-            className="bg-primary hover:bg-primary/90"
-          >
-            {createContactMutation.isPending ? "Creating..." : "Create Contact"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+
+        <Button 
+          type="submit" 
+          disabled={isSubmitting || mutation.isPending}
+          className="w-full"
+        >
+          {isSubmitting || mutation.isPending ? "Creating..." : "Create Contact"}
+        </Button>
+      </div>
+    </form>
   );
 }

@@ -133,7 +133,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createContact(contact: InsertContact, userId: string): Promise<Contact> {
-    const contactData = { ...contact, createdBy: userId } as any;
+    // Convert date strings to Date objects
+    const processedContact = { ...contact } as any;
+    
+    // Handle date conversions
+    const dateFields = [
+      'dateOfBirth', 'dateOfDeath', 'govIdExpiration', 'spouseDateOfBirth', 
+      'spouseDateOfDeath', 'spouseGovIdExpiration', 'marriageDate',
+      'child1DateOfBirth', 'child1DateOfDeath', 'child2DateOfBirth', 'child2DateOfDeath',
+      'child3DateOfBirth', 'child3DateOfDeath', 'child4DateOfBirth', 'child4DateOfDeath',
+      'child5DateOfBirth', 'child5DateOfDeath', 'child6DateOfBirth', 'child6DateOfDeath',
+      'child7DateOfBirth', 'child7DateOfDeath'
+    ];
+    
+    dateFields.forEach(field => {
+      if (processedContact[field] && processedContact[field].trim()) {
+        processedContact[field] = new Date(processedContact[field]);
+      } else {
+        processedContact[field] = null;
+      }
+    });
+    
+    const contactData = { ...processedContact, createdBy: userId };
     const [newContact] = await db
       .insert(contacts)
       .values(contactData)
