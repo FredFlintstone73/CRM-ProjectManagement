@@ -32,7 +32,7 @@ export default function ProjectDetail() {
   const [showProjectEdit, setShowProjectEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
-  const [sortBy, setSortBy] = useState<'assignee' | 'dueDate' | 'created'>('created');
+  const [sortBy, setSortBy] = useState<'assignee' | 'dueDate'>('assignee');
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id],
@@ -219,10 +219,8 @@ export default function ProjectDetail() {
       if (!a.dueDate) return 1;
       if (!b.dueDate) return -1;
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-    } else {
-      // Default sort by created date (newest first)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
+    return 0;
   }) : [];
 
   if (projectLoading || tasksLoading) {
@@ -380,12 +378,11 @@ export default function ProjectDetail() {
             {tasks && tasks.length > 0 && (
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="w-4 h-4 text-gray-500" />
-                <Select value={sortBy} onValueChange={(value: 'assignee' | 'dueDate' | 'created') => setSortBy(value)}>
+                <Select value={sortBy} onValueChange={(value: 'assignee' | 'dueDate') => setSortBy(value)}>
                   <SelectTrigger className="w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="created">Created Date</SelectItem>
                     <SelectItem value="assignee">Assignee</SelectItem>
                     <SelectItem value="dueDate">Due Date</SelectItem>
                   </SelectContent>
@@ -400,63 +397,66 @@ export default function ProjectDetail() {
               <p className="text-gray-500">No tasks yet. Add your first task to get started.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {sortedTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleToggleTask(task.id, task.status === 'completed')}
-                      className="text-gray-500 hover:text-primary"
-                    >
-                      {task.status === 'completed' ? (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <Circle className="w-5 h-5" />
-                      )}
-                    </button>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
-                          {task.title}
-                        </h3>
-                      </div>
-                      
-                      {task.description && (
-                        <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-                      )}
-                      
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span>Assigned to: {getAssigneeName(task.assignedTo)}</span>
-                        {task.dueDate && (
-                          <span>Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
+            <div className="max-h-96 overflow-y-auto">
+              <div className="space-y-1">
+                {sortedTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between p-3 border-b hover:bg-gray-50 last:border-b-0"
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <button
+                        onClick={() => handleToggleTask(task.id, task.status === 'completed')}
+                        className="text-gray-500 hover:text-primary flex-shrink-0"
+                      >
+                        {task.status === 'completed' ? (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <Circle className="w-4 h-4" />
                         )}
+                      </button>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className={`font-medium text-sm ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
+                            {task.title}
+                          </h3>
+                        </div>
+                        
+                        {task.description && (
+                          <p className="text-xs text-gray-600 mb-1 truncate">{task.description}</p>
+                        )}
+                        
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span>Assigned to: {getAssigneeName(task.assignedTo)}</span>
+                          {task.dueDate && (
+                            <span>Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditTask(task)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditTask(task)}
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteTask(task.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </CardContent>

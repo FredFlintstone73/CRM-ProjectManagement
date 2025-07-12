@@ -622,20 +622,26 @@ export class DatabaseStorage implements IStorage {
 
   // Helper method to find or create a contact for a user
   async findOrCreateUserContact(userId: string): Promise<Contact> {
-    // First, try to find an existing contact for this user
-    const existingContact = await db
-      .select()
-      .from(contacts)
-      .where(eq(contacts.createdBy, userId))
-      .limit(1);
+    // First, try to find an existing contact that represents this user
+    // Look for a team member contact with the same email as the user
+    const user = await this.getUser(userId);
     
-    if (existingContact.length > 0) {
-      return existingContact[0];
+    if (user?.email) {
+      const existingContact = await db
+        .select()
+        .from(contacts)
+        .where(and(
+          eq(contacts.email, user.email),
+          eq(contacts.contactType, 'team_member')
+        ))
+        .limit(1);
+      
+      if (existingContact.length > 0) {
+        return existingContact[0];
+      }
     }
     
-    // If no contact exists, create a new one
-    // Get user information
-    const user = await this.getUser(userId);
+    // If no contact exists, create a new one for this user
     const newContact = await this.createContact({
       contactType: 'team_member',
       firstName: user?.firstName || 'User',

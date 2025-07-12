@@ -178,3 +178,11 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Dashboard Metrics**: Modern metric cards with trend indicators and percentage changes
 - **Component Library**: Comprehensive CSS component system with status badges and priority indicators
 - **Responsive Layout**: Mobile-first design with proper grid systems and spacing
+
+### Task Management Enhancement (July 12, 2025)
+- **Removed "Created Date" Sort Option**: Simplified task sorting to only include Assignee and Due Date options
+- **Row View Implementation**: Changed task display from card view to compact row view with scrollable container
+- **Improved Task Assignment Logic**: Fixed "Assign to me" functionality to correctly identify current user
+- **Database Validation**: Added server-side validation to ensure only team members can be assigned to tasks
+- **Task Display Optimization**: Compact row design with fixed height scrollable container (max-height: 96px)
+- **Assignment Cleanup**: Removed incorrect client assignments from existing tasks
