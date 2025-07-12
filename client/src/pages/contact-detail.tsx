@@ -103,6 +103,25 @@ export default function ContactDetail() {
     }
   };
 
+  const formatDisplayValue = (value: string | null | undefined) => {
+    if (!value) return "Not specified";
+    
+    // Handle snake_case to Title Case conversion
+    if (value.includes('_')) {
+      return value
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+    
+    // Handle lowercase strings
+    if (value === value.toLowerCase()) {
+      return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    }
+    
+    return value;
+  };
+
   return (
     <div className="flex-1 overflow-auto">
       <Header
@@ -297,7 +316,7 @@ export default function ContactDetail() {
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Gender:</span>
-                      <span>{contact.gender || "Not specified"}</span>
+                      <span>{formatDisplayValue(contact.gender)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Date of Birth:</span>
@@ -334,7 +353,7 @@ export default function ContactDetail() {
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium">Preferred Contact:</span>
-                        <span>{contact.preferredContactMethod || "Not specified"}</span>
+                        <span>{formatDisplayValue(contact.preferredContactMethod)}</span>
                       </div>
                     </div>
                   </div>
@@ -344,7 +363,7 @@ export default function ContactDetail() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="font-medium">ID Type:</span>
-                        <span>{contact.govIdType || "Not specified"}</span>
+                        <span>{formatDisplayValue(contact.govIdType)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium">ID Number:</span>
@@ -379,7 +398,7 @@ export default function ContactDetail() {
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Gender:</span>
-                      <span>{contact.spouseGender || "Not specified"}</span>
+                      <span>{formatDisplayValue(contact.spouseGender)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Date of Birth:</span>
@@ -416,7 +435,7 @@ export default function ContactDetail() {
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium">Preferred Contact:</span>
-                        <span>{contact.spousePreferredContactMethod || "Not specified"}</span>
+                        <span>{formatDisplayValue(contact.spousePreferredContactMethod)}</span>
                       </div>
                     </div>
                   </div>
@@ -426,7 +445,7 @@ export default function ContactDetail() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="font-medium">ID Type:</span>
-                        <span>{contact.spouseGovIdType || "Not specified"}</span>
+                        <span>{formatDisplayValue(contact.spouseGovIdType)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium">ID Number:</span>
@@ -518,7 +537,7 @@ export default function ContactDetail() {
                           <h5 className="font-semibold">Child {childNum}</h5>
                           <div className="space-y-1 text-sm">
                             <div><span className="font-medium">Name:</span> {firstName} {lastName}</div>
-                            <div><span className="font-medium">Gender:</span> {gender || "Not specified"}</div>
+                            <div><span className="font-medium">Gender:</span> {formatDisplayValue(gender)}</div>
                             <div><span className="font-medium">Date of Birth:</span> {formatDate(dateOfBirth)}</div>
                           </div>
                         </div>
