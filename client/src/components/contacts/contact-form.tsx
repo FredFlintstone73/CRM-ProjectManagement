@@ -149,13 +149,21 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="dateOfBirth">Date of Birth</Label>
                   <Input
                     id="dateOfBirth"
                     type="date"
                     {...form.register("dateOfBirth")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dateOfDeath">Date of Death</Label>
+                  <Input
+                    id="dateOfDeath"
+                    type="date"
+                    {...form.register("dateOfDeath")}
                   />
                 </div>
                 <div>
@@ -355,13 +363,21 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="spouseDateOfBirth">Spouse Date of Birth</Label>
                   <Input
                     id="spouseDateOfBirth"
                     type="date"
                     {...form.register("spouseDateOfBirth")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="spouseDateOfDeath">Spouse Date of Death</Label>
+                  <Input
+                    id="spouseDateOfDeath"
+                    type="date"
+                    {...form.register("spouseDateOfDeath")}
                   />
                 </div>
                 <div>
@@ -527,7 +543,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor={`child${childNum}Gender`}>Gender</Label>
                       <Select value={form.watch(`child${childNum}Gender` as keyof InsertContact)} onValueChange={(value) => form.setValue(`child${childNum}Gender` as keyof InsertContact, value)}>
@@ -547,6 +563,14 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                         id={`child${childNum}DateOfBirth`}
                         type="date"
                         {...form.register(`child${childNum}DateOfBirth` as keyof InsertContact)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`child${childNum}DateOfDeath`}>Date of Death</Label>
+                      <Input
+                        id={`child${childNum}DateOfDeath`}
+                        type="date"
+                        {...form.register(`child${childNum}DateOfDeath` as keyof InsertContact)}
                       />
                     </div>
                   </div>
