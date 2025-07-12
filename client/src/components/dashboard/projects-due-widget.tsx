@@ -136,7 +136,7 @@ export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetP
         {!isLoading && !error && projects && (
           <>
             <div className="mb-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-[16px]">
                 <strong>{projects.length}</strong> projects due in the {currentRange.label.toLowerCase()}
               </p>
             </div>
