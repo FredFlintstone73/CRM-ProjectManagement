@@ -208,11 +208,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
-      await storage.deleteProject(parseInt(req.params.id));
+      const projectId = parseInt(req.params.id);
+      
+      // Check if project exists
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      await storage.deleteProject(projectId);
       res.json({ message: "Project deleted successfully" });
     } catch (error) {
       console.error("Error deleting project:", error);
-      res.status(500).json({ message: "Failed to delete project" });
+      res.status(500).json({ message: `Failed to delete project: ${error.message}` });
     }
   });
 

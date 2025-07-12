@@ -102,11 +102,18 @@ export default function ProjectDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
       toast({ title: "Project deleted successfully" });
       setLocation('/projects');
     },
-    onError: () => {
-      toast({ title: "Failed to delete project", variant: "destructive" });
+    onError: (error: any) => {
+      console.error('Delete project error:', error);
+      const errorMessage = error.message || "Failed to delete project";
+      toast({ 
+        title: "Delete Failed", 
+        description: errorMessage,
+        variant: "destructive" 
+      });
     },
   });
 
