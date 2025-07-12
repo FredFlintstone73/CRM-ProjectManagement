@@ -176,7 +176,7 @@ export default function ProjectsDueWidget() {
                             {project.dueDate && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
-                                <span>Due {format(new Date(project.dueDate), 'MMM dd, yyyy')}</span>
+                                <span>Meeting {format(new Date(project.dueDate), 'MMM dd, yyyy')}</span>
                               </div>
                             )}
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -194,8 +194,8 @@ export default function ProjectsDueWidget() {
                             daysUntilDue <= 14 ? 'text-orange-600' : 
                             'text-green-600'
                           }`}>
-                            {daysUntilDue === 0 ? 'Due today' :
-                             daysUntilDue === 1 ? 'Due tomorrow' :
+                            {daysUntilDue === 0 ? 'Meeting today' :
+                             daysUntilDue === 1 ? 'Meeting tomorrow' :
                              daysUntilDue > 0 ? `${daysUntilDue} days left` :
                              `${Math.abs(daysUntilDue)} days overdue`}
                           </div>
