@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Plus, Mail, Phone, Building } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Search, Plus, Mail, Phone, Building, Grid, List } from "lucide-react";
 import ContactForm from "@/components/contacts/contact-form";
 import type { Contact } from "@shared/schema";
 
@@ -29,6 +30,7 @@ export default function Contacts() {
     strategic_partner: true
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'cards' | 'rows'>('cards');
 
   // Handle URL query parameters for contact type filtering
   useEffect(() => {
@@ -214,90 +216,196 @@ export default function Contacts() {
               </Dialog>
             </div>
             
-            {/* Category Toggles */}
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Show:</span>
-              {Object.entries(visibleTypes).map(([type, isVisible]) => (
-                <Toggle
-                  key={type}
-                  pressed={isVisible}
-                  onPressedChange={() => toggleContactType(type as keyof typeof visibleTypes)}
-                  variant="outline"
-                  className="data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800"
-                >
-                  {getContactTypeLabel(type)}
-                </Toggle>
-              ))}
+            {/* Category Toggles and View Options */}
+            <div className="flex flex-wrap items-center gap-4 justify-between">
+              <div className="flex flex-wrap gap-2">
+                <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Show:</span>
+                {Object.entries(visibleTypes).map(([type, isVisible]) => (
+                  <Toggle
+                    key={type}
+                    pressed={isVisible}
+                    onPressedChange={() => toggleContactType(type as keyof typeof visibleTypes)}
+                    variant="outline"
+                    className="data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800"
+                  >
+                    {getContactTypeLabel(type)}
+                  </Toggle>
+                ))}
+              </div>
+              
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700">View:</span>
+                <div className="flex rounded-lg border">
+                  <Button
+                    variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('cards')}
+                    className="rounded-r-none"
+                  >
+                    <Grid className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'rows' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('rows')}
+                    className="rounded-l-none"
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Contacts Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredContacts.map((contact) => (
-              <Card key={contact.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Avatar>
-                        <AvatarImage src="" alt={`${contact.firstName} ${contact.lastName}`} />
-                        <AvatarFallback>
-                          {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-lg">
-                          <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer">
-                            {contact.familyName || `${contact.firstName} ${contact.lastName}`}
-                          </Link>
-                        </CardTitle>
-                        {contact.company && (
-                          <p className="text-sm text-gray-600">{contact.company}</p>
-                        )}
+          {/* Contacts Display */}
+          {viewMode === 'cards' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredContacts.map((contact) => (
+                <Card key={contact.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar>
+                          <AvatarImage src="" alt={`${contact.firstName} ${contact.lastName}`} />
+                          <AvatarFallback>
+                            {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">
+                            <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer">
+                              {contact.familyName || `${contact.firstName} ${contact.lastName}`}
+                            </Link>
+                          </CardTitle>
+                          {contact.company && (
+                            <p className="text-sm text-gray-600">{contact.company}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className={getContactTypeColor(contact.contactType)}>
+                          {contact.contactType.replace('_', ' ')}
+                        </Badge>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Badge className={getContactTypeColor(contact.contactType)}>
-                        {contact.contactType.replace('_', ' ')}
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {contact.personalEmail && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Mail className="w-4 h-4" />
+                        <span>{contact.personalEmail}</span>
+                      </div>
+                    )}
+                    {contact.cellPhone && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Phone className="w-4 h-4" />
+                        <span>{contact.cellPhone}</span>
+                      </div>
+                    )}
+                    {contact.position && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Building className="w-4 h-4" />
+                        <span>{contact.position}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between pt-2">
+                      <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
+                        {contact.status || 'active'}
                       </Badge>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteContactMutation.mutate(contact.id)}
+                        disabled={deleteContactMutation.isPending}
+                      >
+                        Delete
+                      </Button>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {contact.email && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Mail className="w-4 h-4" />
-                      <span>{contact.email}</span>
-                    </div>
-                  )}
-                  {contact.phone && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Phone className="w-4 h-4" />
-                      <span>{contact.phone}</span>
-                    </div>
-                  )}
-                  {contact.position && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Building className="w-4 h-4" />
-                      <span>{contact.position}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between pt-2">
-                    <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
-                      {contact.status || 'active'}
-                    </Badge>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteContactMutation.mutate(contact.id)}
-                      disabled={deleteContactMutation.isPending}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredContacts.map((contact) => (
+                    <TableRow key={contact.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src="" alt={`${contact.firstName} ${contact.lastName}`} />
+                            <AvatarFallback className="text-xs">
+                              {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer font-medium">
+                              {contact.familyName || `${contact.firstName} ${contact.lastName}`}
+                            </Link>
+                            {contact.company && (
+                              <p className="text-sm text-gray-600">{contact.company}</p>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getContactTypeColor(contact.contactType)}>
+                          {contact.contactType.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          {contact.personalEmail && (
+                            <>
+                              <Mail className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm">{contact.personalEmail}</span>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          {contact.cellPhone && (
+                            <>
+                              <Phone className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm">{contact.cellPhone}</span>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
+                          {contact.status || 'active'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteContactMutation.mutate(contact.id)}
+                          disabled={deleteContactMutation.isPending}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
           {filteredContacts.length === 0 && (
             <div className="text-center py-12">
