@@ -382,7 +382,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let tasks = [];
       try {
-        tasks = typeof template.tasks === 'string' ? JSON.parse(template.tasks) : template.tasks || [];
+        const taskData = typeof template.tasks === 'string' ? JSON.parse(template.tasks) : template.tasks || [];
+        
+        // Convert sectioned data to flat array format
+        if (taskData.sections) {
+          tasks = Object.values(taskData.sections).flat().map((task: any) => ({
+            name: task.title,
+            description: task.description,
+            priority: task.priority,
+            estimatedDays: task.estimatedDays || 1,
+            parentTask: task.parentTask
+          }));
+        } else if (Array.isArray(taskData)) {
+          // Already in flat array format
+          tasks = taskData.map((task: any) => ({
+            name: task.title || task.name,
+            description: task.description,
+            priority: task.priority,
+            estimatedDays: task.estimatedDays || 1,
+            parentTask: task.parentTask
+          }));
+        }
       } catch (error) {
         console.error('Error parsing template tasks:', error);
         return res.status(500).json({ message: "Failed to parse template tasks" });

@@ -213,9 +213,29 @@ export default function TemplateDetail() {
 
   let tasks: TaskTemplate[] = [];
   try {
-    tasks = typeof template.tasks === 'string' 
+    const taskData = typeof template.tasks === 'string' 
       ? JSON.parse(template.tasks) 
       : template.tasks || [];
+    
+    // Convert sectioned data to flat array format
+    if (taskData.sections) {
+      tasks = Object.values(taskData.sections).flat().map((task: any) => ({
+        name: task.title,
+        description: task.description,
+        priority: task.priority,
+        estimatedDays: task.estimatedDays || 1,
+        parentTask: task.parentTask
+      }));
+    } else if (Array.isArray(taskData)) {
+      // Already in flat array format
+      tasks = taskData.map((task: any) => ({
+        name: task.title || task.name,
+        description: task.description,
+        priority: task.priority,
+        estimatedDays: task.estimatedDays || 1,
+        parentTask: task.parentTask
+      }));
+    }
   } catch (error) {
     console.error('Error parsing tasks:', error);
     tasks = [];
@@ -224,6 +244,14 @@ export default function TemplateDetail() {
   const groupedTasks = groupTasksByPhase(tasks);
   const totalTasks = tasks.length;
   const totalDays = tasks.reduce((sum, task) => sum + (task.estimatedDays || 0), 0);
+  
+  // Create a global task index mapping for proper routing
+  let globalTaskIndex = 0;
+  const taskIndexMap = new Map<string, number>();
+  
+  tasks.forEach((task, index) => {
+    taskIndexMap.set(task.name, index);
+  });
 
   return (
     <>
@@ -330,12 +358,14 @@ export default function TemplateDetail() {
                       <CardContent className="pt-0">
                         <Separator className="mb-4" />
                         <div className="space-y-3">
-                          {phaseTasks.map((task, taskIndex) => (
+                          {phaseTasks.map((task, taskIndex) => {
+                            const globalIndex = taskIndexMap.get(task.name) || 0;
+                            return (
                             <div key={taskIndex} className="space-y-2">
                               {/* Main Task */}
                               <div className="border rounded-lg p-4 bg-white">
                                 <div className="flex items-start justify-between mb-2">
-                                  <Link href={`/templates/${id}/tasks/${taskIndex}`}>
+                                  <Link href={`/templates/${id}/tasks/${globalIndex}`}>
                                     <h4 className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer transition-colors">
                                       {task.name}
                                     </h4>
@@ -358,10 +388,12 @@ export default function TemplateDetail() {
                               {/* Subtasks */}
                               {task.subtasks && task.subtasks.length > 0 && (
                                 <div className="ml-6 space-y-2">
-                                  {task.subtasks.map((subtask, subtaskIndex) => (
+                                  {task.subtasks.map((subtask, subtaskIndex) => {
+                                    const subtaskGlobalIndex = taskIndexMap.get(subtask.name) || globalIndex;
+                                    return (
                                     <div key={subtaskIndex} className="border rounded-lg p-3 bg-gray-50 border-l-4 border-l-blue-200">
                                       <div className="flex items-start justify-between">
-                                        <Link href={`/templates/${id}/tasks/${taskIndex}-${subtaskIndex}`}>
+                                        <Link href={`/templates/${id}/tasks/${subtaskGlobalIndex}`}>
                                           <h5 className="text-sm font-medium text-gray-800 hover:text-blue-600 cursor-pointer transition-colors">
                                             {subtask.name}
                                           </h5>
@@ -379,11 +411,12 @@ export default function TemplateDetail() {
                                         </div>
                                       </div>
                                     </div>
-                                  ))}
+                                  )})}
                                 </div>
                               )}
                             </div>
-                          ))}
+                          );
+                          })}
                         </div>
                       </CardContent>
                     </CollapsibleContent>
