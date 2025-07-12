@@ -339,6 +339,24 @@ export default function ContactDetail() {
                       </div>
                     </div>
                   </div>
+                  
+                  <div className="pt-4 border-t">
+                    <h4 className="font-semibold mb-2">ID Information</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Type:</span>
+                        <span>{contact.govIdType || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Number:</span>
+                        <span>{contact.govIdNumber || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Expiration:</span>
+                        <span>{formatDate(contact.govIdExpiration) || "Not specified"}</span>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
