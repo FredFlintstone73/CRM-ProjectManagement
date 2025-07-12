@@ -502,7 +502,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProjectTemplate(id: number): Promise<void> {
-    await db.delete(projectTemplates).where(eq(projectTemplates.id, id));
+    try {
+      const result = await db.delete(projectTemplates).where(eq(projectTemplates.id, id));
+      console.log(`Deleted project template ${id}:`, result);
+    } catch (error) {
+      console.error(`Error deleting project template ${id}:`, error);
+      throw error;
+    }
   }
 
   // Email interaction operations

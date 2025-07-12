@@ -70,9 +70,10 @@ export default function Templates() {
         }, 500);
         return;
       }
+      console.error("Template deletion error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete template",
+        description: `Failed to delete template: ${error.message}`,
         variant: "destructive",
       });
     },

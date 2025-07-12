@@ -382,11 +382,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/project-templates/:id', isAuthenticated, async (req: any, res) => {
     try {
-      await storage.deleteProjectTemplate(parseInt(req.params.id));
+      const templateId = parseInt(req.params.id);
+      
+      // Check if template exists
+      const template = await storage.getProjectTemplate(templateId);
+      if (!template) {
+        return res.status(404).json({ message: "Project template not found" });
+      }
+      
+      await storage.deleteProjectTemplate(templateId);
       res.json({ message: "Project template deleted successfully" });
     } catch (error) {
       console.error("Error deleting project template:", error);
-      res.status(500).json({ message: "Failed to delete project template" });
+      res.status(500).json({ message: `Failed to delete project template: ${error.message}` });
     }
   });
 
