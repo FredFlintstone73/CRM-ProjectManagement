@@ -164,7 +164,11 @@ export default function ProjectDetail() {
   const getAssigneeName = (assignedTo: number | null) => {
     if (!assignedTo || !contacts) return 'Unassigned';
     const assignee = contacts.find(c => c.id === assignedTo);
-    return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown assignee';
+    if (!assignee) return 'Unknown assignee';
+    
+    // Add contact type indicator for clarity
+    const contactTypeLabel = assignee.contactType === 'team_member' ? '' : ` (${assignee.contactType})`;
+    return `${assignee.firstName} ${assignee.lastName}${contactTypeLabel}`;
   };
 
   const handleTaskCreated = () => {

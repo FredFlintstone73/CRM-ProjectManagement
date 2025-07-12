@@ -329,7 +329,13 @@ export class DatabaseStorage implements IStorage {
       if (processedTask.assignedTo.startsWith('team_')) {
         // Extract contact ID from team_xxx format
         const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
-        processedTask.assignedTo = contactId;
+        // Verify the contact is a team member
+        const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
+        if (contact.length > 0 && contact[0].contactType === 'team_member') {
+          processedTask.assignedTo = contactId;
+        } else {
+          processedTask.assignedTo = null;
+        }
       } else if (processedTask.assignedTo.startsWith('me_')) {
         // Handle "Assign to Me" - create or find user contact
         const currentUserId = processedTask.assignedTo.replace('me_', '');
@@ -377,7 +383,13 @@ export class DatabaseStorage implements IStorage {
       if (processedTask.assignedTo.startsWith('team_')) {
         // Extract contact ID from team_xxx format
         const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
-        processedTask.assignedTo = contactId;
+        // Verify the contact is a team member
+        const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
+        if (contact.length > 0 && contact[0].contactType === 'team_member') {
+          processedTask.assignedTo = contactId;
+        } else {
+          processedTask.assignedTo = null;
+        }
       } else if (processedTask.assignedTo.startsWith('me_')) {
         // Handle "Assign to Me" - create or find user contact
         const currentUserId = processedTask.assignedTo.replace('me_', '');
