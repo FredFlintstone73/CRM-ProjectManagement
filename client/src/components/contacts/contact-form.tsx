@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { insertContactSchema, type InsertContact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
@@ -23,6 +24,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sameAsMailingAddress, setSameAsMailingAddress] = useState(false);
 
   const form = useForm<InsertContact>({
     resolver: zodResolver(insertContactSchema),
@@ -70,6 +72,26 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
     setIsSubmitting(true);
     mutation.mutate(data);
     setIsSubmitting(false);
+  };
+
+  const handleSameAsMailingAddress = (value: string) => {
+    const isSame = value === "yes";
+    setSameAsMailingAddress(isSame);
+    
+    if (isSame) {
+      // Auto-populate home address with mailing address values
+      const mailingStreet1 = form.getValues("mailingAddressStreet1");
+      const mailingStreet2 = form.getValues("mailingAddressStreet2");
+      const mailingCity = form.getValues("mailingAddressCity");
+      const mailingState = form.getValues("mailingAddressState");
+      const mailingZip = form.getValues("mailingAddressZip");
+      
+      form.setValue("homeAddressStreet1", mailingStreet1);
+      form.setValue("homeAddressStreet2", mailingStreet2);
+      form.setValue("homeAddressCity", mailingCity);
+      form.setValue("homeAddressState", mailingState);
+      form.setValue("homeAddressZip", mailingZip);
+    }
   };
 
   return (
@@ -467,13 +489,35 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
               </div>
 
               <div className="space-y-4">
-                <h4 className="font-semibold">Home Address</h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">Home Address</h4>
+                  <div className="flex items-center space-x-4">
+                    <Label htmlFor="sameAsMailingAddress" className="text-sm font-medium">
+                      Same as Mailing Address
+                    </Label>
+                    <RadioGroup 
+                      value={sameAsMailingAddress ? "yes" : "no"}
+                      onValueChange={handleSameAsMailingAddress}
+                      className="flex items-center space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="same-yes" />
+                        <Label htmlFor="same-yes" className="text-sm">Yes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="same-no" />
+                        <Label htmlFor="same-no" className="text-sm">No</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
                 <div>
                   <Label htmlFor="homeAddressStreet1">Street Address</Label>
                   <Input
                     id="homeAddressStreet1"
                     {...form.register("homeAddressStreet1")}
                     placeholder="Enter street address"
+                    disabled={sameAsMailingAddress}
                   />
                 </div>
                 <div>
@@ -482,6 +526,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                     id="homeAddressStreet2"
                     {...form.register("homeAddressStreet2")}
                     placeholder="Apartment, suite, etc."
+                    disabled={sameAsMailingAddress}
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-4">
@@ -491,6 +536,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                       id="homeAddressCity"
                       {...form.register("homeAddressCity")}
                       placeholder="Enter city"
+                      disabled={sameAsMailingAddress}
                     />
                   </div>
                   <div>
@@ -499,6 +545,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                       id="homeAddressState"
                       {...form.register("homeAddressState")}
                       placeholder="Enter state"
+                      disabled={sameAsMailingAddress}
                     />
                   </div>
                   <div>
@@ -507,6 +554,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                       id="homeAddressZip"
                       {...form.register("homeAddressZip")}
                       placeholder="Enter ZIP code"
+                      disabled={sameAsMailingAddress}
                     />
                   </div>
                 </div>
