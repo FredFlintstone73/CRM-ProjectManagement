@@ -199,7 +199,7 @@ export default function Projects() {
                     {project.dueDate && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Calendar className="w-4 h-4" />
-                        <span>Due: {new Date(project.dueDate).toLocaleDateString()}</span>
+                        <span>Meeting: {new Date(project.dueDate).toLocaleDateString()}</span>
                       </div>
                     )}
                     
