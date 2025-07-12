@@ -219,7 +219,16 @@ export default function Projects() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                       <User className="w-4 h-4" />
-                      <span>{getFamilyName(project.clientId)}</span>
+                      {project.clientId ? (
+                        <Link 
+                          href={`/contacts/${project.clientId}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                        >
+                          {getFamilyName(project.clientId)}
+                        </Link>
+                      ) : (
+                        <span>{getFamilyName(project.clientId)}</span>
+                      )}
                     </div>
                     
                     {project.dueDate && (
@@ -287,7 +296,18 @@ export default function Projects() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{getFamilyName(project.clientId)}</TableCell>
+                      <TableCell>
+                        {project.clientId ? (
+                          <Link 
+                            href={`/contacts/${project.clientId}`}
+                            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                          >
+                            {getFamilyName(project.clientId)}
+                          </Link>
+                        ) : (
+                          <span>{getFamilyName(project.clientId)}</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Progress value={project.progress || 0} className="h-2 w-20" />
