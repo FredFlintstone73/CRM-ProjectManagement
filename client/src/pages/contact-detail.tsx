@@ -561,33 +561,33 @@ export default function ContactDetail() {
                   <div>
                     <h4 className="font-semibold mb-2">Investment Advisor</h4>
                     <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.investmentAdvisorName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.investmentAdvisorPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.investmentAdvisorEmail || "Not specified"}</div>
+                      <div><span className="font-medium">Name:</span> {contact.investmentName || "Not specified"}</div>
+                      <div><span className="font-medium">Phone:</span> {contact.investmentPhone || "Not specified"}</div>
+                      <div><span className="font-medium">Email:</span> {contact.investmentEmail || "Not specified"}</div>
                     </div>
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Tax Professional</h4>
                     <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.taxProfessionalName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.taxProfessionalPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.taxProfessionalEmail || "Not specified"}</div>
+                      <div><span className="font-medium">Name:</span> {contact.taxName || "Not specified"}</div>
+                      <div><span className="font-medium">Phone:</span> {contact.taxPhone || "Not specified"}</div>
+                      <div><span className="font-medium">Email:</span> {contact.taxEmail || "Not specified"}</div>
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Attorney</h4>
+                    <h4 className="font-semibold mb-2">Estate Attorney</h4>
                     <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.attorneyName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.attorneyPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.attorneyEmail || "Not specified"}</div>
+                      <div><span className="font-medium">Name:</span> {contact.estateAttyName || "Not specified"}</div>
+                      <div><span className="font-medium">Phone:</span> {contact.estateAttyPhone || "Not specified"}</div>
+                      <div><span className="font-medium">Email:</span> {contact.estateAttyEmail || "Not specified"}</div>
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Insurance Agent</h4>
+                    <h4 className="font-semibold mb-2">Property & Casualty Insurance</h4>
                     <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.insuranceAgentName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.insuranceAgentPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.insuranceAgentEmail || "Not specified"}</div>
+                      <div><span className="font-medium">Name:</span> {contact.pncName || "Not specified"}</div>
+                      <div><span className="font-medium">Phone:</span> {contact.pncPhone || "Not specified"}</div>
+                      <div><span className="font-medium">Email:</span> {contact.pncEmail || "Not specified"}</div>
                     </div>
                   </div>
                 </div>

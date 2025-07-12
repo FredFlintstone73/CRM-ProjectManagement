@@ -116,18 +116,18 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       child7Gender: contact.child7Gender || "",
       child7DateOfBirth: contact.child7DateOfBirth ? new Date(contact.child7DateOfBirth) : undefined,
       child7DateOfDeath: contact.child7DateOfDeath ? new Date(contact.child7DateOfDeath) : undefined,
-      investmentAdvisorName: contact.investmentAdvisorName || "",
-      investmentAdvisorPhone: contact.investmentAdvisorPhone || "",
-      investmentAdvisorEmail: contact.investmentAdvisorEmail || "",
-      taxProfessionalName: contact.taxProfessionalName || "",
-      taxProfessionalPhone: contact.taxProfessionalPhone || "",
-      taxProfessionalEmail: contact.taxProfessionalEmail || "",
-      attorneyName: contact.attorneyName || "",
-      attorneyPhone: contact.attorneyPhone || "",
-      attorneyEmail: contact.attorneyEmail || "",
-      insuranceAgentName: contact.insuranceAgentName || "",
-      insuranceAgentPhone: contact.insuranceAgentPhone || "",
-      insuranceAgentEmail: contact.insuranceAgentEmail || "",
+      investmentName: contact.investmentName || "",
+      investmentPhone: contact.investmentPhone || "",
+      investmentEmail: contact.investmentEmail || "",
+      taxName: contact.taxName || "",
+      taxPhone: contact.taxPhone || "",
+      taxEmail: contact.taxEmail || "",
+      estateAttyName: contact.estateAttyName || "",
+      estateAttyPhone: contact.estateAttyPhone || "",
+      estateAttyEmail: contact.estateAttyEmail || "",
+      pncName: contact.pncName || "",
+      pncPhone: contact.pncPhone || "",
+      pncEmail: contact.pncEmail || "",
       contactType: contact.contactType || "client",
       status: contact.status || "active",
     } : {
@@ -897,10 +897,10 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             </CardHeader>
             <CardContent className="space-y-6">
               {[
-                { key: "investmentAdvisor", label: "Investment Advisor" },
-                { key: "taxProfessional", label: "Tax Professional" },
-                { key: "attorney", label: "Attorney" },
-                { key: "insuranceAgent", label: "Insurance Agent" },
+                { key: "investment", label: "Investment Advisor" },
+                { key: "tax", label: "Tax Professional" },
+                { key: "estateAtty", label: "Estate Attorney" },
+                { key: "pnc", label: "Property & Casualty Insurance" },
               ].map((professional) => (
                 <div key={professional.key} className="space-y-4 p-4 border rounded-lg">
                   <h4 className="font-semibold">{professional.label}</h4>
