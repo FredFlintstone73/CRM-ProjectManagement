@@ -69,6 +69,9 @@ export default function ContactDetail() {
     },
   });
 
+
+
+  // Early returns after all hooks are declared
   if (contactLoading) {
     return (
       <div className="flex-1 p-6">
