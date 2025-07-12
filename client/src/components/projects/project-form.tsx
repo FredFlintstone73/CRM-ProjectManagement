@@ -37,6 +37,9 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
     queryKey: ['/api/contacts'],
   });
 
+  // Filter to only show clients
+  const clientContacts = contacts?.filter(contact => contact.contactType === 'client') || [];
+
   const createProjectMutation = useMutation({
     mutationFn: async (data: InsertProject) => {
       const response = await apiRequest("POST", "/api/projects", data);
@@ -140,7 +143,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {contacts?.map((contact) => (
+                  {clientContacts.map((contact) => (
                     <SelectItem key={contact.id} value={contact.id.toString()}>
                       {contact.familyName || `${contact.firstName} ${contact.lastName}`}
                     </SelectItem>
