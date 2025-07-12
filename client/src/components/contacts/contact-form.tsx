@@ -11,24 +11,124 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { insertContactSchema, type InsertContact } from "@shared/schema";
+import { insertContactSchema, type InsertContact, type Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 interface ContactFormProps {
+  contact?: Contact;
   onSuccess?: () => void;
 }
 
-export default function ContactForm({ onSuccess }: ContactFormProps) {
+export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sameAsMailingAddress, setSameAsMailingAddress] = useState(false);
+  const [sameAsMailingAddress, setSameAsMailingAddress] = useState(
+    contact ? contact.sameAsMailingAddress === "yes" : false
+  );
 
   const form = useForm<InsertContact>({
     resolver: zodResolver(insertContactSchema),
-    defaultValues: {
+    defaultValues: contact ? {
+      familyName: contact.familyName || "",
+      firstName: contact.firstName || "",
+      lastName: contact.lastName || "",
+      nickname: contact.nickname || "",
+      gender: contact.gender || "",
+      ssn: contact.ssn || "",
+      govIdType: contact.govIdType || "",
+      govIdNumber: contact.govIdNumber || "",
+      govIdExpiration: contact.govIdExpiration ? new Date(contact.govIdExpiration) : undefined,
+      dateOfBirth: contact.dateOfBirth ? new Date(contact.dateOfBirth) : undefined,
+      dateOfDeath: contact.dateOfDeath ? new Date(contact.dateOfDeath) : undefined,
+      cellPhone: contact.cellPhone || "",
+      personalEmail: contact.personalEmail || "",
+      workPhone: contact.workPhone || "",
+      workEmail: contact.workEmail || "",
+      preferredContactMethod: contact.preferredContactMethod || "",
+      spouseFirstName: contact.spouseFirstName || "",
+      spouseLastName: contact.spouseLastName || "",
+      spouseNickname: contact.spouseNickname || "",
+      spouseGender: contact.spouseGender || "",
+      spouseSSN: contact.spouseSSN || "",
+      spouseGovIdType: contact.spouseGovIdType || "",
+      spouseGovIdNumber: contact.spouseGovIdNumber || "",
+      spouseGovIdExpiration: contact.spouseGovIdExpiration ? new Date(contact.spouseGovIdExpiration) : undefined,
+      spouseDateOfBirth: contact.spouseDateOfBirth ? new Date(contact.spouseDateOfBirth) : undefined,
+      spouseDateOfDeath: contact.spouseDateOfDeath ? new Date(contact.spouseDateOfDeath) : undefined,
+      marriageDate: contact.marriageDate ? new Date(contact.marriageDate) : undefined,
+      spouseCellPhone: contact.spouseCellPhone || "",
+      spousePersonalEmail: contact.spousePersonalEmail || "",
+      spouseWorkPhone: contact.spouseWorkPhone || "",
+      spouseWorkEmail: contact.spouseWorkEmail || "",
+      spousePreferredContactMethod: contact.spousePreferredContactMethod || "",
+      mailingAddressStreet1: contact.mailingAddressStreet1 || "",
+      mailingAddressStreet2: contact.mailingAddressStreet2 || "",
+      mailingAddressCity: contact.mailingAddressCity || "",
+      mailingAddressState: contact.mailingAddressState || "",
+      mailingAddressZip: contact.mailingAddressZip || "",
+      homeAddressStreet1: contact.homeAddressStreet1 || "",
+      homeAddressStreet2: contact.homeAddressStreet2 || "",
+      homeAddressCity: contact.homeAddressCity || "",
+      homeAddressState: contact.homeAddressState || "",
+      homeAddressZip: contact.homeAddressZip || "",
+      vacationAddressStreet1: contact.vacationAddressStreet1 || "",
+      vacationAddressStreet2: contact.vacationAddressStreet2 || "",
+      vacationAddressCity: contact.vacationAddressCity || "",
+      vacationAddressState: contact.vacationAddressState || "",
+      vacationAddressZip: contact.vacationAddressZip || "",
+      child1FirstName: contact.child1FirstName || "",
+      child1LastName: contact.child1LastName || "",
+      child1Gender: contact.child1Gender || "",
+      child1DateOfBirth: contact.child1DateOfBirth ? new Date(contact.child1DateOfBirth) : undefined,
+      child1DateOfDeath: contact.child1DateOfDeath ? new Date(contact.child1DateOfDeath) : undefined,
+      child2FirstName: contact.child2FirstName || "",
+      child2LastName: contact.child2LastName || "",
+      child2Gender: contact.child2Gender || "",
+      child2DateOfBirth: contact.child2DateOfBirth ? new Date(contact.child2DateOfBirth) : undefined,
+      child2DateOfDeath: contact.child2DateOfDeath ? new Date(contact.child2DateOfDeath) : undefined,
+      child3FirstName: contact.child3FirstName || "",
+      child3LastName: contact.child3LastName || "",
+      child3Gender: contact.child3Gender || "",
+      child3DateOfBirth: contact.child3DateOfBirth ? new Date(contact.child3DateOfBirth) : undefined,
+      child3DateOfDeath: contact.child3DateOfDeath ? new Date(contact.child3DateOfDeath) : undefined,
+      child4FirstName: contact.child4FirstName || "",
+      child4LastName: contact.child4LastName || "",
+      child4Gender: contact.child4Gender || "",
+      child4DateOfBirth: contact.child4DateOfBirth ? new Date(contact.child4DateOfBirth) : undefined,
+      child4DateOfDeath: contact.child4DateOfDeath ? new Date(contact.child4DateOfDeath) : undefined,
+      child5FirstName: contact.child5FirstName || "",
+      child5LastName: contact.child5LastName || "",
+      child5Gender: contact.child5Gender || "",
+      child5DateOfBirth: contact.child5DateOfBirth ? new Date(contact.child5DateOfBirth) : undefined,
+      child5DateOfDeath: contact.child5DateOfDeath ? new Date(contact.child5DateOfDeath) : undefined,
+      child6FirstName: contact.child6FirstName || "",
+      child6LastName: contact.child6LastName || "",
+      child6Gender: contact.child6Gender || "",
+      child6DateOfBirth: contact.child6DateOfBirth ? new Date(contact.child6DateOfBirth) : undefined,
+      child6DateOfDeath: contact.child6DateOfDeath ? new Date(contact.child6DateOfDeath) : undefined,
+      child7FirstName: contact.child7FirstName || "",
+      child7LastName: contact.child7LastName || "",
+      child7Gender: contact.child7Gender || "",
+      child7DateOfBirth: contact.child7DateOfBirth ? new Date(contact.child7DateOfBirth) : undefined,
+      child7DateOfDeath: contact.child7DateOfDeath ? new Date(contact.child7DateOfDeath) : undefined,
+      investmentAdvisorName: contact.investmentAdvisorName || "",
+      investmentAdvisorPhone: contact.investmentAdvisorPhone || "",
+      investmentAdvisorEmail: contact.investmentAdvisorEmail || "",
+      taxProfessionalName: contact.taxProfessionalName || "",
+      taxProfessionalPhone: contact.taxProfessionalPhone || "",
+      taxProfessionalEmail: contact.taxProfessionalEmail || "",
+      attorneyName: contact.attorneyName || "",
+      attorneyPhone: contact.attorneyPhone || "",
+      attorneyEmail: contact.attorneyEmail || "",
+      insuranceAgentName: contact.insuranceAgentName || "",
+      insuranceAgentPhone: contact.insuranceAgentPhone || "",
+      insuranceAgentEmail: contact.insuranceAgentEmail || "",
+      contactType: contact.contactType || "client",
+      status: contact.status || "active",
+    } : {
       firstName: "",
       lastName: "",
       contactType: "client",
@@ -38,14 +138,20 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: InsertContact) => {
-      await apiRequest("POST", "/api/contacts", data);
+      if (contact) {
+        await apiRequest("PUT", `/api/contacts/${contact.id}`, data);
+      } else {
+        await apiRequest("POST", "/api/contacts", data);
+      }
     },
     onSuccess: () => {
       toast({
-        title: "Contact created",
-        description: "The contact has been successfully created.",
+        title: contact ? "Contact updated" : "Contact created",
+        description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
       });
-      form.reset();
+      if (!contact) {
+        form.reset();
+      }
       onSuccess?.();
     },
     onError: (error) => {
@@ -62,7 +168,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       }
       toast({
         title: "Error",
-        description: "Failed to create contact. Please try again.",
+        description: contact ? "Failed to update contact. Please try again." : "Failed to create contact. Please try again.",
         variant: "destructive",
       });
     },
@@ -813,7 +919,10 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
           disabled={isSubmitting || mutation.isPending}
           className="w-full"
         >
-          {isSubmitting || mutation.isPending ? "Creating..." : "Create Contact"}
+          {isSubmitting || mutation.isPending ? 
+            (contact ? "Updating..." : "Creating...") : 
+            (contact ? "Update Contact" : "Create Contact")
+          }
         </Button>
       </div>
     </form>

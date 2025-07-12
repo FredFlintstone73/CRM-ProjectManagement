@@ -1,15 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useParams, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit } from "lucide-react";
 import Header from "@/components/layout/header";
+import ContactForm from "@/components/contacts/contact-form";
 import type { Contact } from "@shared/schema";
 
 interface ContactDetailParams {
@@ -21,6 +23,8 @@ export default function ContactDetail() {
   const { isAuthenticated, isLoading } = useAuth();
   const { id } = useParams<ContactDetailParams>();
   const [, navigate] = useLocation();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -201,8 +205,32 @@ export default function ContactDetail() {
             </Card>
           )}
 
-          {/* Create Client Button */}
-          <Button className="w-full">CREATE CLIENT</Button>
+          {/* Edit Client Button */}
+          <Button 
+            className="w-full" 
+            onClick={() => setIsEditDialogOpen(true)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Client
+          </Button>
+          
+          {/* Edit Dialog */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Client Information</DialogTitle>
+              </DialogHeader>
+              <ContactForm 
+                contact={contact} 
+                onSuccess={() => {
+                  setIsEditDialogOpen(false);
+                  // Refresh the contact data after successful edit
+                  queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+                }} 
+              />
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Main Content */}
