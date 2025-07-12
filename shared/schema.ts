@@ -438,6 +438,7 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  createdBy: true,
 }).extend({
   // Handle string date inputs from forms
   startDate: z.string().optional(),

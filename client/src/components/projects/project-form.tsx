@@ -26,9 +26,9 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
       clientId: null,
       status: "planning",
       projectType: "frm",
-      startDate: null,
-      endDate: null,
-      dueDate: null,
+      startDate: "",
+      endDate: "",
+      dueDate: "",
       progress: 0,
     },
   });
@@ -192,7 +192,15 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
         />
         
         <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={createProjectMutation.isPending}>
+          <Button 
+            type="submit" 
+            disabled={createProjectMutation.isPending}
+            onClick={() => {
+              console.log("Create Meeting button clicked");
+              console.log("Form errors:", form.formState.errors);
+              console.log("Form values:", form.getValues());
+            }}
+          >
             {createProjectMutation.isPending ? "Creating..." : "Create Meeting"}
           </Button>
         </div>
