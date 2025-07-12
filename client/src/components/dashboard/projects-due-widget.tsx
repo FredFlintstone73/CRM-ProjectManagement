@@ -184,8 +184,8 @@ export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetP
                           </div>
                           <div className="space-y-1 mt-2 w-72">
                             <div className="flex justify-between text-xs">
-                              <span>Progress</span>
-                              <span>{project.progress}%</span>
+                              <span className="text-[14px]">Progress</span>
+                              <span className="text-[14px]">{project.progress}%</span>
                             </div>
                             <Progress value={project.progress || 0} className="h-1" />
                           </div>
