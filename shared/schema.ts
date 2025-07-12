@@ -143,6 +143,13 @@ export const contacts = pgTable("contacts", {
   homeAddressZip: varchar("home_address_zip"),
   sameAsMailingAddress: varchar("same_as_mailing_address"),
   
+  // Vacation Home Address Information
+  vacationAddressStreet1: varchar("vacation_address_street1"),
+  vacationAddressStreet2: varchar("vacation_address_street2"),
+  vacationAddressCity: varchar("vacation_address_city"),
+  vacationAddressState: varchar("vacation_address_state"),
+  vacationAddressZip: varchar("vacation_address_zip"),
+  
   // Children Information (up to 7 children)
   child1FirstName: varchar("child1_first_name"),
   child1LastName: varchar("child1_last_name"),

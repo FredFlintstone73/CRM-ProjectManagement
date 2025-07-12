@@ -632,6 +632,52 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
                   </div>
                 </div>
               </div>
+
+              <div className="space-y-4">
+                <h4 className="font-semibold">Vacation Home Address</h4>
+                <div>
+                  <Label htmlFor="vacationAddressStreet1">Street Address</Label>
+                  <Input
+                    id="vacationAddressStreet1"
+                    {...form.register("vacationAddressStreet1")}
+                    placeholder="Enter street address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="vacationAddressStreet2">Street Address 2</Label>
+                  <Input
+                    id="vacationAddressStreet2"
+                    {...form.register("vacationAddressStreet2")}
+                    placeholder="Apartment, suite, etc."
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="vacationAddressCity">City</Label>
+                    <Input
+                      id="vacationAddressCity"
+                      {...form.register("vacationAddressCity")}
+                      placeholder="Enter city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="vacationAddressState">State</Label>
+                    <Input
+                      id="vacationAddressState"
+                      {...form.register("vacationAddressState")}
+                      placeholder="Enter state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="vacationAddressZip">ZIP Code</Label>
+                    <Input
+                      id="vacationAddressZip"
+                      {...form.register("vacationAddressZip")}
+                      placeholder="Enter ZIP code"
+                    />
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
