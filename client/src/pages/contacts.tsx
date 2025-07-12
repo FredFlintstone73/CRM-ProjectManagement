@@ -14,7 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Mail, Phone, Building, Grid, List } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Search, Plus, Mail, Phone, Building, Grid, List, MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import ContactForm from "@/components/contacts/contact-form";
 import type { Contact } from "@shared/schema";
 
@@ -31,6 +33,10 @@ export default function Contacts() {
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'rows'>('cards');
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   // Handle URL query parameters for contact type filtering
   useEffect(() => {
@@ -199,6 +205,30 @@ export default function Contacts() {
     queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
   };
 
+  const handleContactUpdated = () => {
+    setEditingContact(null);
+    queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+  };
+
+  const handleDeleteClick = (contact: Contact) => {
+    setContactToDelete(contact);
+    setDeleteDialogOpen(true);
+    setDeleteConfirmText("");
+  };
+
+  const handleDeleteConfirm = () => {
+    if (contactToDelete && deleteConfirmText === "DELETE") {
+      deleteContactMutation.mutate(contactToDelete.id);
+      setDeleteDialogOpen(false);
+      setContactToDelete(null);
+      setDeleteConfirmText("");
+    }
+  };
+
+  const handleEditClick = (contact: Contact) => {
+    setEditingContact(contact);
+  };
+
   if (isLoading || contactsLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -343,14 +373,26 @@ export default function Contacts() {
                       <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
                         {formatStatus(contact.status || 'active')}
                       </Badge>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteContactMutation.mutate(contact.id)}
-                        disabled={deleteContactMutation.isPending}
-                      >
-                        Delete
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditClick(contact)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteClick(contact)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </CardContent>
                 </Card>
@@ -421,14 +463,26 @@ export default function Contacts() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => deleteContactMutation.mutate(contact.id)}
-                          disabled={deleteContactMutation.isPending}
-                        >
-                          Delete
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditClick(contact)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteClick(contact)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -444,6 +498,60 @@ export default function Contacts() {
           )}
         </div>
       </main>
+
+      {/* Edit Contact Dialog */}
+      <Dialog open={!!editingContact} onOpenChange={() => setEditingContact(null)}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Contact</DialogTitle>
+          </DialogHeader>
+          {editingContact && (
+            <ContactForm 
+              contact={editingContact} 
+              onSuccess={handleContactUpdated} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {contactToDelete?.familyName || `${contactToDelete?.firstName} ${contactToDelete?.lastName}`}? 
+              This action cannot be undone.
+              <br /><br />
+              Type <strong>DELETE</strong> to confirm:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="my-4">
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE to confirm"
+              className="w-full"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteDialogOpen(false);
+              setContactToDelete(null);
+              setDeleteConfirmText("");
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteConfirmText !== "DELETE" || deleteContactMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleteContactMutation.isPending ? "Deleting..." : "Delete Contact"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
