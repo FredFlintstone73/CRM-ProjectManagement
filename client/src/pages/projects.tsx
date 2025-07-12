@@ -186,9 +186,6 @@ export default function Projects() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{project.name}</CardTitle>
-                      <Badge className={getProjectStatusColor(project.status || 'planning')}>
-                        {project.status?.replace('_', ' ') || 'planning'}
-                      </Badge>
                     </div>
                     {project.description && (
                       <p className="text-sm text-gray-600 mt-2">{project.description}</p>
@@ -215,10 +212,7 @@ export default function Projects() {
                       <Progress value={project.progress || 0} className="h-6" />
                     </div>
                     
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-sm text-gray-500">
-                        Created: {new Date(project.createdAt || '').toLocaleDateString()}
-                      </span>
+                    <div className="flex items-center justify-end pt-2">
                       <Button
                         variant="destructive"
                         size="sm"
@@ -239,10 +233,8 @@ export default function Projects() {
                   <TableRow>
                     <TableHead>Project Name</TableHead>
                     <TableHead>Client</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Progress</TableHead>
                     <TableHead>Due Date</TableHead>
-                    <TableHead>Created</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -259,11 +251,6 @@ export default function Projects() {
                       </TableCell>
                       <TableCell>{getClientName(project.clientId)}</TableCell>
                       <TableCell>
-                        <Badge className={getProjectStatusColor(project.status || 'planning')}>
-                          {project.status?.replace('_', ' ') || 'planning'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
                         <div className="flex items-center gap-2">
                           <Progress value={project.progress || 0} className="h-2 w-20" />
                           <span className="text-sm">{project.progress || 0}%</span>
@@ -271,9 +258,6 @@ export default function Projects() {
                       </TableCell>
                       <TableCell>
                         {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'Not set'}
-                      </TableCell>
-                      <TableCell>
-                        {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'Unknown'}
                       </TableCell>
                       <TableCell>
                         <Button
