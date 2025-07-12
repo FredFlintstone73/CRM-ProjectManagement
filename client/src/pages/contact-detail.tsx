@@ -110,7 +110,6 @@ export default function ContactDetail() {
         subtitle="Client Detail"
         showActions={false}
       />
-      
       <div className="flex h-full">
         {/* Left Sidebar */}
         <div className="w-80 bg-white border-r p-6 space-y-6">
@@ -448,7 +447,7 @@ export default function ContactDetail() {
               <Card className="mb-6">
                 <CardContent className="p-6 pt-6 text-center text-[20px]">
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Marriage Date:</p>
+                    <p className="font-medium text-gray-700 text-[16px]">Marriage Date:</p>
                     <p className="text-sm">{formatDate(contact.marriageDate)}</p>
                   </div>
                 </CardContent>
