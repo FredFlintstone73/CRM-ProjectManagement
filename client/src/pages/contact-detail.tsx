@@ -69,9 +69,6 @@ export default function ContactDetail() {
     },
   });
 
-
-
-  // Early returns after all hooks are declared
   if (contactLoading) {
     return (
       <div className="flex-1 p-6">
@@ -270,9 +267,23 @@ export default function ContactDetail() {
             Back to Contacts
           </Button>
 
-          {/* Upload Photo Button */}
+          {/* Client Photo */}
           <div className="text-center">
-            <Button variant="outline" size="sm" onClick={handlePhotoUpload} className="w-full">
+            <div className="w-32 h-32 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden">
+              {profileImageUrl ? (
+                <img 
+                  src={profileImageUrl} 
+                  alt="Client Photo" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-center">
+                  <Camera className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">Client Photo</p>
+                </div>
+              )}
+            </div>
+            <Button variant="outline" size="sm" onClick={handlePhotoUpload}>
               <Upload className="h-4 w-4 mr-2" />
               Upload Photo
             </Button>
@@ -285,24 +296,11 @@ export default function ContactDetail() {
             />
           </div>
 
-          {/* Family Name with Avatar */}
+          {/* Family Name */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
-                {profileImageUrl ? (
-                  <img 
-                    src={profileImageUrl} 
-                    alt="Family Photo" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Camera className="h-6 w-6 text-gray-400" />
-                )}
-              </div>
-              <h2 className="text-xl font-bold">
-                {contact.familyName || `${contact.firstName} ${contact.lastName}`}
-              </h2>
-            </div>
+            <h2 className="text-xl font-bold mb-2">
+              {contact.familyName || `${contact.firstName} ${contact.lastName}`}
+            </h2>
             <div className="flex flex-col items-center gap-2">
               <Badge className={getContactTypeColor(contact.contactType)}>
                 {formatContactType(contact.contactType)}
