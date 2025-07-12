@@ -102,10 +102,10 @@ export default function Projects() {
     }
   };
 
-  const getClientName = (clientId: number | null) => {
-    if (!clientId || !contacts) return 'No client assigned';
+  const getFamilyName = (clientId: number | null) => {
+    if (!clientId || !contacts) return 'No family assigned';
     const client = contacts.find(c => c.id === clientId);
-    return client ? `${client.firstName} ${client.lastName}` : 'Unknown client';
+    return client ? (client.familyName || `${client.firstName} ${client.lastName}`) : 'Unknown family';
   };
 
   const handleProjectCreated = () => {
@@ -211,7 +211,7 @@ export default function Projects() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                       <User className="w-4 h-4" />
-                      <span>{getClientName(project.clientId)}</span>
+                      <span>{getFamilyName(project.clientId)}</span>
                     </div>
                     
                     {project.dueDate && (
@@ -255,7 +255,7 @@ export default function Projects() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Project Name</TableHead>
-                    <TableHead>Client</TableHead>
+                    <TableHead>Family Name</TableHead>
                     <TableHead>Progress</TableHead>
                     <TableHead>Meeting Date</TableHead>
                     <TableHead>Actions</TableHead>
@@ -272,7 +272,7 @@ export default function Projects() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{getClientName(project.clientId)}</TableCell>
+                      <TableCell>{getFamilyName(project.clientId)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Progress value={project.progress || 0} className="h-2 w-20" />

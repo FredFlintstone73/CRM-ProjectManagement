@@ -88,10 +88,6 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
   });
 
   const onSubmit = (data: InsertProject) => {
-    console.log("Form submitted with data:", data);
-    console.log("Form validation errors:", form.formState.errors);
-    console.log("Form is valid:", form.formState.isValid);
-    
     // Generate project name based on meeting type
     const meetingTypeNames = {
       frm: "Financial Road Map Interview",
@@ -107,7 +103,6 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
       name: meetingTypeNames[data.projectType as keyof typeof meetingTypeNames],
       clientId: data.clientId || null,
     };
-    console.log("Processed data:", processedData);
     createProjectMutation.mutate(processedData);
   };
 
@@ -192,15 +187,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
         />
         
         <div className="flex justify-end space-x-2">
-          <Button 
-            type="submit" 
-            disabled={createProjectMutation.isPending}
-            onClick={() => {
-              console.log("Create Meeting button clicked");
-              console.log("Form errors:", form.formState.errors);
-              console.log("Form values:", form.getValues());
-            }}
-          >
+          <Button type="submit" disabled={createProjectMutation.isPending}>
             {createProjectMutation.isPending ? "Creating..." : "Create Meeting"}
           </Button>
         </div>

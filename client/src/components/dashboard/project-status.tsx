@@ -16,10 +16,10 @@ export default function ProjectStatus() {
 
   const activeProjects = projects?.filter(p => p.status === 'active').slice(0, 3) || [];
 
-  const getClientName = (clientId: number | null) => {
-    if (!clientId || !contacts) return 'No client assigned';
+  const getFamilyName = (clientId: number | null) => {
+    if (!clientId || !contacts) return 'No family assigned';
     const client = contacts.find(c => c.id === clientId);
-    return client ? `${client.firstName} ${client.lastName}` : 'Unknown client';
+    return client ? (client.familyName || `${client.firstName} ${client.lastName}`) : 'Unknown family';
   };
 
   const getProgressColor = (progress: number) => {
@@ -83,7 +83,7 @@ export default function ProjectStatus() {
                 </div>
                 <Progress value={project.progress || 0} className="h-2" />
                 <p className="text-xs text-gray-500">
-                  Client: {getClientName(project.clientId)}
+                  Family: {getFamilyName(project.clientId)}
                 </p>
               </div>
             ))}

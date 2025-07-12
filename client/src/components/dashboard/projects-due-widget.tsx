@@ -97,10 +97,10 @@ export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetP
     return diffDays;
   };
 
-  const getClientName = (clientId: number | null) => {
-    if (!clientId || !contacts) return 'No client assigned';
+  const getFamilyName = (clientId: number | null) => {
+    if (!clientId || !contacts) return 'No family assigned';
     const client = contacts.find(c => c.id === clientId);
-    return client ? `${client.firstName} ${client.lastName}` : 'Unknown client';
+    return client ? (client.familyName || `${client.firstName} ${client.lastName}`) : 'Unknown family';
   };
 
   return (
@@ -169,7 +169,7 @@ export default function ProjectsDueWidget({ selectedPeriod }: ProjectsDueWidgetP
                             )}
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <User className="w-3 h-3" />
-                              <span className="text-[14px]">{getClientName(project.clientId)}</span>
+                              <span className="text-[14px]">{getFamilyName(project.clientId)}</span>
                             </div>
                           </div>
                         </div>
