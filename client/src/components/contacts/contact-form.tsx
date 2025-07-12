@@ -96,21 +96,19 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="basic">Basic</TabsTrigger>
-          <TabsTrigger value="contact">Contact 1</TabsTrigger>
-          <TabsTrigger value="spouse">Contact 2</TabsTrigger>
+      <Tabs defaultValue="family" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="family">Family</TabsTrigger>
           <TabsTrigger value="address">Address</TabsTrigger>
           <TabsTrigger value="children">Children</TabsTrigger>
           <TabsTrigger value="professionals">Professionals</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="basic" className="space-y-4">
+        <TabsContent value="family" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Essential client information</CardDescription>
+              <CardTitle>Family Information</CardTitle>
+              <CardDescription>Essential client and family information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -268,9 +266,8 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="contact" className="space-y-4">
+          {/* Contact Information Section */}
           <Card>
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
@@ -333,9 +330,8 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="spouse" className="space-y-4">
+          {/* Spouse Information Section */}
           <Card>
             <CardHeader>
               <CardTitle>Spouse Information</CardTitle>
