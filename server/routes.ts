@@ -9,7 +9,8 @@ import {
   insertProjectTemplateSchema,
   insertEmailInteractionSchema,
   insertCallTranscriptSchema,
-  insertProjectCommentSchema
+  insertProjectCommentSchema,
+  insertContactNoteSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -328,6 +329,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating project comment:", error);
       res.status(500).json({ message: "Failed to create project comment" });
+    }
+  });
+
+  // Contact notes routes
+  app.get('/api/contacts/:id/notes', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const notes = await storage.getContactNotes(contactId);
+      res.json(notes);
+    } catch (error) {
+      console.error("Error fetching contact notes:", error);
+      res.status(500).json({ message: "Failed to fetch contact notes" });
+    }
+  });
+
+  app.post('/api/contacts/:id/notes', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const noteData = insertContactNoteSchema.parse({
+        ...req.body,
+        contactId,
+      });
+      const note = await storage.createContactNote(noteData, userId);
+      res.json(note);
+    } catch (error) {
+      console.error("Error creating contact note:", error);
+      res.status(500).json({ message: "Failed to create contact note" });
     }
   });
 

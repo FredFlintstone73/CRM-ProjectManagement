@@ -346,6 +346,7 @@ export const contactsRelations = relations(contacts, ({ one, many }) => ({
   projects: many(projects),
   emailInteractions: many(emailInteractions),
   callTranscripts: many(callTranscripts),
+  notes: many(contactNotes),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -419,6 +420,27 @@ export const projectCommentsRelations = relations(projectComments, ({ one }) => 
   }),
   user: one(users, {
     fields: [projectComments.userId],
+    references: [users.id],
+  }),
+}));
+
+// Contact notes table
+export const contactNotes = pgTable("contact_notes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  contactId: integer("contact_id").notNull().references(() => contacts.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const contactNotesRelations = relations(contactNotes, ({ one }) => ({
+  contact: one(contacts, {
+    fields: [contactNotes.contactId],
+    references: [contacts.id],
+  }),
+  user: one(users, {
+    fields: [contactNotes.userId],
     references: [users.id],
   }),
 }));
@@ -505,6 +527,12 @@ export const insertProjectCommentSchema = createInsertSchema(projectComments).om
   createdAt: true,
 });
 
+export const insertContactNoteSchema = createInsertSchema(contactNotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -524,3 +552,5 @@ export type ActivityLog = typeof activityLog.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 export type ProjectComment = typeof projectComments.$inferSelect;
 export type InsertProjectComment = z.infer<typeof insertProjectCommentSchema>;
+export type ContactNote = typeof contactNotes.$inferSelect;
+export type InsertContactNote = z.infer<typeof insertContactNoteSchema>;

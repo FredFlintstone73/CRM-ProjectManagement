@@ -14,9 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera, StickyNote } from "lucide-react";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
+import ContactNotes from "@/components/contacts/contact-notes";
 import type { Contact } from "@shared/schema";
 
 interface ContactDetailParams {
@@ -31,6 +32,7 @@ export default function ContactDetail() {
   const [, navigate] = useLocation();
   const searchString = useSearch();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -1079,26 +1081,47 @@ export default function ContactDetail() {
           <TabsContent value="notes" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Notes</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <StickyNote className="h-5 w-5" />
+                    Notes
+                  </span>
+                  <Button 
+                    onClick={() => setIsNotesDialogOpen(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <StickyNote className="h-4 w-4" />
+                    Add Note
+                  </Button>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                {contact.notes ? (
-                  <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-gray-700">
-                      {contact.notes}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-gray-500 text-center py-8">
-                    No notes available for this contact
-                  </div>
-                )}
+                <div className="text-gray-600 text-center py-8">
+                  <StickyNote className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <p className="mb-4">Track important information and conversations about this contact.</p>
+                  <Button 
+                    onClick={() => setIsNotesDialogOpen(true)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <StickyNote className="h-4 w-4" />
+                    View & Add Notes
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
           </Tabs>
         </div>
       </div>
+
+      {/* Contact Notes Dialog */}
+      <ContactNotes 
+        contactId={parseInt(id || "0")}
+        contactName={contact.familyName || `${contact.firstName} ${contact.lastName}`}
+        isOpen={isNotesDialogOpen}
+        onClose={() => setIsNotesDialogOpen(false)}
+      />
     </div>
   );
 }

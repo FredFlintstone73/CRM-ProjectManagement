@@ -8,6 +8,7 @@ import {
   callTranscripts,
   activityLog,
   projectComments,
+  contactNotes,
   type User,
   type UpsertUser,
   type Contact,
@@ -26,6 +27,8 @@ import {
   type InsertActivityLog,
   type ProjectComment,
   type InsertProjectComment,
+  type ContactNote,
+  type InsertContactNote,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
@@ -98,6 +101,10 @@ export interface IStorage {
   // Project comment operations
   getProjectComments(projectId: number): Promise<ProjectComment[]>;
   createProjectComment(comment: InsertProjectComment, userId: string): Promise<ProjectComment>;
+
+  // Contact note operations
+  getContactNotes(contactId: number): Promise<ContactNote[]>;
+  createContactNote(note: InsertContactNote, userId: string): Promise<ContactNote>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -633,6 +640,46 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return newComment;
+  }
+
+  async getContactNotes(contactId: number): Promise<ContactNote[]> {
+    const notes = await db
+      .select({
+        id: contactNotes.id,
+        contactId: contactNotes.contactId,
+        userId: contactNotes.userId,
+        content: contactNotes.content,
+        createdAt: contactNotes.createdAt,
+        updatedAt: contactNotes.updatedAt,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+      })
+      .from(contactNotes)
+      .leftJoin(users, eq(contactNotes.userId, users.id))
+      .where(eq(contactNotes.contactId, contactId))
+      .orderBy(desc(contactNotes.createdAt));
+    
+    return notes.map(note => ({
+      id: note.id,
+      contactId: note.contactId,
+      userId: note.userId,
+      content: note.content,
+      createdAt: note.createdAt,
+      updatedAt: note.updatedAt,
+      userFirstName: note.userFirstName,
+      userLastName: note.userLastName,
+    })) as ContactNote[];
+  }
+
+  async createContactNote(note: InsertContactNote, userId: string): Promise<ContactNote> {
+    const [contactNote] = await db
+      .insert(contactNotes)
+      .values({
+        ...note,
+        userId,
+      })
+      .returning();
+    return contactNote;
   }
 
   // Helper method to find or create a contact for a user
