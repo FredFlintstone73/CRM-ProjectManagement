@@ -58,9 +58,7 @@ export default function Templates() {
 
   const deleteTemplateMutation = useMutation({
     mutationFn: async (templateId: number) => {
-      await apiRequest(`/api/project-templates/${templateId}`, {
-        method: 'DELETE',
-      });
+      await apiRequest('DELETE', `/api/project-templates/${templateId}`);
     },
     onSuccess: () => {
       toast({
