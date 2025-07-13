@@ -48,9 +48,23 @@ export default function Contacts() {
   useEffect(() => {
     const urlParams = new URLSearchParams(searchString);
     const typeParam = urlParams.get('type');
+    const typesParam = urlParams.get('types');
+    const viewParam = urlParams.get('view');
+    const sortParam = urlParams.get('sort');
+    const sortDirParam = urlParams.get('sortDir');
+    const searchParam = urlParams.get('search');
     
-    if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner'].includes(typeParam)) {
-      // Show only the selected type from URL
+    // Handle types filter
+    if (typesParam) {
+      const selectedTypes = typesParam.split(',');
+      setVisibleTypes({
+        client: selectedTypes.includes('client'),
+        prospect: selectedTypes.includes('prospect'),
+        team_member: selectedTypes.includes('team_member'),
+        strategic_partner: selectedTypes.includes('strategic_partner')
+      });
+    } else if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner'].includes(typeParam)) {
+      // Show only the selected type from URL (legacy support)
       setVisibleTypes({
         client: typeParam === 'client',
         prospect: typeParam === 'prospect',
@@ -66,12 +80,69 @@ export default function Contacts() {
         strategic_partner: true
       });
     }
+    
+    // Handle view mode
+    if (viewParam === 'rows') {
+      setViewMode('rows');
+    } else {
+      setViewMode('cards');
+    }
+    
+    // Handle sort configuration
+    if (sortParam && sortDirParam) {
+      setSortConfig({
+        key: sortParam as keyof Contact,
+        direction: sortDirParam as 'asc' | 'desc'
+      });
+    } else {
+      setSortConfig({ key: null, direction: 'asc' });
+    }
+    
+    // Handle search query
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    } else {
+      setSearchQuery('');
+    }
   }, [searchString]);
 
   // Get the current filtered type from URL
   const getCurrentFilteredType = () => {
     const urlParams = new URLSearchParams(searchString);
     return urlParams.get('type');
+  };
+
+  // Build URL with current state for back navigation
+  const buildContactsUrl = () => {
+    const params = new URLSearchParams();
+    
+    // Add active type filters
+    const activeTypes = Object.entries(visibleTypes)
+      .filter(([_, isVisible]) => isVisible)
+      .map(([type]) => type);
+    
+    if (activeTypes.length > 0 && activeTypes.length < 4) {
+      // Only add type param if not all types are visible
+      params.set('types', activeTypes.join(','));
+    }
+    
+    // Add view mode
+    if (viewMode !== 'cards') {
+      params.set('view', viewMode);
+    }
+    
+    // Add sort config
+    if (sortConfig.key) {
+      params.set('sort', sortConfig.key);
+      params.set('sortDir', sortConfig.direction);
+    }
+    
+    // Add search query
+    if (searchQuery) {
+      params.set('search', searchQuery);
+    }
+    
+    return params.toString() ? `/contacts?${params.toString()}` : '/contacts';
   };
 
   // Get page title and subtitle based on filtered type
@@ -450,7 +521,7 @@ export default function Contacts() {
                         </Avatar>
                         <div>
                           <CardTitle className="text-lg">
-                            <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer">
+                            <Link href={`/contacts/${contact.id}?from=${encodeURIComponent(new URLSearchParams(window.location.search).toString())}`} className="hover:text-blue-600 hover:underline cursor-pointer">
                               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
                             </Link>
                           </CardTitle>
@@ -601,7 +672,7 @@ export default function Contacts() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer font-medium">
+                            <Link href={`/contacts/${contact.id}?from=${encodeURIComponent(new URLSearchParams(window.location.search).toString())}`} className="hover:text-blue-600 hover:underline cursor-pointer font-medium">
                               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
                             </Link>
                             {contact.company && (

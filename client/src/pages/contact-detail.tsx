@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, useSearch } from "wouter";
 import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,10 +29,25 @@ export default function ContactDetail() {
   const { isAuthenticated, isLoading } = useAuth();
   const { id } = useParams<ContactDetailParams>();
   const [, navigate] = useLocation();
+  const searchString = useSearch();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+
+  // Build back navigation URL to preserve contacts page state
+  const buildBackToContactsUrl = () => {
+    const currentUrl = new URL(window.location.href);
+    const referrerParams = currentUrl.searchParams.get('from');
+    
+    if (referrerParams) {
+      // Use the referrer parameters if available
+      return `/contacts?${referrerParams}`;
+    }
+    
+    // Default back to contacts page
+    return '/contacts';
+  };
 
   const { data: contact, isLoading: contactLoading } = useQuery<Contact>({
     queryKey: ['/api/contacts', id],
@@ -351,7 +366,7 @@ export default function ContactDetail() {
           {/* Back Button */}
           <Button 
             variant="outline" 
-            onClick={() => navigate("/contacts")}
+            onClick={() => navigate(buildBackToContactsUrl())}
             className="w-full"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -575,7 +590,7 @@ export default function ContactDetail() {
             <Button 
               variant="outline" 
               className="w-full"
-              onClick={() => navigate("/contacts")}
+              onClick={() => navigate(buildBackToContactsUrl())}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Contacts
