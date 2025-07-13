@@ -21,13 +21,39 @@ interface ContactFormProps {
   onSuccess?: () => void;
 }
 
+type ContactCategory = "client_prospect" | "team_strategic" | null;
+type ContactType = "client" | "prospect" | "team_member" | "strategic_partner";
+
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  
+  const [selectedCategory, setSelectedCategory] = useState<ContactCategory>(
+    contact ? (contact.contactType === "client" || contact.contactType === "prospect" ? "client_prospect" : "team_strategic") : null
+  );
+  const [selectedType, setSelectedType] = useState<ContactType | null>(contact?.contactType || null);
 
   const [sameAsMailingAddress, setSameAsMailingAddress] = useState(
     contact ? contact.sameAsMailingAddress === "yes" : false
   );
+
+  // Role options for team members and strategic partners
+  const roleOptions = [
+    { value: "estate_planner", label: "Estate Planner" },
+    { value: "financial_planner", label: "Financial Planner" },
+    { value: "tax_planner", label: "Tax Planner" },
+    { value: "money_manager", label: "Money Manager" },
+    { value: "insurance_pc", label: "Insurance - P&C" },
+    { value: "insurance_business", label: "Insurance - Business" },
+    { value: "insurance_life_ltc_disability", label: "Insurance - Life, LTC, & Disability" },
+    { value: "insurance_health", label: "Insurance - Health" },
+    { value: "trusted_advisor", label: "Trusted Advisor" },
+    { value: "admin_assistant", label: "Admin Assistant" },
+    { value: "deliverables_team_coordinator", label: "Deliverables Team Coordinator" },
+    { value: "human_relations", label: "Human Relations" },
+    { value: "accountant", label: "Accountant" },
+    { value: "other", label: "Other" },
+  ];
 
   const form = useForm<InsertContact>({
     // Temporarily remove validation to test if it's causing issues
@@ -234,8 +260,347 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     }
   };
 
+  // Handle category selection
+  const handleCategorySelect = (category: ContactCategory) => {
+    setSelectedCategory(category);
+    setSelectedType(null);
+    // Reset form when category changes
+    form.reset();
+  };
+
+  // Handle type selection
+  const handleTypeSelect = (type: ContactType) => {
+    setSelectedType(type);
+    form.setValue("contactType", type);
+  };
+
+  // If no category is selected (new contact), show selection screen
+  if (!selectedCategory && !contact) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold mb-2">Choose Contact Type</h3>
+          <p className="text-sm text-gray-600 mb-6">Select the type of contact you want to create</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card 
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => handleCategorySelect("client_prospect")}
+          >
+            <CardHeader className="text-center">
+              <CardTitle className="text-lg">Client or Prospect</CardTitle>
+              <CardDescription>
+                Individuals or families who are clients or potential clients
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-gray-600">
+                <p>• Complete client information</p>
+                <p>• Family and spouse details</p>
+                <p>• Address and contact information</p>
+                <p>• Children and professional contacts</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => handleCategorySelect("team_strategic")}
+          >
+            <CardHeader className="text-center">
+              <CardTitle className="text-lg">Team Member or Strategic Partner</CardTitle>
+              <CardDescription>
+                Team members, strategic partners, or professional contacts
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-gray-600">
+                <p>• Basic contact information</p>
+                <p>• Professional role</p>
+                <p>• Contact methods</p>
+                <p>• Mailing address</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // If category is selected but not type, show type selection
+  if (selectedCategory && !selectedType) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold mb-2">
+            {selectedCategory === "client_prospect" ? "Client or Prospect?" : "Team Member or Strategic Partner?"}
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">Choose the specific type</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {selectedCategory === "client_prospect" ? (
+            <>
+              <Card 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleTypeSelect("client")}
+              >
+                <CardHeader className="text-center">
+                  <CardTitle className="text-lg">Client</CardTitle>
+                  <CardDescription>Existing client</CardDescription>
+                </CardHeader>
+              </Card>
+              <Card 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleTypeSelect("prospect")}
+              >
+                <CardHeader className="text-center">
+                  <CardTitle className="text-lg">Prospect</CardTitle>
+                  <CardDescription>Potential client</CardDescription>
+                </CardHeader>
+              </Card>
+            </>
+          ) : (
+            <>
+              <Card 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleTypeSelect("team_member")}
+              >
+                <CardHeader className="text-center">
+                  <CardTitle className="text-lg">Team Member</CardTitle>
+                  <CardDescription>Internal team member</CardDescription>
+                </CardHeader>
+              </Card>
+              <Card 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleTypeSelect("strategic_partner")}
+              >
+                <CardHeader className="text-center">
+                  <CardTitle className="text-lg">Strategic Partner</CardTitle>
+                  <CardDescription>External strategic partner</CardDescription>
+                </CardHeader>
+              </Card>
+            </>
+          )}
+        </div>
+        
+        <div className="text-center">
+          <Button 
+            variant="outline" 
+            onClick={() => setSelectedCategory(null)}
+          >
+            Back to Category Selection
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Render the appropriate form based on selected type
+  if (selectedType === "team_member" || selectedType === "strategic_partner") {
+    return (
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
+            {selectedType === "team_member" ? "Team Member" : "Strategic Partner"} Information
+          </h3>
+          {!contact && (
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => setSelectedType(null)}
+            >
+              Back
+            </Button>
+          )}
+        </div>
+        
+        {/* Simplified form for team members and strategic partners */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="firstName">First Name *</Label>
+            <Input
+              id="firstName"
+              {...form.register("firstName")}
+              placeholder="Enter first name"
+            />
+          </div>
+          <div>
+            <Label htmlFor="lastName">Last Name *</Label>
+            <Input
+              id="lastName"
+              {...form.register("lastName")}
+              placeholder="Enter last name"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="cellPhone">Cell Phone</Label>
+            <Input
+              id="cellPhone"
+              {...form.register("cellPhone")}
+              placeholder="Enter cell phone"
+            />
+          </div>
+          <div>
+            <Label htmlFor="workPhone">Work Phone</Label>
+            <Input
+              id="workPhone"
+              {...form.register("workPhone")}
+              placeholder="Enter work phone"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="personalEmail">Personal Email</Label>
+            <Input
+              id="personalEmail"
+              type="email"
+              {...form.register("personalEmail")}
+              placeholder="Enter personal email"
+            />
+          </div>
+          <div>
+            <Label htmlFor="workEmail">Work Email</Label>
+            <Input
+              id="workEmail"
+              type="email"
+              {...form.register("workEmail")}
+              placeholder="Enter work email"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="preferredContactMethod">Preferred Contact Method</Label>
+            <Select onValueChange={(value) => form.setValue("preferredContactMethod", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select contact method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cell">Cell Phone</SelectItem>
+                <SelectItem value="work">Work Phone</SelectItem>
+                <SelectItem value="personal_email">Personal Email</SelectItem>
+                <SelectItem value="work_email">Work Email</SelectItem>
+                <SelectItem value="text">Text</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="role">Role *</Label>
+            <Select onValueChange={(value) => form.setValue("role", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roleOptions.map((role) => (
+                  <SelectItem key={role.value} value={role.value}>
+                    {role.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Mailing Address */}
+        <div className="space-y-4">
+          <h4 className="text-md font-medium">Mailing Address</h4>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <Label htmlFor="mailingAddressStreet1">Street Address 1</Label>
+              <Input
+                id="mailingAddressStreet1"
+                {...form.register("mailingAddressStreet1")}
+                placeholder="Enter street address"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mailingAddressStreet2">Street Address 2</Label>
+              <Input
+                id="mailingAddressStreet2"
+                {...form.register("mailingAddressStreet2")}
+                placeholder="Enter street address 2 (optional)"
+              />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="mailingAddressCity">City</Label>
+                <Input
+                  id="mailingAddressCity"
+                  {...form.register("mailingAddressCity")}
+                  placeholder="Enter city"
+                />
+              </div>
+              <div>
+                <Label htmlFor="mailingAddressState">State</Label>
+                <Input
+                  id="mailingAddressState"
+                  {...form.register("mailingAddressState")}
+                  placeholder="Enter state"
+                />
+              </div>
+              <div>
+                <Label htmlFor="mailingAddressZip">ZIP Code</Label>
+                <Input
+                  id="mailingAddressZip"
+                  {...form.register("mailingAddressZip")}
+                  placeholder="Enter ZIP code"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="status">Status</Label>
+          <Select onValueChange={(value) => form.setValue("status", value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex gap-4">
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? "Saving..." : (contact ? "Update Contact" : "Create Contact")}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => form.reset()}>
+            Reset Form
+          </Button>
+        </div>
+      </form>
+    );
+  }
+
+  // Original full form for clients and prospects
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">
+          {selectedType === "client" ? "Client" : "Prospect"} Information
+        </h3>
+        {!contact && (
+          <Button 
+            type="button"
+            variant="outline" 
+            onClick={() => setSelectedType(null)}
+          >
+            Back
+          </Button>
+        )}
+      </div>
+      
       <Tabs defaultValue="family" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="family">Family</TabsTrigger>

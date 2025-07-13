@@ -43,6 +43,24 @@ export const contactTypeEnum = pgEnum("contact_type", [
   "strategic_partner"
 ]);
 
+// Contact roles enum (for team members and strategic partners)
+export const contactRoleEnum = pgEnum("contact_role", [
+  "estate_planner",
+  "financial_planner", 
+  "tax_planner",
+  "money_manager",
+  "insurance_pc",
+  "insurance_business",
+  "insurance_life_ltc_disability",
+  "insurance_health",
+  "trusted_advisor",
+  "admin_assistant",
+  "deliverables_team_coordinator",
+  "human_relations",
+  "accountant",
+  "other"
+]);
+
 // Contact status enum
 export const contactStatusEnum = pgEnum("contact_status", [
   "active",
@@ -209,6 +227,7 @@ export const contacts = pgTable("contacts", {
   
   // System fields
   contactType: contactTypeEnum("contact_type").notNull(),
+  role: contactRoleEnum("role"), // Only for team_member and strategic_partner
   status: contactStatusEnum("status").default("active"),
   notes: text("notes"),
   applicationComplete: varchar("application_complete"),
