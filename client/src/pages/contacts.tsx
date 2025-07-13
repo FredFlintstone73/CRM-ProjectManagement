@@ -261,6 +261,41 @@ export default function Contacts() {
     }
   };
 
+  const formatRole = (role: string) => {
+    switch (role) {
+      case 'accountant':
+        return 'Accountant';
+      case 'admin_assistant':
+        return 'Admin Assistant';
+      case 'deliverables_team_coordinator':
+        return 'Deliverables Team Coordinator';
+      case 'estate_planner':
+        return 'Estate Planner';
+      case 'financial_planner':
+        return 'Financial Planner';
+      case 'human_relations':
+        return 'Human Relations';
+      case 'insurance_business':
+        return 'Insurance - Business';
+      case 'insurance_health':
+        return 'Insurance - Health';
+      case 'insurance_life_ltc_disability':
+        return 'Insurance - Life, LTC, & Disability';
+      case 'insurance_pc':
+        return 'Insurance - P&C';
+      case 'money_manager':
+        return 'Money Manager';
+      case 'tax_planner':
+        return 'Tax Planner';
+      case 'trusted_advisor':
+        return 'Trusted Advisor';
+      case 'other':
+        return 'Other';
+      default:
+        return role?.charAt(0).toUpperCase() + role?.slice(1) || '';
+    }
+  };
+
   const handleContactCreated = () => {
     setIsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
@@ -360,10 +395,11 @@ export default function Contacts() {
             <div className="flex flex-wrap items-center gap-4 justify-between">
               <div className="flex flex-wrap gap-2">
                 <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Show:</span>
-                {Object.entries(visibleTypes).map(([type, isVisible]) => (
+                {/* Reordered buttons: Clients, Prospects, Strategic Partners, Team Members */}
+                {['client', 'prospect', 'strategic_partner', 'team_member'].map((type) => (
                   <Toggle
                     key={type}
-                    pressed={isVisible}
+                    pressed={visibleTypes[type as keyof typeof visibleTypes]}
                     onPressedChange={() => toggleContactType(type as keyof typeof visibleTypes)}
                     variant="outline"
                     className="data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800"
@@ -449,6 +485,13 @@ export default function Contacts() {
                         <span>{contact.position}</span>
                       </div>
                     )}
+                    {/* Role for Team Members and Strategic Partners */}
+                    {(contact.contactType === 'team_member' || contact.contactType === 'strategic_partner') && contact.role && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Building className="w-4 h-4" />
+                        <span>{formatRole(contact.role)}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between pt-2">
                       <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
                         {formatStatus(contact.status || 'active')}
@@ -526,6 +569,16 @@ export default function Contacts() {
                     <TableHead>
                       <Button
                         variant="ghost"
+                        onClick={() => handleSort('role')}
+                        className="h-auto p-0 font-medium hover:bg-transparent"
+                      >
+                        Role
+                        {getSortIcon('role')}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
                         onClick={() => handleSort('status')}
                         className="h-auto p-0 font-medium hover:bg-transparent"
                       >
@@ -581,6 +634,13 @@ export default function Contacts() {
                             </>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {(contact.contactType === 'team_member' || contact.contactType === 'strategic_partner') && contact.role ? (
+                          <span className="text-sm text-gray-600">{formatRole(contact.role)}</span>
+                        ) : (
+                          <span className="text-sm text-gray-400">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
