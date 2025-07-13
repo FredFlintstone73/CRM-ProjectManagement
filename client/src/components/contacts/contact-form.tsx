@@ -282,7 +282,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           <h3 className="text-lg font-semibold mb-2">Choose Contact Type</h3>
           <p className="text-sm text-gray-600 mb-6">Select the type of contact you want to create</p>
         </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card 
             className="cursor-pointer hover:bg-gray-50 transition-colors"
@@ -309,7 +308,8 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             onClick={() => handleCategorySelect("team_strategic")}
           >
             <CardHeader className="text-center">
-              <CardTitle className="text-lg">Strategic Partner or Team Member</CardTitle>
+              <CardTitle className="text-lg">Strategic Partner or 
+              Team Member</CardTitle>
               <CardDescription>
                 Team members, strategic partners, or professional contacts
               </CardDescription>
