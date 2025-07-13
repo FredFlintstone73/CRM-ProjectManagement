@@ -706,6 +706,30 @@ export default function ContactDetail() {
                 </CardContent>
               </Card>
 
+              {/* Address Information Card - positioned to the right for team members and strategic partners */}
+              {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      Address Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-2">Mailing Address</h4>
+                        <div className="space-y-1 text-sm">
+                          <div>{contact.mailingAddressStreet1}</div>
+                          {contact.mailingAddressStreet2 && <div>{contact.mailingAddressStreet2}</div>}
+                          <div>{contact.mailingAddressCity}, {contact.mailingAddressState} {contact.mailingAddressZip}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Contact 2 Information (Spouse) - only for clients and prospects */}
               {contact.spouseFirstName && (contact.contactType === "client" || contact.contactType === "prospect") && (
                 <Card>
@@ -803,51 +827,48 @@ export default function ContactDetail() {
               </Card>
             )}
 
-            {/* Address Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Address Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`grid grid-cols-1 gap-6 ${contact.contactType === "team_member" || contact.contactType === "strategic_partner" ? "md:grid-cols-1" : "md:grid-cols-3"}`}>
-                  <div>
-                    <h4 className="font-semibold mb-2">Mailing Address</h4>
-                    <div className="space-y-1 text-sm">
-                      <div>{contact.mailingAddressStreet1}</div>
-                      {contact.mailingAddressStreet2 && <div>{contact.mailingAddressStreet2}</div>}
-                      <div>{contact.mailingAddressCity}, {contact.mailingAddressState} {contact.mailingAddressZip}</div>
+            {/* Address Information - only for clients and prospects (team members and strategic partners have it in the right column) */}
+            {(contact.contactType === "client" || contact.contactType === "prospect") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Address Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-2">Mailing Address</h4>
+                      <div className="space-y-1 text-sm">
+                        <div>{contact.mailingAddressStreet1}</div>
+                        {contact.mailingAddressStreet2 && <div>{contact.mailingAddressStreet2}</div>}
+                        <div>{contact.mailingAddressCity}, {contact.mailingAddressState} {contact.mailingAddressZip}</div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold mb-2">Home Address</h4>
+                      <div className="space-y-1 text-sm">
+                        <div>{contact.homeAddressStreet1 || "Same as mailing"}</div>
+                        {contact.homeAddressStreet2 && <div>{contact.homeAddressStreet2}</div>}
+                        <div>{contact.homeAddressCity || contact.mailingAddressCity}, {contact.homeAddressState || contact.mailingAddressState} {contact.homeAddressZip || contact.mailingAddressZip}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Vacation Home Address</h4>
+                      <div className="space-y-1 text-sm">
+                        <div>{contact.vacationAddressStreet1 || "Not specified"}</div>
+                        {contact.vacationAddressStreet2 && <div>{contact.vacationAddressStreet2}</div>}
+                        {contact.vacationAddressCity && (
+                          <div>{contact.vacationAddressCity}, {contact.vacationAddressState} {contact.vacationAddressZip}</div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* Home and Vacation addresses - only for clients and prospects */}
-                  {(contact.contactType === "client" || contact.contactType === "prospect") && (
-                    <>
-                      <div>
-                        <h4 className="font-semibold mb-2">Home Address</h4>
-                        <div className="space-y-1 text-sm">
-                          <div>{contact.homeAddressStreet1 || "Same as mailing"}</div>
-                          {contact.homeAddressStreet2 && <div>{contact.homeAddressStreet2}</div>}
-                          <div>{contact.homeAddressCity || contact.mailingAddressCity}, {contact.homeAddressState || contact.mailingAddressState} {contact.homeAddressZip || contact.mailingAddressZip}</div>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-2">Vacation Home Address</h4>
-                        <div className="space-y-1 text-sm">
-                          <div>{contact.vacationAddressStreet1 || "Not specified"}</div>
-                          {contact.vacationAddressStreet2 && <div>{contact.vacationAddressStreet2}</div>}
-                          {contact.vacationAddressCity && (
-                            <div>{contact.vacationAddressCity}, {contact.vacationAddressState} {contact.vacationAddressZip}</div>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Children Information - only for clients and prospects */}
             {(contact.child1FirstName || contact.child2FirstName || contact.child3FirstName) && (contact.contactType === "client" || contact.contactType === "prospect") && (
