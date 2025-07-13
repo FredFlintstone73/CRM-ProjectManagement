@@ -315,7 +315,7 @@ export default function ContactDetail() {
     return "Contact Details";
   };
 
-  const showSidebar = contact.contactType === "client" || contact.contactType === "prospect";
+  const showSidebar = true; // Show sidebar with profile image for all contact types
 
   return (
     <div className="flex-1 overflow-auto">
