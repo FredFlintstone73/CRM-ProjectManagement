@@ -604,9 +604,9 @@ export default function ContactDetail() {
             </TabsList>
 
           <TabsContent value="client" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Contact Information */}
-              <Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Contact Information */}
+                <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
@@ -814,10 +814,9 @@ export default function ContactDetail() {
                   </CardContent>
                 </Card>
               )}
-            </div>
 
-            {/* Marriage Information - only for clients and prospects */}
-            {contact.marriageDate && (contact.contactType === "client" || contact.contactType === "prospect") && (
+              {/* Marriage Information - only for clients and prospects */}
+              {contact.marriageDate && (contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card className="mb-6">
                 <CardContent className="p-6 pt-6 text-center text-[20px]">
                   <div className="flex justify-center items-center gap-2">
@@ -828,8 +827,8 @@ export default function ContactDetail() {
               </Card>
             )}
 
-            {/* Address Information - only for clients and prospects (team members and strategic partners have it in the right column) */}
-            {(contact.contactType === "client" || contact.contactType === "prospect") && (
+              {/* Address Information - only for clients and prospects (team members and strategic partners have it in the right column) */}
+              {(contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -871,8 +870,8 @@ export default function ContactDetail() {
               </Card>
             )}
 
-            {/* Children Information - only for clients and prospects */}
-            {(contact.child1FirstName || contact.child2FirstName || contact.child3FirstName) && (contact.contactType === "client" || contact.contactType === "prospect") && (
+              {/* Children Information - only for clients and prospects */}
+              {(contact.child1FirstName || contact.child2FirstName || contact.child3FirstName) && (contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -906,8 +905,8 @@ export default function ContactDetail() {
               </Card>
             )}
 
-            {/* Professional Contacts - only for clients and prospects */}
-            {(contact.contactType === "client" || contact.contactType === "prospect") && (
+              {/* Professional Contacts - only for clients and prospects */}
+              {(contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -954,8 +953,8 @@ export default function ContactDetail() {
               </Card>
             )}
 
-            {/* Profile Image Upload Section for Team Members and Strategic Partners */}
-            {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && (
+              {/* Profile Image Upload Section for Team Members and Strategic Partners */}
+              {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
