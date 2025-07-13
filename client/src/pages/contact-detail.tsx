@@ -387,24 +387,47 @@ export default function ContactDetail() {
             </div>
           </div>
 
-          {/* Client 1 Information */}
+          {/* Contact Information */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Client 1</CardTitle>
+              <CardTitle className="text-base">
+                {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+                  ? "Contact Information" 
+                  : "Client 1"}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <div>
                 <p className="font-medium">{contact.firstName} {contact.lastName}</p>
-                {contact.nickname && <p className="text-sm text-gray-600">"{contact.nickname}"</p>}
+                {contact.contactType === "client" || contact.contactType === "prospect" ? (
+                  contact.nickname && <p className="text-sm text-gray-600">"{contact.nickname}"</p>
+                ) : null}
               </div>
+              
+              {/* Role for team members and strategic partners */}
+              {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && contact.role && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Role:</p>
+                  <p className="text-sm">{formatDisplayValue(contact.role)}</p>
+                </div>
+              )}
+              
               <div className="space-y-1">
                 <div>
                   <p className="text-sm font-medium text-gray-700">Cell Phone:</p>
                   <p className="text-sm">{contact.cellPhone || "Not specified"}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Email:</p>
-                  <p className="text-sm">{contact.personalEmail || contact.workEmail || "Not specified"}</p>
+                  <p className="text-sm font-medium text-gray-700">Work Phone:</p>
+                  <p className="text-sm">{contact.workPhone || "Not specified"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Personal Email:</p>
+                  <p className="text-sm">{contact.personalEmail || "Not specified"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Work Email:</p>
+                  <p className="text-sm">{contact.workEmail || "Not specified"}</p>
                 </div>
               </div>
               <div>
@@ -429,8 +452,8 @@ export default function ContactDetail() {
             </CardContent>
           </Card>
 
-          {/* Client 2 Information (Spouse) */}
-          {contact.spouseFirstName && (
+          {/* Client 2 Information (Spouse) - only for clients and prospects */}
+          {contact.spouseFirstName && (contact.contactType === "client" || contact.contactType === "prospect") && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Client 2 (Spouse)</CardTitle>
@@ -475,22 +498,30 @@ export default function ContactDetail() {
 
 
 
-          {/* Edit Client Button */}
+          {/* Edit Contact Button */}
           <Button 
             className="w-full" 
             onClick={() => setIsEditDialogOpen(true)}
           >
             <Edit className="h-4 w-4 mr-2" />
-            Edit Client
+            {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+              ? "Edit Contact" 
+              : "Edit Client"}
           </Button>
           
           {/* Edit Dialog */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Edit Client Information</DialogTitle>
+                <DialogTitle>
+                  {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+                    ? "Edit Contact Information" 
+                    : "Edit Client Information"}
+                </DialogTitle>
                 <DialogDescription>
-                  Update the client's personal information, contact details, and family information.
+                  {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+                    ? "Update the contact's personal information and contact details." 
+                    : "Update the client's personal information, contact details, and family information."}
                 </DialogDescription>
               </DialogHeader>
               <ContactForm 
@@ -520,12 +551,14 @@ export default function ContactDetail() {
 
           <TabsContent value="client" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Contact 1 Information */}
+              {/* Contact Information */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
-                    Contact 1
+                    {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+                      ? "Contact Information" 
+                      : "Contact 1"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -534,26 +567,40 @@ export default function ContactDetail() {
                       <span className="font-medium">Full Name:</span>
                       <span>{contact.firstName} {contact.lastName}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Nickname:</span>
-                      <span>{contact.nickname || "Not specified"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Gender:</span>
-                      <span>{formatDisplayValue(contact.gender)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Date of Birth:</span>
-                      <span>{formatDate(contact.dateOfBirth)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Date of Death:</span>
-                      <span>{formatDate(contact.dateOfDeath) || "Not specified"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">SSN:</span>
-                      <span>{contact.ssn || "Not specified"}</span>
-                    </div>
+                    
+                    {/* Role for team members and strategic partners */}
+                    {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && contact.role && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">Role:</span>
+                        <span>{formatDisplayValue(contact.role)}</span>
+                      </div>
+                    )}
+                    
+                    {/* Fields only for clients and prospects */}
+                    {(contact.contactType === "client" || contact.contactType === "prospect") && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Nickname:</span>
+                          <span>{contact.nickname || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Gender:</span>
+                          <span>{formatDisplayValue(contact.gender)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Date of Birth:</span>
+                          <span>{formatDate(contact.dateOfBirth)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Date of Death:</span>
+                          <span>{formatDate(contact.dateOfDeath) || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">SSN:</span>
+                          <span>{contact.ssn || "Not specified"}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                   
                   <div className="pt-4 border-t">
@@ -582,111 +629,116 @@ export default function ContactDetail() {
                     </div>
                   </div>
                   
-                  <div className="pt-4 border-t">
-                    <h4 className="font-semibold mb-2">ID Information</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">ID Type:</span>
-                        <span>{formatDisplayValue(contact.govIdType)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium">ID Number:</span>
-                        <span>{contact.govIdNumber || "Not specified"}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium">ID Expiration:</span>
-                        <span>{formatDate(contact.govIdExpiration) || "Not specified"}</span>
+                  {/* ID Information - only for clients and prospects */}
+                  {(contact.contactType === "client" || contact.contactType === "prospect") && (
+                    <div className="pt-4 border-t">
+                      <h4 className="font-semibold mb-2">ID Information</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">ID Type:</span>
+                          <span>{formatDisplayValue(contact.govIdType)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">ID Number:</span>
+                          <span>{contact.govIdNumber || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">ID Expiration:</span>
+                          <span>{formatDate(contact.govIdExpiration) || "Not specified"}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Contact 2 Information (Spouse) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Contact 2
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Full Name:</span>
-                      <span>{contact.spouseFirstName} {contact.spouseLastName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Nickname:</span>
-                      <span>{contact.spouseNickname || "Not specified"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Gender:</span>
-                      <span>{formatDisplayValue(contact.spouseGender)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Date of Birth:</span>
-                      <span>{formatDate(contact.spouseDateOfBirth)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Date of Death:</span>
-                      <span>{formatDate(contact.spouseDateOfDeath) || "Not specified"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">SSN:</span>
-                      <span>{contact.spouseSSN || "Not specified"}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 border-t">
-                    <h4 className="font-semibold mb-2">Contact Information</h4>
+              {/* Contact 2 Information (Spouse) - only for clients and prospects */}
+              {contact.spouseFirstName && (contact.contactType === "client" || contact.contactType === "prospect") && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Contact 2
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="font-medium">Cell Phone:</span>
-                        <span>{contact.spouseCellPhone || "Not specified"}</span>
+                        <span className="font-medium">Full Name:</span>
+                        <span>{contact.spouseFirstName} {contact.spouseLastName}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-medium">Work Phone:</span>
-                        <span>{contact.spouseWorkPhone || "Not specified"}</span>
+                        <span className="font-medium">Nickname:</span>
+                        <span>{contact.spouseNickname || "Not specified"}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-medium">Personal Email:</span>
-                        <span>{contact.spousePersonalEmail || "Not specified"}</span>
+                        <span className="font-medium">Gender:</span>
+                        <span>{formatDisplayValue(contact.spouseGender)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-medium">Work Email:</span>
-                        <span>{contact.spouseWorkEmail || "Not specified"}</span>
+                        <span className="font-medium">Date of Birth:</span>
+                        <span>{formatDate(contact.spouseDateOfBirth)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-medium">Preferred Contact:</span>
-                        <span>{formatDisplayValue(contact.spousePreferredContactMethod)}</span>
+                        <span className="font-medium">Date of Death:</span>
+                        <span>{formatDate(contact.spouseDateOfDeath) || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">SSN:</span>
+                        <span>{contact.spouseSSN || "Not specified"}</span>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="pt-4 border-t">
-                    <h4 className="font-semibold mb-2">ID Information</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">ID Type:</span>
-                        <span>{formatDisplayValue(contact.spouseGovIdType)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium">ID Number:</span>
-                        <span>{contact.spouseGovIdNumber || "Not specified"}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium">ID Expiration:</span>
-                        <span>{formatDate(contact.spouseGovIdExpiration) || "Not specified"}</span>
+                    
+                    <div className="pt-4 border-t">
+                      <h4 className="font-semibold mb-2">Contact Information</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">Cell Phone:</span>
+                          <span>{contact.spouseCellPhone || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Work Phone:</span>
+                          <span>{contact.spouseWorkPhone || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Personal Email:</span>
+                          <span>{contact.spousePersonalEmail || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Work Email:</span>
+                          <span>{contact.spouseWorkEmail || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Preferred Contact:</span>
+                          <span>{formatDisplayValue(contact.spousePreferredContactMethod)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    
+                    <div className="pt-4 border-t">
+                      <h4 className="font-semibold mb-2">ID Information</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">ID Type:</span>
+                          <span>{formatDisplayValue(contact.spouseGovIdType)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">ID Number:</span>
+                          <span>{contact.spouseGovIdNumber || "Not specified"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">ID Expiration:</span>
+                          <span>{formatDate(contact.spouseGovIdExpiration) || "Not specified"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
-            {/* Marriage Information */}
-            {contact.marriageDate && (
+            {/* Marriage Information - only for clients and prospects */}
+            {contact.marriageDate && (contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card className="mb-6">
                 <CardContent className="p-6 pt-6 text-center text-[20px]">
                   <div className="flex justify-center items-center gap-2">
@@ -706,7 +758,7 @@ export default function ContactDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className={`grid grid-cols-1 gap-6 ${contact.contactType === "team_member" || contact.contactType === "strategic_partner" ? "md:grid-cols-1" : "md:grid-cols-3"}`}>
                   <div>
                     <h4 className="font-semibold mb-2">Mailing Address</h4>
                     <div className="space-y-1 text-sm">
@@ -715,30 +767,36 @@ export default function ContactDetail() {
                       <div>{contact.mailingAddressCity}, {contact.mailingAddressState} {contact.mailingAddressZip}</div>
                     </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Home Address</h4>
-                    <div className="space-y-1 text-sm">
-                      <div>{contact.homeAddressStreet1 || "Same as mailing"}</div>
-                      {contact.homeAddressStreet2 && <div>{contact.homeAddressStreet2}</div>}
-                      <div>{contact.homeAddressCity || contact.mailingAddressCity}, {contact.homeAddressState || contact.mailingAddressState} {contact.homeAddressZip || contact.mailingAddressZip}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Vacation Home Address</h4>
-                    <div className="space-y-1 text-sm">
-                      <div>{contact.vacationAddressStreet1 || "Not specified"}</div>
-                      {contact.vacationAddressStreet2 && <div>{contact.vacationAddressStreet2}</div>}
-                      {contact.vacationAddressCity && (
-                        <div>{contact.vacationAddressCity}, {contact.vacationAddressState} {contact.vacationAddressZip}</div>
-                      )}
-                    </div>
-                  </div>
+                  
+                  {/* Home and Vacation addresses - only for clients and prospects */}
+                  {(contact.contactType === "client" || contact.contactType === "prospect") && (
+                    <>
+                      <div>
+                        <h4 className="font-semibold mb-2">Home Address</h4>
+                        <div className="space-y-1 text-sm">
+                          <div>{contact.homeAddressStreet1 || "Same as mailing"}</div>
+                          {contact.homeAddressStreet2 && <div>{contact.homeAddressStreet2}</div>}
+                          <div>{contact.homeAddressCity || contact.mailingAddressCity}, {contact.homeAddressState || contact.mailingAddressState} {contact.homeAddressZip || contact.mailingAddressZip}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Vacation Home Address</h4>
+                        <div className="space-y-1 text-sm">
+                          <div>{contact.vacationAddressStreet1 || "Not specified"}</div>
+                          {contact.vacationAddressStreet2 && <div>{contact.vacationAddressStreet2}</div>}
+                          {contact.vacationAddressCity && (
+                            <div>{contact.vacationAddressCity}, {contact.vacationAddressState} {contact.vacationAddressZip}</div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Children Information */}
-            {(contact.child1FirstName || contact.child2FirstName || contact.child3FirstName) && (
+            {/* Children Information - only for clients and prospects */}
+            {(contact.child1FirstName || contact.child2FirstName || contact.child3FirstName) && (contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -772,51 +830,53 @@ export default function ContactDetail() {
               </Card>
             )}
 
-            {/* Professional Contacts */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5" />
-                  Professional Contacts
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-2">Investment Advisor</h4>
-                    <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.investmentName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.investmentPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.investmentEmail || "Not specified"}</div>
+            {/* Professional Contacts - only for clients and prospects */}
+            {(contact.contactType === "client" || contact.contactType === "prospect") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building className="h-5 w-5" />
+                    Professional Contacts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-2">Investment Advisor</h4>
+                      <div className="space-y-1 text-sm">
+                        <div><span className="font-medium">Name:</span> {contact.investmentName || "Not specified"}</div>
+                        <div><span className="font-medium">Phone:</span> {contact.investmentPhone || "Not specified"}</div>
+                        <div><span className="font-medium">Email:</span> {contact.investmentEmail || "Not specified"}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Tax Professional</h4>
+                      <div className="space-y-1 text-sm">
+                        <div><span className="font-medium">Name:</span> {contact.taxName || "Not specified"}</div>
+                        <div><span className="font-medium">Phone:</span> {contact.taxPhone || "Not specified"}</div>
+                        <div><span className="font-medium">Email:</span> {contact.taxEmail || "Not specified"}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Estate Attorney</h4>
+                      <div className="space-y-1 text-sm">
+                        <div><span className="font-medium">Name:</span> {contact.estateAttyName || "Not specified"}</div>
+                        <div><span className="font-medium">Phone:</span> {contact.estateAttyPhone || "Not specified"}</div>
+                        <div><span className="font-medium">Email:</span> {contact.estateAttyEmail || "Not specified"}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Property & Casualty Insurance</h4>
+                      <div className="space-y-1 text-sm">
+                        <div><span className="font-medium">Name:</span> {contact.pncName || "Not specified"}</div>
+                        <div><span className="font-medium">Phone:</span> {contact.pncPhone || "Not specified"}</div>
+                        <div><span className="font-medium">Email:</span> {contact.pncEmail || "Not specified"}</div>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Tax Professional</h4>
-                    <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.taxName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.taxPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.taxEmail || "Not specified"}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Estate Attorney</h4>
-                    <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.estateAttyName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.estateAttyPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.estateAttyEmail || "Not specified"}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Property & Casualty Insurance</h4>
-                    <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Name:</span> {contact.pncName || "Not specified"}</div>
-                      <div><span className="font-medium">Phone:</span> {contact.pncPhone || "Not specified"}</div>
-                      <div><span className="font-medium">Email:</span> {contact.pncEmail || "Not specified"}</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="interaction" className="space-y-4">

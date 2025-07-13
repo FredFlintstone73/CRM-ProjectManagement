@@ -334,7 +334,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       <div className="space-y-6">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">
-            {selectedCategory === "client_prospect" ? "Client or Prospect?" : "Team Member or Strategic Partner?"}
+            {selectedCategory === "client_prospect" ? "Client or Prospect?" : "Strategic Partner or Team Member?"}
           </h3>
           <p className="text-sm text-gray-600 mb-6">Choose the specific type</p>
         </div>
