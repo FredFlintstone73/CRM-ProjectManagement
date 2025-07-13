@@ -37,21 +37,21 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     contact ? contact.sameAsMailingAddress === "yes" : false
   );
 
-  // Role options for team members and strategic partners
+  // Role options for team members and strategic partners (alphabetical order with "Other" last)
   const roleOptions = [
-    { value: "estate_planner", label: "Estate Planner" },
-    { value: "financial_planner", label: "Financial Planner" },
-    { value: "tax_planner", label: "Tax Planner" },
-    { value: "money_manager", label: "Money Manager" },
-    { value: "insurance_pc", label: "Insurance - P&C" },
-    { value: "insurance_business", label: "Insurance - Business" },
-    { value: "insurance_life_ltc_disability", label: "Insurance - Life, LTC, & Disability" },
-    { value: "insurance_health", label: "Insurance - Health" },
-    { value: "trusted_advisor", label: "Trusted Advisor" },
+    { value: "accountant", label: "Accountant" },
     { value: "admin_assistant", label: "Admin Assistant" },
     { value: "deliverables_team_coordinator", label: "Deliverables Team Coordinator" },
+    { value: "estate_planner", label: "Estate Planner" },
+    { value: "financial_planner", label: "Financial Planner" },
     { value: "human_relations", label: "Human Relations" },
-    { value: "accountant", label: "Accountant" },
+    { value: "insurance_business", label: "Insurance - Business" },
+    { value: "insurance_health", label: "Insurance - Health" },
+    { value: "insurance_life_ltc_disability", label: "Insurance - Life, LTC, & Disability" },
+    { value: "insurance_pc", label: "Insurance - P&C" },
+    { value: "money_manager", label: "Money Manager" },
+    { value: "tax_planner", label: "Tax Planner" },
+    { value: "trusted_advisor", label: "Trusted Advisor" },
     { value: "other", label: "Other" },
   ];
 
@@ -365,20 +365,20 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             <>
               <Card 
                 className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => handleTypeSelect("team_member")}
-              >
-                <CardHeader className="text-center">
-                  <CardTitle className="text-lg">Team Member</CardTitle>
-                  <CardDescription>Internal team member</CardDescription>
-                </CardHeader>
-              </Card>
-              <Card 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => handleTypeSelect("strategic_partner")}
               >
                 <CardHeader className="text-center">
                   <CardTitle className="text-lg">Strategic Partner</CardTitle>
                   <CardDescription>External strategic partner</CardDescription>
+                </CardHeader>
+              </Card>
+              <Card 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleTypeSelect("team_member")}
+              >
+                <CardHeader className="text-center">
+                  <CardTitle className="text-lg">Team Member</CardTitle>
+                  <CardDescription>Internal team member</CardDescription>
                 </CardHeader>
               </Card>
             </>
