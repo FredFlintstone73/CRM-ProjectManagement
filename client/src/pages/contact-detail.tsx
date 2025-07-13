@@ -634,7 +634,11 @@ export default function ContactDetail() {
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="client">Client</TabsTrigger>
+              <TabsTrigger value="client">
+                {contact.contactType === 'prospect' ? 'Prospect' : 
+                 contact.contactType === 'strategic_partner' ? 'Partner' : 
+                 contact.contactType === 'team_member' ? 'Member' : 'Client'}
+              </TabsTrigger>
               <TabsTrigger value="interaction">Interaction</TabsTrigger>
               <TabsTrigger value="projects">Projects</TabsTrigger>
               <TabsTrigger value="files">Files</TabsTrigger>
