@@ -158,12 +158,14 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       contactType: contact.contactType || "client",
       status: contact.status || "active",
       departments: contact.departments || [],
+      notes: contact.notes || "",
     } : {
       firstName: "",
       lastName: "",
       contactType: "client",
       status: "active",
       departments: [],
+      notes: "",
     },
   });
 

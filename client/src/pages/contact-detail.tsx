@@ -1082,9 +1082,17 @@ export default function ContactDetail() {
                 <CardTitle>Notes</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-gray-500 text-center py-8">
-                  Notes will be displayed here
-                </div>
+                {contact.notes ? (
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap text-gray-700">
+                      {contact.notes}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-center py-8">
+                    No notes available for this contact
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
