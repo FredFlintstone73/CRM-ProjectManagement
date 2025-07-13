@@ -315,7 +315,7 @@ export default function ContactDetail() {
     return "Contact Details";
   };
 
-  const showSidebar = true; // Show sidebar with profile image for all contact types
+  const showSidebar = contact.contactType === "client" || contact.contactType === "prospect";
 
   return (
     <div className="flex-1 overflow-auto">
@@ -604,7 +604,7 @@ export default function ContactDetail() {
             </TabsList>
 
           <TabsContent value="client" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Contact Information */}
               <Card>
                 <CardHeader>
@@ -729,10 +729,9 @@ export default function ContactDetail() {
                   </CardContent>
                 </Card>
               )}
-            </div>
 
-            {/* Contact 2 Information (Spouse) - only for clients and prospects */}
-            {contact.spouseFirstName && (contact.contactType === "client" || contact.contactType === "prospect") && (
+              {/* Contact 2 Information (Spouse) - only for clients and prospects */}
+              {contact.spouseFirstName && (contact.contactType === "client" || contact.contactType === "prospect") && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -814,8 +813,9 @@ export default function ContactDetail() {
                   </CardContent>
                 </Card>
               )}
+            </div>
 
-              {/* Marriage Information - only for clients and prospects */}
+            {/* Marriage Information - only for clients and prospects */}
             {contact.marriageDate && (contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card className="mb-6">
                 <CardContent className="p-6 pt-6 text-center text-[20px]">
@@ -952,8 +952,6 @@ export default function ContactDetail() {
                 </CardContent>
               </Card>
             )}
-
-
           </TabsContent>
 
           <TabsContent value="interaction" className="space-y-4">

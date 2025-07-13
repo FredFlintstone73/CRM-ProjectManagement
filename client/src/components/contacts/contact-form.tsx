@@ -154,15 +154,11 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       pncName: contact.pncName || "",
       pncPhone: contact.pncPhone || "",
       pncEmail: contact.pncEmail || "",
-      profileImageUrl: contact.profileImageUrl || "",
-      role: contact.role || "",
       contactType: contact.contactType || "client",
       status: contact.status || "active",
     } : {
       firstName: "",
       lastName: "",
-      profileImageUrl: "",
-      role: "",
       contactType: "client",
       status: "active",
     },
@@ -420,44 +416,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           )}
         </div>
         
-        {/* Profile Image Upload */}
-        <div className="mb-6">
-          <Label htmlFor="profileImage">Profile Image</Label>
-          <div className="mt-2 flex items-start gap-4">
-            <div className="flex-1">
-              <Input
-                id="profileImage"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    // Convert file to base64 or handle upload
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                      const result = e.target?.result as string;
-                      form.setValue("profileImageUrl", result);
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-              <p className="text-sm text-gray-500 mt-1">Upload a profile picture (optional)</p>
-            </div>
-            {/* Profile Image Preview */}
-            {form.watch("profileImageUrl") && (
-              <div className="flex-shrink-0">
-                <img
-                  src={form.watch("profileImageUrl")}
-                  alt="Profile preview"
-                  className="w-16 h-16 rounded-full object-cover border"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Simplified form for team members and strategic partners */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -521,7 +479,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="preferredContactMethod">Preferred Contact Method</Label>
-            <Select onValueChange={(value) => form.setValue("preferredContactMethod", value)} defaultValue={form.watch("preferredContactMethod")}>
+            <Select onValueChange={(value) => form.setValue("preferredContactMethod", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select contact method" />
               </SelectTrigger>
@@ -536,7 +494,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           </div>
           <div>
             <Label htmlFor="role">Role *</Label>
-            <Select onValueChange={(value) => form.setValue("role", value)} defaultValue={form.watch("role")}>
+            <Select onValueChange={(value) => form.setValue("role", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
