@@ -413,6 +413,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CSV template download endpoint
+  app.get('/api/download/csv-template', (req, res) => {
+    const csvContent = `Milestone,Parent Task,Parent Description,Sub-Task,Sub-Task Description,Sub-Sub-Task,Sub-Sub-Task Description,Assignee,Due Date,Comments
+"Confirming & Scheduling Meeting Dates & Times","Confirm Meeting Date & Time with Client","Confirm Meeting Date & Time with Client and Any Questions Regarding Implementation Plan or Items Due From Last Meeting","","","","","","10/12/2025",""
+"Confirming & Scheduling Meeting Dates & Times","Confirm Preselected Dates in ClientHub","Confirm Preselected Dates in ClientHub","","","","","","10/13/2025",""
+"Confirming & Scheduling Meeting Dates & Times","Confirm Proposed Dates/Time for DRPM","Confirm Proposed Dates/Time for DRPM","","","","","","10/15/2025",""
+"Confirming & Scheduling Meeting Dates & Times","Update New Meeting in ClientHub","Update New Meeting in ClientHub and Create Meeting Packet Folder","","","","","","10/22/2025",""
+"Confirming & Scheduling Meeting Dates & Times","Send Out Expectation Email #1","Send Out Expectation Email #1 to Team Through Email","","","","","","10/23/2025",""
+"Preparing for & Gathering Information for Meetings","Submit Items Still Needed","Submit Your Items Still Needed & Initial Highest Priority Conversation Reports","Estate Attorney","Enter the Items Still Needed and your Highest Priority Conversation below in the comments area","","","","10/31/2025",""
+"Preparing for & Gathering Information for Meetings","Submit Items Still Needed","Submit Your Items Still Needed & Initial Highest Priority Conversation Reports","Financial Planner","Enter the Items Still Needed and your Highest Priority Conversation below in the comments area","","","","10/31/2025",""
+"Preparing for & Gathering Information for Meetings","Submit Items Still Needed","Submit Your Items Still Needed & Initial Highest Priority Conversation Reports","Insurance Planner - Life","Enter the Items Still Needed and your Highest Priority Conversation below in the comments area","","","","10/31/2025",""
+"Preparing for & Gathering Information for Meetings","Submit Items Still Needed","Submit Your Items Still Needed & Initial Highest Priority Conversation Reports","Money Manager","Enter the Items Still Needed and your Highest Priority Conversation below in the comments area","","","","10/31/2025",""
+"Preparing for & Gathering Information for Meetings","Submit Items Still Needed","Submit Your Items Still Needed & Initial Highest Priority Conversation Reports","Tax Planner","Enter the Items Still Needed and your Highest Priority Conversation below in the comments area","","","","10/31/2025",""
+"Preparing for & Gathering Information for Meetings","Consolidate Items Still Needed","Consolidate Items Still Needed and Send to SMEs","","","","","","10/24/2025",""
+"Preparing for & Gathering Information for Meetings","Consolidate Highest Priority Conversations","Consolidate Highest Priority Conversations & Update Meeting Agenda","Communicate Team Priorities","Communicate the Team's Highest Priorities to each SME","","","","10/24/2025",""
+"Preparing for & Gathering Information for Meetings","Request Account Values","Request Account Values for Any Outside Accounts and Transactions","","","","","","11/21/2025",""
+"Preparing for & Gathering Information for Meetings","Request Actions Taken","Request Actions Taken Since Last Meeting by Team and Client","Create Initial Client Agenda","Create Initial Client Agenda","","","","12/1/2025",""
+"Preparing for & Gathering Information for Meetings","Download Account Values","Download Account Values & Transactions for Growth Accounts","","","","","","12/6/2025",""
+"Preparing for DRPM","Create Circle Chart","Create Circle Chart","","","","","","12/8/2025",""
+"Preparing for DRPM","Financial Planner Review","Financial Planner Review Circle Chart","","","","","","12/9/2025",""
+"Preparing for DRPM","Provide Circle Chart to Team","Provide Circle Chart to Team with Expectation Letter #2 to Team ClientHub","Confirm DRPM Date","Confirm date of DRPM","","","","12/9/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Financial Roadmap","Financial Roadmap Updated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Implementation Plan","Implementation Plan (GPS) Updated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Paperwork Sources","Paperwork Sources Updated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Behind Numbers Report","Behind the Numbers Report Generated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Numbers History","Numbers History Report Updated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Since Inception Report","Since Inception Report Updated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Goal Progress Report","Goal Progress Report","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Growth Progress Since Last Meeting","Growth Progress Since Last Meeting Generated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Growth Progress Since Inception","Growth Progress Since Inception Generated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Annual Income Report","Annual Income From Current Assets Report Generated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Total Progress Report","Total Progress Report Generated","","","","12/10/2025",""
+"Preparing for DRPM","Generate Reports","Generate Reports in Database Documents Due for Preliminary Packet","Master Goal Tracker","The Master Goal Tracker Updated","","","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Estate Attorney","Click on subtask below for list of reports","Legacy Flow Chart","The Legacy Flow Chart Updated","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Estate Attorney","Click on subtask below for list of reports","POA Summary","POA Summary Updated","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Estate Attorney","Click on subtask below for list of reports","Asset Titling Report","Asset Titling Report Updated","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Financial Planner","Click on subtask below for list of reports","Goal Blueprint","The Goal Blueprint Updated","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Financial Planner","Click on subtask below for list of reports","Lifetime Capital Projection","Lifetime Capital Projection","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Financial Planner","Click on subtask below for list of reports","Multiple Scenario Projections","Multiple Scenario Projections","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Insurance Planner - Life","Click on subtask below for list of reports","Insurance Grid","Insurance Grid Updated","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Insurance Planner - P&C","Click on subtask below for list of reports","Insurance Grid","Insurance Grid Updated","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Insurance Planner - Health","Click on subtask below for list of reports","Insurance Grid","Insurance Grid Updated","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Money Managers","Click on subtask below for list of reports","","","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Tax Planner","Click on subtask below for list of reports","Annual Tax Projection","Annual Tax Projection Completed","","12/10/2025",""
+"Preparing for DRPM","Submit Critical Reports","Submit Critical Reports and Final Highest Priority Conversation","Tax Planner","Click on subtask below for list of reports","Tax Return Copy","Copy of Last Tax Return Filed on Record","","12/10/2025",""
+"Preparing for DRPM","Trust Advisor Review","Trust Advisor Review of Preliminary Packet","","","","","","12/11/2025",""
+"Preparing for DRPM","Preliminary Packet Distribution","Preliminary Packet Distributed to Team with Expectation Letter #3 to Team Through ClientHub","","","","","","12/12/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR01 Confirm Status","CSR01 Confirm Status of Last Meeting's Action Items","","12/19/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR02 Implementation Plan","CSR02 Implementation Plan-of-Action Updated","","12/19/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR03 Unfinished Recommendations","CSR03 Unfinished Recommendations are Updated","","12/19/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR04 Debts Updated","CSR04 Debts are Updated on The Circle Chart","","12/19/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR05 Since Inception Report","CSR05 The Since Inception Report Completed","","12/19/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR06 Growth Progress Report","CSR06 The Growth Progress Since Last Meeting Report Completed","","12/19/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR07 Growth Progress Since Inception","CSR07 The Growth Progress Since Inception Report Completed","","12/19/2025",""
+"Preparing for DRPM","Nominations and Deliverables","Nominations and Deliverable Checkpoints Due","Client Service Rep","Click on subtask below for list of reports","CSR08 Goals Progress Report","CSR08 The Goals Progress Report Completed","","12/19/2025",""
+"Preparing for Progress Meeting","DRPM Meeting","DRPM Meeting Execution","","","","","","12/15/2025",""
+"Preparing for Progress Meeting","Corrections from DRPM","Corrections from DRPM Notes Made to Packet","","","","","","12/16/2025",""
+"Preparing for Progress Meeting","Packet Sealed","Packet Sealed and Made Available to TA","","","","","","12/17/2025",""
+"Preparing for Progress Meeting","Final Team Meeting","Final Team Meeting Before Client Progress Meeting","","","","","","12/18/2025",""
+"After Progress Meeting","Send Post Meeting Notes","Send Post Meeting Notes and Action Items","","","","","","12/20/2025",""
+"After Progress Meeting","Archive Meeting","Archive Meeting and Create Next Meeting Project in ClientHub","","","","","","12/21/2025",""`;
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="clean_csv_template.csv"');
+    res.send(csvContent);
+  });
+
   // Project template routes
   app.get('/api/project-templates', isAuthenticated, async (req: any, res) => {
     try {

@@ -180,6 +180,13 @@ export default function Templates() {
               <Button onClick={handleRefresh} variant="outline">
                 Refresh
               </Button>
+              <Button 
+                onClick={() => window.open('/api/download/csv-template', '_blank')}
+                variant="outline"
+                className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              >
+                Download Clean CSV Template
+              </Button>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
