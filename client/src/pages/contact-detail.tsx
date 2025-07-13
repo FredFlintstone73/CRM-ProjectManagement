@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera } from "lucide-react";
 import Header from "@/components/layout/header";
@@ -69,6 +70,10 @@ export default function ContactDetail() {
       });
     },
   });
+
+  const handleStatusChange = (newStatus: string) => {
+    updateStatusMutation.mutate(newStatus);
+  };
 
 
 
@@ -160,10 +165,6 @@ export default function ContactDetail() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const handleStatusChange = (newStatus: string) => {
-    updateStatusMutation.mutate(newStatus);
   };
 
   const handlePhotoUpload = () => {
@@ -549,29 +550,62 @@ export default function ContactDetail() {
           </div>
         )}
 
-        {/* Main Content */}
-        <div className="flex-1 p-6">
-          {/* Back Button and Edit Button for Team Members and Strategic Partners */}
-          {!showSidebar && (
-            <div className="flex justify-between items-center mb-6">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate("/contacts")}
+        {/* Left Sidebar for Strategic Partners and Team Members */}
+        {!showSidebar && (
+          <div className="w-80 bg-white border-r border-gray-200 p-6 space-y-6">
+            {/* Profile Picture */}
+            <div className="flex flex-col items-center space-y-4">
+              <Avatar className="w-24 h-24">
+                <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
+                <AvatarFallback className="text-xl">
+                  {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-center">
+                <h2 className="text-xl font-semibold">{contact.firstName} {contact.lastName}</h2>
+                {contact.role && (
+                  <p className="text-gray-600">{formatDisplayValue(contact.role)}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select 
+                value={contact.status || 'active'} 
+                onValueChange={(value) => handleStatusChange(value)}
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Contacts
-              </Button>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
               <Button 
+                className="w-full"
                 onClick={() => setIsEditDialogOpen(true)}
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Contact
               </Button>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate("/contacts")}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Contacts
+              </Button>
             </div>
-          )}
-          
-          {/* Edit Dialog for Team Members and Strategic Partners */}
-          {!showSidebar && (
+
+            {/* Edit Dialog for Strategic Partners and Team Members */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
               <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
@@ -591,7 +625,11 @@ export default function ContactDetail() {
                 />
               </DialogContent>
             </Dialog>
-          )}
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 p-6">
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
