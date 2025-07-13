@@ -43,6 +43,22 @@ export default function Contacts() {
   }>({ key: null, direction: 'asc' });
 
   const searchString = useSearch();
+
+  // Restore state from localStorage on component mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('contactsPageState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        if (state.visibleTypes) setVisibleTypes(state.visibleTypes);
+        if (state.viewMode) setViewMode(state.viewMode);
+        if (state.sortConfig) setSortConfig(state.sortConfig);
+        if (state.searchQuery) setSearchQuery(state.searchQuery);
+      } catch (error) {
+        console.error('Error restoring contacts page state:', error);
+      }
+    }
+  }, []);
   
   // Handle URL query parameters for contact type filtering
   useEffect(() => {
@@ -256,6 +272,17 @@ export default function Contacts() {
       [type]: !prev[type]
     }));
   };
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const state = {
+      visibleTypes,
+      viewMode,
+      sortConfig,
+      searchQuery
+    };
+    localStorage.setItem('contactsPageState', JSON.stringify(state));
+  }, [visibleTypes, viewMode, sortConfig, searchQuery]);
 
   const getContactTypeLabel = (type: string) => {
     switch (type) {
@@ -521,7 +548,7 @@ export default function Contacts() {
                         </Avatar>
                         <div>
                           <CardTitle className="text-lg">
-                            <Link href={`/contacts/${contact.id}?from=${encodeURIComponent(new URLSearchParams(window.location.search).toString())}`} className="hover:text-blue-600 hover:underline cursor-pointer">
+                            <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer">
                               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
                             </Link>
                           </CardTitle>
@@ -672,7 +699,7 @@ export default function Contacts() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <Link href={`/contacts/${contact.id}?from=${encodeURIComponent(new URLSearchParams(window.location.search).toString())}`} className="hover:text-blue-600 hover:underline cursor-pointer font-medium">
+                            <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer font-medium">
                               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
                             </Link>
                             {contact.company && (

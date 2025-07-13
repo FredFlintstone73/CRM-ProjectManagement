@@ -35,18 +35,9 @@ export default function ContactDetail() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  // Build back navigation URL to preserve contacts page state
-  const buildBackToContactsUrl = () => {
-    const currentUrl = new URL(window.location.href);
-    const referrerParams = currentUrl.searchParams.get('from');
-    
-    if (referrerParams) {
-      // Use the referrer parameters if available
-      return `/contacts?${referrerParams}`;
-    }
-    
-    // Default back to contacts page
-    return '/contacts';
+  // Navigate back to contacts page (state will be restored from localStorage)
+  const navigateBackToContacts = () => {
+    navigate('/contacts');
   };
 
   const { data: contact, isLoading: contactLoading } = useQuery<Contact>({
@@ -366,7 +357,7 @@ export default function ContactDetail() {
           {/* Back Button */}
           <Button 
             variant="outline" 
-            onClick={() => navigate(buildBackToContactsUrl())}
+            onClick={navigateBackToContacts}
             className="w-full"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -590,7 +581,7 @@ export default function ContactDetail() {
             <Button 
               variant="outline" 
               className="w-full"
-              onClick={() => navigate(buildBackToContactsUrl())}
+              onClick={navigateBackToContacts}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Contacts
