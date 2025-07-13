@@ -307,16 +307,27 @@ export default function ContactDetail() {
     );
   }
 
+  const getDetailPageTitle = () => {
+    if (contact.contactType === "client") return "Client Details";
+    if (contact.contactType === "prospect") return "Prospect Details";
+    if (contact.contactType === "strategic_partner") return "Strategic Partner Details";
+    if (contact.contactType === "team_member") return "Team Member Details";
+    return "Contact Details";
+  };
+
+  const showSidebar = contact.contactType === "client" || contact.contactType === "prospect";
+
   return (
     <div className="flex-1 overflow-auto">
       <Header
         title={contact.familyName || `${contact.firstName} ${contact.lastName}`}
-        subtitle="Client Detail"
+        subtitle={getDetailPageTitle()}
         showActions={false}
       />
       <div className="flex h-full">
-        {/* Left Sidebar */}
-        <div className="w-80 bg-white border-r p-6 space-y-6">
+        {/* Left Sidebar - only for clients and prospects */}
+        {showSidebar && (
+          <div className="w-80 bg-white border-r p-6 space-y-6">
           {/* Back Button */}
           <Button 
             variant="outline" 
@@ -535,10 +546,53 @@ export default function ContactDetail() {
               />
             </DialogContent>
           </Dialog>
-        </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 p-6">
+          {/* Back Button and Edit Button for Team Members and Strategic Partners */}
+          {!showSidebar && (
+            <div className="flex justify-between items-center mb-6">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/contacts")}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Contacts
+              </Button>
+              <Button 
+                onClick={() => setIsEditDialogOpen(true)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Contact
+              </Button>
+            </div>
+          )}
+          
+          {/* Edit Dialog for Team Members and Strategic Partners */}
+          {!showSidebar && (
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Edit Contact Information</DialogTitle>
+                  <DialogDescription>
+                    Update the contact's personal information and contact details.
+                  </DialogDescription>
+                </DialogHeader>
+                <ContactForm 
+                  contact={contact} 
+                  onSuccess={() => {
+                    setIsEditDialogOpen(false);
+                    // Refresh the contact data after successful edit
+                    queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+                  }} 
+                />
+              </DialogContent>
+            </Dialog>
+          )}
+
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
