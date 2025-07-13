@@ -338,35 +338,7 @@ export default function ContactDetail() {
             Back to Contacts
           </Button>
 
-          {/* Client Photo */}
-          <div className="text-center">
-            <div className="w-32 h-32 mx-auto mb-4 relative">
-              <Avatar className="w-full h-full border-2 border-dashed border-gray-300">
-                <AvatarImage src={profileImageUrl || ""} alt="Client Photo" className="object-cover" />
-                <AvatarFallback className="text-2xl bg-gray-100">
-                  {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handlePhotoUpload}
-              disabled={uploadPhotoMutation.isPending}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
-            </Button>
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </div>
-
-          {/* Family Name */}
+          {/* Family Name and Status */}
           <div className="text-center">
             <h2 className="text-xl font-bold mb-2">
               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
@@ -592,6 +564,42 @@ export default function ContactDetail() {
               </DialogContent>
             </Dialog>
           )}
+
+          {/* Profile Image Section */}
+          <div className="text-center mb-6">
+            <div className="w-32 h-32 mx-auto mb-4 relative">
+              <Avatar className="w-full h-full border-2 border-dashed border-gray-300">
+                <AvatarImage src={profileImageUrl || ""} alt="Profile Photo" className="object-cover" />
+                <AvatarFallback className="text-2xl bg-gray-100">
+                  {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold mb-2">
+                {contact.familyName || `${contact.firstName} ${contact.lastName}`}
+              </h2>
+              <Badge className={getContactTypeColor(contact.contactType)}>
+                {formatContactType(contact.contactType)}
+              </Badge>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handlePhotoUpload}
+              disabled={uploadPhotoMutation.isPending}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
+            </Button>
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
