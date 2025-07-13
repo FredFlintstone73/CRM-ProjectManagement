@@ -315,7 +315,7 @@ export default function ContactDetail() {
     return "Contact Details";
   };
 
-  const showSidebar = contact.contactType === "client" || contact.contactType === "prospect";
+  const showSidebar = true; // Show sidebar with profile image for all contact types
 
   return (
     <div className="flex-1 overflow-auto">
@@ -338,7 +338,35 @@ export default function ContactDetail() {
             Back to Contacts
           </Button>
 
-          {/* Family Name and Status */}
+          {/* Client Photo */}
+          <div className="text-center">
+            <div className="w-32 h-32 mx-auto mb-4 relative">
+              <Avatar className="w-full h-full border-2 border-dashed border-gray-300">
+                <AvatarImage src={profileImageUrl || ""} alt="Client Photo" className="object-cover" />
+                <AvatarFallback className="text-2xl bg-gray-100">
+                  {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handlePhotoUpload}
+              disabled={uploadPhotoMutation.isPending}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
+            </Button>
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
+
+          {/* Family Name */}
           <div className="text-center">
             <h2 className="text-xl font-bold mb-2">
               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
@@ -565,42 +593,6 @@ export default function ContactDetail() {
             </Dialog>
           )}
 
-          {/* Profile Image Section */}
-          <div className="text-center mb-6">
-            <div className="w-32 h-32 mx-auto mb-4 relative">
-              <Avatar className="w-full h-full border-2 border-dashed border-gray-300">
-                <AvatarImage src={profileImageUrl || ""} alt="Profile Photo" className="object-cover" />
-                <AvatarFallback className="text-2xl bg-gray-100">
-                  {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-            <div className="mb-4">
-              <h2 className="text-2xl font-bold mb-2">
-                {contact.familyName || `${contact.firstName} ${contact.lastName}`}
-              </h2>
-              <Badge className={getContactTypeColor(contact.contactType)}>
-                {formatContactType(contact.contactType)}
-              </Badge>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handlePhotoUpload}
-              disabled={uploadPhotoMutation.isPending}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
-            </Button>
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </div>
-
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
@@ -613,8 +605,8 @@ export default function ContactDetail() {
 
           <TabsContent value="client" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Contact Information */}
-                <Card>
+              {/* Contact Information */}
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
@@ -824,7 +816,7 @@ export default function ContactDetail() {
               )}
 
               {/* Marriage Information - only for clients and prospects */}
-              {contact.marriageDate && (contact.contactType === "client" || contact.contactType === "prospect") && (
+            {contact.marriageDate && (contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card className="mb-6">
                 <CardContent className="p-6 pt-6 text-center text-[20px]">
                   <div className="flex justify-center items-center gap-2">
@@ -835,8 +827,8 @@ export default function ContactDetail() {
               </Card>
             )}
 
-              {/* Address Information - only for clients and prospects (team members and strategic partners have it in the right column) */}
-              {(contact.contactType === "client" || contact.contactType === "prospect") && (
+            {/* Address Information - only for clients and prospects (team members and strategic partners have it in the right column) */}
+            {(contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -878,8 +870,8 @@ export default function ContactDetail() {
               </Card>
             )}
 
-              {/* Children Information - only for clients and prospects */}
-              {(contact.child1FirstName || contact.child2FirstName || contact.child3FirstName) && (contact.contactType === "client" || contact.contactType === "prospect") && (
+            {/* Children Information - only for clients and prospects */}
+            {(contact.child1FirstName || contact.child2FirstName || contact.child3FirstName) && (contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -913,8 +905,8 @@ export default function ContactDetail() {
               </Card>
             )}
 
-              {/* Professional Contacts - only for clients and prospects */}
-              {(contact.contactType === "client" || contact.contactType === "prospect") && (
+            {/* Professional Contacts - only for clients and prospects */}
+            {(contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -961,67 +953,7 @@ export default function ContactDetail() {
               </Card>
             )}
 
-              {/* Profile Image Upload Section for Team Members and Strategic Partners */}
-              {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Camera className="h-5 w-5" />
-                    Profile Image
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-6">
-                    <div className="flex-shrink-0">
-                      <Avatar className="w-24 h-24">
-                        <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
-                        <AvatarFallback className="text-2xl">
-                          {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1">
-                      <div className="mb-4">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = async (e) => {
-                                const result = e.target?.result as string;
-                                try {
-                                  // Update the profile image via API
-                                  await apiRequest("PUT", `/api/contacts/${contact.id}`, {
-                                    profileImageUrl: result
-                                  });
-                                  // Refresh the contact data
-                                  queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
-                                  toast({
-                                    title: "Profile image updated",
-                                    description: "The profile image has been successfully updated.",
-                                  });
-                                } catch (error) {
-                                  toast({
-                                    title: "Error",
-                                    description: "Failed to update profile image.",
-                                    variant: "destructive",
-                                  });
-                                }
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                          className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        />
-                        <p className="text-sm text-gray-500 mt-2">Upload a new profile picture</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+
           </TabsContent>
 
           <TabsContent value="interaction" className="space-y-4">
