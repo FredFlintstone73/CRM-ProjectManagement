@@ -552,9 +552,12 @@ export default function Contacts() {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-1">
                         <Badge className={getContactTypeColor(contact.contactType)}>
                           {formatContactType(contact.contactType)}
+                        </Badge>
+                        <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
+                          {formatStatus(contact.status || 'active')}
                         </Badge>
                       </div>
                     </div>
@@ -585,10 +588,18 @@ export default function Contacts() {
                         <span>{formatRole(contact.role)}</span>
                       </div>
                     )}
+                    {/* Departments */}
+                    {contact.departments && contact.departments.length > 0 && (
+                      <div className="flex flex-wrap gap-1 text-sm">
+                        <span className="text-gray-600">Departments:</span>
+                        {contact.departments.map((dept) => (
+                          <Badge key={dept} variant="secondary" className="text-xs">
+                            {dept}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center justify-between pt-2">
-                      <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
-                        {formatStatus(contact.status || 'active')}
-                      </Badge>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline" size="sm">
@@ -679,6 +690,7 @@ export default function Contacts() {
                         {getSortIcon('status')}
                       </Button>
                     </TableHead>
+                    <TableHead>Departments</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -739,6 +751,19 @@ export default function Contacts() {
                         <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
                           {formatStatus(contact.status || 'active')}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {contact.departments && contact.departments.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {contact.departments.map((dept) => (
+                              <Badge key={dept} variant="secondary" className="text-xs">
+                                {dept}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
