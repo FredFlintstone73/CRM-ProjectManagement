@@ -46,19 +46,25 @@ export default function Contacts() {
 
   // Restore state from localStorage on component mount
   useEffect(() => {
-    const savedState = localStorage.getItem('contactsPageState');
-    if (savedState) {
-      try {
-        const state = JSON.parse(savedState);
-        if (state.visibleTypes) setVisibleTypes(state.visibleTypes);
-        if (state.viewMode) setViewMode(state.viewMode);
-        if (state.sortConfig) setSortConfig(state.sortConfig);
-        if (state.searchQuery) setSearchQuery(state.searchQuery);
-      } catch (error) {
-        console.error('Error restoring contacts page state:', error);
+    const urlParams = new URLSearchParams(searchString);
+    const hasUrlParams = urlParams.toString().length > 0;
+    
+    // Only restore from localStorage if there are no URL parameters
+    if (!hasUrlParams) {
+      const savedState = localStorage.getItem('contactsPageState');
+      if (savedState) {
+        try {
+          const state = JSON.parse(savedState);
+          if (state.visibleTypes) setVisibleTypes(state.visibleTypes);
+          if (state.viewMode) setViewMode(state.viewMode);
+          if (state.sortConfig) setSortConfig(state.sortConfig);
+          if (state.searchQuery) setSearchQuery(state.searchQuery);
+        } catch (error) {
+          console.error('Error restoring contacts page state:', error);
+        }
       }
     }
-  }, []);
+  }, [searchString]);
   
   // Handle URL query parameters for contact type filtering
   useEffect(() => {
@@ -70,55 +76,44 @@ export default function Contacts() {
     const sortDirParam = urlParams.get('sortDir');
     const searchParam = urlParams.get('search');
     
-    // Handle types filter
-    if (typesParam) {
-      const selectedTypes = typesParam.split(',');
-      setVisibleTypes({
-        client: selectedTypes.includes('client'),
-        prospect: selectedTypes.includes('prospect'),
-        team_member: selectedTypes.includes('team_member'),
-        strategic_partner: selectedTypes.includes('strategic_partner')
-      });
-    } else if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner'].includes(typeParam)) {
-      // Show only the selected type from URL (legacy support)
-      setVisibleTypes({
-        client: typeParam === 'client',
-        prospect: typeParam === 'prospect',
-        team_member: typeParam === 'team_member',
-        strategic_partner: typeParam === 'strategic_partner'
-      });
-    } else {
-      // Reset to show all types when no type parameter is present
-      setVisibleTypes({
-        client: true,
-        prospect: true,
-        team_member: true,
-        strategic_partner: true
-      });
-    }
-    
-    // Handle view mode
-    if (viewParam === 'rows') {
-      setViewMode('rows');
-    } else {
-      setViewMode('cards');
-    }
-    
-    // Handle sort configuration
-    if (sortParam && sortDirParam) {
-      setSortConfig({
-        key: sortParam as keyof Contact,
-        direction: sortDirParam as 'asc' | 'desc'
-      });
-    } else {
-      setSortConfig({ key: null, direction: 'asc' });
-    }
-    
-    // Handle search query
-    if (searchParam) {
-      setSearchQuery(searchParam);
-    } else {
-      setSearchQuery('');
+    // Only apply URL parameters if they exist
+    if (typeParam || typesParam || viewParam || sortParam || searchParam) {
+      // Handle types filter
+      if (typesParam) {
+        const selectedTypes = typesParam.split(',');
+        setVisibleTypes({
+          client: selectedTypes.includes('client'),
+          prospect: selectedTypes.includes('prospect'),
+          team_member: selectedTypes.includes('team_member'),
+          strategic_partner: selectedTypes.includes('strategic_partner')
+        });
+      } else if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner'].includes(typeParam)) {
+        // Show only the selected type from URL (legacy support)
+        setVisibleTypes({
+          client: typeParam === 'client',
+          prospect: typeParam === 'prospect',
+          team_member: typeParam === 'team_member',
+          strategic_partner: typeParam === 'strategic_partner'
+        });
+      }
+      
+      // Handle view mode
+      if (viewParam === 'rows') {
+        setViewMode('rows');
+      }
+      
+      // Handle sort configuration
+      if (sortParam && sortDirParam) {
+        setSortConfig({
+          key: sortParam as keyof Contact,
+          direction: sortDirParam as 'asc' | 'desc'
+        });
+      }
+      
+      // Handle search query
+      if (searchParam) {
+        setSearchQuery(searchParam);
+      }
     }
   }, [searchString]);
 
