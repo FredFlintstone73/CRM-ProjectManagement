@@ -367,16 +367,15 @@ export default function ContactDetail() {
                   {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+                onClick={handlePhotoUpload}
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handlePhotoUpload}
-              disabled={uploadPhotoMutation.isPending}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
-            </Button>
             <Input
               ref={fileInputRef}
               type="file"
@@ -633,14 +632,6 @@ export default function ContactDetail() {
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Contact
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={handlePhotoUpload}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Photo
               </Button>
             </div>
 

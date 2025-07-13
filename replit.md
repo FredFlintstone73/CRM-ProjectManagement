@@ -224,6 +224,8 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Specialized Contact Detail Sidebars**: Created left sidebar for Strategic Partners and Team Members with profile picture, status dropdown, and action buttons
 - **Dynamic Tab Labels**: Changed tab labels to be contact-type specific: "Client", "Prospect", "Partner", "Member"
 - **Layout Optimization**: Strategic Partners and Team Members have Address Information positioned to the right of Contact Information to save space
+- **Consistent Photo Upload UI**: Added camera icon button to all contact types for photo uploads, removed "Upload Photo" buttons from all sidebars
+- **Sidebar Navigation**: Positioned "Back to Contacts" button above profile pictures for Strategic Partners and Team Members
 
 ### Asana Template Import with Due Date Formulas (July 12, 2025)
 - **CSV Import Processing**: Successfully imported complete CSR Meeting Template from user's formatted CSV
