@@ -397,28 +397,13 @@ export default function ContactDetail() {
               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
             </h2>
             <div className="flex flex-col items-center gap-2">
-              <Badge className={getContactTypeColor(contact.contactType)}>
-                {formatContactType(contact.contactType)}
-              </Badge>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700">Status:</span>
-                <Select
-                  value={contact.status || "active"}
-                  onValueChange={handleStatusChange}
-                  disabled={updateStatusMutation.isPending}
-                >
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue>
-                      <Badge variant="outline" className={getStatusColor(contact.status || "active")}>
-                        {formatDisplayValue(contact.status || "active")}
-                      </Badge>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Badge className={getContactTypeColor(contact.contactType)}>
+                  {formatContactType(contact.contactType)}
+                </Badge>
+                <Badge variant="outline" className={getStatusColor(contact.status || "active")}>
+                  {formatDisplayValue(contact.status || "active")}
+                </Badge>
               </div>
             </div>
           </div>
@@ -625,23 +610,6 @@ export default function ContactDetail() {
                   <p className="text-gray-600">{formatDisplayValue(contact.role)}</p>
                 )}
               </div>
-            </div>
-
-            {/* Status Dropdown */}
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select 
-                value={contact.status || 'active'} 
-                onValueChange={(value) => handleStatusChange(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Departments */}

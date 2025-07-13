@@ -217,6 +217,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Query Optimization**: Updated query keys to include custom dates for proper cache invalidation
 - **User Experience**: Clean popover interface with "Set Dates" button and "Apply Date Range" functionality
 
+### Department Selection Feature (July 13, 2025)
+- **Database Schema**: Added departments array field to contacts table supporting Accounting, Planning, and Tax departments
+- **Contact Forms**: Added department selection with checkboxes for all contact types (clients, prospects, strategic partners, team members)
+- **Multiple Selection**: Users can select multiple departments for each contact using checkbox interface
+- **Contact Details Display**: Departments shown as badges below contact type and status in contact detail pages
+- **Sidebar Integration**: Department badges displayed in left sidebar for strategic partners and team members
+- **Form Integration**: Department selection integrated into both simplified and full contact forms
+- **Status Display Update**: Removed status dropdown, now showing status as badge next to contact type for cleaner interface
+
 ### Contact Management UI Enhancements (July 13, 2025)
 - **Role Information Display**: Added role information to contact cards and table rows for Strategic Partners and Team Members
 - **Show Button Reordering**: Reordered Show buttons to: Clients, Prospects, Strategic Partners, Team Members
