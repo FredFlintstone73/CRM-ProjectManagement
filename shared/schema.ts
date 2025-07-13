@@ -229,6 +229,7 @@ export const contacts = pgTable("contacts", {
   contactType: contactTypeEnum("contact_type").notNull(),
   role: contactRoleEnum("role"), // Only for team_member and strategic_partner
   status: contactStatusEnum("status").default("active"),
+  departments: text("departments").array().default([]),
   notes: text("notes"),
   applicationComplete: varchar("application_complete"),
   profileImageUrl: varchar("profile_image_url"),

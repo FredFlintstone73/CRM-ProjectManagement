@@ -423,6 +423,20 @@ export default function ContactDetail() {
             </div>
           </div>
 
+          {/* Departments */}
+          {contact.departments && contact.departments.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">Departments:</p>
+              <div className="flex flex-wrap gap-2">
+                {contact.departments.map((dept) => (
+                  <Badge key={dept} variant="secondary" className="text-xs">
+                    {dept}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Contact Information */}
           <Card>
             <CardHeader className="pb-3">
@@ -629,6 +643,20 @@ export default function ContactDetail() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Departments */}
+            {contact.departments && contact.departments.length > 0 && (
+              <div className="space-y-2">
+                <Label>Departments</Label>
+                <div className="flex flex-wrap gap-2">
+                  {contact.departments.map((dept) => (
+                    <Badge key={dept} variant="secondary" className="text-xs">
+                      {dept}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="space-y-3">

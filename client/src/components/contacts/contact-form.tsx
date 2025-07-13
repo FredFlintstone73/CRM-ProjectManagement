@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { insertContactSchema, type InsertContact, type Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
@@ -156,11 +157,13 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       pncEmail: contact.pncEmail || "",
       contactType: contact.contactType || "client",
       status: contact.status || "active",
+      departments: contact.departments || [],
     } : {
       firstName: "",
       lastName: "",
       contactType: "client",
       status: "active",
+      departments: [],
     },
   });
 
@@ -509,6 +512,30 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           </div>
         </div>
 
+        {/* Departments */}
+        <div className="space-y-4">
+          <h4 className="text-md font-medium">Departments</h4>
+          <p className="text-sm text-gray-600">Select the departments this contact is working with</p>
+          <div className="flex gap-6">
+            {["Accounting", "Planning", "Tax"].map((dept) => (
+              <div key={dept} className="flex items-center space-x-2">
+                <Checkbox
+                  id={dept}
+                  checked={form.watch("departments")?.includes(dept)}
+                  onCheckedChange={(checked) => {
+                    const currentDepts = form.watch("departments") || [];
+                    const newDepts = checked
+                      ? [...currentDepts, dept]
+                      : currentDepts.filter(d => d !== dept);
+                    form.setValue("departments", newDepts);
+                  }}
+                />
+                <Label htmlFor={dept} className="cursor-pointer">{dept}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Mailing Address */}
         <div className="space-y-4">
           <h4 className="text-md font-medium">Mailing Address</h4>
@@ -657,6 +684,30 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                       <SelectItem value="inactive">Inactive</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+              
+              {/* Departments */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Departments</Label>
+                <p className="text-sm text-gray-600">Select the departments this contact is working with</p>
+                <div className="flex gap-6">
+                  {["Accounting", "Planning", "Tax"].map((dept) => (
+                    <div key={dept} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={dept}
+                        checked={form.watch("departments")?.includes(dept)}
+                        onCheckedChange={(checked) => {
+                          const currentDepts = form.watch("departments") || [];
+                          const newDepts = checked
+                            ? [...currentDepts, dept]
+                            : currentDepts.filter(d => d !== dept);
+                          form.setValue("departments", newDepts);
+                        }}
+                      />
+                      <Label htmlFor={dept} className="cursor-pointer">{dept}</Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
