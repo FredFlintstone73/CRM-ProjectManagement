@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,7 @@ type ContactType = "client" | "prospect" | "team_member" | "strategic_partner";
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   const [selectedCategory, setSelectedCategory] = useState<ContactCategory>(
     contact ? (contact.contactType === "client" || contact.contactType === "prospect" ? "client_prospect" : "team_strategic") : null
@@ -183,6 +184,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       }
     },
     onSuccess: () => {
+      // Invalidate cache to ensure updated data is displayed
+      if (contact) {
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+      
       toast({
         title: contact ? "Contact updated" : "Contact created",
         description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
