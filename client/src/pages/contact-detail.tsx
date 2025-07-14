@@ -46,6 +46,8 @@ export default function ContactDetail() {
   const { data: contact, isLoading: contactLoading } = useQuery<Contact>({
     queryKey: ['/api/contacts', id],
     enabled: isAuthenticated && !!id,
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Don't cache data
   });
 
   const updateStatusMutation = useMutation({
@@ -587,7 +589,9 @@ export default function ContactDetail() {
                 contact={contact} 
                 onSuccess={() => {
                   setIsEditDialogOpen(false);
-                  // Refresh the contact data after successful edit
+                  // Force refresh of contact data after successful edit
+                  queryClient.removeQueries({ queryKey: ['/api/contacts', id] });
+                  queryClient.removeQueries({ queryKey: ['/api/contacts'] });
                   queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
                   queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
                 }} 
