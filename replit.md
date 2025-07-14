@@ -258,6 +258,13 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Performance**: Efficient file handling with proper content-type detection and browser download triggers
 - **User Experience**: Professional file management interface with file type icons, size display, and intuitive controls
 
+### Dynamic Role Column Display Enhancement (July 14, 2025)
+- **Conditional Column Display**: Made Role column in contacts table view conditional based on selected contact types
+- **Smart UI Logic**: Role column only appears when Strategic Partners and/or Team Members are selected to be displayed
+- **Clean Table View**: When showing only Clients and Prospects, Role column is hidden since those contact types don't have role information
+- **Dynamic Responsiveness**: Column automatically shows/hides based on which contact types are currently visible through filter toggles
+- **User Experience**: Provides cleaner, more relevant table layout that adapts to user's current filtering preferences
+
 ### Contact Management UI Enhancements (July 13, 2025)
 - **Role Information Display**: Added role information to contact cards and table rows for Strategic Partners and Team Members
 - **Show Button Reordering**: Reordered Show buttons to: Clients, Prospects, Strategic Partners, Team Members
