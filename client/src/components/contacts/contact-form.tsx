@@ -186,9 +186,15 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     onSuccess: () => {
       // Invalidate cache to ensure updated data is displayed
       if (contact) {
+        console.log('Invalidating cache for contact:', contact.id);
+        // Try both string and number formats to ensure cache invalidation works
         queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id] });
       }
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+      
+      // Force refetch by clearing all contact-related queries
+      queryClient.removeQueries({ queryKey: ['/api/contacts'] });
       
       toast({
         title: contact ? "Contact updated" : "Contact created",
