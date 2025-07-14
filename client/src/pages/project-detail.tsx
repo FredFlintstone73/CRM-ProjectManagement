@@ -33,6 +33,8 @@ export default function ProjectDetail() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [sortBy, setSortBy] = useState<'assignee' | 'dueDate'>('assignee');
+  const [editingDueDate, setEditingDueDate] = useState(false);
+  const [newDueDate, setNewDueDate] = useState("");
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id],
@@ -114,6 +116,27 @@ export default function ProjectDetail() {
         description: errorMessage,
         variant: "destructive" 
       });
+    },
+  });
+
+  const updateDueDateMutation = useMutation({
+    mutationFn: async ({ projectId, dueDate }: { projectId: number; dueDate: string | null }) => {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dueDate }),
+      });
+      if (!response.ok) throw new Error('Failed to update due date');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
+      setEditingDueDate(false);
+      setNewDueDate("");
+      toast({ title: "Due date updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update due date", variant: "destructive" });
     },
   });
 
@@ -214,6 +237,34 @@ export default function ProjectDetail() {
     setShowProjectEdit(false);
     queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
     toast({ title: "Project updated successfully" });
+  };
+
+  const handleEditDueDate = () => {
+    setEditingDueDate(true);
+    setNewDueDate(project?.dueDate ? format(new Date(project.dueDate), 'yyyy-MM-dd') : "");
+  };
+
+  const handleSaveDueDate = () => {
+    if (project) {
+      updateDueDateMutation.mutate({ 
+        projectId: project.id, 
+        dueDate: newDueDate || null 
+      });
+    }
+  };
+
+  const handleDeleteDueDate = () => {
+    if (project && confirm('Are you sure you want to remove the due date?')) {
+      updateDueDateMutation.mutate({ 
+        projectId: project.id, 
+        dueDate: null 
+      });
+    }
+  };
+
+  const handleCancelEditDueDate = () => {
+    setEditingDueDate(false);
+    setNewDueDate("");
   };
 
   // Calculate progress based on completed tasks
@@ -359,14 +410,57 @@ export default function ProjectDetail() {
               </div>
             </div>
             
-            {project.dueDate && (
-              <div className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-700">
-                  Due: {format(new Date(project.dueDate), 'MMM dd, yyyy')}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-gray-500" />
+              {editingDueDate ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="date"
+                    value={newDueDate}
+                    onChange={(e) => setNewDueDate(e.target.value)}
+                    className="w-40 h-8"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSaveDueDate}
+                    disabled={updateDueDateMutation.isPending}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelEditDueDate}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700">
+                    Due: {project.dueDate ? format(new Date(project.dueDate), 'MMM dd, yyyy') : 'No due date set'}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleEditDueDate}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                  </Button>
+                  {project.dueDate && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleDeleteDueDate}
+                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
             
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-gray-500" />
