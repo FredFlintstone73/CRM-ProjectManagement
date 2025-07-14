@@ -105,6 +105,8 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
           parentTask: task.parentTask || '',
           subTask: task.subTask || '',
           subSubTask: task.subSubTask || '',
+          daysFromMeeting: task.dueDateOffset || 0,
+          basedOnDrpm: task.basedOnDrpm || false,
         };
       });
 

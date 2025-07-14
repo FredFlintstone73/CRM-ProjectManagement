@@ -228,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           estimatedDays: 1,
           dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
           assignedTo: taskData.assignedTo ? parseInt(taskData.assignedTo) : null,
-          comments: `Milestone: ${taskData.milestone || 'N/A'}\nParent Task: ${taskData.parentTask || 'N/A'}\nSub-Task: ${taskData.subTask || 'N/A'}\nSub-Sub-Task: ${taskData.subSubTask || 'N/A'}`
+          description: `${taskData.description || ''}\nMilestone: ${taskData.milestone || 'N/A'}\nParent Task: ${taskData.parentTask || 'N/A'}\nSub-Task: ${taskData.subTask || 'N/A'}\nSub-Sub-Task: ${taskData.subSubTask || 'N/A'}\nDaysFromMeeting: ${taskData.daysFromMeeting || 0}\nBasedOnDrpm: ${taskData.basedOnDrpm || false}`
         }, userId);
         createdTasks.push(task);
       }
@@ -274,22 +274,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await storage.getTasksByProject(projectId);
       
       if (dueDate && tasks.length > 0) {
-        // If we have a new due date, recalculate all task due dates
+        // If we have a new due date, recalculate all task due dates based on original offsets
         const newMeetingDate = new Date(dueDate);
-        const originalMeetingDate = project.dueDate ? new Date(project.dueDate) : null;
         
-        // Calculate the difference in days
-        const daysDifference = originalMeetingDate ? 
-          Math.round((newMeetingDate.getTime() - originalMeetingDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-        
-        // Update all task due dates by the same offset
+        // Update all task due dates using original offsets from meeting date
         const updatePromises = tasks.map(async (task) => {
-          if (task.dueDate) {
-            const currentTaskDate = new Date(task.dueDate);
-            const newTaskDate = new Date(currentTaskDate);
-            newTaskDate.setDate(newTaskDate.getDate() + daysDifference);
+          if (task.description) {
+            // Parse the offset information from description
+            const daysFromMeetingMatch = task.description.match(/DaysFromMeeting: (-?\d+)/);
+            const basedOnDrpmMatch = task.description.match(/BasedOnDrpm: (true|false)/);
             
-            return storage.updateTask(task.id, { dueDate: newTaskDate });
+            if (daysFromMeetingMatch) {
+              const daysFromMeeting = parseInt(daysFromMeetingMatch[1]);
+              const basedOnDrpm = basedOnDrpmMatch ? basedOnDrpmMatch[1] === 'true' : false;
+              
+              let newTaskDate: Date;
+              if (basedOnDrpm) {
+                // TODO: For now, use meeting date. We'd need to store DRPM date separately
+                newTaskDate = new Date(newMeetingDate);
+                newTaskDate.setDate(newTaskDate.getDate() + daysFromMeeting);
+              } else {
+                // Calculate based on meeting date
+                newTaskDate = new Date(newMeetingDate);
+                newTaskDate.setDate(newTaskDate.getDate() + daysFromMeeting);
+              }
+              
+              return storage.updateTask(task.id, { dueDate: newTaskDate });
+            }
           }
           return Promise.resolve();
         });
