@@ -98,7 +98,7 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
           title: task.name,
           description: task.description || '',
           priority: task.priority || 'medium',
-          status: 'pending',
+          status: 'todo',
           dueDate: dueDate.toISOString().split('T')[0],
           assignedTo: assignee?.id || null,
           milestone: task.milestone || '',
