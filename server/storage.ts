@@ -105,6 +105,8 @@ export interface IStorage {
   // Contact note operations
   getContactNotes(contactId: number): Promise<ContactNote[]>;
   createContactNote(note: InsertContactNote, userId: string): Promise<ContactNote>;
+  updateContactNote(noteId: number, updates: Partial<InsertContactNote>): Promise<ContactNote>;
+  deleteContactNote(noteId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -680,6 +682,24 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return contactNote;
+  }
+
+  async updateContactNote(noteId: number, updates: Partial<InsertContactNote>): Promise<ContactNote> {
+    const [updatedNote] = await db
+      .update(contactNotes)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(contactNotes.id, noteId))
+      .returning();
+    return updatedNote;
+  }
+
+  async deleteContactNote(noteId: number): Promise<void> {
+    await db
+      .delete(contactNotes)
+      .where(eq(contactNotes.id, noteId));
   }
 
   // Helper method to find or create a contact for a user

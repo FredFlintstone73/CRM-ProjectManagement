@@ -360,6 +360,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/contacts/:id/notes/:noteId', isAuthenticated, async (req: any, res) => {
+    try {
+      const noteId = parseInt(req.params.noteId);
+      const { content } = req.body;
+      const updatedNote = await storage.updateContactNote(noteId, { content });
+      res.json(updatedNote);
+    } catch (error) {
+      console.error("Error updating contact note:", error);
+      res.status(500).json({ message: "Failed to update contact note" });
+    }
+  });
+
+  app.delete('/api/contacts/:id/notes/:noteId', isAuthenticated, async (req: any, res) => {
+    try {
+      const noteId = parseInt(req.params.noteId);
+      await storage.deleteContactNote(noteId);
+      res.json({ message: "Note deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting contact note:", error);
+      res.status(500).json({ message: "Failed to delete contact note" });
+    }
+  });
+
   // Task routes
   app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {
