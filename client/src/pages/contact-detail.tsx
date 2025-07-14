@@ -19,6 +19,7 @@ import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
 import ContactNotes from "@/components/contacts/contact-notes";
 import NotesDisplay from "@/components/contacts/notes-display";
+import ContactFiles from "@/components/contacts/contact-files";
 import type { Contact } from "@shared/schema";
 
 interface ContactDetailParams {
@@ -1092,16 +1093,7 @@ export default function ContactDetail() {
           </TabsContent>
 
           <TabsContent value="files" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Files</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-gray-500 text-center py-8">
-                  Files will be displayed here
-                </div>
-              </CardContent>
-            </Card>
+            <ContactFiles contactId={parseInt(id || "0")} />
           </TabsContent>
 
           <TabsContent value="notes" className="space-y-4">

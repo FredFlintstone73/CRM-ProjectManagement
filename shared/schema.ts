@@ -445,6 +445,32 @@ export const contactNotesRelations = relations(contactNotes, ({ one }) => ({
   }),
 }));
 
+// Contact files table
+export const contactFiles = pgTable("contact_files", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  contactId: integer("contact_id").notNull().references(() => contacts.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  fileName: varchar("file_name").notNull(),
+  originalName: varchar("original_name").notNull(),
+  fileSize: integer("file_size"),
+  mimeType: varchar("mime_type"),
+  fileUrl: varchar("file_url"),
+  isUrl: boolean("is_url").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const contactFilesRelations = relations(contactFiles, ({ one }) => ({
+  contact: one(contacts, {
+    fields: [contactFiles.contactId],
+    references: [contacts.id],
+  }),
+  user: one(users, {
+    fields: [contactFiles.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertContactSchema = createInsertSchema(contacts).omit({
   id: true,
@@ -596,6 +622,13 @@ export const insertContactNoteSchema = createInsertSchema(contactNotes).omit({
   userId: true,
 });
 
+export const insertContactFileSchema = createInsertSchema(contactFiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -617,3 +650,5 @@ export type ProjectComment = typeof projectComments.$inferSelect;
 export type InsertProjectComment = z.infer<typeof insertProjectCommentSchema>;
 export type ContactNote = typeof contactNotes.$inferSelect;
 export type InsertContactNote = z.infer<typeof insertContactNoteSchema>;
+export type ContactFile = typeof contactFiles.$inferSelect;
+export type InsertContactFile = z.infer<typeof insertContactFileSchema>;

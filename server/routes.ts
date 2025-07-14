@@ -388,6 +388,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact files routes
+  app.get('/api/contacts/:id/files', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const files = await storage.getContactFiles(contactId);
+      res.json(files);
+    } catch (error) {
+      console.error("Error fetching contact files:", error);
+      res.status(500).json({ message: "Failed to fetch contact files" });
+    }
+  });
+
+  app.post('/api/contacts/:id/files', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const fileData = { ...req.body, contactId };
+      
+      const file = await storage.createContactFile(fileData, userId);
+      res.json(file);
+    } catch (error) {
+      console.error("Error creating contact file:", error);
+      res.status(500).json({ message: "Failed to create contact file" });
+    }
+  });
+
+  app.put('/api/contacts/:id/files/:fileId', isAuthenticated, async (req: any, res) => {
+    try {
+      const fileId = parseInt(req.params.fileId);
+      const updates = req.body;
+      
+      const updatedFile = await storage.updateContactFile(fileId, updates);
+      res.json(updatedFile);
+    } catch (error) {
+      console.error("Error updating contact file:", error);
+      res.status(500).json({ message: "Failed to update contact file" });
+    }
+  });
+
+  app.delete('/api/contacts/:id/files/:fileId', isAuthenticated, async (req: any, res) => {
+    try {
+      const fileId = parseInt(req.params.fileId);
+      await storage.deleteContactFile(fileId);
+      res.json({ message: "File deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting contact file:", error);
+      res.status(500).json({ message: "Failed to delete contact file" });
+    }
+  });
+
   // Task routes
   app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {

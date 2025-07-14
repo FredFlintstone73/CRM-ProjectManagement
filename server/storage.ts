@@ -9,6 +9,7 @@ import {
   activityLog,
   projectComments,
   contactNotes,
+  contactFiles,
   type User,
   type UpsertUser,
   type Contact,
@@ -29,6 +30,8 @@ import {
   type InsertProjectComment,
   type ContactNote,
   type InsertContactNote,
+  type ContactFile,
+  type InsertContactFile,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
@@ -107,6 +110,12 @@ export interface IStorage {
   createContactNote(note: InsertContactNote, userId: string): Promise<ContactNote>;
   updateContactNote(noteId: number, updates: Partial<InsertContactNote>): Promise<ContactNote>;
   deleteContactNote(noteId: number): Promise<void>;
+
+  // Contact file operations
+  getContactFiles(contactId: number): Promise<ContactFile[]>;
+  createContactFile(file: InsertContactFile, userId: string): Promise<ContactFile>;
+  updateContactFile(fileId: number, updates: Partial<InsertContactFile>): Promise<ContactFile>;
+  deleteContactFile(fileId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -734,6 +743,106 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(contactNotes)
       .where(eq(contactNotes.id, noteId));
+  }
+
+  // Contact file operations
+  async getContactFiles(contactId: number): Promise<ContactFile[]> {
+    const files = await db
+      .select({
+        id: contactFiles.id,
+        contactId: contactFiles.contactId,
+        userId: contactFiles.userId,
+        fileName: contactFiles.fileName,
+        originalName: contactFiles.originalName,
+        fileSize: contactFiles.fileSize,
+        mimeType: contactFiles.mimeType,
+        fileUrl: contactFiles.fileUrl,
+        isUrl: contactFiles.isUrl,
+        createdAt: contactFiles.createdAt,
+        updatedAt: contactFiles.updatedAt,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+      })
+      .from(contactFiles)
+      .leftJoin(users, eq(contactFiles.userId, users.id))
+      .where(eq(contactFiles.contactId, contactId))
+      .orderBy(desc(contactFiles.createdAt));
+    
+    return files as ContactFile[];
+  }
+
+  async createContactFile(file: InsertContactFile, userId: string): Promise<ContactFile> {
+    const [createdFile] = await db
+      .insert(contactFiles)
+      .values({
+        ...file,
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    // Return the created file with user information
+    const [fileWithUser] = await db
+      .select({
+        id: contactFiles.id,
+        contactId: contactFiles.contactId,
+        userId: contactFiles.userId,
+        fileName: contactFiles.fileName,
+        originalName: contactFiles.originalName,
+        fileSize: contactFiles.fileSize,
+        mimeType: contactFiles.mimeType,
+        fileUrl: contactFiles.fileUrl,
+        isUrl: contactFiles.isUrl,
+        createdAt: contactFiles.createdAt,
+        updatedAt: contactFiles.updatedAt,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+      })
+      .from(contactFiles)
+      .leftJoin(users, eq(contactFiles.userId, users.id))
+      .where(eq(contactFiles.id, createdFile.id));
+    
+    return fileWithUser as ContactFile;
+  }
+
+  async updateContactFile(fileId: number, updates: Partial<InsertContactFile>): Promise<ContactFile> {
+    await db
+      .update(contactFiles)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(contactFiles.id, fileId));
+    
+    // Return the updated file with user information
+    const [updatedFile] = await db
+      .select({
+        id: contactFiles.id,
+        contactId: contactFiles.contactId,
+        userId: contactFiles.userId,
+        fileName: contactFiles.fileName,
+        originalName: contactFiles.originalName,
+        fileSize: contactFiles.fileSize,
+        mimeType: contactFiles.mimeType,
+        fileUrl: contactFiles.fileUrl,
+        isUrl: contactFiles.isUrl,
+        createdAt: contactFiles.createdAt,
+        updatedAt: contactFiles.updatedAt,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+      })
+      .from(contactFiles)
+      .leftJoin(users, eq(contactFiles.userId, users.id))
+      .where(eq(contactFiles.id, fileId));
+    
+    return updatedFile as ContactFile;
+  }
+
+  async deleteContactFile(fileId: number): Promise<void> {
+    await db
+      .delete(contactFiles)
+      .where(eq(contactFiles.id, fileId));
   }
 
   // Helper method to find or create a contact for a user
