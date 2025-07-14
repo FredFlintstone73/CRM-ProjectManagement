@@ -1095,7 +1095,18 @@ export default function ContactDetail() {
                   </Button>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {/* Legacy notes from contact form */}
+                {contact.notes && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-medium text-yellow-800 mb-2">Contact Form Notes</h4>
+                    <div className="whitespace-pre-wrap text-sm text-yellow-700">
+                      {contact.notes}
+                    </div>
+                  </div>
+                )}
+
+                {/* Interactive notes section */}
                 <div className="text-gray-600 text-center py-8">
                   <StickyNote className="h-12 w-12 mx-auto mb-3 text-gray-400" />
                   <p className="mb-4">Track important information and conversations about this contact.</p>

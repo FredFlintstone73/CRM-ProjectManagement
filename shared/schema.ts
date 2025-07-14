@@ -531,6 +531,7 @@ export const insertContactNoteSchema = createInsertSchema(contactNotes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  userId: true,
 });
 
 // Types
