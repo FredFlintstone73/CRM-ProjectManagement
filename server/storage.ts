@@ -205,15 +205,12 @@ export class DatabaseStorage implements IStorage {
       }
     });
     
-    console.log('Updating contact with processed data:', processedContact);
-    
     const [updatedContact] = await db
       .update(contacts)
       .set({ ...processedContact, updatedAt: new Date() })
       .where(eq(contacts.id, id))
       .returning();
     
-    console.log('Updated contact result:', updatedContact);
     return updatedContact;
   }
 

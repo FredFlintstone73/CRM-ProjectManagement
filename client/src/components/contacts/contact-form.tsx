@@ -193,8 +193,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       onSuccess?.();
     },
     onError: (error) => {
-      console.error('Mutation error:', error);
-      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -219,14 +217,8 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   });
 
   const onSubmit = (data: InsertContact) => {
-    console.log('Form submitted with data:', data);
-    console.log('Form validation errors:', form.formState.errors);
-    console.log('Form is valid:', form.formState.isValid);
-    console.log('Mutation state:', { isPending: mutation.isPending, error: mutation.error });
-    
     // Check if form has validation errors
     if (Object.keys(form.formState.errors).length > 0) {
-      console.log('Form has validation errors, not submitting');
       return;
     }
     
@@ -245,7 +237,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       }).filter(([_, value]) => value !== undefined)
     ) as InsertContact;
     
-    console.log('Cleaned data being sent:', cleanedData);
     mutation.mutate(cleanedData);
   };
 
