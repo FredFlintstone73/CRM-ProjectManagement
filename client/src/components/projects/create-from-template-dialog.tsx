@@ -6,7 +6,7 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -189,6 +189,9 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
             <Rocket className="h-5 w-5" />
             Create Project from Template
           </DialogTitle>
+          <DialogDescription>
+            Configure your project settings and team assignments to create a new project from this template.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">

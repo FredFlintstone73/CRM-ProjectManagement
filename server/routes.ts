@@ -209,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: description || 'Project created from template',
         status: (status || 'active') as const,
         priority: 'medium' as const,
-        projectType: 'csr_meeting' as const,
+        projectType: 'csr' as const,
         estimatedDays: 90,
         dueDate: meetingDate ? new Date(meetingDate) : null
       };
@@ -223,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: taskData.title,
           description: taskData.description || '',
           projectId: newProject.id,
-          status: (taskData.status || 'pending') as const,
+          status: (taskData.status || 'todo') as const,
           priority: (taskData.priority || 'medium') as const,
           estimatedDays: 1,
           dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
