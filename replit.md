@@ -258,6 +258,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Performance**: Efficient file handling with proper content-type detection and browser download triggers
 - **User Experience**: Professional file management interface with file type icons, size display, and intuitive controls
 
+### Project Due Date Formula Fix (July 14, 2025)
+- **Task Offset Storage**: Fixed task creation to store original meeting date offsets in task descriptions
+- **Correct Negative Offsets**: Tasks now properly use negative day offsets (like -64, -63, -61) so tasks occur BEFORE meeting dates
+- **Formula-Based Recalculation**: When project due dates change, all task due dates recalculate using original template offsets
+- **Cache Invalidation Fix**: Implemented refresh key approach to force UI updates when due dates change
+- **UI Cleanup**: Removed unnecessary "Created" date from project information section
+- **Template Data Alignment**: Fixed frontend to use correct `daysFromMeeting` property from template data instead of incorrect `dueDateOffset`
+
 ### Dynamic Role Column Display Enhancement (July 14, 2025)
 - **Conditional Column Display**: Made Role column in contacts table view conditional based on selected contact types
 - **Smart UI Logic**: Role column only appears when Strategic Partners and/or Team Members are selected to be displayed

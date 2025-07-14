@@ -82,11 +82,11 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
         if (task.basedOnDrpm) {
           // Calculate based on DRPM date
           dueDate = new Date(drpmDate);
-          dueDate.setDate(dueDate.getDate() + task.dueDateOffset);
+          dueDate.setDate(dueDate.getDate() + task.daysFromMeeting);
         } else {
           // Calculate based on meeting date
           dueDate = new Date(meetingDate);
-          dueDate.setDate(dueDate.getDate() + task.dueDateOffset);
+          dueDate.setDate(dueDate.getDate() + task.daysFromMeeting);
         }
         
         // Find team member with matching role
@@ -105,7 +105,7 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
           parentTask: task.parentTask || '',
           subTask: task.subTask || '',
           subSubTask: task.subSubTask || '',
-          daysFromMeeting: task.dueDateOffset || 0,
+          daysFromMeeting: task.daysFromMeeting || 0,
           basedOnDrpm: task.basedOnDrpm || false,
         };
       });

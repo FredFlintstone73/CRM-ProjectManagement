@@ -464,12 +464,7 @@ export default function ProjectDetail() {
               )}
             </div>
             
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">
-                Created: {format(new Date(project.createdAt), 'MMM dd, yyyy')}
-              </span>
-            </div>
+
           </div>
 
           <div className="space-y-2">
