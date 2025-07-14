@@ -243,15 +243,12 @@ export default function Templates() {
                               View Details
                             </DropdownMenuItem>
                           </Link>
-                          <CreateFromTemplateDialog 
-                            template={template}
-                            trigger={
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <Rocket className="h-4 w-4 mr-2" />
-                                Create Project
-                              </DropdownMenuItem>
-                            }
-                          />
+                          <CreateFromTemplateDialog template={template}>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                              <Rocket className="h-4 w-4 mr-2" />
+                              Create Project
+                            </DropdownMenuItem>
+                          </CreateFromTemplateDialog>
                           <DropdownMenuItem onClick={() => handleEditClick(template)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit

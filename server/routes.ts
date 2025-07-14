@@ -200,20 +200,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects/from-template', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { templateId, projectName, clientId, meetingDate, drpmDate, description } = req.body;
+      const { name, clientId, description, status, meetingDate, drpmDate, tasks } = req.body;
       
-      // Get the template
-      const template = await storage.getProjectTemplate(templateId);
-      if (!template) {
-        return res.status(404).json({ message: "Template not found" });
-      }
-
       // Create the project
       const projectData = {
-        name: projectName,
+        name,
         clientId: parseInt(clientId),
-        description: description || template.description,
-        status: 'active' as const,
+        description: description || 'Project created from template',
+        status: (status || 'active') as const,
         priority: 'medium' as const,
         projectType: 'csr_meeting' as const,
         estimatedDays: 90,
@@ -222,33 +216,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const newProject = await storage.createProject(projectData, userId);
 
-      // Parse template tasks and create project tasks with calculated due dates
-      const templateTasks = JSON.parse(template.tasks || '[]');
-      const baseMeetingDate = new Date(meetingDate);
-      const baseDrpmDate = drpmDate ? new Date(drpmDate) : null;
-
+      // Create tasks from the calculated task data
       const createdTasks = [];
-      for (const templateTask of templateTasks) {
-        // Calculate actual due date based on formula
-        let calculatedDueDate = null;
-        if (templateTask.daysFromMeeting !== undefined) {
-          calculatedDueDate = new Date(baseMeetingDate);
-          calculatedDueDate.setDate(calculatedDueDate.getDate() + templateTask.daysFromMeeting);
-        }
-
-        const taskData = {
-          title: templateTask.name,
-          description: templateTask.description || '',
+      for (const taskData of tasks || []) {
+        const task = await storage.createTask({
+          title: taskData.title,
+          description: taskData.description || '',
           projectId: newProject.id,
-          status: 'pending' as const,
-          priority: (templateTask.priority || 'medium') as const,
-          estimatedDays: templateTask.estimatedDays || 1,
-          dueDate: calculatedDueDate,
-          assignedTo: null, // Will be assigned later
-          comments: templateTask.comments || ''
-        };
-
-        const task = await storage.createTask(taskData, userId);
+          status: (taskData.status || 'pending') as const,
+          priority: (taskData.priority || 'medium') as const,
+          estimatedDays: 1,
+          dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
+          assignedTo: taskData.assignedTo ? parseInt(taskData.assignedTo) : null,
+          comments: `Milestone: ${taskData.milestone || 'N/A'}\nParent Task: ${taskData.parentTask || 'N/A'}\nSub-Task: ${taskData.subTask || 'N/A'}\nSub-Sub-Task: ${taskData.subSubTask || 'N/A'}`
+        }, userId);
         createdTasks.push(task);
       }
 
