@@ -297,9 +297,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await Promise.all(updatePromises);
       }
       
+      console.log('Updated project:', updatedProject);
       res.json({ 
         project: updatedProject, 
-        message: `Updated project due date and ${tasks.length} task dates` 
+        message: `Updated project due date and ${tasks.length} task dates`,
+        taskCount: tasks.length
       });
     } catch (error) {
       console.error("Error updating project due date:", error);

@@ -98,9 +98,7 @@ export default function ProjectDetail() {
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
-      await apiRequest(`/api/projects/${projectId}`, {
-        method: 'DELETE',
-      });
+      await apiRequest('DELETE', `/api/projects/${projectId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
@@ -129,9 +127,14 @@ export default function ProjectDetail() {
       if (!response.ok) throw new Error('Failed to update due date');
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', id, 'tasks'] });
+    onSuccess: (data) => {
+      console.log('Update successful, data:', data);
+      // Force refetch by removing from cache and refetching
+      queryClient.removeQueries({ queryKey: ['/api/projects', id] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', id, 'tasks'] });
+      queryClient.refetchQueries({ queryKey: ['/api/projects', id] });
+      queryClient.refetchQueries({ queryKey: ['/api/projects', id, 'tasks'] });
+      
       setEditingDueDate(false);
       setNewDueDate("");
       toast({ title: "Due date and all task dates updated successfully" });
