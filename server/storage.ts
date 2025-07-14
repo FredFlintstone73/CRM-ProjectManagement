@@ -681,19 +681,52 @@ export class DatabaseStorage implements IStorage {
         userId,
       })
       .returning();
-    return contactNote;
+    
+    // Return the created note with user information
+    const [newNote] = await db
+      .select({
+        id: contactNotes.id,
+        contactId: contactNotes.contactId,
+        userId: contactNotes.userId,
+        content: contactNotes.content,
+        createdAt: contactNotes.createdAt,
+        updatedAt: contactNotes.updatedAt,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+      })
+      .from(contactNotes)
+      .leftJoin(users, eq(contactNotes.userId, users.id))
+      .where(eq(contactNotes.id, contactNote.id));
+    
+    return newNote as ContactNote;
   }
 
   async updateContactNote(noteId: number, updates: Partial<InsertContactNote>): Promise<ContactNote> {
-    const [updatedNote] = await db
+    await db
       .update(contactNotes)
       .set({
         ...updates,
         updatedAt: new Date(),
       })
-      .where(eq(contactNotes.id, noteId))
-      .returning();
-    return updatedNote;
+      .where(eq(contactNotes.id, noteId));
+    
+    // Return the updated note with user information
+    const [updatedNote] = await db
+      .select({
+        id: contactNotes.id,
+        contactId: contactNotes.contactId,
+        userId: contactNotes.userId,
+        content: contactNotes.content,
+        createdAt: contactNotes.createdAt,
+        updatedAt: contactNotes.updatedAt,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+      })
+      .from(contactNotes)
+      .leftJoin(users, eq(contactNotes.userId, users.id))
+      .where(eq(contactNotes.id, noteId));
+    
+    return updatedNote as ContactNote;
   }
 
   async deleteContactNote(noteId: number): Promise<void> {
