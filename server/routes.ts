@@ -362,9 +362,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/contacts/:id/notes/:noteId', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Update note request:", { params: req.params, body: req.body });
       const noteId = parseInt(req.params.noteId);
       const { content } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+      
       const updatedNote = await storage.updateContactNote(noteId, { content });
+      console.log("Updated note:", updatedNote);
       res.json(updatedNote);
     } catch (error) {
       console.error("Error updating contact note:", error);
