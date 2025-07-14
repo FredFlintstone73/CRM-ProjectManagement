@@ -451,22 +451,43 @@ export default function ContactDetail() {
               )}
               
               <div className="space-y-1">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Cell Phone:</p>
-                  <p className="text-sm">{contact.cellPhone || "Not specified"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Work Phone:</p>
-                  <p className="text-sm">{contact.workPhone || "Not specified"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Personal Email:</p>
-                  <p className="text-sm">{contact.personalEmail || "Not specified"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Work Email:</p>
-                  <p className="text-sm">{contact.workEmail || "Not specified"}</p>
-                </div>
+                {/* Phone Number - Show only one, prioritize cell phone */}
+                {(contact.contactType === "client" || contact.contactType === "prospect") ? (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Phone:</p>
+                    <p className="text-sm">{contact.cellPhone || contact.workPhone || "Not specified"}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Cell Phone:</p>
+                      <p className="text-sm">{contact.cellPhone || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Work Phone:</p>
+                      <p className="text-sm">{contact.workPhone || "Not specified"}</p>
+                    </div>
+                  </>
+                )}
+                
+                {/* Email Address - Show only one, prioritize personal email */}
+                {(contact.contactType === "client" || contact.contactType === "prospect") ? (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Email:</p>
+                    <p className="text-sm">{contact.personalEmail || contact.workEmail || "Not specified"}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Personal Email:</p>
+                      <p className="text-sm">{contact.personalEmail || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Work Email:</p>
+                      <p className="text-sm">{contact.workEmail || "Not specified"}</p>
+                    </div>
+                  </>
+                )}
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Preferred Contact:</p>
