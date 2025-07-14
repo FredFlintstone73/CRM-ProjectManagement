@@ -670,16 +670,7 @@ export default function Contacts() {
                         {getSortIcon('cellPhone')}
                       </Button>
                     </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('role')}
-                        className="h-auto p-0 font-medium hover:bg-transparent"
-                      >
-                        Role
-                        {getSortIcon('role')}
-                      </Button>
-                    </TableHead>
+
                     <TableHead>
                       <Button
                         variant="ghost"
@@ -740,13 +731,7 @@ export default function Contacts() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {(contact.contactType === 'team_member' || contact.contactType === 'strategic_partner') && contact.role ? (
-                          <span className="text-sm text-gray-600">{formatRole(contact.role)}</span>
-                        ) : (
-                          <span className="text-sm text-gray-400">—</span>
-                        )}
-                      </TableCell>
+
                       <TableCell>
                         <Badge variant="outline" className={getContactStatusColor(contact.status || 'active')}>
                           {formatStatus(contact.status || 'active')}
