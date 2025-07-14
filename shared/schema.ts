@@ -455,6 +455,7 @@ export const contactFiles = pgTable("contact_files", {
   fileSize: integer("file_size"),
   mimeType: varchar("mime_type"),
   fileUrl: varchar("file_url"),
+  fileContent: text("file_content"), // Store base64 encoded file content
   isUrl: boolean("is_url").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

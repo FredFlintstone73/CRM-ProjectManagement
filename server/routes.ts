@@ -438,6 +438,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/contacts/:id/files/:fileId/download', isAuthenticated, async (req: any, res) => {
+    try {
+      const fileId = parseInt(req.params.fileId);
+      const files = await storage.getContactFiles(parseInt(req.params.id));
+      const file = files.find(f => f.id === fileId);
+      
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      if (file.isUrl) {
+        // For URL links, redirect to the URL
+        return res.redirect(file.fileUrl);
+      }
+
+      // For uploaded files, serve the actual file content
+      if (file.fileContent) {
+        // Extract base64 content from data URL
+        const base64Data = file.fileContent.split(',')[1];
+        if (base64Data) {
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+          res.setHeader('Content-Type', file.mimeType || 'application/octet-stream');
+          res.setHeader('Content-Length', buffer.length.toString());
+          
+          return res.send(buffer);
+        }
+      }
+
+      // Fallback if no file content is stored
+      const fileContent = `File: ${file.fileName}\nOriginal Name: ${file.originalName}\nSize: ${file.fileSize} bytes\nUploaded: ${file.createdAt}\nBy: ${file.userFirstName} ${file.userLastName}\n\nNote: File content not found. This may be due to a storage issue.`;
+      
+      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}.txt"`);
+      res.setHeader('Content-Type', 'text/plain');
+      res.send(fileContent);
+    } catch (error) {
+      console.error("Error downloading contact file:", error);
+      res.status(500).json({ message: "Failed to download file" });
+    }
+  });
+
   // Task routes
   app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {

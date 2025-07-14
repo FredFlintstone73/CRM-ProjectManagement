@@ -142,15 +142,24 @@ export default function ContactFiles({ contactId }: ContactFilesProps) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const fileData = {
-      fileName: file.name,
-      originalName: file.name,
-      fileSize: file.size,
-      mimeType: file.type,
-      isUrl: false,
-    };
+    // Read file content as base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const fileContent = e.target?.result as string;
+      
+      const fileData = {
+        fileName: file.name,
+        originalName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        fileContent: fileContent,
+        isUrl: false,
+      };
 
-    createFileMutation.mutate(fileData);
+      createFileMutation.mutate(fileData);
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   const handleUrlSubmit = () => {
@@ -333,11 +342,13 @@ export default function ContactFiles({ contactId }: ContactFilesProps) {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        // For now, just show a message - in a real app, you'd implement file download
-                        toast({
-                          title: "Download",
-                          description: "File download functionality would be implemented here",
-                        });
+                        // Create a download trigger for the file
+                        const link = document.createElement('a');
+                        link.href = `/api/contacts/${contactId}/files/${file.id}/download`;
+                        link.download = file.fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                       }}
                     >
                       <Download className="w-4 h-4 mr-1" />
