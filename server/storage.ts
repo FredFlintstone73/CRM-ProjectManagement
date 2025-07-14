@@ -198,18 +198,22 @@ export class DatabaseStorage implements IStorage {
     ];
     
     dateFields.forEach(field => {
-      if (processedContact[field] && processedContact[field].trim()) {
+      if (processedContact[field] && typeof processedContact[field] === 'string' && processedContact[field].trim()) {
         processedContact[field] = new Date(processedContact[field]);
-      } else {
+      } else if (processedContact[field] === '' || processedContact[field] === null) {
         processedContact[field] = null;
       }
     });
+    
+    console.log('Updating contact with processed data:', processedContact);
     
     const [updatedContact] = await db
       .update(contacts)
       .set({ ...processedContact, updatedAt: new Date() })
       .where(eq(contacts.id, id))
       .returning();
+    
+    console.log('Updated contact result:', updatedContact);
     return updatedContact;
   }
 

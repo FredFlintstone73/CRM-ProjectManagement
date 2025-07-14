@@ -238,8 +238,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
         if (value instanceof Date) {
           return [key, value.toISOString()];
         }
+        // Convert empty strings to null for proper database updates
+        if (value === "") {
+          return [key, null];
+        }
         return [key, value];
-      }).filter(([_, value]) => value !== undefined && value !== null && value !== "")
+      }).filter(([_, value]) => value !== undefined)
     ) as InsertContact;
     
     console.log('Cleaned data being sent:', cleanedData);
