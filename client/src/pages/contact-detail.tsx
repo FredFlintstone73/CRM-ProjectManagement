@@ -18,6 +18,7 @@ import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
 import ContactNotes from "@/components/contacts/contact-notes";
+import NotesDisplay from "@/components/contacts/notes-display";
 import type { Contact } from "@shared/schema";
 
 interface ContactDetailParams {
@@ -1096,29 +1097,7 @@ export default function ContactDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Legacy notes from contact form */}
-                {contact.notes && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-medium text-yellow-800 mb-2">Contact Form Notes</h4>
-                    <div className="whitespace-pre-wrap text-sm text-yellow-700">
-                      {contact.notes}
-                    </div>
-                  </div>
-                )}
-
-                {/* Interactive notes section */}
-                <div className="text-gray-600 text-center py-8">
-                  <StickyNote className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                  <p className="mb-4">Track important information and conversations about this contact.</p>
-                  <Button 
-                    onClick={() => setIsNotesDialogOpen(true)}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <StickyNote className="h-4 w-4" />
-                    View & Add Notes
-                  </Button>
-                </div>
+                <NotesDisplay contactId={parseInt(id || "0")} legacyNotes={contact.notes} />
               </CardContent>
             </Card>
           </TabsContent>
