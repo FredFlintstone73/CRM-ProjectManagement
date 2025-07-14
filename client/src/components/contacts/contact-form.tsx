@@ -158,14 +158,14 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       contactType: contact.contactType || "client",
       status: contact.status || "active",
       departments: contact.departments || [],
-      notes: contact.notes || "",
+
     } : {
       firstName: "",
       lastName: "",
       contactType: "client",
       status: "active",
       departments: [],
-      notes: "",
+
     },
   });
 
@@ -1354,16 +1354,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
         </TabsContent>
       </Tabs>
       <div className="space-y-4">
-        <div>
-          <Label htmlFor="notes">Notes</Label>
-          <Textarea
-            id="notes"
-            {...form.register("notes")}
-            placeholder="Enter any additional notes"
-            rows={3}
-          />
-        </div>
-
         <Button 
           type="submit" 
           disabled={mutation.isPending}
