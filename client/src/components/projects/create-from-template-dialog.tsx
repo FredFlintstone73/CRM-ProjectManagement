@@ -70,57 +70,69 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: CreateProjectForm) => {
-      const tasks = Array.isArray(template.tasks) ? template.tasks : [];
-      
-      // Calculate due dates based on meeting date and DRPM date
-      const meetingDate = new Date(data.meetingDate);
-      const drpmDate = new Date(data.drpmDate);
-      
-      const calculatedTasks = tasks.map((task: any) => {
-        let dueDate: Date;
+      try {
+        const tasks = Array.isArray(template.tasks) ? template.tasks : [];
         
-        if (task.basedOnDrpm) {
-          // Calculate based on DRPM date
-          dueDate = new Date(drpmDate);
-          dueDate.setDate(dueDate.getDate() + task.daysFromMeeting);
-        } else {
-          // Calculate based on meeting date
-          dueDate = new Date(meetingDate);
-          dueDate.setDate(dueDate.getDate() + task.daysFromMeeting);
+        // Validate and parse dates
+        const meetingDate = new Date(data.meetingDate);
+        const drpmDate = new Date(data.drpmDate);
+        
+        if (isNaN(meetingDate.getTime()) || isNaN(drpmDate.getTime())) {
+          throw new Error('Invalid date format');
         }
         
-        // Find team member with matching role
-        const assignee = teamMembers.find(member => 
-          member.role === task.assigneeRole
-        );
-        
-        return {
-          title: task.name,
-          description: task.description || '',
-          priority: task.priority || 'medium',
-          status: 'todo',
-          dueDate: dueDate.toISOString().split('T')[0],
-          assignedTo: assignee?.id || null,
-          milestone: task.milestone || '',
-          parentTask: task.parentTask || '',
-          subTask: task.subTask || '',
-          subSubTask: task.subSubTask || '',
-          daysFromMeeting: task.daysFromMeeting || 0,
-          basedOnDrpm: task.basedOnDrpm || false,
+        const calculatedTasks = tasks.map((task: any) => {
+          let dueDate: Date;
+          
+          // Get the offset from the task (default to 0 if not found)
+          const daysFromMeeting = task.daysFromMeeting || 0;
+          
+          if (task.basedOnDrpm) {
+            // Calculate based on DRPM date
+            dueDate = new Date(drpmDate);
+            dueDate.setDate(dueDate.getDate() + daysFromMeeting);
+          } else {
+            // Calculate based on meeting date
+            dueDate = new Date(meetingDate);
+            dueDate.setDate(dueDate.getDate() + daysFromMeeting);
+          }
+          
+          // Find team member with matching role
+          const assignee = teamMembers.find(member => 
+            member.role === task.assigneeRole
+          );
+          
+          return {
+            title: task.name || task.title || 'Untitled Task',
+            description: task.description || '',
+            priority: task.priority || 'medium',
+            status: 'todo',
+            dueDate: dueDate.toISOString().split('T')[0],
+            assignedTo: assignee?.id || null,
+            milestone: task.milestone || '',
+            parentTask: task.parentTask || '',
+            subTask: task.subTask || '',
+            subSubTask: task.subSubTask || '',
+            daysFromMeeting: daysFromMeeting,
+            basedOnDrpm: task.basedOnDrpm || false,
+          };
+        });
+
+        const projectData = {
+          name: data.projectName,
+          clientId: data.clientId,
+          description: `Project created from template: ${template.name}`,
+          status: 'active',
+          meetingDate: data.meetingDate,
+          drpmDate: data.drpmDate,
+          tasks: calculatedTasks,
         };
-      });
 
-      const projectData = {
-        name: data.projectName,
-        clientId: data.clientId,
-        description: `Project created from template: ${template.name}`,
-        status: 'active',
-        meetingDate: data.meetingDate,
-        drpmDate: data.drpmDate,
-        tasks: calculatedTasks,
-      };
-
-      return await apiRequest('POST', '/api/projects/from-template', projectData);
+        return await apiRequest('POST', '/api/projects/from-template', projectData);
+      } catch (error) {
+        console.error('Error in createProjectMutation:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
