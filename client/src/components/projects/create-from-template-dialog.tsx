@@ -81,6 +81,38 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
           throw new Error('Invalid date format');
         }
         
+        // Create a map of task IDs to tasks for hierarchy resolution
+        const taskMap = new Map();
+        tasks.forEach(task => {
+          taskMap.set(task.id, task);
+        });
+        
+        // Function to build task hierarchy path
+        const buildTaskHierarchy = (task: any): string => {
+          if (!task.parentTaskId) {
+            // This is a milestone
+            return task.description?.includes('Milestone:') ? `🎯 ${task.name}` : task.name;
+          }
+          
+          const parentTask = taskMap.get(task.parentTaskId);
+          if (parentTask) {
+            if (parentTask.parentTaskId) {
+              // This is a sub-task or sub-sub-task
+              const grandParent = taskMap.get(parentTask.parentTaskId);
+              if (grandParent) {
+                return `    ↳ ${task.name}`;
+              } else {
+                return `  ↳ ${task.name}`;
+              }
+            } else {
+              // This is a direct task under a milestone
+              return `  • ${task.name}`;
+            }
+          }
+          
+          return task.name;
+        };
+        
         const calculatedTasks = tasks.map((task: any) => {
           let dueDate: Date;
           
@@ -102,8 +134,11 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
             member.role === task.assigneeRole
           );
           
+          // Build hierarchical title
+          const hierarchicalTitle = buildTaskHierarchy(task);
+          
           return {
-            title: task.name || task.title || 'Untitled Task',
+            title: hierarchicalTitle,
             description: task.description || '',
             priority: task.priority || 'medium',
             status: 'todo',
