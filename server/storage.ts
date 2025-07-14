@@ -702,8 +702,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateContactNote(noteId: number, updates: Partial<InsertContactNote>): Promise<ContactNote> {
-    console.log("Storage updateContactNote:", { noteId, updates });
-    
     await db
       .update(contactNotes)
       .set({
@@ -728,7 +726,6 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(contactNotes.userId, users.id))
       .where(eq(contactNotes.id, noteId));
     
-    console.log("Storage result:", updatedNote);
     return updatedNote as ContactNote;
   }
 

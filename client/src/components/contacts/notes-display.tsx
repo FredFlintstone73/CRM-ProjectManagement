@@ -25,15 +25,7 @@ export default function NotesDisplay({ contactId, legacyNotes }: NotesDisplayPro
 
   const editMutation = useMutation({
     mutationFn: async ({ noteId, content }: { noteId: number; content: string }) => {
-      console.log("Edit mutation called:", { noteId, content, contactId });
-      try {
-        const response = await apiRequest('PUT', `/api/contacts/${contactId}/notes/${noteId}`, { content });
-        console.log("Edit response:", response);
-        return response;
-      } catch (error) {
-        console.error("Edit mutation error:", error);
-        throw error;
-      }
+      return await apiRequest('PUT', `/api/contacts/${contactId}/notes/${noteId}`, { content });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', contactId, 'notes'] });
@@ -106,11 +98,8 @@ export default function NotesDisplay({ contactId, legacyNotes }: NotesDisplayPro
   };
 
   const saveEdit = () => {
-    console.log("saveEdit called:", { editingNoteId, editingContent });
     if (editingNoteId && editingContent.trim()) {
       editMutation.mutate({ noteId: editingNoteId, content: editingContent.trim() });
-    } else {
-      console.log("saveEdit skipped - missing noteId or content");
     }
   };
 
