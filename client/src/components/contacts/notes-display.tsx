@@ -27,10 +27,7 @@ export default function NotesDisplay({ contactId, legacyNotes }: NotesDisplayPro
     mutationFn: async ({ noteId, content }: { noteId: number; content: string }) => {
       console.log("Edit mutation called:", { noteId, content, contactId });
       try {
-        const response = await apiRequest(`/api/contacts/${contactId}/notes/${noteId}`, {
-          method: 'PUT',
-          body: JSON.stringify({ content }),
-        });
+        const response = await apiRequest('PUT', `/api/contacts/${contactId}/notes/${noteId}`, { content });
         console.log("Edit response:", response);
         return response;
       } catch (error) {
@@ -69,9 +66,7 @@ export default function NotesDisplay({ contactId, legacyNotes }: NotesDisplayPro
 
   const deleteMutation = useMutation({
     mutationFn: async (noteId: number) => {
-      await apiRequest(`/api/contacts/${contactId}/notes/${noteId}`, {
-        method: 'DELETE',
-      });
+      await apiRequest('DELETE', `/api/contacts/${contactId}/notes/${noteId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', contactId, 'notes'] });
