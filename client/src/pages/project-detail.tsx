@@ -35,9 +35,10 @@ export default function ProjectDetail() {
   const [sortBy, setSortBy] = useState<'assignee' | 'dueDate'>('assignee');
   const [editingDueDate, setEditingDueDate] = useState(false);
   const [newDueDate, setNewDueDate] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
-    queryKey: ['/api/projects', id],
+    queryKey: ['/api/projects', id, refreshKey],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${id}`);
       if (!response.ok) throw new Error('Failed to fetch project');
@@ -46,7 +47,7 @@ export default function ProjectDetail() {
   });
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ['/api/projects', id, 'tasks'],
+    queryKey: ['/api/projects', id, 'tasks', refreshKey],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${id}/tasks`);
       if (!response.ok) throw new Error('Failed to fetch tasks');
@@ -69,7 +70,7 @@ export default function ProjectDetail() {
       if (!response.ok) throw new Error('Failed to delete task');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', id, 'tasks'] });
+      setRefreshKey(prev => prev + 1);
       toast({ title: "Task deleted successfully" });
     },
     onError: () => {
@@ -88,7 +89,7 @@ export default function ProjectDetail() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', id, 'tasks'] });
+      setRefreshKey(prev => prev + 1);
       toast({ title: "Task updated successfully" });
     },
     onError: () => {
@@ -129,11 +130,8 @@ export default function ProjectDetail() {
     },
     onSuccess: (data) => {
       console.log('Update successful, data:', data);
-      // Force refetch by removing from cache and refetching
-      queryClient.removeQueries({ queryKey: ['/api/projects', id] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', id, 'tasks'] });
-      queryClient.refetchQueries({ queryKey: ['/api/projects', id] });
-      queryClient.refetchQueries({ queryKey: ['/api/projects', id, 'tasks'] });
+      // Force refresh by incrementing the refresh key
+      setRefreshKey(prev => prev + 1);
       
       setEditingDueDate(false);
       setNewDueDate("");
@@ -239,7 +237,7 @@ export default function ProjectDetail() {
 
   const handleProjectUpdated = () => {
     setShowProjectEdit(false);
-    queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
+    setRefreshKey(prev => prev + 1);
     toast({ title: "Project updated successfully" });
   };
 
