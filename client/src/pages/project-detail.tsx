@@ -121,7 +121,7 @@ export default function ProjectDetail() {
 
   const updateDueDateMutation = useMutation({
     mutationFn: async ({ projectId, dueDate }: { projectId: number; dueDate: string | null }) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await fetch(`/api/projects/${projectId}/update-due-date`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dueDate }),
@@ -131,9 +131,10 @@ export default function ProjectDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', id, 'tasks'] });
       setEditingDueDate(false);
       setNewDueDate("");
-      toast({ title: "Due date updated successfully" });
+      toast({ title: "Due date and all task dates updated successfully" });
     },
     onError: () => {
       toast({ title: "Failed to update due date", variant: "destructive" });

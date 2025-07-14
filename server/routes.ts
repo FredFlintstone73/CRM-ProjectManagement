@@ -255,6 +255,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update project due date and recalculate all task due dates
+  app.put('/api/projects/:id/update-due-date', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const { dueDate } = req.body;
+      
+      // Get the current project
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Update the project due date
+      const updatedProject = await storage.updateProject(projectId, { dueDate });
+      
+      // Get all tasks for this project
+      const tasks = await storage.getTasksByProject(projectId);
+      
+      if (dueDate && tasks.length > 0) {
+        // If we have a new due date, recalculate all task due dates
+        const newMeetingDate = new Date(dueDate);
+        const originalMeetingDate = project.dueDate ? new Date(project.dueDate) : null;
+        
+        // Calculate the difference in days
+        const daysDifference = originalMeetingDate ? 
+          Math.round((newMeetingDate.getTime() - originalMeetingDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+        
+        // Update all task due dates by the same offset
+        const updatePromises = tasks.map(async (task) => {
+          if (task.dueDate) {
+            const currentTaskDate = new Date(task.dueDate);
+            const newTaskDate = new Date(currentTaskDate);
+            newTaskDate.setDate(newTaskDate.getDate() + daysDifference);
+            
+            return storage.updateTask(task.id, { dueDate: newTaskDate });
+          }
+          return Promise.resolve();
+        });
+        
+        await Promise.all(updatePromises);
+      }
+      
+      res.json({ 
+        project: updatedProject, 
+        message: `Updated project due date and ${tasks.length} task dates` 
+      });
+    } catch (error) {
+      console.error("Error updating project due date:", error);
+      res.status(500).json({ message: "Failed to update project due date" });
+    }
+  });
+
   app.delete('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
