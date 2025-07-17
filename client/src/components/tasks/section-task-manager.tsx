@@ -112,12 +112,8 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   });
 
   const teamMembers = contacts.filter(contact => 
-    contact && contact.contactType === 'team_member'
+    contact && contact.contactType === 'team_member' && contact.status === 'active'
   );
-
-  // Debug: Check team member data
-  console.log('Filtered team members:', teamMembers);
-  console.log('First contact contactType:', contacts[0]?.contactType);
 
   // Create task mutation
   const createTaskMutation = useMutation({
@@ -229,11 +225,11 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     const taskData = {
       ...taskForm,
       parentTaskId: taskForm.parentTaskId || null,
-      assignedTo: taskForm.assignedTo || null,
+      assignedTo: taskForm.assignedTo ? parseInt(taskForm.assignedTo) : null,
       projectId: projectId,
       milestoneId: null, // We'll use null for now since we're using sections
       priority: 'medium', // Default priority
-      status: 'pending', // Default status
+      status: 'todo', // Default status (matching schema enum)
     };
 
     if (isEditMode && selectedTask) {
