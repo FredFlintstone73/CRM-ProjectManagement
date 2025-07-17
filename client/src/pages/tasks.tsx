@@ -396,8 +396,8 @@ export default function Tasks() {
             </div>
           </div>
 
-          {/* My Task Progress Bar */}
-          {myTaskProgress.total > 0 && (
+          {/* My Task Progress Bar - Only show when viewing My Tasks */}
+          {taskFilter === 'my_tasks' && myTaskProgress.total > 0 && (
             <Card className="mb-6">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -559,16 +559,14 @@ export default function Tasks() {
                             <Circle className="h-5 w-5 text-gray-400" />
                           )}
                         </Button>
+                        <Badge className={getPriorityColor(task.priority || 25)}>
+                          {task.priority || 25}
+                        </Badge>
                         <Link href={`/task/${task.id}`} className="flex-1">
                           <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors">
                             {task.title}
                           </CardTitle>
                         </Link>
-                      </div>
-                      <div className="flex gap-2 ml-2">
-                        <Badge className={getPriorityColor(task.priority || 25)}>
-                          {task.priority || 25}
-                        </Badge>
                       </div>
                     </div>
                     {task.description && (
@@ -648,14 +646,14 @@ export default function Tasks() {
                             <Circle className="h-5 w-5 text-gray-400" />
                           )}
                         </Button>
+                        <Badge className={getPriorityColor(task.priority || 25)}>
+                          {task.priority || 25}
+                        </Badge>
                         <Link href={`/task/${task.id}`}>
                           <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors">
                             {task.title}
                           </span>
                         </Link>
-                        <Badge className={getPriorityColor(task.priority || 25)}>
-                          {task.priority || 25}
-                        </Badge>
                       </div>
                       
                       <div className="flex items-center space-x-4">

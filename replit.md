@@ -365,6 +365,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 ### Personal Task Progress Bar (July 17, 2025)
 - **Individual Progress Tracking**: Added progress bar on Tasks page showing completion percentage for tasks assigned to current user only
 - **Detailed Statistics**: Shows completed vs total tasks, percentage complete, and remaining task count
-- **Conditional Display**: Progress bar only appears when user has tasks assigned to them
+- **Conditional Display**: Progress bar only appears when viewing "My Tasks" and user has tasks assigned to them
 - **Real-time Updates**: Progress automatically updates when tasks are completed or status changes
 - **Clean Card Design**: Professional card layout with progress bar and summary information
+- **Priority Number Positioning**: Moved priority numbers to appear between completion radio button and task name in both grid and row views
