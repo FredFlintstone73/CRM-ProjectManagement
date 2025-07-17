@@ -569,13 +569,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskData = insertTaskSchema.parse(req.body);
       const userId = req.user.claims.sub;
       
+      console.log("Raw task data:", taskData);
+      
       // Convert assignedTo from string to number if provided
+      let assignedTo = null;
+      if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
+        if (taskData.assignedTo.startsWith("me_")) {
+          assignedTo = null; // "Assign to me" - we'll handle this differently
+        } else if (taskData.assignedTo.startsWith("team_")) {
+          assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
+        } else {
+          assignedTo = parseInt(taskData.assignedTo);
+        }
+      }
+      
       // Convert priority to number if provided
+      let priority = 25;
+      if (taskData.priority !== undefined && taskData.priority !== null) {
+        const priorityNum = parseInt(taskData.priority.toString());
+        priority = isNaN(priorityNum) ? 25 : priorityNum;
+      }
+      
       const processedTaskData = {
         ...taskData,
-        assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null,
-        priority: taskData.priority ? parseInt(taskData.priority.toString()) : 25,
+        assignedTo: assignedTo,
+        priority: priority,
       };
+      
+      console.log("Processed task data:", processedTaskData);
       
       const task = await storage.createTask(processedTaskData, userId);
       res.json(task);
