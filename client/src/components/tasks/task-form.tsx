@@ -35,8 +35,10 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     queryKey: ['/api/contacts'],
   });
 
-  // Filter contacts to only show team members
-  const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
+  // Filter contacts to only show active team members
+  const teamMembers = contacts?.filter(contact => 
+    contact.contactType === 'team_member' && contact.status === 'active'
+  ) || [];
 
   const form = useForm<InsertTask>({
     resolver: zodResolver(insertTaskSchema),

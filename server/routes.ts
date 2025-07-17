@@ -575,7 +575,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let assignedTo = null;
       if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
         if (taskData.assignedTo.startsWith("me_")) {
-          assignedTo = null; // "Assign to me" - we'll handle this differently
+          // Find the current user's contact ID from the contacts table
+          const userEmail = req.user.email;
+          const userContacts = await storage.getContacts();
+          const userContact = userContacts.find(contact => 
+            contact.personalEmail === userEmail || 
+            contact.workEmail === userEmail
+          );
+          assignedTo = userContact ? userContact.id : null;
         } else if (taskData.assignedTo.startsWith("team_")) {
           assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
         } else {
@@ -614,7 +621,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let assignedTo = null;
       if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
         if (taskData.assignedTo.startsWith("me_")) {
-          assignedTo = null; // "Assign to me" - we'll handle this differently
+          // Find the current user's contact ID from the contacts table
+          const userEmail = req.user.email;
+          const userContacts = await storage.getContacts();
+          const userContact = userContacts.find(contact => 
+            contact.personalEmail === userEmail || 
+            contact.workEmail === userEmail
+          );
+          assignedTo = userContact ? userContact.id : null;
         } else if (taskData.assignedTo.startsWith("team_")) {
           assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
         } else {
@@ -669,7 +683,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (taskData.assignedTo !== undefined) {
         if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
           if (taskData.assignedTo.startsWith("me_")) {
-            assignedTo = null; // "Assign to me" - we'll handle this differently
+            // Find the current user's contact ID from the contacts table
+            const userEmail = req.user.email;
+            const userContacts = await storage.getContacts();
+            const userContact = userContacts.find(contact => 
+              contact.personalEmail === userEmail || 
+              contact.workEmail === userEmail
+            );
+            assignedTo = userContact ? userContact.id : null;
           } else if (taskData.assignedTo.startsWith("team_")) {
             assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
           } else {

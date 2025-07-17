@@ -291,6 +291,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **UI Cleanup**: Removed unnecessary "Created" date from project information section
 - **Template Data Alignment**: Fixed frontend to use correct `daysFromMeeting` property from template data instead of incorrect `dueDateOffset`
 
+### Task Management UX Enhancement (July 17, 2025)
+- **Contacts-Style Toggle Interface**: Replaced filter dropdowns with toggle buttons matching Contacts page pattern ("My Tasks" and "All Tasks")
+- **Numeric Priority System**: Implemented 1-50 priority scale with proper server-side validation and display
+- **Assignee Sorting**: Added team member assignment sorting option alongside priority, due date, and title
+- **Assignment Processing Fix**: Fixed "Assign to Me" functionality to properly map to current user's contact ID
+- **Active Team Members Only**: Filtered task assignment dropdown to show only active team members
+- **Status Functionality Removal**: Removed complex status system while maintaining completion tracking
+- **Completion Filter Toggles**: Added "All" and "Completed" toggle buttons for task completion status
+- **Server-Side Assignment Logic**: Fixed POST, PUT, and PATCH routes to properly handle "me_" and "team_" assignment prefixes
+
 ### Dynamic Role Column Display Enhancement (July 14, 2025)
 - **Conditional Column Display**: Made Role column in contacts table view conditional based on selected contact types
 - **Smart UI Logic**: Role column only appears when Strategic Partners and/or Team Members are selected to be displayed
