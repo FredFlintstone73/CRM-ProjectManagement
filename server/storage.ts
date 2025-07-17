@@ -257,6 +257,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteContact(id: number): Promise<void> {
+    // Check if contact has assigned tasks
+    const assignedTasks = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.assignedTo, id));
+    
+    if (assignedTasks.length > 0) {
+      throw new Error(`Cannot delete contact. This contact is assigned to ${assignedTasks.length} task(s). Please reassign or delete these tasks first.`);
+    }
+    
     await db.delete(contacts).where(eq(contacts.id, id));
   }
 

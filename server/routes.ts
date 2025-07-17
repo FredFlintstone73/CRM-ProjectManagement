@@ -132,7 +132,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Contact deleted successfully" });
     } catch (error) {
       console.error("Error deleting contact:", error);
-      res.status(500).json({ message: "Failed to delete contact" });
+      if (error.message.includes("Cannot delete contact")) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to delete contact" });
+      }
     }
   });
 
