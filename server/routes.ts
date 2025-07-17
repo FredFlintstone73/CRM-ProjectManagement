@@ -1048,9 +1048,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/project-templates', isAuthenticated, async (req: any, res) => {
     try {
-      const templateData = insertProjectTemplateSchema.parse(req.body);
+      const { name, description, sections } = req.body;
       const userId = req.user.claims.sub;
+      
+      // Create the template first
+      const templateData = { name, description };
       const template = await storage.createProjectTemplate(templateData, userId);
+      
+      // If sections are provided, create milestones and tasks
+      if (sections && sections.length > 0) {
+        for (const section of sections) {
+          // Create milestone for each section
+          const milestone = await storage.createMilestone({
+            title: section.title,
+            description: section.description,
+            templateId: template.id,
+            sortOrder: section.sortOrder || 0
+          }, userId);
+          
+          // Create tasks for each section
+          if (section.tasks && section.tasks.length > 0) {
+            for (const task of section.tasks) {
+              await storage.createTask({
+                title: task.title,
+                description: task.description,
+                milestoneId: milestone.id,
+                priority: task.priority,
+                level: task.level || 0,
+                parentTaskId: task.parentId ? null : undefined, // Will handle hierarchy in a second pass
+                sortOrder: task.sortOrder || 0,
+                dueDate: task.daysFromMeeting ? new Date(Date.now() + (task.daysFromMeeting * 24 * 60 * 60 * 1000)) : undefined
+              }, userId);
+            }
+          }
+        }
+      }
+      
       res.json(template);
     } catch (error) {
       console.error("Error creating project template:", error);
