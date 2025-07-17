@@ -143,10 +143,10 @@ export default function Tasks() {
         return { start: startOfDay, end: endOfDay };
       case 'this_week':
         const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay());
+        startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Monday of this week
         startOfWeek.setHours(0, 0, 0, 0);
         const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday of this week
         endOfWeek.setHours(23, 59, 59, 999);
         return { start: startOfWeek, end: endOfWeek };
       case 'next_two_weeks':

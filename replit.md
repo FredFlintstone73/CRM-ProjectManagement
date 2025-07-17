@@ -372,4 +372,4 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Edit Task Assignment Fix**: Fixed task form to show "Assign to Me" when editing tasks assigned to current user instead of showing blank dropdown
 - **In Progress Status Filter**: Added "In Progress" button to status section to show tasks that are not yet completed
 - **Date-Filtered Progress Bar**: Progress bar now reflects completion percentage based on selected due date range, providing targeted progress tracking
-- **Week-Aligned Two-Week Filter**: "Next Two Weeks" filter now starts from Monday of current week and ends Sunday of next week for better weekly planning alignment
+- **Week-Aligned Date Filters**: Both "This Week" and "Next Two Weeks" filters now start from Monday and end on Sunday for consistent weekly planning alignment
