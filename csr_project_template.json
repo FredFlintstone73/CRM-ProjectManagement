@@ -1,0 +1,51 @@
+{
+  "name": "CSR Project Template",
+  "description": "Comprehensive Safety Review (CSR) project template based on actual Lynn & Ted Smith project workflow. Includes Planning Phase and Execution Phase with hierarchical task structure.",
+  "sections": {
+    "Planning Phase": [
+      {
+        "title": "Schedule",
+        "description": "Initial project scheduling and setup",
+        "priority": "high",
+        "daysFromMeeting": -7,
+        "subtasks": [
+          {
+            "title": "Get details from Team",
+            "description": "Gather initial requirements and details from all team members",
+            "priority": "medium",
+            "daysFromMeeting": -6
+          }
+        ]
+      },
+      {
+        "title": "Review past meeting notes",
+        "description": "Review previous meeting notes and action items",
+        "priority": "medium",
+        "daysFromMeeting": -5,
+        "parentTitle": "Get details from Team"
+      }
+    ],
+    "Execution Phase": [
+      {
+        "title": "Delete Delete",
+        "description": "Execute deletion tasks and cleanup",
+        "priority": "medium",
+        "daysFromMeeting": 14,
+        "subtasks": [
+          {
+            "title": "Wipe Wipr",
+            "description": "Complete wiping and cleanup procedures",
+            "priority": "medium",
+            "daysFromMeeting": 12
+          }
+        ]
+      },
+      {
+        "title": "Wipe",
+        "description": "Primary wipe operations",
+        "priority": "medium",
+        "daysFromMeeting": 20
+      }
+    ]
+  }
+}
