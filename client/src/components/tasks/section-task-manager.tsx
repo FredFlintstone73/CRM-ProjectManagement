@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Plus, Edit3, Trash2, CheckCircle, Circle, CalendarDays, ChevronRight, ChevronDown, User } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Task, Contact } from "@shared/schema";
 
@@ -51,6 +52,7 @@ interface EditingSectionState {
 
 export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // Form states
   const [selectedTask, setSelectedTask] = useState<TaskNode | null>(null);
@@ -235,7 +237,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     const sectionId = sections.find(s => s.title === sectionTitle)?.id || "section-1";
     
     // Convert assignedTo to correct format for form - fix null handling
-    const assignedToValue = task.assignedTo ? task.assignedTo.toString() : "";
+    const assignedToValue = task.assignedTo ? `team_${task.assignedTo}` : "unassigned";
     
     setTaskForm({
       title: task.title,
@@ -269,8 +271,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       assignedTo: taskForm.assignedTo || "", // Keep as string for server conversion
       projectId: projectId,
       milestoneId: null, // We'll use null for now since we're using sections
-      priority: 'medium', // Default priority
-      status: 'todo', // Default status (matching schema enum)
+      priority: 25, // Default priority (1-50 scale)
     };
 
     if (isEditMode && selectedTask) {
@@ -609,9 +610,15 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                   <SelectValue placeholder="Select team member" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {user && (
+                    <SelectItem value={`me_${user.id}`}>
+                      Assign to Me ({user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})
+                    </SelectItem>
+                  )}
                   {teamMembers.length > 0 ? (
                     teamMembers.map(member => (
-                      <SelectItem key={member.id} value={member.id.toString()}>
+                      <SelectItem key={member.id} value={`team_${member.id}`}>
                         {member.firstName} {member.lastName || ''}
                       </SelectItem>
                     ))

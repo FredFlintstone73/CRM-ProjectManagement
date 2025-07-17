@@ -615,7 +615,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const processedTaskData = {
         ...taskData,
         assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null,
-        priority: taskData.priority ? parseInt(taskData.priority.toString()) : taskData.priority,
+        priority: taskData.priority !== null && taskData.priority !== undefined ? 
+          (typeof taskData.priority === 'string' ? parseInt(taskData.priority) : taskData.priority) : 
+          25, // Default priority
       };
       
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
@@ -638,7 +640,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null 
         }),
         ...(taskData.priority !== undefined && { 
-          priority: taskData.priority ? parseInt(taskData.priority.toString()) : taskData.priority 
+          priority: taskData.priority !== null && taskData.priority !== undefined ? 
+            (typeof taskData.priority === 'string' ? parseInt(taskData.priority) : taskData.priority) : 
+            25 // Default priority
         }),
       };
       
