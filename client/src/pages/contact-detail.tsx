@@ -186,17 +186,22 @@ export default function ContactDetail() {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // For now, we'll just show a success message
-      // In a real app, you would upload the file to a server
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "File size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert to base64 and upload
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
         setProfileImageUrl(imageUrl);
-        // You could also call an API to save this image
-        toast({
-          title: "Photo uploaded",
-          description: "Profile photo has been updated",
-        });
+        uploadPhotoMutation.mutate(imageUrl);
       };
       reader.readAsDataURL(file);
     }
