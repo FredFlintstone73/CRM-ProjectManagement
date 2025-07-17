@@ -58,8 +58,11 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       return await apiRequest(method, url, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       toast({
         title: task ? "Task updated successfully" : "Task created successfully",
       });
