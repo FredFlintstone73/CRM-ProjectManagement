@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Plus, Calendar, User, AlertCircle, Grid, List } from "lucide-react";
+import { Search, Plus, Calendar, User, AlertCircle, Grid, List, Edit, Trash2 } from "lucide-react";
 import TaskForm from "@/components/tasks/task-form";
 import type { Task, Project, User as UserType } from "@shared/schema";
 import { Link } from "wouter";
@@ -27,6 +27,7 @@ export default function Tasks() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
   const [sortBy, setSortBy] = useState("priority");
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -293,6 +294,25 @@ export default function Tasks() {
                   <TaskForm onSuccess={handleTaskCreated} />
                 </DialogContent>
               </Dialog>
+
+              {/* Edit Task Dialog */}
+              <Dialog open={editingTask !== null} onOpenChange={(open) => !open && setEditingTask(null)}>
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Edit Task</DialogTitle>
+                  </DialogHeader>
+                  {editingTask && (
+                    <TaskForm 
+                      task={editingTask} 
+                      projectId={editingTask.projectId} 
+                      onSuccess={() => {
+                        setEditingTask(null);
+                        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+                      }} 
+                    />
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
@@ -364,14 +384,25 @@ export default function Tasks() {
                           <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteTaskMutation.mutate(task.id)}
-                        disabled={deleteTaskMutation.isPending}
-                      >
-                        Delete
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingTask(task)}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteTaskMutation.mutate(task.id)}
+                          disabled={deleteTaskMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -438,11 +469,20 @@ export default function Tasks() {
                         </Select>
                         
                         <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingTask(task)}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => deleteTaskMutation.mutate(task.id)}
                           disabled={deleteTaskMutation.isPending}
                         >
+                          <Trash2 className="w-4 h-4 mr-1" />
                           Delete
                         </Button>
                       </div>
