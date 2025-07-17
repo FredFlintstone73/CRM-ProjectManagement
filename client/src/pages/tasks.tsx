@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Search, Plus, Calendar, User, AlertCircle, Grid, List, Edit, Trash2 } from "lucide-react";
 import TaskForm from "@/components/tasks/task-form";
 import type { Task, Project, User as UserType } from "@shared/schema";
@@ -22,7 +22,7 @@ export default function Tasks() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("all");
+
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
@@ -84,45 +84,14 @@ export default function Tasks() {
     },
   });
 
-  const updateTaskStatusMutation = useMutation({
-    mutationFn: async ({ taskId, status }: { taskId: number; status: string }) => {
-      await apiRequest('PUT', `/api/tasks/${taskId}`, { status });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      toast({
-        title: "Success",
-        description: "Task updated successfully",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to update task",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const filteredAndSortedTasks = tasks?.filter((task) => {
     const matchesSearch = searchQuery === "" ||
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesStatus = selectedStatus === "all" || task.status === selectedStatus;
-    
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   }).sort((a, b) => {
     switch (sortBy) {
       case "priority":
@@ -226,18 +195,7 @@ export default function Tasks() {
                 className="pl-10"
               />
             </div>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="todo">To Do</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
+
 
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
@@ -311,15 +269,7 @@ export default function Tasks() {
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-3 flex-1">
-                        <Checkbox
-                          checked={task.status === 'completed'}
-                          onCheckedChange={(checked) => {
-                            const newStatus = checked ? 'completed' : 'todo';
-                            updateTaskStatusMutation.mutate({ taskId: task.id, status: newStatus });
-                          }}
-                          className="mt-1"
-                        />
+                      <div className="flex items-start flex-1">
                         <Link href={`/task/${task.id}`} className="flex-1">
                           <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors">
                             {task.title}
@@ -329,9 +279,6 @@ export default function Tasks() {
                       <div className="flex gap-2 ml-2">
                         <Badge className={getPriorityColor(task.priority || 25)}>
                           {task.priority || 25}
-                        </Badge>
-                        <Badge className={getTaskStatusColor(task.status || 'todo')}>
-                          {task.status?.replace('_', ' ') || 'todo'}
                         </Badge>
                       </div>
                     </div>
@@ -357,21 +304,7 @@ export default function Tasks() {
                       </div>
                     )}
                     
-                    <div className="flex items-center justify-between pt-2">
-                      <Select
-                        value={task.status || 'todo'}
-                        onValueChange={(status) => updateTaskStatusMutation.mutate({ taskId: task.id, status })}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="todo">To Do</SelectItem>
-                          <SelectItem value="in_progress">In Progress</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="flex items-center justify-end pt-2">
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
@@ -403,13 +336,6 @@ export default function Tasks() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4 flex-1">
-                        <Checkbox
-                          checked={task.status === 'completed'}
-                          onCheckedChange={(checked) => {
-                            const newStatus = checked ? 'completed' : 'todo';
-                            updateTaskStatusMutation.mutate({ taskId: task.id, status: newStatus });
-                          }}
-                        />
                         <Link href={`/task/${task.id}`}>
                           <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors">
                             {task.title}
@@ -417,9 +343,6 @@ export default function Tasks() {
                         </Link>
                         <Badge className={getPriorityColor(task.priority || 25)}>
                           {task.priority || 25}
-                        </Badge>
-                        <Badge className={getTaskStatusColor(task.status || 'todo')}>
-                          {task.status?.replace('_', ' ') || 'todo'}
                         </Badge>
                       </div>
                       
@@ -441,20 +364,7 @@ export default function Tasks() {
                           </div>
                         )}
                         
-                        <Select
-                          value={task.status || 'todo'}
-                          onValueChange={(status) => updateTaskStatusMutation.mutate({ taskId: task.id, status })}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="todo">To Do</SelectItem>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
+
                         
                         <Button
                           variant="outline"
