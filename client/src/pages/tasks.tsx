@@ -35,7 +35,7 @@ export default function Tasks() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('all_tasks');
   const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress'>('all');
-  const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_30_days' | 'next_four_months' | 'custom'>('all');
+  const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_30_days' | 'next_122_days' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
 
@@ -162,11 +162,11 @@ export default function Tasks() {
         thirtyDaysFromNow.setDate(today.getDate() + 30);
         thirtyDaysFromNow.setHours(23, 59, 59, 999);
         return { start: startOfDay, end: thirtyDaysFromNow };
-      case 'next_four_months':
-        const fourMonthsFromNow = new Date(today);
-        fourMonthsFromNow.setMonth(today.getMonth() + 4);
-        fourMonthsFromNow.setHours(23, 59, 59, 999);
-        return { start: startOfDay, end: fourMonthsFromNow };
+      case 'next_122_days':
+        const oneHundredTwentyTwoDaysFromNow = new Date(today);
+        oneHundredTwentyTwoDaysFromNow.setDate(today.getDate() + 122);
+        oneHundredTwentyTwoDaysFromNow.setHours(23, 59, 59, 999);
+        return { start: startOfDay, end: oneHundredTwentyTwoDaysFromNow };
       case 'custom':
         if (customStartDate && customEndDate) {
           const start = new Date(customStartDate);
@@ -502,7 +502,7 @@ export default function Tasks() {
                   <SelectItem value="this_week">This Week</SelectItem>
                   <SelectItem value="next_two_weeks">Next Two Weeks</SelectItem>
                   <SelectItem value="next_30_days">Next 30 Days</SelectItem>
-                  <SelectItem value="next_four_months">Next Four Months</SelectItem>
+                  <SelectItem value="next_122_days">Next 122 Days</SelectItem>
                   <SelectItem value="custom">Custom Date Range</SelectItem>
                 </SelectContent>
               </Select>

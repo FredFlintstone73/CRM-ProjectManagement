@@ -374,3 +374,4 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Date-Filtered Progress Bar**: Progress bar now reflects completion percentage based on selected due date range, providing targeted progress tracking
 - **Week-Aligned Date Filters**: Both "This Week" and "Next Two Weeks" filters now start from Monday and end on Sunday for consistent weekly planning alignment
 - **Next 30 Days Filter**: Changed "Next Month" to "Next 30 Days" for more precise time-based filtering (shows tasks due within 30 days from today)
+- **Next 122 Days Filter**: Changed "Next Four Months" to "Next 122 Days" for consistent day-based filtering (shows tasks due within 122 days from today)
