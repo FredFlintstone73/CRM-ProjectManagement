@@ -35,7 +35,7 @@ export default function Tasks() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('all_tasks');
   const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress'>('all');
-  const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_month' | 'next_four_months' | 'custom'>('all');
+  const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_30_days' | 'next_four_months' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
 
@@ -157,11 +157,11 @@ export default function Tasks() {
         endOfTwoWeeks.setDate(startOfCurrentWeek.getDate() + 13); // Sunday of next week
         endOfTwoWeeks.setHours(23, 59, 59, 999);
         return { start: startOfCurrentWeek, end: endOfTwoWeeks };
-      case 'next_month':
-        const oneMonthFromNow = new Date(today);
-        oneMonthFromNow.setMonth(today.getMonth() + 1);
-        oneMonthFromNow.setHours(23, 59, 59, 999);
-        return { start: startOfDay, end: oneMonthFromNow };
+      case 'next_30_days':
+        const thirtyDaysFromNow = new Date(today);
+        thirtyDaysFromNow.setDate(today.getDate() + 30);
+        thirtyDaysFromNow.setHours(23, 59, 59, 999);
+        return { start: startOfDay, end: thirtyDaysFromNow };
       case 'next_four_months':
         const fourMonthsFromNow = new Date(today);
         fourMonthsFromNow.setMonth(today.getMonth() + 4);
@@ -501,7 +501,7 @@ export default function Tasks() {
                   <SelectItem value="today">Today</SelectItem>
                   <SelectItem value="this_week">This Week</SelectItem>
                   <SelectItem value="next_two_weeks">Next Two Weeks</SelectItem>
-                  <SelectItem value="next_month">Next Month</SelectItem>
+                  <SelectItem value="next_30_days">Next 30 Days</SelectItem>
                   <SelectItem value="next_four_months">Next Four Months</SelectItem>
                   <SelectItem value="custom">Custom Date Range</SelectItem>
                 </SelectContent>
