@@ -30,7 +30,7 @@ export default function TaskDetail() {
   });
 
   const { data: project } = useQuery<Project>({
-    queryKey: ['/api/projects', task?.projectId.toString()],
+    queryKey: ['/api/projects', task?.projectId?.toString()],
     enabled: !!task?.projectId,
     queryFn: async () => {
       const response = await fetch(`/api/projects/${task?.projectId}`);
