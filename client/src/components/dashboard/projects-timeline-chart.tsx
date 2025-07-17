@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Calendar, BarChart3, CalendarDays } from "lucide-react";
-import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks, eachDayOfInterval, isSameDay, eachWeekOfInterval, isWithinInterval, differenceInDays } from "date-fns";
+import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks, eachDayOfInterval, isSameDay, eachWeekOfInterval, isWithinInterval, differenceInDays, addDays } from "date-fns";
 import type { Project } from "@shared/schema";
 
 interface TimelineData {
