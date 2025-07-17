@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Plus, Calendar, User, AlertCircle, Grid, List } from "lucide-react";
 import TaskForm from "@/components/tasks/task-form";
 import type { Task, Project, User as UserType } from "@shared/schema";
@@ -302,11 +303,21 @@ export default function Tasks() {
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <Link href={`/task/${task.id}`} className="flex-1">
-                        <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors">
-                          {task.title}
-                        </CardTitle>
-                      </Link>
+                      <div className="flex items-start space-x-3 flex-1">
+                        <Checkbox
+                          checked={task.status === 'completed'}
+                          onCheckedChange={(checked) => {
+                            const newStatus = checked ? 'completed' : 'todo';
+                            updateTaskStatusMutation.mutate({ taskId: task.id, status: newStatus });
+                          }}
+                          className="mt-1"
+                        />
+                        <Link href={`/task/${task.id}`} className="flex-1">
+                          <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors">
+                            {task.title}
+                          </CardTitle>
+                        </Link>
+                      </div>
                       <div className="flex gap-2 ml-2">
                         <Badge className={getPriorityColor(task.priority || 25)}>
                           {task.priority || 25}
@@ -373,6 +384,13 @@ export default function Tasks() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4 flex-1">
+                        <Checkbox
+                          checked={task.status === 'completed'}
+                          onCheckedChange={(checked) => {
+                            const newStatus = checked ? 'completed' : 'todo';
+                            updateTaskStatusMutation.mutate({ taskId: task.id, status: newStatus });
+                          }}
+                        />
                         <Link href={`/task/${task.id}`}>
                           <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors">
                             {task.title}
