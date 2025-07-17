@@ -239,15 +239,12 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     const currentSection = sections.find(s => s.id === taskForm.sectionId);
     const sectionPrefix = currentSection ? `[${currentSection.title}] ` : '';
     
-    // Convert assignedTo to number or null
-    const assignedToNumber = taskForm.assignedTo ? parseInt(taskForm.assignedTo) : null;
-    
     // Prepare task data with proper type conversions
     const taskData = {
       ...taskForm,
       description: sectionPrefix + (taskForm.description || ''), // Embed section in description
       parentTaskId: taskForm.parentTaskId || null,
-      assignedTo: assignedToNumber, // Convert to number as expected by schema
+      assignedTo: taskForm.assignedTo || "", // Keep as string for server conversion
       projectId: projectId,
       milestoneId: null, // We'll use null for now since we're using sections
       priority: 'medium', // Default priority
