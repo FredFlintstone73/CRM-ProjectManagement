@@ -369,3 +369,4 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Real-time Updates**: Progress automatically updates when tasks are completed or status changes
 - **Clean Card Design**: Professional card layout with progress bar and summary information
 - **Priority Number Positioning**: Moved priority numbers to appear between completion radio button and task name in both grid and row views
+- **Edit Task Assignment Fix**: Fixed task form to show "Assign to Me" when editing tasks assigned to current user instead of showing blank dropdown

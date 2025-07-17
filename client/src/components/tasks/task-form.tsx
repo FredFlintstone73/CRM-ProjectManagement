@@ -43,13 +43,35 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     contact.workEmail !== user?.email
   ) || [];
 
+  // Get current user's contact ID
+  const getCurrentUserContactId = () => {
+    if (!user || !contacts) return null;
+    const userContact = contacts.find((contact: any) => 
+      contact.personalEmail === user.email || 
+      contact.workEmail === user.email
+    );
+    return userContact?.id || null;
+  };
+
+  // Determine the correct default value for assignedTo
+  const getDefaultAssignedTo = () => {
+    if (!task?.assignedTo) return '';
+    
+    const currentUserContactId = getCurrentUserContactId();
+    if (currentUserContactId && task.assignedTo === currentUserContactId) {
+      return `me_${user?.id}`;
+    }
+    
+    return `team_${task.assignedTo}`;
+  };
+
   const form = useForm<InsertTask>({
     resolver: zodResolver(insertTaskSchema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assignedTo: task?.assignedTo ? `team_${task.assignedTo}` : '',
+      assignedTo: getDefaultAssignedTo(),
       priority: task?.priority || 25,
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
     },
