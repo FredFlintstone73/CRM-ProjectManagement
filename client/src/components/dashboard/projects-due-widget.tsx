@@ -26,12 +26,12 @@ const getDateRanges = (): Record<string, DateRange> => {
     "next-1-week": {
       start: today,
       end: endOfDay(addWeeks(today, 1)),
-      label: "1 Week",
+      label: "This Week",
     },
     "next-2-weeks": {
       start: today,
       end: endOfDay(addWeeks(today, 2)),
-      label: "2 Weeks",
+      label: "This 2 Weeks",
     },
     "next-1-month": {
       start: today,
