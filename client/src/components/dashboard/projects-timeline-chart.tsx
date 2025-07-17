@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Calendar, BarChart3, CalendarDays } from "lucide-react";
-import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks, eachDayOfInterval, isSameDay, eachWeekOfInterval, isWithinInterval } from "date-fns";
+import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks, eachDayOfInterval, isSameDay, eachWeekOfInterval, isWithinInterval, differenceInDays } from "date-fns";
 import type { Project } from "@shared/schema";
 
 interface TimelineData {
@@ -219,6 +219,97 @@ export default function ProjectsTimelineChart({
           ...projectCounts,
           total: weekProjects.length,
           projects: weekProjects,
+        };
+      });
+    }
+    
+    // For "Custom Date Range", use dynamic formatting based on range duration
+    if (selectedPeriod === "custom-range" && customStartDate && customEndDate) {
+      const startDate = new Date(customStartDate);
+      const endDate = new Date(customEndDate);
+      const daysDifference = differenceInDays(endDate, startDate);
+      
+      // Less than 15 days: show by days
+      if (daysDifference < 15) {
+        const days = eachDayOfInterval({ start: startDate, end: endDate });
+        
+        return days.map((day) => {
+          const dayProjects = projects?.filter(project => 
+            project.dueDate && isSameDay(new Date(project.dueDate), day)
+          ) || [];
+          
+          const projectCounts = {
+            frm: dayProjects.filter(p => p.projectType === 'frm').length,
+            im: dayProjects.filter(p => p.projectType === 'im').length,
+            ipu: dayProjects.filter(p => p.projectType === 'ipu').length,
+            csr: dayProjects.filter(p => p.projectType === 'csr').length,
+            gpo: dayProjects.filter(p => p.projectType === 'gpo').length,
+            tar: dayProjects.filter(p => p.projectType === 'tar').length,
+          };
+          
+          return {
+            period: format(day, 'EEE M/d'),
+            ...projectCounts,
+            total: dayProjects.length,
+            projects: dayProjects,
+          };
+        });
+      }
+      
+      // Less than 50 days: show by weeks
+      if (daysDifference < 50) {
+        const weeks = eachWeekOfInterval(
+          { start: startDate, end: endDate },
+          { weekStartsOn: 1 }
+        );
+        
+        return weeks.map((weekStart, index) => {
+          const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+          const weekProjects = projects?.filter(project => {
+            if (!project.dueDate) return false;
+            const projectDate = new Date(project.dueDate);
+            return isWithinInterval(projectDate, { start: weekStart, end: weekEnd });
+          }) || [];
+          
+          const projectCounts = {
+            frm: weekProjects.filter(p => p.projectType === 'frm').length,
+            im: weekProjects.filter(p => p.projectType === 'im').length,
+            ipu: weekProjects.filter(p => p.projectType === 'ipu').length,
+            csr: weekProjects.filter(p => p.projectType === 'csr').length,
+            gpo: weekProjects.filter(p => p.projectType === 'gpo').length,
+            tar: weekProjects.filter(p => p.projectType === 'tar').length,
+          };
+          
+          return {
+            period: format(weekStart, 'M/d'),
+            ...projectCounts,
+            total: weekProjects.length,
+            projects: weekProjects,
+          };
+        });
+      }
+      
+      // 50+ days: show by months
+      const months = eachMonthOfInterval({ start: startOfMonth(startDate), end: endOfMonth(endDate) });
+      return months.map((month, index) => {
+        const monthProjects = projects?.filter(project => 
+          project.dueDate && isSameMonth(new Date(project.dueDate), month)
+        ) || [];
+        
+        const projectCounts = {
+          frm: monthProjects.filter(p => p.projectType === 'frm').length,
+          im: monthProjects.filter(p => p.projectType === 'im').length,
+          ipu: monthProjects.filter(p => p.projectType === 'ipu').length,
+          csr: monthProjects.filter(p => p.projectType === 'csr').length,
+          gpo: monthProjects.filter(p => p.projectType === 'gpo').length,
+          tar: monthProjects.filter(p => p.projectType === 'tar').length,
+        };
+        
+        return {
+          period: format(month, 'MMM yyyy'),
+          ...projectCounts,
+          total: monthProjects.length,
+          projects: monthProjects,
         };
       });
     }
