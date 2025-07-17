@@ -568,7 +568,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const taskData = insertTaskSchema.parse(req.body);
       const userId = req.user.claims.sub;
-      const task = await storage.createTask(taskData, userId);
+      
+      // Convert assignedTo from string to number if provided
+      const processedTaskData = {
+        ...taskData,
+        assignedTo: taskData.assignedTo ? parseInt(taskData.assignedTo) : null,
+      };
+      
+      const task = await storage.createTask(processedTaskData, userId);
       res.json(task);
     } catch (error) {
       console.error("Error creating task:", error);
@@ -579,7 +586,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
     try {
       const taskData = insertTaskSchema.partial().parse(req.body);
-      const task = await storage.updateTask(parseInt(req.params.id), taskData);
+      
+      // Convert assignedTo from string to number if provided
+      const processedTaskData = {
+        ...taskData,
+        assignedTo: taskData.assignedTo ? parseInt(taskData.assignedTo) : null,
+      };
+      
+      const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);
@@ -590,7 +604,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
     try {
       const taskData = insertTaskSchema.partial().parse(req.body);
-      const task = await storage.updateTask(parseInt(req.params.id), taskData);
+      
+      // Convert assignedTo from string to number if provided
+      const processedTaskData = {
+        ...taskData,
+        assignedTo: taskData.assignedTo ? parseInt(taskData.assignedTo) : null,
+      };
+      
+      const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);

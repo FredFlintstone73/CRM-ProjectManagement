@@ -172,6 +172,8 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString()] });
     },
   });
 

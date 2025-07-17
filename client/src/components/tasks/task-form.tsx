@@ -44,7 +44,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assignedTo: task?.assignedTo ? `team_${task.assignedTo}` : 'unassigned',
+      assignedTo: task?.assignedTo ? task.assignedTo.toString() : '',
       priority: task?.priority || 'medium',
       status: task?.status || 'todo',
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
