@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -240,6 +241,25 @@ export default function Tasks() {
     }
   }) || [];
 
+  // Calculate progress for tasks assigned to current user only
+  const getCurrentUserTaskProgress = () => {
+    if (!tasks || !user || !contacts) return { completed: 0, total: 0, percentage: 0 };
+    
+    const currentUserContactId = getCurrentUserContactId();
+    if (!currentUserContactId) return { completed: 0, total: 0, percentage: 0 };
+    
+    const myTasks = tasks.filter(task => task.assignedTo === currentUserContactId);
+    const completedTasks = myTasks.filter(task => task.status === 'completed');
+    
+    return {
+      completed: completedTasks.length,
+      total: myTasks.length,
+      percentage: myTasks.length > 0 ? (completedTasks.length / myTasks.length) * 100 : 0
+    };
+  };
+
+  const myTaskProgress = getCurrentUserTaskProgress();
+
   const getTaskStatusColor = (status: string) => {
     switch (status) {
       case 'todo':
@@ -375,6 +395,30 @@ export default function Tasks() {
               </Dialog>
             </div>
           </div>
+
+          {/* My Task Progress Bar */}
+          {myTaskProgress.total > 0 && (
+            <Card className="mb-6">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-700">My Task Progress</h3>
+                  <span className="text-sm text-gray-600">
+                    {myTaskProgress.completed} of {myTaskProgress.total} completed
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <Progress 
+                    value={myTaskProgress.percentage} 
+                    className="h-3"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>{myTaskProgress.percentage.toFixed(1)}% Complete</span>
+                    <span>{myTaskProgress.total - myTaskProgress.completed} remaining</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Task Assignment Toggles and Filters */}
           <div className="flex flex-wrap items-center gap-4 justify-between mb-6">
