@@ -257,17 +257,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteContact(id: number): Promise<void> {
-    // Check if contact has assigned tasks
-    const assignedTasks = await db
-      .select()
-      .from(tasks)
-      .where(eq(tasks.assignedTo, id));
-    
-    if (assignedTasks.length > 0) {
-      throw new Error(`Cannot delete contact. This contact is assigned to ${assignedTasks.length} task(s). Please reassign or delete these tasks first.`);
+    try {
+      // Check if contact has assigned tasks
+      const assignedTasks = await db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.assignedTo, id));
+      
+      if (assignedTasks.length > 0) {
+        throw new Error(`Cannot delete contact. This contact is assigned to ${assignedTasks.length} task(s). Please reassign or delete these tasks first.`);
+      }
+      
+      // Check if contact has created projects
+      const createdProjects = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.clientId, id));
+      
+      if (createdProjects.length > 0) {
+        throw new Error(`Cannot delete contact. This contact is associated with ${createdProjects.length} project(s). Please reassign or delete these projects first.`);
+      }
+      
+      await db.delete(contacts).where(eq(contacts.id, id));
+    } catch (error) {
+      // If it's our custom error, re-throw it
+      if (error.message.includes("Cannot delete contact")) {
+        throw error;
+      }
+      // Handle database constraint errors
+      if (error.code === '23503') {
+        throw new Error(`Cannot delete contact. This contact is referenced by other records in the system. Please remove all references first.`);
+      }
+      throw error;
     }
-    
-    await db.delete(contacts).where(eq(contacts.id, id));
   }
 
   async searchContacts(query: string): Promise<Contact[]> {
