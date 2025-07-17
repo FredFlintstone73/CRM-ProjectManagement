@@ -332,3 +332,11 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Meeting Workflow**: Complete CSR (Comprehensive Safety Review) meeting workflow from initial scheduling to post-meeting follow-up
 - **Project Creation from Template**: Added "Create Project" functionality that automatically calculates all task due dates based on specified meeting date
 - **Template Availability**: Template available in ClientHub Templates section with "Create Project" button for formula-based project creation
+
+### Profile Image Display Fix (July 17, 2025)
+- **Fixed Photo Upload Bug**: Corrected `handleFileSelect` function in contact detail page to properly save uploaded images to database
+- **Database Integration**: Profile images now save to `profileImageUrl` field via POST `/api/contacts/:id/photo` endpoint
+- **File Size Validation**: Added 5MB file size limit with proper error handling
+- **Base64 Storage**: Images converted to base64 format and stored directly in database
+- **Real-time Updates**: Profile images display immediately on contacts page after upload with proper cache invalidation
+- **Team Member Photos**: Team members' profile pictures now properly display on contacts page after uploading through contact detail pages
