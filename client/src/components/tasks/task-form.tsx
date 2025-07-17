@@ -35,9 +35,12 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     queryKey: ['/api/contacts'],
   });
 
-  // Filter contacts to only show active team members
+  // Filter contacts to only show active team members, excluding current user
   const teamMembers = contacts?.filter(contact => 
-    contact.contactType === 'team_member' && contact.status === 'active'
+    contact.contactType === 'team_member' && 
+    contact.status === 'active' &&
+    contact.personalEmail !== user?.email &&
+    contact.workEmail !== user?.email
   ) || [];
 
   const form = useForm<InsertTask>({

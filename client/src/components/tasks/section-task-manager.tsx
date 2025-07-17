@@ -136,7 +136,11 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   });
 
   const teamMembers = contacts.filter(contact => 
-    contact && contact.contactType === 'team_member' && contact.status === 'active'
+    contact && 
+    contact.contactType === 'team_member' && 
+    contact.status === 'active' &&
+    contact.personalEmail !== user?.email &&
+    contact.workEmail !== user?.email
   );
 
   // Create task mutation
