@@ -301,17 +301,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       const currentSection = sections.find(s => s.id === sectionId);
       const sectionTitle = currentSection?.title || '';
       
-      console.log('Building hierarchy for section:', sectionTitle, 'with tasks:', tasks.length);
-      
       const sectionTasks = tasks.filter(task => {
         if (!task || task.parentTaskId) return false;
-        
-        const hasPrefix = task.description?.startsWith(`[${sectionTitle}]`);
-        console.log(`Task "${task.title}" has prefix [${sectionTitle}]:`, hasPrefix, 'description:', task.description);
-        return hasPrefix;
+        return task.description?.startsWith(`[${sectionTitle}]`);
       });
-      
-      console.log('Found section tasks:', sectionTasks.length);
       
       const buildChildren = (parentId: number): TaskNode[] => {
         if (!parentId || !tasks) return [];
