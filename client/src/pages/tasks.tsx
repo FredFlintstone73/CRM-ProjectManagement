@@ -150,10 +150,13 @@ export default function Tasks() {
         endOfWeek.setHours(23, 59, 59, 999);
         return { start: startOfWeek, end: endOfWeek };
       case 'next_two_weeks':
-        const twoWeeksFromNow = new Date(today);
-        twoWeeksFromNow.setDate(today.getDate() + 14);
-        twoWeeksFromNow.setHours(23, 59, 59, 999);
-        return { start: startOfDay, end: twoWeeksFromNow };
+        const startOfCurrentWeek = new Date(today);
+        startOfCurrentWeek.setDate(today.getDate() - today.getDay() + 1); // Monday of this week
+        startOfCurrentWeek.setHours(0, 0, 0, 0);
+        const endOfTwoWeeks = new Date(startOfCurrentWeek);
+        endOfTwoWeeks.setDate(startOfCurrentWeek.getDate() + 13); // Sunday of next week
+        endOfTwoWeeks.setHours(23, 59, 59, 999);
+        return { start: startOfCurrentWeek, end: endOfTwoWeeks };
       case 'next_month':
         const oneMonthFromNow = new Date(today);
         oneMonthFromNow.setMonth(today.getMonth() + 1);
