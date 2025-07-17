@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { CalendarDays, User, Clock, Plus, Edit3, Trash2, CheckCircle, Circle, Settings, ArrowLeft, ArrowUpDown } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarDays, User, Clock, Plus, Edit3, Trash2, CheckCircle, Circle, Settings, ArrowLeft, ArrowUpDown, Target, GitBranch } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
 import TaskForm from "@/components/tasks/task-form";
 import ProjectForm from "@/components/projects/project-form";
+import { HierarchicalTaskManager } from "@/components/tasks/hierarchical-task-manager";
+import { MilestoneManager } from "@/components/projects/milestone-manager";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
@@ -477,97 +480,124 @@ export default function ProjectDetail() {
         </CardContent>
       </Card>
 
-      {/* Tasks Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Tasks</CardTitle>
-            {tasks && tasks.length > 0 && (
-              <div className="flex items-center gap-2">
-                <ArrowUpDown className="w-4 h-4 text-gray-500" />
-                <Select value={sortBy} onValueChange={(value: 'assignee' | 'dueDate') => setSortBy(value)}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="assignee">Assignee</SelectItem>
-                    <SelectItem value="dueDate">Due Date</SelectItem>
-                  </SelectContent>
-                </Select>
+      {/* Project Management Tabs */}
+      <Tabs defaultValue="milestones" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="milestones" className="flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            Milestones
+          </TabsTrigger>
+          <TabsTrigger value="hierarchical" className="flex items-center gap-2">
+            <GitBranch className="w-4 h-4" />
+            Hierarchical Tasks
+          </TabsTrigger>
+          <TabsTrigger value="legacy" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Legacy Tasks
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="milestones" className="mt-4">
+          <MilestoneManager projectId={project.id} />
+        </TabsContent>
+        
+        <TabsContent value="hierarchical" className="mt-4">
+          <HierarchicalTaskManager projectId={project.id} />
+        </TabsContent>
+        
+        <TabsContent value="legacy" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Legacy Tasks</CardTitle>
+                {tasks && tasks.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <ArrowUpDown className="w-4 h-4 text-gray-500" />
+                    <Select value={sortBy} onValueChange={(value: 'assignee' | 'dueDate') => setSortBy(value)}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="assignee">Assignee</SelectItem>
+                        <SelectItem value="dueDate">Due Date</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {!tasks || tasks.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No tasks yet. Add your first task to get started.</p>
-            </div>
-          ) : (
-            <div className="max-h-96 overflow-y-auto">
-              <div className="space-y-1">
-                {sortedTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between p-3 border-b hover:bg-gray-50 last:border-b-0"
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      <button
-                        onClick={() => handleToggleTask(task.id, task.status === 'completed')}
-                        className="text-gray-500 hover:text-primary flex-shrink-0"
+            </CardHeader>
+            <CardContent>
+              {!tasks || tasks.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No legacy tasks yet. Add your first task to get started.</p>
+                </div>
+              ) : (
+                <div className="max-h-96 overflow-y-auto">
+                  <div className="space-y-1">
+                    {sortedTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className="flex items-center justify-between p-3 border-b hover:bg-gray-50 last:border-b-0"
                       >
-                        {task.status === 'completed' ? (
-                          <CheckCircle className="w-4 h-4 text-green-500" />
-                        ) : (
-                          <Circle className="w-4 h-4" />
-                        )}
-                      </button>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className={`font-medium text-sm ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
-                            {task.title}
-                          </h3>
+                        <div className="flex items-center gap-3 flex-1">
+                          <button
+                            onClick={() => handleToggleTask(task.id, task.status === 'completed')}
+                            className="text-gray-500 hover:text-primary flex-shrink-0"
+                          >
+                            {task.status === 'completed' ? (
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <Circle className="w-4 h-4" />
+                            )}
+                          </button>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className={`font-medium text-sm ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
+                                {task.title}
+                              </h3>
+                            </div>
+                            
+                            {task.description && (
+                              <p className="text-xs text-gray-600 mb-1 truncate">{task.description}</p>
+                            )}
+                            
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>Assigned to: {getAssigneeName(task.assignedTo)}</span>
+                              {task.dueDate && (
+                                <span>Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                         
-                        {task.description && (
-                          <p className="text-xs text-gray-600 mb-1 truncate">{task.description}</p>
-                        )}
-                        
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>Assigned to: {getAssigneeName(task.assignedTo)}</span>
-                          {task.dueDate && (
-                            <span>Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
-                          )}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditTask(task)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditTask(task)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit3 className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

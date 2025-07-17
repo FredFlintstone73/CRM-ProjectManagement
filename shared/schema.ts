@@ -255,28 +255,67 @@ export const projects = pgTable("projects", {
   createdBy: varchar("created_by").references(() => users.id),
 });
 
-// Tasks table
-export const tasks = pgTable("tasks", {
+// Milestones table - For organizing tasks within projects and templates
+export const milestones = pgTable("milestones", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   title: varchar("title").notNull(),
   description: text("description"),
   projectId: integer("project_id").references(() => projects.id),
-  assignedTo: integer("assigned_to").references(() => contacts.id),
-  status: taskStatusEnum("status").default("todo"),
-  priority: taskPriorityEnum("priority").default("medium"),
+  templateId: integer("template_id").references(() => projectTemplates.id),
   dueDate: timestamp("due_date"),
-  completedAt: timestamp("completed_at"),
+  sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   createdBy: varchar("created_by").references(() => users.id),
 });
 
-// Project templates table
+// Tasks table - Enhanced with hierarchy support
+export const tasks = pgTable("tasks", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  projectId: integer("project_id").references(() => projects.id),
+  milestoneId: integer("milestone_id").references(() => milestones.id),
+  parentTaskId: integer("parent_task_id").references(() => tasks.id),
+  assignedTo: integer("assigned_to").references(() => contacts.id),
+  status: taskStatusEnum("status").default("todo"),
+  priority: taskPriorityEnum("priority").default("medium"),
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  sortOrder: integer("sort_order").default(0),
+  level: integer("level").default(0), // 0 = parent, 1 = child, 2 = grandchild
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdBy: varchar("created_by").references(() => users.id),
+});
+
+// Task comments table
+export const taskComments = pgTable("task_comments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  taskId: integer("task_id").references(() => tasks.id),
+  userId: varchar("user_id").references(() => users.id),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Task files table
+export const taskFiles = pgTable("task_files", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  taskId: integer("task_id").references(() => tasks.id),
+  fileName: varchar("file_name").notNull(),
+  originalName: varchar("original_name").notNull(),
+  fileSize: integer("file_size"),
+  mimeType: varchar("mime_type"),
+  uploadedBy: varchar("uploaded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Project templates table - Enhanced with milestone support
 export const projectTemplates = pgTable("project_templates", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: varchar("name").notNull(),
   description: text("description"),
-  tasks: jsonb("tasks"), // Array of task templates
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   createdBy: varchar("created_by").references(() => users.id),
@@ -331,11 +370,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   contacts: many(contacts),
   projects: many(projects),
   tasks: many(tasks),
+  milestones: many(milestones),
   projectTemplates: many(projectTemplates),
   emailInteractions: many(emailInteractions),
   callTranscripts: many(callTranscripts),
   activityLog: many(activityLog),
   projectComments: many(projectComments),
+  taskComments: many(taskComments),
+  taskFiles: many(taskFiles),
 }));
 
 export const contactsRelations = relations(contacts, ({ one, many }) => ({
@@ -359,14 +401,24 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     references: [users.id],
   }),
   tasks: many(tasks),
+  milestones: many(milestones),
   comments: many(projectComments),
 }));
 
-export const tasksRelations = relations(tasks, ({ one }) => ({
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
   project: one(projects, {
     fields: [tasks.projectId],
     references: [projects.id],
   }),
+  milestone: one(milestones, {
+    fields: [tasks.milestoneId],
+    references: [milestones.id],
+  }),
+  parentTask: one(tasks, {
+    fields: [tasks.parentTaskId],
+    references: [tasks.id],
+  }),
+  subtasks: many(tasks),
   assignedTo: one(contacts, {
     fields: [tasks.assignedTo],
     references: [contacts.id],
@@ -375,11 +427,52 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
     fields: [tasks.createdBy],
     references: [users.id],
   }),
+  comments: many(taskComments),
+  files: many(taskFiles),
 }));
 
-export const projectTemplatesRelations = relations(projectTemplates, ({ one }) => ({
+export const milestonesRelations = relations(milestones, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [milestones.projectId],
+    references: [projects.id],
+  }),
+  template: one(projectTemplates, {
+    fields: [milestones.templateId],
+    references: [projectTemplates.id],
+  }),
+  createdBy: one(users, {
+    fields: [milestones.createdBy],
+    references: [users.id],
+  }),
+  tasks: many(tasks),
+}));
+
+export const projectTemplatesRelations = relations(projectTemplates, ({ one, many }) => ({
   createdBy: one(users, {
     fields: [projectTemplates.createdBy],
+    references: [users.id],
+  }),
+  milestones: many(milestones),
+}));
+
+export const taskCommentsRelations = relations(taskComments, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskComments.taskId],
+    references: [tasks.id],
+  }),
+  user: one(users, {
+    fields: [taskComments.userId],
+    references: [users.id],
+  }),
+}));
+
+export const taskFilesRelations = relations(taskFiles, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskFiles.taskId],
+    references: [tasks.id],
+  }),
+  uploadedBy: one(users, {
+    fields: [taskFiles.uploadedBy],
     references: [users.id],
   }),
 }));
@@ -577,6 +670,16 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   dueDate: z.string().optional(),
 });
 
+export const insertMilestoneSchema = createInsertSchema(milestones).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  // Handle string date inputs from forms
+  dueDate: z.string().optional(),
+});
+
 export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
@@ -630,6 +733,19 @@ export const insertContactFileSchema = createInsertSchema(contactFiles).omit({
   userId: true,
 });
 
+export const insertTaskCommentSchema = createInsertSchema(taskComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+});
+
+export const insertTaskFileSchema = createInsertSchema(taskFiles).omit({
+  id: true,
+  createdAt: true,
+  uploadedBy: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -637,8 +753,14 @@ export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Milestone = typeof milestones.$inferSelect;
+export type InsertMilestone = z.infer<typeof insertMilestoneSchema>;
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type TaskComment = typeof taskComments.$inferSelect;
+export type InsertTaskComment = z.infer<typeof insertTaskCommentSchema>;
+export type TaskFile = typeof taskFiles.$inferSelect;
+export type InsertTaskFile = z.infer<typeof insertTaskFileSchema>;
 export type ProjectTemplate = typeof projectTemplates.$inferSelect;
 export type InsertProjectTemplate = z.infer<typeof insertProjectTemplateSchema>;
 export type EmailInteraction = typeof emailInteractions.$inferSelect;

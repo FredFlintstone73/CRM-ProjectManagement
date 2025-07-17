@@ -608,6 +608,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Task hierarchy endpoints
+  app.get('/api/tasks/:id/subtasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const subtasks = await storage.getSubtasks(parseInt(req.params.id));
+      res.json(subtasks);
+    } catch (error) {
+      console.error("Error fetching subtasks:", error);
+      res.status(500).json({ message: "Failed to fetch subtasks" });
+    }
+  });
+
+  app.get('/api/projects/:id/task-hierarchy', isAuthenticated, async (req: any, res) => {
+    try {
+      const tasks = await storage.getTaskHierarchy(parseInt(req.params.id));
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching task hierarchy:", error);
+      res.status(500).json({ message: "Failed to fetch task hierarchy" });
+    }
+  });
+
+  // Task comments endpoints
+  app.get('/api/tasks/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const comments = await storage.getTaskComments(parseInt(req.params.id));
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching task comments:", error);
+      res.status(500).json({ message: "Failed to fetch task comments" });
+    }
+  });
+
+  app.post('/api/tasks/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const commentData = { ...req.body, taskId: parseInt(req.params.id) };
+      const comment = await storage.createTaskComment(commentData, userId);
+      res.json(comment);
+    } catch (error) {
+      console.error("Error creating task comment:", error);
+      res.status(500).json({ message: "Failed to create task comment" });
+    }
+  });
+
+  app.put('/api/task-comments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const comment = await storage.updateTaskComment(parseInt(req.params.id), req.body);
+      res.json(comment);
+    } catch (error) {
+      console.error("Error updating task comment:", error);
+      res.status(500).json({ message: "Failed to update task comment" });
+    }
+  });
+
+  app.delete('/api/task-comments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteTaskComment(parseInt(req.params.id));
+      res.json({ message: "Task comment deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting task comment:", error);
+      res.status(500).json({ message: "Failed to delete task comment" });
+    }
+  });
+
+  // Task files endpoints
+  app.get('/api/tasks/:id/files', isAuthenticated, async (req: any, res) => {
+    try {
+      const files = await storage.getTaskFiles(parseInt(req.params.id));
+      res.json(files);
+    } catch (error) {
+      console.error("Error fetching task files:", error);
+      res.status(500).json({ message: "Failed to fetch task files" });
+    }
+  });
+
+  app.post('/api/tasks/:id/files', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const fileData = { ...req.body, taskId: parseInt(req.params.id) };
+      const file = await storage.createTaskFile(fileData, userId);
+      res.json(file);
+    } catch (error) {
+      console.error("Error creating task file:", error);
+      res.status(500).json({ message: "Failed to create task file" });
+    }
+  });
+
+  app.put('/api/task-files/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const file = await storage.updateTaskFile(parseInt(req.params.id), req.body);
+      res.json(file);
+    } catch (error) {
+      console.error("Error updating task file:", error);
+      res.status(500).json({ message: "Failed to update task file" });
+    }
+  });
+
+  app.delete('/api/task-files/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteTaskFile(parseInt(req.params.id));
+      res.json({ message: "Task file deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting task file:", error);
+      res.status(500).json({ message: "Failed to delete task file" });
+    }
+  });
+
+  // Milestone endpoints
+  app.get('/api/milestones', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId, templateId } = req.query;
+      let milestones;
+      
+      if (projectId) {
+        milestones = await storage.getMilestonesByProject(parseInt(projectId as string));
+      } else if (templateId) {
+        milestones = await storage.getMilestonesByTemplate(parseInt(templateId as string));
+      } else {
+        milestones = await storage.getMilestones();
+      }
+      
+      res.json(milestones);
+    } catch (error) {
+      console.error("Error fetching milestones:", error);
+      res.status(500).json({ message: "Failed to fetch milestones" });
+    }
+  });
+
+  app.get('/api/milestones/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const milestone = await storage.getMilestone(parseInt(req.params.id));
+      if (!milestone) {
+        return res.status(404).json({ message: "Milestone not found" });
+      }
+      res.json(milestone);
+    } catch (error) {
+      console.error("Error fetching milestone:", error);
+      res.status(500).json({ message: "Failed to fetch milestone" });
+    }
+  });
+
+  app.post('/api/milestones', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestone = await storage.createMilestone(req.body, userId);
+      res.json(milestone);
+    } catch (error) {
+      console.error("Error creating milestone:", error);
+      res.status(500).json({ message: "Failed to create milestone" });
+    }
+  });
+
+  app.put('/api/milestones/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const milestone = await storage.updateMilestone(parseInt(req.params.id), req.body);
+      res.json(milestone);
+    } catch (error) {
+      console.error("Error updating milestone:", error);
+      res.status(500).json({ message: "Failed to update milestone" });
+    }
+  });
+
+  app.delete('/api/milestones/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteMilestone(parseInt(req.params.id));
+      res.json({ message: "Milestone deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting milestone:", error);
+      res.status(500).json({ message: "Failed to delete milestone" });
+    }
+  });
+
+  app.get('/api/milestones/:id/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const tasks = await storage.getTasksByMilestone(parseInt(req.params.id));
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching milestone tasks:", error);
+      res.status(500).json({ message: "Failed to fetch milestone tasks" });
+    }
+  });
+
   // CSV template download endpoint
   app.get('/api/download/csv-template', (req, res) => {
     const csvContent = `Milestone,Parent Task,Parent Description,Sub-Task,Sub-Task Description,Sub-Sub-Task,Sub-Sub-Task Description,Assignee,Due Date,Comments

@@ -3,6 +3,9 @@ import {
   contacts,
   projects,
   tasks,
+  milestones,
+  taskComments,
+  taskFiles,
   projectTemplates,
   emailInteractions,
   callTranscripts,
@@ -18,6 +21,12 @@ import {
   type InsertProject,
   type Task,
   type InsertTask,
+  type Milestone,
+  type InsertMilestone,
+  type TaskComment,
+  type InsertTaskComment,
+  type TaskFile,
+  type InsertTaskFile,
   type ProjectTemplate,
   type InsertProjectTemplate,
   type EmailInteraction,
@@ -68,6 +77,30 @@ export interface IStorage {
   getTasksByUser(userId: string): Promise<Task[]>;
   getUpcomingTasks(): Promise<Task[]>;
   getOverdueTasks(): Promise<Task[]>;
+  getTasksByMilestone(milestoneId: number): Promise<Task[]>;
+  getTaskHierarchy(projectId: number): Promise<Task[]>;
+  getSubtasks(parentTaskId: number): Promise<Task[]>;
+
+  // Milestone operations
+  getMilestones(): Promise<Milestone[]>;
+  getMilestone(id: number): Promise<Milestone | undefined>;
+  createMilestone(milestone: InsertMilestone, userId: string): Promise<Milestone>;
+  updateMilestone(id: number, milestone: Partial<InsertMilestone>): Promise<Milestone>;
+  deleteMilestone(id: number): Promise<void>;
+  getMilestonesByProject(projectId: number): Promise<Milestone[]>;
+  getMilestonesByTemplate(templateId: number): Promise<Milestone[]>;
+
+  // Task comment operations
+  getTaskComments(taskId: number): Promise<TaskComment[]>;
+  createTaskComment(comment: InsertTaskComment, userId: string): Promise<TaskComment>;
+  updateTaskComment(commentId: number, updates: Partial<InsertTaskComment>): Promise<TaskComment>;
+  deleteTaskComment(commentId: number): Promise<void>;
+
+  // Task file operations
+  getTaskFiles(taskId: number): Promise<TaskFile[]>;
+  createTaskFile(file: InsertTaskFile, userId: string): Promise<TaskFile>;
+  updateTaskFile(fileId: number, updates: Partial<InsertTaskFile>): Promise<TaskFile>;
+  deleteTaskFile(fileId: number): Promise<void>;
 
   // Project template operations
   getProjectTemplates(): Promise<ProjectTemplate[]>;
@@ -490,6 +523,193 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(tasks.dueDate);
+  }
+
+  async getTasksByMilestone(milestoneId: number): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.milestoneId, milestoneId))
+      .orderBy(tasks.sortOrder, tasks.level, tasks.createdAt);
+  }
+
+  async getTaskHierarchy(projectId: number): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.projectId, projectId))
+      .orderBy(tasks.sortOrder, tasks.level, tasks.createdAt);
+  }
+
+  async getSubtasks(parentTaskId: number): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.parentTaskId, parentTaskId))
+      .orderBy(tasks.sortOrder, tasks.createdAt);
+  }
+
+  // Milestone operations
+  async getMilestones(): Promise<Milestone[]> {
+    return await db.select().from(milestones).orderBy(milestones.sortOrder, desc(milestones.createdAt));
+  }
+
+  async getMilestone(id: number): Promise<Milestone | undefined> {
+    const [milestone] = await db.select().from(milestones).where(eq(milestones.id, id));
+    return milestone;
+  }
+
+  async createMilestone(milestone: InsertMilestone, userId: string): Promise<Milestone> {
+    // Process date field - convert string date to Date object
+    const processedMilestone = { ...milestone };
+    if (processedMilestone.dueDate && typeof processedMilestone.dueDate === 'string' && processedMilestone.dueDate.trim()) {
+      processedMilestone.dueDate = new Date(processedMilestone.dueDate);
+    } else if (processedMilestone.dueDate === '') {
+      processedMilestone.dueDate = null;
+    }
+    
+    const milestoneData = { ...processedMilestone, createdBy: userId } as any;
+    const [newMilestone] = await db
+      .insert(milestones)
+      .values(milestoneData)
+      .returning();
+    
+    // Log activity
+    await this.createActivityLog({
+      userId,
+      action: "created_milestone",
+      entityType: "milestone",
+      entityId: newMilestone.id,
+      metadata: { milestoneTitle: newMilestone.title },
+    });
+
+    return newMilestone;
+  }
+
+  async updateMilestone(id: number, milestone: Partial<InsertMilestone>): Promise<Milestone> {
+    // Process date field - convert string date to Date object
+    const processedMilestone = { ...milestone };
+    if (processedMilestone.dueDate && typeof processedMilestone.dueDate === 'string' && processedMilestone.dueDate.trim()) {
+      processedMilestone.dueDate = new Date(processedMilestone.dueDate);
+    } else if (processedMilestone.dueDate === '') {
+      processedMilestone.dueDate = null;
+    }
+    
+    const [updatedMilestone] = await db
+      .update(milestones)
+      .set({ ...processedMilestone, updatedAt: new Date() })
+      .where(eq(milestones.id, id))
+      .returning();
+    return updatedMilestone;
+  }
+
+  async deleteMilestone(id: number): Promise<void> {
+    // First, update all tasks in this milestone to have no milestone
+    await db
+      .update(tasks)
+      .set({ milestoneId: null })
+      .where(eq(tasks.milestoneId, id));
+    
+    // Then delete the milestone
+    await db.delete(milestones).where(eq(milestones.id, id));
+  }
+
+  async getMilestonesByProject(projectId: number): Promise<Milestone[]> {
+    return await db
+      .select()
+      .from(milestones)
+      .where(eq(milestones.projectId, projectId))
+      .orderBy(milestones.sortOrder, desc(milestones.createdAt));
+  }
+
+  async getMilestonesByTemplate(templateId: number): Promise<Milestone[]> {
+    return await db
+      .select()
+      .from(milestones)
+      .where(eq(milestones.templateId, templateId))
+      .orderBy(milestones.sortOrder, desc(milestones.createdAt));
+  }
+
+  // Task comment operations
+  async getTaskComments(taskId: number): Promise<TaskComment[]> {
+    return await db
+      .select()
+      .from(taskComments)
+      .where(eq(taskComments.taskId, taskId))
+      .orderBy(desc(taskComments.createdAt));
+  }
+
+  async createTaskComment(comment: InsertTaskComment, userId: string): Promise<TaskComment> {
+    const commentData = { ...comment, userId } as any;
+    const [newComment] = await db
+      .insert(taskComments)
+      .values(commentData)
+      .returning();
+    
+    // Log activity
+    await this.createActivityLog({
+      userId,
+      action: "created_task_comment",
+      entityType: "task_comment",
+      entityId: newComment.id,
+      metadata: { taskId: newComment.taskId },
+    });
+
+    return newComment;
+  }
+
+  async updateTaskComment(commentId: number, updates: Partial<InsertTaskComment>): Promise<TaskComment> {
+    const [updatedComment] = await db
+      .update(taskComments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(taskComments.id, commentId))
+      .returning();
+    return updatedComment;
+  }
+
+  async deleteTaskComment(commentId: number): Promise<void> {
+    await db.delete(taskComments).where(eq(taskComments.id, commentId));
+  }
+
+  // Task file operations
+  async getTaskFiles(taskId: number): Promise<TaskFile[]> {
+    return await db
+      .select()
+      .from(taskFiles)
+      .where(eq(taskFiles.taskId, taskId))
+      .orderBy(desc(taskFiles.createdAt));
+  }
+
+  async createTaskFile(file: InsertTaskFile, userId: string): Promise<TaskFile> {
+    const fileData = { ...file, uploadedBy: userId } as any;
+    const [newFile] = await db
+      .insert(taskFiles)
+      .values(fileData)
+      .returning();
+    
+    // Log activity
+    await this.createActivityLog({
+      userId,
+      action: "uploaded_task_file",
+      entityType: "task_file",
+      entityId: newFile.id,
+      metadata: { taskId: newFile.taskId, fileName: newFile.originalName },
+    });
+
+    return newFile;
+  }
+
+  async updateTaskFile(fileId: number, updates: Partial<InsertTaskFile>): Promise<TaskFile> {
+    const [updatedFile] = await db
+      .update(taskFiles)
+      .set(updates)
+      .where(eq(taskFiles.id, fileId))
+      .returning();
+    return updatedFile;
+  }
+
+  async deleteTaskFile(fileId: number): Promise<void> {
+    await db.delete(taskFiles).where(eq(taskFiles.id, fileId));
   }
 
   // Project template operations
