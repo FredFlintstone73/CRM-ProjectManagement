@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Toggle } from "@/components/ui/toggle";
 
 import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays, CheckCircle, Circle } from "lucide-react";
 import { format } from "date-fns";
@@ -31,6 +32,7 @@ export default function Tasks() {
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
   const [sortBy, setSortBy] = useState("priority");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('all_tasks');
   const [completionFilter, setCompletionFilter] = useState<'all' | 'completed'>('all');
   const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_month' | 'next_four_months' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
@@ -57,6 +59,11 @@ export default function Tasks() {
 
   const { data: projects } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
+    enabled: isAuthenticated,
+  });
+
+  const { data: contacts } = useQuery({
+    queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
   });
 
@@ -170,6 +177,15 @@ export default function Tasks() {
     }
   };
 
+  const getCurrentUserContactId = () => {
+    if (!user || !contacts) return null;
+    const userContact = contacts.find((contact: any) => 
+      contact.personalEmail === user.email || 
+      contact.workEmail === user.email
+    );
+    return userContact?.id || null;
+  };
+
   const filteredAndSortedTasks = tasks?.filter((task) => {
     const matchesSearch = searchQuery === "" ||
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -178,6 +194,15 @@ export default function Tasks() {
     const matchesCompletion = 
       completionFilter === 'all' || 
       (completionFilter === 'completed' && task.status === 'completed');
+
+    const matchesTaskFilter = () => {
+      if (taskFilter === 'all_tasks') return true;
+      if (taskFilter === 'my_tasks') {
+        const currentUserContactId = getCurrentUserContactId();
+        return currentUserContactId && task.assignedTo === currentUserContactId;
+      }
+      return true;
+    };
 
     const matchesDueDate = () => {
       if (dueDateFilter === 'all') return true;
@@ -190,7 +215,7 @@ export default function Tasks() {
       return taskDueDate >= dateRange.start && taskDueDate <= dateRange.end;
     };
     
-    return matchesSearch && matchesCompletion && matchesDueDate();
+    return matchesSearch && matchesCompletion && matchesTaskFilter() && matchesDueDate();
   }).sort((a, b) => {
     switch (sortBy) {
       case "priority":
@@ -202,6 +227,14 @@ export default function Tasks() {
         return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
       case "title":
         return a.title.localeCompare(b.title);
+      case "assignee":
+        const getAssigneeName = (taskId: number) => {
+          const task = tasks?.find(t => t.id === taskId);
+          if (!task?.assignedTo || !contacts) return 'Unassigned';
+          const assignee = contacts.find((c: any) => c.id === task.assignedTo);
+          return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unassigned';
+        };
+        return getAssigneeName(a.id).localeCompare(getAssigneeName(b.id));
       default:
         return 0;
     }
@@ -303,6 +336,7 @@ export default function Tasks() {
                 <SelectItem value="priority">Sort by Priority</SelectItem>
                 <SelectItem value="dueDate">Sort by Due Date</SelectItem>
                 <SelectItem value="title">Sort by Title</SelectItem>
+                <SelectItem value="assignee">Sort by Assignee</SelectItem>
               </SelectContent>
             </Select>
 
@@ -342,84 +376,102 @@ export default function Tasks() {
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-col gap-4 mb-6">
-            {/* Completion Filter */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium">Completion Status:</span>
-              <RadioGroup
-                value={completionFilter}
-                onValueChange={(value) => setCompletionFilter(value as 'all' | 'completed')}
-                className="flex gap-6"
+          {/* Task Assignment Toggles and Filters */}
+          <div className="flex flex-wrap items-center gap-4 justify-between mb-6">
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Show:</span>
+              <Toggle
+                pressed={taskFilter === 'my_tasks'}
+                onPressedChange={() => setTaskFilter(taskFilter === 'my_tasks' ? 'all_tasks' : 'my_tasks')}
+                variant="outline"
+                className="data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800"
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="all" id="all" />
-                  <Label htmlFor="all">All Tasks</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="completed" id="completed" />
-                  <Label htmlFor="completed">Completed</Label>
-                </div>
-              </RadioGroup>
+                My Tasks
+              </Toggle>
+              <Toggle
+                pressed={taskFilter === 'all_tasks'}
+                onPressedChange={() => setTaskFilter(taskFilter === 'all_tasks' ? 'my_tasks' : 'all_tasks')}
+                variant="outline"
+                className="data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800"
+              >
+                All Tasks
+              </Toggle>
+            </div>
+
+            {/* Completion Filter */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Status:</span>
+              <Toggle
+                pressed={completionFilter === 'all'}
+                onPressedChange={() => setCompletionFilter(completionFilter === 'all' ? 'completed' : 'all')}
+                variant="outline"
+                className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800"
+              >
+                All
+              </Toggle>
+              <Toggle
+                pressed={completionFilter === 'completed'}
+                onPressedChange={() => setCompletionFilter(completionFilter === 'completed' ? 'all' : 'completed')}
+                variant="outline"
+                className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800"
+              >
+                Completed
+              </Toggle>
             </div>
 
             {/* Due Date Filter */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <span className="text-sm font-medium">Due Date:</span>
-              <div className="flex flex-col sm:flex-row gap-2 flex-1">
-                <Select value={dueDateFilter} onValueChange={(value) => setDueDateFilter(value as typeof dueDateFilter)}>
-                  <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="Filter by due date" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Dates</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="this_week">This Week</SelectItem>
-                    <SelectItem value="next_two_weeks">Next Two Weeks</SelectItem>
-                    <SelectItem value="next_month">Next Month</SelectItem>
-                    <SelectItem value="next_four_months">Next Four Months</SelectItem>
-                    <SelectItem value="custom">Custom Date Range</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {dueDateFilter === 'custom' && (
-                  <div className="flex gap-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-32">
-                          <CalendarDays className="mr-2 h-4 w-4" />
-                          {customStartDate ? format(customStartDate, "MMM d") : "Start Date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={customStartDate}
-                          onSelect={setCustomStartDate}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-32">
-                          <CalendarDays className="mr-2 h-4 w-4" />
-                          {customEndDate ? format(customEndDate, "MMM d") : "End Date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={customEndDate}
-                          onSelect={setCustomEndDate}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                )}
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Due Date:</span>
+              <Select value={dueDateFilter} onValueChange={(value) => setDueDateFilter(value as typeof dueDateFilter)}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by due date" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Dates</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="this_week">This Week</SelectItem>
+                  <SelectItem value="next_two_weeks">Next Two Weeks</SelectItem>
+                  <SelectItem value="next_month">Next Month</SelectItem>
+                  <SelectItem value="next_four_months">Next Four Months</SelectItem>
+                  <SelectItem value="custom">Custom Date Range</SelectItem>
+                </SelectContent>
+              </Select>
+              {dueDateFilter === 'custom' && (
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32">
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        {customStartDate ? format(customStartDate, "MMM d") : "Start Date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={customStartDate}
+                        onSelect={setCustomStartDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32">
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        {customEndDate ? format(customEndDate, "MMM d") : "End Date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={customEndDate}
+                        onSelect={setCustomEndDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
             </div>
           </div>
 

@@ -611,13 +611,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskData = insertTaskSchema.partial().parse(req.body);
       
       // Convert assignedTo from string to number if provided
+      let assignedTo = null;
+      if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
+        if (taskData.assignedTo.startsWith("me_")) {
+          assignedTo = null; // "Assign to me" - we'll handle this differently
+        } else if (taskData.assignedTo.startsWith("team_")) {
+          assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
+        } else {
+          assignedTo = parseInt(taskData.assignedTo);
+        }
+      }
+      
       // Convert priority to number if provided
+      let priority = 25;
+      if (taskData.priority !== undefined && taskData.priority !== null) {
+        const priorityNum = typeof taskData.priority === 'string' ? parseInt(taskData.priority) : taskData.priority;
+        priority = isNaN(priorityNum) ? 25 : priorityNum;
+      }
+      
       const processedTaskData = {
         ...taskData,
-        assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null,
-        priority: taskData.priority !== null && taskData.priority !== undefined ? 
-          (typeof taskData.priority === 'string' ? parseInt(taskData.priority) : taskData.priority) : 
-          25, // Default priority
+        assignedTo: assignedTo,
+        priority: priority,
       };
       
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
@@ -650,17 +665,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Convert assignedTo from string to number if provided and present
+      let assignedTo = null;
+      if (taskData.assignedTo !== undefined) {
+        if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
+          if (taskData.assignedTo.startsWith("me_")) {
+            assignedTo = null; // "Assign to me" - we'll handle this differently
+          } else if (taskData.assignedTo.startsWith("team_")) {
+            assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
+          } else {
+            assignedTo = safeParseInt(taskData.assignedTo);
+          }
+        }
+      }
+      
       // Convert priority to number if provided
+      let priority = 25;
+      if (taskData.priority !== undefined && taskData.priority !== null) {
+        const priorityNum = safeParseInt(taskData.priority);
+        priority = priorityNum || 25;
+      }
+      
       const processedTaskData = {
         ...taskData,
-        ...(taskData.assignedTo !== undefined && { 
-          assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? 
-            safeParseInt(taskData.assignedTo) : null 
-        }),
-        ...(taskData.priority !== undefined && { 
-          priority: taskData.priority !== null && taskData.priority !== undefined ? 
-            safeParseInt(taskData.priority) || 25 : 25 // Default priority
-        }),
+        ...(taskData.assignedTo !== undefined && { assignedTo }),
+        ...(taskData.priority !== undefined && { priority }),
         ...(taskData.milestoneId !== undefined && {
           milestoneId: safeParseInt(taskData.milestoneId)
         }),
