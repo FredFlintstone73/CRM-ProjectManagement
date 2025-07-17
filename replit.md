@@ -269,6 +269,20 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Clean Task Display**: Removed task descriptions from task rows for cleaner, more focused interface
 - **Progress Tracking**: Task completion toggles work properly with real-time progress bar updates
 
+### CSR Project Template Creation (July 17, 2025)
+- **Template Database Integration**: Created comprehensive CSR project template based on actual Lynn & Ted Smith project
+- **Hierarchical Structure**: Preserved Planning Phase and Execution Phase sections with proper task relationships
+- **Task Organization**: Maintained 3-level task hierarchy with parent-child relationships
+- **Template Availability**: Template accessible through Templates section for creating new CSR projects
+- **Milestone Integration**: Created template milestones and tasks with proper database relationships
+
+### Project Date Handling Fix (July 17, 2025)
+- **Timezone Issue Resolution**: Fixed date picker showing one day earlier than selected date
+- **Proper UTC Conversion**: Added correct timezone conversion between database (UTC) and date input (local time)
+- **Date Display Accuracy**: Project due dates now display exactly as selected without timezone offset
+- **Data Integrity**: Maintained existing project dates while fixing future date operations
+- **Input Field Correction**: Date input field now shows correct local date when editing project due dates
+
 ### Project Due Date Formula Fix (July 14, 2025)
 - **Task Offset Storage**: Fixed task creation to store original meeting date offsets in task descriptions
 - **Correct Negative Offsets**: Tasks now properly use negative day offsets (like -64, -63, -61) so tasks occur BEFORE meeting dates
