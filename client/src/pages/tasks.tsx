@@ -23,7 +23,7 @@ export default function Tasks() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedPriority, setSelectedPriority] = useState("all");
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
   const [sortBy, setSortBy] = useState("priority");
@@ -121,9 +121,8 @@ export default function Tasks() {
       task.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = selectedStatus === "all" || task.status === selectedStatus;
-    const matchesPriority = selectedPriority === "all" || task.priority === selectedPriority;
     
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus;
   }).sort((a, b) => {
     switch (sortBy) {
       case "priority":
@@ -239,18 +238,7 @@ export default function Tasks() {
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priorities</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-              </SelectContent>
-            </Select>
+
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
