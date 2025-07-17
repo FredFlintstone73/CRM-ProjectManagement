@@ -46,7 +46,6 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       projectId: projectId,
       assignedTo: task?.assignedTo ? `team_${task.assignedTo}` : '',
       priority: task?.priority || 25,
-      status: task?.status || 'todo',
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
     },
   });

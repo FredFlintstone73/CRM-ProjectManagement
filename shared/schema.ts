@@ -691,6 +691,8 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   dueDate: z.string().optional(),
   // Handle assignment field as string (will be converted server-side)
   assignedTo: z.string().optional(),
+  // Handle priority field as string that will be converted to number
+  priority: z.union([z.string(), z.number()]).optional(),
 });
 
 export const insertProjectTemplateSchema = createInsertSchema(projectTemplates).omit({
