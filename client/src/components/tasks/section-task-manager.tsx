@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,11 +73,32 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const [editingSection, setEditingSection] = useState<EditingSectionState | null>(null);
   const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
 
-  // Mock sections for now - will be replaced with real data
-  const [sections, setSections] = useState<TaskSection[]>([
-    { id: "section-1", title: "Planning Phase", tasks: [] },
-    { id: "section-2", title: "Execution Phase", tasks: [] },
-  ]);
+  // Get sections from localStorage or use defaults
+  const getSavedSections = () => {
+    try {
+      const saved = localStorage.getItem(`project-${projectId}-sections`);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (error) {
+      console.error('Error loading saved sections:', error);
+    }
+    return [
+      { id: "section-1", title: "Planning Phase", tasks: [] },
+      { id: "section-2", title: "Execution Phase", tasks: [] },
+    ];
+  };
+
+  const [sections, setSections] = useState<TaskSection[]>(getSavedSections);
+
+  // Save sections to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(`project-${projectId}-sections`, JSON.stringify(sections));
+    } catch (error) {
+      console.error('Error saving sections:', error);
+    }
+  }, [sections, projectId]);
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
