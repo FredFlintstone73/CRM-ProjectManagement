@@ -168,8 +168,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const toggleTaskCompletion = useMutation({
     mutationFn: (task: Task) => 
       apiRequest('PATCH', `/api/tasks/${task.id}`, { 
-        completed: !task.completed,
-        completedAt: !task.completed ? new Date().toISOString() : null,
+        status: task.status === 'completed' ? 'todo' : 'completed',
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
@@ -211,11 +210,14 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     const sectionTitle = sectionMatch ? sectionMatch[1] : '';
     const sectionId = sections.find(s => s.title === sectionTitle)?.id || "section-1";
     
+    // Convert assignedTo to correct format for form
+    const assignedToValue = task.assignedTo ? task.assignedTo.toString() : "";
+    
     setTaskForm({
       title: task.title,
       description: cleanDescription,
       dueDate: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "",
-      assignedTo: task.assignedTo || "",
+      assignedTo: assignedToValue,
       parentTaskId: task.parentTaskId,
       sectionId: sectionId,
     });
@@ -235,12 +237,15 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     const currentSection = sections.find(s => s.id === taskForm.sectionId);
     const sectionPrefix = currentSection ? `[${currentSection.title}] ` : '';
     
+    // Convert assignedTo to number or null
+    const assignedToNumber = taskForm.assignedTo ? parseInt(taskForm.assignedTo) : null;
+    
     // Prepare task data with proper type conversions
     const taskData = {
       ...taskForm,
       description: sectionPrefix + (taskForm.description || ''), // Embed section in description
       parentTaskId: taskForm.parentTaskId || null,
-      assignedTo: taskForm.assignedTo || null, // Keep as string to match schema
+      assignedTo: assignedToNumber, // Convert to number as expected by schema
       projectId: projectId,
       milestoneId: null, // We'll use null for now since we're using sections
       priority: 'medium', // Default priority
@@ -333,7 +338,8 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   const renderTaskNode = (task: TaskNode, level: number = 0) => {
     const hasChildren = task.children && task.children.length > 0;
-    const assignedUser = teamMembers.find(member => member.id.toString() === task.assignedTo);
+    const assignedUser = teamMembers.find(member => member.id === task.assignedTo);
+    const isCompleted = task.status === 'completed';
     
     // Clean up description by removing section prefix
     const cleanDescription = task.description ? 
@@ -343,7 +349,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       <div key={task.id} className="space-y-2">
         <div 
           className={`flex items-center gap-2 p-3 rounded-lg border ${
-            task.completed ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
+            isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
           }`}
           style={{ marginLeft: `${level * 24}px` }}
         >
@@ -366,7 +372,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
             className="h-6 w-6 p-0"
             onClick={() => toggleTaskCompletion.mutate(task)}
           >
-            {task.completed ? (
+            {isCompleted ? (
               <CheckCircle className="h-4 w-4 text-green-600" />
             ) : (
               <Circle className="h-4 w-4 text-gray-400" />
@@ -375,7 +381,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+              <span className={`font-medium ${isCompleted ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                 {task.title}
               </span>
               {task.dueDate && (
@@ -451,11 +457,32 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         {sections.map(section => {
           const sectionTasks = buildTaskHierarchy(section.id);
           
+          // Calculate task counts including all subtasks
+          const getAllTasks = (tasks: TaskNode[]): TaskNode[] => {
+            const allTasks: TaskNode[] = [];
+            tasks.forEach(task => {
+              allTasks.push(task);
+              if (task.children && task.children.length > 0) {
+                allTasks.push(...getAllTasks(task.children));
+              }
+            });
+            return allTasks;
+          };
+          
+          const allSectionTasks = getAllTasks(sectionTasks);
+          const totalTasks = allSectionTasks.length;
+          const completedTasks = allSectionTasks.filter(task => task.status === 'completed').length;
+          
           return (
             <Card key={section.id}>
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">{section.title}</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <CardTitle className="text-lg">{section.title}</CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      {completedTasks}/{totalTasks} completed
+                    </Badge>
+                  </div>
                   <div className="flex gap-2">
                     <Button 
                       variant="ghost" 
@@ -501,12 +528,15 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
       {/* Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" aria-describedby="task-dialog-description">
           <DialogHeader>
             <DialogTitle>
               {isEditMode ? 'Edit Task' : 'Add New Task'}
             </DialogTitle>
           </DialogHeader>
+          <div id="task-dialog-description" className="sr-only">
+            {isEditMode ? 'Edit the task details below' : 'Fill in the task details below'}
+          </div>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Title</label>
@@ -583,10 +613,13 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
       {/* Section Dialog */}
       <Dialog open={isSectionDialogOpen} onOpenChange={setIsSectionDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" aria-describedby="section-dialog-description">
           <DialogHeader>
             <DialogTitle>{editingSection ? "Edit Section" : "Add New Section"}</DialogTitle>
           </DialogHeader>
+          <div id="section-dialog-description" className="sr-only">
+            {editingSection ? 'Edit the section title below' : 'Enter a title for the new section'}
+          </div>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Section Title</label>
