@@ -1066,19 +1066,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sortOrder: section.sortOrder || 0
           }, userId);
           
-          // Create tasks for each section
+          // Create tasks for each section with proper hierarchy
           if (section.tasks && section.tasks.length > 0) {
-            for (const task of section.tasks) {
-              await storage.createTask({
+            // Create a map to track task IDs by their template ID
+            const taskIdMap = new Map<string, number>();
+            
+            // Sort tasks by level to create parent tasks first
+            const sortedTasks = section.tasks.sort((a, b) => (a.level || 0) - (b.level || 0));
+            
+            for (const task of sortedTasks) {
+              // Find the parent task ID if this task has a parent
+              const parentTaskId = task.parentId ? taskIdMap.get(task.parentId) : null;
+              
+              const createdTask = await storage.createTask({
                 title: task.title,
                 description: task.description,
                 milestoneId: milestone.id,
                 priority: task.priority,
                 level: task.level || 0,
-                parentTaskId: task.parentId ? null : undefined, // Will handle hierarchy in a second pass
+                parentTaskId: parentTaskId || null,
                 sortOrder: task.sortOrder || 0,
                 dueDate: task.daysFromMeeting ? new Date(Date.now() + (task.daysFromMeeting * 24 * 60 * 60 * 1000)) : undefined
               }, userId);
+              
+              // Store the mapping between template task ID and actual task ID
+              taskIdMap.set(task.id, createdTask.id);
             }
           }
         }
