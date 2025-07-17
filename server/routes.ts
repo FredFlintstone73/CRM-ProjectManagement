@@ -570,9 +570,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       
       // Convert assignedTo from string to number if provided
+      // Convert priority to number if provided
       const processedTaskData = {
         ...taskData,
         assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null,
+        priority: taskData.priority ? parseInt(taskData.priority.toString()) : 25,
       };
       
       const task = await storage.createTask(processedTaskData, userId);
@@ -588,9 +590,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskData = insertTaskSchema.partial().parse(req.body);
       
       // Convert assignedTo from string to number if provided
+      // Convert priority to number if provided
       const processedTaskData = {
         ...taskData,
         assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null,
+        priority: taskData.priority ? parseInt(taskData.priority.toString()) : taskData.priority,
       };
       
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
@@ -606,10 +610,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskData = insertTaskSchema.partial().parse(req.body);
       
       // Convert assignedTo from string to number if provided and present
+      // Convert priority to number if provided
       const processedTaskData = {
         ...taskData,
         ...(taskData.assignedTo !== undefined && { 
           assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null 
+        }),
+        ...(taskData.priority !== undefined && { 
+          priority: taskData.priority ? parseInt(taskData.priority.toString()) : taskData.priority 
         }),
       };
       
