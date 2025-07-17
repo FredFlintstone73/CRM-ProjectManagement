@@ -340,3 +340,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Base64 Storage**: Images converted to base64 format and stored directly in database
 - **Real-time Updates**: Profile images display immediately on contacts page after upload with proper cache invalidation
 - **Team Member Photos**: Team members' profile pictures now properly display on contacts page after uploading through contact detail pages
+
+### Contact Information Priority Display (July 17, 2025)
+- **Email Priority Logic**: Contacts page now displays personal email first, falls back to work email if personal is empty
+- **Phone Priority Logic**: Contacts page now displays cell phone first, falls back to work phone if cell is empty
+- **Consistent Across Views**: Priority logic applied to both card view and table view for consistent user experience
+- **Clean Display**: Only shows available contact information, no empty fields displayed
