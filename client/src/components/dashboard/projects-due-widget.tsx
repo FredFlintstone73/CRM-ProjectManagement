@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, FolderOpen, User } from "lucide-react";
-import { format, addDays, addWeeks, addMonths, startOfDay, endOfDay } from "date-fns";
+import { format, addDays, addWeeks, addMonths, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
 import type { Project, Contact } from "@shared/schema";
 
 interface DateRange {
@@ -24,13 +24,13 @@ const getDateRanges = (): Record<string, DateRange> => {
 
   return {
     "next-1-week": {
-      start: today,
-      end: endOfDay(addWeeks(today, 1)),
+      start: startOfWeek(today, { weekStartsOn: 1 }), // Monday = 1
+      end: endOfWeek(today, { weekStartsOn: 1 }),
       label: "This Week",
     },
     "next-2-weeks": {
-      start: today,
-      end: endOfDay(addWeeks(today, 2)),
+      start: startOfWeek(today, { weekStartsOn: 1 }), // Monday = 1
+      end: endOfWeek(addWeeks(today, 1), { weekStartsOn: 1 }),
       label: "This 2 Weeks",
     },
     "next-1-month": {

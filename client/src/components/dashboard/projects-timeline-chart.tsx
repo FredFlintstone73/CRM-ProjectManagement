@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Calendar, BarChart3, CalendarDays } from "lucide-react";
-import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth } from "date-fns";
+import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks } from "date-fns";
 import type { Project } from "@shared/schema";
 
 interface TimelineData {
@@ -86,13 +86,27 @@ export default function ProjectsTimelineChart({
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ['/api/dashboard/projects-due', selectedPeriod, customStartDate, customEndDate],
     queryFn: async () => {
-      const months = getPeriodMonths(selectedPeriod);
-      const startDate = months[0];
-      const endDate = months[months.length - 1];
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date;
+      
+      // Use Monday-based weeks for "This Week" and "This 2 Weeks"
+      if (selectedPeriod === "next-1-week") {
+        startDate = startOfWeek(now, { weekStartsOn: 1 });
+        endDate = endOfWeek(now, { weekStartsOn: 1 });
+      } else if (selectedPeriod === "next-2-weeks") {
+        startDate = startOfWeek(now, { weekStartsOn: 1 });
+        endDate = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+      } else {
+        // For other periods, use the existing month-based logic
+        const months = getPeriodMonths(selectedPeriod);
+        startDate = months[0];
+        endDate = endOfMonth(months[months.length - 1]);
+      }
       
       const params = new URLSearchParams({
         startDate: startDate.toISOString(),
-        endDate: endOfMonth(endDate).toISOString(),
+        endDate: endDate.toISOString(),
       });
       
       const response = await fetch(`/api/dashboard/projects-due?${params}`);
