@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Calendar, BarChart3, CalendarDays } from "lucide-react";
-import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks } from "date-fns";
+import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks, eachDayOfInterval, isSameDay } from "date-fns";
 import type { Project } from "@shared/schema";
 
 interface TimelineData {
@@ -117,27 +117,66 @@ export default function ProjectsTimelineChart({
     },
   });
 
-  const chartData: TimelineData[] = getPeriodMonths(selectedPeriod).map((month, index) => {
-    const monthProjects = projects?.filter(project => 
-      project.dueDate && isSameMonth(new Date(project.dueDate), month)
-    ) || [];
+  const getChartData = (): TimelineData[] => {
+    const now = new Date();
     
-    const projectCounts = {
-      frm: monthProjects.filter(p => p.projectType === 'frm').length,
-      im: monthProjects.filter(p => p.projectType === 'im').length,
-      ipu: monthProjects.filter(p => p.projectType === 'ipu').length,
-      csr: monthProjects.filter(p => p.projectType === 'csr').length,
-      gpo: monthProjects.filter(p => p.projectType === 'gpo').length,
-      tar: monthProjects.filter(p => p.projectType === 'tar').length,
-    };
+    // For "This Week", show Monday through Friday
+    if (selectedPeriod === "next-1-week") {
+      const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+      const weekDays = eachDayOfInterval({
+        start: weekStart,
+        end: addWeeks(weekStart, 1) // Get all 7 days but we'll filter to Mon-Fri
+      }).slice(0, 5); // Only Monday through Friday
+      
+      return weekDays.map((day) => {
+        const dayProjects = projects?.filter(project => 
+          project.dueDate && isSameDay(new Date(project.dueDate), day)
+        ) || [];
+        
+        const projectCounts = {
+          frm: dayProjects.filter(p => p.projectType === 'frm').length,
+          im: dayProjects.filter(p => p.projectType === 'im').length,
+          ipu: dayProjects.filter(p => p.projectType === 'ipu').length,
+          csr: dayProjects.filter(p => p.projectType === 'csr').length,
+          gpo: dayProjects.filter(p => p.projectType === 'gpo').length,
+          tar: dayProjects.filter(p => p.projectType === 'tar').length,
+        };
+        
+        return {
+          period: format(day, 'EEE'), // Mon, Tue, Wed, Thu, Fri
+          ...projectCounts,
+          total: dayProjects.length,
+          projects: dayProjects,
+        };
+      });
+    }
     
-    return {
-      period: format(month, 'MMM yyyy'),
-      ...projectCounts,
-      total: monthProjects.length,
-      projects: monthProjects,
-    };
-  });
+    // For other periods, use the existing month-based logic
+    const months = getPeriodMonths(selectedPeriod);
+    return months.map((month, index) => {
+      const monthProjects = projects?.filter(project => 
+        project.dueDate && isSameMonth(new Date(project.dueDate), month)
+      ) || [];
+      
+      const projectCounts = {
+        frm: monthProjects.filter(p => p.projectType === 'frm').length,
+        im: monthProjects.filter(p => p.projectType === 'im').length,
+        ipu: monthProjects.filter(p => p.projectType === 'ipu').length,
+        csr: monthProjects.filter(p => p.projectType === 'csr').length,
+        gpo: monthProjects.filter(p => p.projectType === 'gpo').length,
+        tar: monthProjects.filter(p => p.projectType === 'tar').length,
+      };
+      
+      return {
+        period: format(month, 'MMM yyyy'),
+        ...projectCounts,
+        total: monthProjects.length,
+        projects: monthProjects,
+      };
+    });
+  };
+
+  const chartData = getChartData();
 
   const maxCount = Math.max(...chartData.map(d => d.total), 1);
 
