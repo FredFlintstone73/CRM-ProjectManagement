@@ -370,3 +370,5 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Clean Card Design**: Professional card layout with progress bar and summary information
 - **Priority Number Positioning**: Moved priority numbers to appear between completion radio button and task name in both grid and row views
 - **Edit Task Assignment Fix**: Fixed task form to show "Assign to Me" when editing tasks assigned to current user instead of showing blank dropdown
+- **In Progress Status Filter**: Added "In Progress" button to status section to show tasks that are not yet completed
+- **Date-Filtered Progress Bar**: Progress bar now reflects completion percentage based on selected due date range, providing targeted progress tracking

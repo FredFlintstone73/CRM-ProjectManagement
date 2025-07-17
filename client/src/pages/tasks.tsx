@@ -34,7 +34,7 @@ export default function Tasks() {
   const [sortBy, setSortBy] = useState("priority");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('all_tasks');
-  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed'>('all');
+  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress'>('all');
   const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_month' | 'next_four_months' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
@@ -194,7 +194,8 @@ export default function Tasks() {
 
     const matchesCompletion = 
       completionFilter === 'all' || 
-      (completionFilter === 'completed' && task.status === 'completed');
+      (completionFilter === 'completed' && task.status === 'completed') ||
+      (completionFilter === 'in_progress' && task.status !== 'completed');
 
     const matchesTaskFilter = () => {
       if (taskFilter === 'all_tasks') return true;
@@ -241,14 +242,28 @@ export default function Tasks() {
     }
   }) || [];
 
-  // Calculate progress for tasks assigned to current user only
+  // Calculate progress for tasks assigned to current user only, considering due date filter
   const getCurrentUserTaskProgress = () => {
     if (!tasks || !user || !contacts) return { completed: 0, total: 0, percentage: 0 };
     
     const currentUserContactId = getCurrentUserContactId();
     if (!currentUserContactId) return { completed: 0, total: 0, percentage: 0 };
     
-    const myTasks = tasks.filter(task => task.assignedTo === currentUserContactId);
+    // Filter tasks by current user assignment
+    let myTasks = tasks.filter(task => task.assignedTo === currentUserContactId);
+    
+    // Apply due date filter if not 'all'
+    if (dueDateFilter !== 'all') {
+      const dateRange = getDateRangeForFilter(dueDateFilter);
+      if (dateRange) {
+        myTasks = myTasks.filter(task => {
+          if (!task.dueDate) return false;
+          const taskDueDate = new Date(task.dueDate);
+          return taskDueDate >= dateRange.start && taskDueDate <= dateRange.end;
+        });
+      }
+    }
+    
     const completedTasks = myTasks.filter(task => task.status === 'completed');
     
     return {
@@ -447,15 +462,23 @@ export default function Tasks() {
               <span className="text-sm font-medium text-gray-700">Status:</span>
               <Toggle
                 pressed={completionFilter === 'all'}
-                onPressedChange={() => setCompletionFilter(completionFilter === 'all' ? 'completed' : 'all')}
+                onPressedChange={() => setCompletionFilter('all')}
                 variant="outline"
                 className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800"
               >
                 All
               </Toggle>
               <Toggle
+                pressed={completionFilter === 'in_progress'}
+                onPressedChange={() => setCompletionFilter('in_progress')}
+                variant="outline"
+                className="data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800"
+              >
+                In Progress
+              </Toggle>
+              <Toggle
                 pressed={completionFilter === 'completed'}
-                onPressedChange={() => setCompletionFilter(completionFilter === 'completed' ? 'all' : 'completed')}
+                onPressedChange={() => setCompletionFilter('completed')}
                 variant="outline"
                 className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800"
               >
