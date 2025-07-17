@@ -11,8 +11,7 @@ import { format } from "date-fns";
 import { useState } from "react";
 import TaskForm from "@/components/tasks/task-form";
 import ProjectForm from "@/components/projects/project-form";
-// import { HierarchicalTaskManager } from "@/components/tasks/hierarchical-task-manager";
-// import { MilestoneManager } from "@/components/projects/milestone-manager";
+import { SectionTaskManager } from "@/components/tasks/section-task-manager";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
@@ -480,42 +479,13 @@ export default function ProjectDetail() {
         </CardContent>
       </Card>
 
-      {/* Project Management Tabs */}
-      <Tabs defaultValue="milestones" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="milestones" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Milestones
-          </TabsTrigger>
-          <TabsTrigger value="hierarchical" className="flex items-center gap-2">
-            <GitBranch className="w-4 h-4" />
-            Hierarchical Tasks
-          </TabsTrigger>
-          <TabsTrigger value="legacy" className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Legacy Tasks
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="milestones" className="mt-4">
-          <div className="p-6">
-            <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Milestone Management</h3>
-              <p className="text-gray-600">Milestone management functionality is coming soon!</p>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="hierarchical" className="mt-4">
-          <div className="p-6">
-            <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Hierarchical Task Management</h3>
-              <p className="text-gray-600">Hierarchical task management functionality is coming soon!</p>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="legacy" className="mt-4">
+      {/* Section Task Management */}
+      <div className="mt-6">
+        <SectionTaskManager projectId={project.id} />
+      </div>
+      
+      {/* Legacy Tasks Section */}
+      <div className="mt-8">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -606,8 +576,7 @@ export default function ProjectDetail() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
