@@ -347,7 +347,7 @@ export default function TemplateDetail() {
                       <Users className="w-4 h-4 text-purple-600" />
                     </div>
                     <div>
-                      <p className="font-medium">{hierarchicalTasks.length}</p>
+                      <p className="font-medium">{milestones.length}</p>
                       <p className="text-sm text-gray-500">Main Milestones</p>
                     </div>
                   </div>
