@@ -662,6 +662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskData = insertTaskSchema.partial().parse(req.body);
       
       console.log('Raw task data:', taskData);
+      console.log('Current user:', req.user);
       
       // Helper function to safely convert to integer
       const safeParseInt = (value: any): number | null => {
@@ -685,11 +686,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (taskData.assignedTo.startsWith("me_")) {
             // Find the current user's contact ID from the contacts table
             const userEmail = req.user.email;
+            console.log('Looking for user email:', userEmail);
             const userContacts = await storage.getContacts();
+            console.log('Available contacts:', userContacts.map(c => ({ id: c.id, personal: c.personalEmail, work: c.workEmail })));
             const userContact = userContacts.find(contact => 
               contact.personalEmail === userEmail || 
               contact.workEmail === userEmail
             );
+            console.log('Found user contact:', userContact);
             assignedTo = userContact ? userContact.id : null;
           } else if (taskData.assignedTo.startsWith("team_")) {
             assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
