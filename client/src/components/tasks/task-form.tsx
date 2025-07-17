@@ -90,16 +90,36 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   return (
     <div className="space-y-4">
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="title">Task Title</Label>
-          <Input
-            id="title"
-            {...form.register('title')}
-            placeholder="Enter task title"
-          />
-          {form.formState.errors.title && (
-            <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
-          )}
+        {/* Task Title and Priority side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Task Title</Label>
+            <Input
+              id="title"
+              {...form.register('title')}
+              placeholder="Enter task title"
+            />
+            {form.formState.errors.title && (
+              <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="priority">Priority (1-50)</Label>
+            <Select
+              value={String(form.watch('priority') || 25)}
+              onValueChange={(value) => form.setValue('priority', parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 50 }, (_, i) => i + 1).map(num => (
+                  <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -115,72 +135,58 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="assignedTo">Assign To</Label>
-          <Select
-            value={form.watch('assignedTo') || 'unassigned'}
-            onValueChange={(value) => form.setValue('assignedTo', value === 'unassigned' ? '' : value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select assignee" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
-              {user && (
-                <SelectItem value={`me_${user.id}`}>
-                  Assign to Me ({user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})
-                </SelectItem>
-              )}
-              {teamMembers.map((member) => (
-                <SelectItem key={member.id} value={`team_${member.id}`}>
-                  {member.firstName} {member.lastName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="priority">Priority (1-50)</Label>
-          <Select
-            value={String(form.watch('priority') || 25)}
-            onValueChange={(value) => form.setValue('priority', parseInt(value))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select priority" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 50 }, (_, i) => i + 1).map(num => (
-                <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Due Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !dueDate && "text-muted-foreground"
+        {/* Assigned To and Due Date side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="assignedTo">Assign To</Label>
+            <Select
+              value={form.watch('assignedTo') || 'unassigned'}
+              onValueChange={(value) => form.setValue('assignedTo', value === 'unassigned' ? '' : value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {user && (
+                  <SelectItem value={`me_${user.id}`}>
+                    Assign to Me ({user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})
+                  </SelectItem>
                 )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dueDate ? format(dueDate, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={dueDate}
-                onSelect={setDueDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+                {teamMembers.map((member) => (
+                  <SelectItem key={member.id} value={`team_${member.id}`}>
+                    {member.firstName} {member.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Due Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         <div className="flex justify-end space-x-2">

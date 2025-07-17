@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Plus, Calendar, User, AlertCircle } from "lucide-react";
+import { Search, Plus, Calendar, User, AlertCircle, Grid, List } from "lucide-react";
 import TaskForm from "@/components/tasks/task-form";
 import type { Task, Project, User as UserType } from "@shared/schema";
+import { Link } from "wouter";
 
 export default function Tasks() {
   const { toast } = useToast();
@@ -23,6 +24,7 @@ export default function Tasks() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedPriority, setSelectedPriority] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -151,6 +153,18 @@ export default function Tasks() {
     }
   };
 
+  const getPriorityColor = (priority: number) => {
+    if (priority <= 10) {
+      return 'bg-green-100 text-green-800';
+    } else if (priority <= 20) {
+      return 'bg-yellow-100 text-yellow-800';
+    } else if (priority <= 35) {
+      return 'bg-orange-100 text-orange-800';
+    } else {
+      return 'bg-red-100 text-red-800';
+    }
+  };
+
   const getProjectName = (projectId: number | null) => {
     if (!projectId || !projects) return 'No project assigned';
     const project = projects.find(p => p.id === projectId);
@@ -220,88 +234,181 @@ export default function Tasks() {
                 <SelectItem value="urgent">Urgent</SelectItem>
               </SelectContent>
             </Select>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Task
+            <div className="flex gap-2">
+              <div className="flex border rounded-md">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none"
+                >
+                  <Grid className="w-4 h-4" />
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Create New Task</DialogTitle>
-                </DialogHeader>
-                <TaskForm onSuccess={handleTaskCreated} />
-              </DialogContent>
-            </Dialog>
+                <Button
+                  variant={viewMode === 'row' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('row')}
+                  className="rounded-l-none"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Task
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create New Task</DialogTitle>
+                  </DialogHeader>
+                  <TaskForm onSuccess={handleTaskCreated} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
-          {/* Tasks Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredTasks.map((task) => (
-              <Card key={task.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg flex-1">{task.title}</CardTitle>
-                    <div className="flex gap-2 ml-2">
-                      <Badge className={getTaskPriorityColor(task.priority || 'medium')}>
-                        {task.priority || 'medium'}
-                      </Badge>
-                      <Badge className={getTaskStatusColor(task.status || 'todo')}>
-                        {task.status?.replace('_', ' ') || 'todo'}
-                      </Badge>
+          {/* Tasks Display */}
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredTasks.map((task) => (
+                <Card key={task.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <Link href={`/task/${task.id}`} className="flex-1">
+                        <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors">
+                          {task.title}
+                        </CardTitle>
+                      </Link>
+                      <div className="flex gap-2 ml-2">
+                        <Badge className={getPriorityColor(task.priority || 25)}>
+                          {task.priority || 25}
+                        </Badge>
+                        <Badge className={getTaskStatusColor(task.status || 'todo')}>
+                          {task.status?.replace('_', ' ') || 'todo'}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                  {task.description && (
-                    <p className="text-sm text-gray-600 mt-2">{task.description}</p>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <User className="w-4 h-4" />
-                    <span>{getProjectName(task.projectId)}</span>
-                  </div>
-                  
-                  {task.dueDate && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Calendar className="w-4 h-4" />
-                      <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
-                        Due: {new Date(task.dueDate).toLocaleDateString()}
-                      </span>
-                      {isOverdue(task.dueDate) && (
-                        <AlertCircle className="w-4 h-4 text-red-600" />
-                      )}
+                    {task.description && (
+                      <p className="text-sm text-gray-600 mt-2">{task.description}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <User className="w-4 h-4" />
+                      <span>{getProjectName(task.projectId)}</span>
                     </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between pt-2">
-                    <Select
-                      value={task.status || 'todo'}
-                      onValueChange={(status) => updateTaskStatusMutation.mutate({ taskId: task.id, status })}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todo">To Do</SelectItem>
-                        <SelectItem value="in_progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteTaskMutation.mutate(task.id)}
-                      disabled={deleteTaskMutation.isPending}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    
+                    {task.dueDate && (
+                      <div className="flex items-center space-x-2 text-sm">
+                        <Calendar className="w-4 h-4" />
+                        <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
+                          Due: {new Date(task.dueDate).toLocaleDateString()}
+                        </span>
+                        {isOverdue(task.dueDate) && (
+                          <AlertCircle className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between pt-2">
+                      <Select
+                        value={task.status || 'todo'}
+                        onValueChange={(status) => updateTaskStatusMutation.mutate({ taskId: task.id, status })}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="todo">To Do</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteTaskMutation.mutate(task.id)}
+                        disabled={deleteTaskMutation.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredTasks.map((task) => (
+                <Card key={task.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <Link href={`/task/${task.id}`}>
+                          <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors">
+                            {task.title}
+                          </span>
+                        </Link>
+                        <Badge className={getPriorityColor(task.priority || 25)}>
+                          {task.priority || 25}
+                        </Badge>
+                        <Badge className={getTaskStatusColor(task.status || 'todo')}>
+                          {task.status?.replace('_', ' ') || 'todo'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <User className="w-4 h-4" />
+                          <span>{getProjectName(task.projectId)}</span>
+                        </div>
+                        
+                        {task.dueDate && (
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Calendar className="w-4 h-4" />
+                            <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
+                              {new Date(task.dueDate).toLocaleDateString()}
+                            </span>
+                            {isOverdue(task.dueDate) && (
+                              <AlertCircle className="w-4 h-4 text-red-600" />
+                            )}
+                          </div>
+                        )}
+                        
+                        <Select
+                          value={task.status || 'todo'}
+                          onValueChange={(status) => updateTaskStatusMutation.mutate({ taskId: task.id, status })}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="todo">To Do</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteTaskMutation.mutate(task.id)}
+                          disabled={deleteTaskMutation.isPending}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {filteredTasks.length === 0 && (
             <div className="text-center py-12">
