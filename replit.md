@@ -346,3 +346,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Phone Priority Logic**: Contacts page now displays cell phone first, falls back to work phone if cell is empty
 - **Consistent Across Views**: Priority logic applied to both card view and table view for consistent user experience
 - **Clean Display**: Only shows available contact information, no empty fields displayed
+
+### Task Assignment Dropdown Fix (July 17, 2025)
+- **Eliminated Duplicate User Entries**: Fixed task assignment dropdown to show only "Assign to Me" without duplicate user name
+- **Smart User Filtering**: Current user is automatically filtered out from team members list when "Assign to Me" option is present
+- **Consistent Across Components**: Applied fix to both task form and section task manager components
+- **Clean Assignment Interface**: Dropdown now shows "Unassigned", "Assign to Me", and other team members without duplication
