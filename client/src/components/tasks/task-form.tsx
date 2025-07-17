@@ -44,7 +44,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assignedTo: task?.assignedTo ? task.assignedTo.toString() : '',
+      assignedTo: task?.assignedTo ? `team_${task.assignedTo}` : '',
       priority: task?.priority || 25,
       status: task?.status || 'todo',
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
@@ -139,7 +139,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         <div className="space-y-2">
           <Label htmlFor="priority">Priority (1-50)</Label>
           <Select
-            value={form.watch('priority')?.toString() || '25'}
+            value={String(form.watch('priority') || 25)}
             onValueChange={(value) => form.setValue('priority', parseInt(value))}
           >
             <SelectTrigger>
