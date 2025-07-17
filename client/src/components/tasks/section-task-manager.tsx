@@ -201,13 +201,23 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   const openEditDialog = (task: Task) => {
     setSelectedTask(task as TaskNode);
+    
+    // Extract section from description and clean it
+    const cleanDescription = task.description ? 
+      task.description.replace(/^\[.*?\]\s*/, '') : '';
+    
+    // Find section ID from description
+    const sectionMatch = task.description?.match(/^\[(.*?)\]/);
+    const sectionTitle = sectionMatch ? sectionMatch[1] : '';
+    const sectionId = sections.find(s => s.title === sectionTitle)?.id || "section-1";
+    
     setTaskForm({
       title: task.title,
-      description: task.description || "",
+      description: cleanDescription,
       dueDate: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "",
       assignedTo: task.assignedTo || "",
       parentTaskId: task.parentTaskId,
-      sectionId: task.milestoneId?.toString() || "section-1", // Use milestone as section for now
+      sectionId: sectionId,
     });
     setIsEditMode(true);
     setIsTaskDialogOpen(true);
@@ -221,9 +231,14 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   };
 
   const handleSubmitTask = () => {
+    // Find the section title to store in description
+    const currentSection = sections.find(s => s.id === taskForm.sectionId);
+    const sectionPrefix = currentSection ? `[${currentSection.title}] ` : '';
+    
     // Prepare task data with proper type conversions
     const taskData = {
       ...taskForm,
+      description: sectionPrefix + (taskForm.description || ''), // Embed section in description
       parentTaskId: taskForm.parentTaskId || null,
       assignedTo: taskForm.assignedTo || null, // Keep as string to match schema
       projectId: projectId,
@@ -283,9 +298,13 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     if (!tasks || !Array.isArray(tasks)) return [];
     
     try {
+      const currentSection = sections.find(s => s.id === sectionId);
+      const sectionTitle = currentSection?.title || '';
+      
       const sectionTasks = tasks.filter(task => 
         task && (
-          (task.milestoneId?.toString() === sectionId || sectionId === "section-1") && 
+          // Check if task description starts with section prefix
+          (sectionTitle && task.description?.startsWith(`[${sectionTitle}]`)) &&
           !task.parentTaskId
         )
       );
@@ -318,6 +337,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const renderTaskNode = (task: TaskNode, level: number = 0) => {
     const hasChildren = task.children && task.children.length > 0;
     const assignedUser = teamMembers.find(member => member.id.toString() === task.assignedTo);
+    
+    // Clean up description by removing section prefix
+    const cleanDescription = task.description ? 
+      task.description.replace(/^\[.*?\]\s*/, '') : '';
     
     return (
       <div key={task.id} className="space-y-2">
@@ -371,8 +394,8 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                 </Badge>
               )}
             </div>
-            {task.description && (
-              <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+            {cleanDescription && (
+              <p className="text-sm text-gray-600 mt-1">{cleanDescription}</p>
             )}
           </div>
           
