@@ -174,9 +174,9 @@ export default function ProjectsTimelineChart({
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="next-1-week">Next 1 Week</SelectItem>
-                <SelectItem value="next-2-weeks">Next 2 Weeks</SelectItem>
-                <SelectItem value="next-1-month">Next 1 Month</SelectItem>
+                <SelectItem value="next-1-week">1 Week</SelectItem>
+                <SelectItem value="next-2-weeks">2 Weeks</SelectItem>
+                <SelectItem value="next-1-month">Next Month</SelectItem>
                 <SelectItem value="next-4-months">Next 4 Months</SelectItem>
                 <SelectItem value="next-12-months">Next 12 Months</SelectItem>
                 <SelectItem value="custom-range">Custom Date Range</SelectItem>
