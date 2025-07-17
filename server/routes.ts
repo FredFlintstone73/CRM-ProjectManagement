@@ -576,7 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
         if (taskData.assignedTo.startsWith("me_")) {
           // Find the current user's contact ID from the contacts table
-          const userEmail = req.user.email;
+          const userEmail = req.user.email || req.user.claims?.email;
           const userContacts = await storage.getContacts();
           const userContact = userContacts.find(contact => 
             contact.personalEmail === userEmail || 
@@ -622,7 +622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
         if (taskData.assignedTo.startsWith("me_")) {
           // Find the current user's contact ID from the contacts table
-          const userEmail = req.user.email;
+          const userEmail = req.user.email || req.user.claims?.email;
           const userContacts = await storage.getContacts();
           const userContact = userContacts.find(contact => 
             contact.personalEmail === userEmail || 
@@ -685,7 +685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
           if (taskData.assignedTo.startsWith("me_")) {
             // Find the current user's contact ID from the contacts table
-            const userEmail = req.user.email;
+            const userEmail = req.user.email || req.user.claims?.email;
             console.log('Looking for user email:', userEmail);
             const userContacts = await storage.getContacts();
             console.log('Available contacts:', userContacts.map(c => ({ id: c.id, personal: c.personalEmail, work: c.workEmail })));
