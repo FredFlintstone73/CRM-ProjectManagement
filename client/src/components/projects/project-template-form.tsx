@@ -24,7 +24,7 @@ interface TaskTemplate {
   id: string;
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: number; // 1-50 priority level
   daysFromMeeting: number;
   level: number; // 0 = parent, 1 = child, 2 = grandchild
   parentId?: string;
@@ -119,7 +119,7 @@ export default function ProjectTemplateForm({ template, onSuccess }: ProjectTemp
       id: `task-${Date.now()}`,
       title: "",
       description: "",
-      priority: 'medium',
+      priority: 25, // Default to middle priority
       daysFromMeeting: 0,
       level: level,
       parentId: parentId,
@@ -174,14 +174,12 @@ export default function ProjectTemplateForm({ template, onSuccess }: ProjectTemp
     createTemplateMutation.mutate(data);
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'low': return 'bg-gray-100 text-gray-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'urgent': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getPriorityColor = (priority: number) => {
+    if (priority >= 40) return 'bg-red-100 text-red-800'; // High priority (40-50)
+    if (priority >= 30) return 'bg-orange-100 text-orange-800'; // Medium-high priority (30-39)
+    if (priority >= 20) return 'bg-yellow-100 text-yellow-800'; // Medium priority (20-29)
+    if (priority >= 10) return 'bg-blue-100 text-blue-800'; // Low-medium priority (10-19)
+    return 'bg-gray-100 text-gray-800'; // Low priority (1-9)
   };
 
   const getTasksByParent = (sectionTasks: TaskTemplate[], parentId?: string) => {
@@ -225,16 +223,15 @@ export default function ProjectTemplateForm({ template, onSuccess }: ProjectTemp
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Priority</label>
+                    <label className="text-sm font-medium mb-1 block">Priority (1-50)</label>
                     <select
                       className="w-full p-2 border rounded-md"
                       value={task.priority}
-                      onChange={(e) => updateTask(sectionId, task.id, 'priority', e.target.value)}
+                      onChange={(e) => updateTask(sectionId, task.id, 'priority', parseInt(e.target.value))}
                     >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
+                      {Array.from({ length: 50 }, (_, i) => i + 1).map(num => (
+                        <option key={num} value={num}>{num}</option>
+                      ))}
                     </select>
                   </div>
                 </div>

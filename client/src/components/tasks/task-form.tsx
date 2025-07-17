@@ -45,7 +45,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       description: task?.description || '',
       projectId: projectId,
       assignedTo: task?.assignedTo ? task.assignedTo.toString() : '',
-      priority: task?.priority || 'medium',
+      priority: task?.priority || 25,
       status: task?.status || 'todo',
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
     },
@@ -131,6 +131,23 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
                 <SelectItem key={member.id} value={`team_${member.id}`}>
                   {member.firstName} {member.lastName}
                 </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="priority">Priority (1-50)</Label>
+          <Select
+            value={form.watch('priority')?.toString() || '25'}
+            onValueChange={(value) => form.setValue('priority', parseInt(value))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select priority" />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 50 }, (_, i) => i + 1).map(num => (
+                <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
               ))}
             </SelectContent>
           </Select>

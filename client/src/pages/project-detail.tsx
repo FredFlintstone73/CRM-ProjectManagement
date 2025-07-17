@@ -176,17 +176,12 @@ export default function ProjectDetail() {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'high':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-    }
+  const getPriorityColor = (priority: number) => {
+    if (priority >= 40) return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'; // High priority (40-50)
+    if (priority >= 30) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'; // Medium-high priority (30-39)
+    if (priority >= 20) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'; // Medium priority (20-29)
+    if (priority >= 10) return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'; // Low-medium priority (10-19)
+    return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'; // Low priority (1-9)
   };
 
   const getFamilyName = (clientId: number | null) => {

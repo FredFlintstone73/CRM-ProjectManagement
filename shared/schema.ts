@@ -279,7 +279,7 @@ export const tasks = pgTable("tasks", {
   parentTaskId: integer("parent_task_id").references(() => tasks.id),
   assignedTo: integer("assigned_to").references(() => contacts.id),
   status: taskStatusEnum("status").default("todo"),
-  priority: taskPriorityEnum("priority").default("medium"),
+  priority: integer("priority").default(25), // 1-50 priority scale
   dueDate: timestamp("due_date"),
   completedAt: timestamp("completed_at"),
   sortOrder: integer("sort_order").default(0),

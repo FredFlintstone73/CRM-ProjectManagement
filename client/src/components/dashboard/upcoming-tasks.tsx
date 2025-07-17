@@ -21,19 +21,12 @@ export default function UpcomingTasks() {
     return project ? project.name : 'Unknown project';
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-red-500';
-      case 'high':
-        return 'bg-orange-500';
-      case 'medium':
-        return 'bg-amber-500';
-      case 'low':
-        return 'bg-green-500';
-      default:
-        return 'bg-gray-500';
-    }
+  const getPriorityColor = (priority: number) => {
+    if (priority >= 40) return 'bg-red-500'; // High priority (40-50)
+    if (priority >= 30) return 'bg-orange-500'; // Medium-high priority (30-39)
+    if (priority >= 20) return 'bg-amber-500'; // Medium priority (20-29)
+    if (priority >= 10) return 'bg-yellow-500'; // Low-medium priority (10-19)
+    return 'bg-green-500'; // Low priority (1-9)
   };
 
   const formatDueDate = (dueDate: string | null) => {

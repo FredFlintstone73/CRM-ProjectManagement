@@ -33,7 +33,7 @@ interface TaskTemplate {
   id: number;
   name: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: number; // 1-50 priority level
   estimatedDays: number;
   daysFromMeeting: number;
   parentTaskId?: number | null;
@@ -77,34 +77,20 @@ const buildTaskHierarchy = (tasks: TaskTemplate[]) => {
   return rootTasks;
 };
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'urgent':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'high':
-      return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'low':
-      return 'bg-green-100 text-green-800 border-green-200';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
+const getPriorityColor = (priority: number) => {
+  if (priority >= 40) return 'bg-red-100 text-red-800 border-red-200'; // High priority (40-50)
+  if (priority >= 30) return 'bg-orange-100 text-orange-800 border-orange-200'; // Medium-high priority (30-39)
+  if (priority >= 20) return 'bg-yellow-100 text-yellow-800 border-yellow-200'; // Medium priority (20-29)
+  if (priority >= 10) return 'bg-blue-100 text-blue-800 border-blue-200'; // Low-medium priority (10-19)
+  return 'bg-gray-100 text-gray-800 border-gray-200'; // Low priority (1-9)
 };
 
-const getPriorityIcon = (priority: string) => {
-  switch (priority) {
-    case 'urgent':
-      return <AlertCircle className="w-4 h-4" />;
-    case 'high':
-      return <CheckCircle2 className="w-4 h-4" />;
-    case 'medium':
-      return <Circle className="w-4 h-4" />;
-    case 'low':
-      return <Circle className="w-4 h-4" />;
-    default:
-      return <Circle className="w-4 h-4" />;
-  }
+const getPriorityIcon = (priority: number) => {
+  if (priority >= 40) return <AlertCircle className="w-4 h-4" />; // High priority
+  if (priority >= 30) return <CheckCircle2 className="w-4 h-4" />; // Medium-high priority
+  if (priority >= 20) return <Circle className="w-4 h-4" />; // Medium priority
+  if (priority >= 10) return <Circle className="w-4 h-4" />; // Low-medium priority
+  return <Circle className="w-4 h-4" />; // Low priority
 };
 
 // TaskDisplay component for recursive task rendering
@@ -122,7 +108,7 @@ const TaskDisplay = ({ task, templateId, level = 0 }: { task: TaskTemplate, temp
           <div className="flex items-center gap-2 ml-4">
             <Badge className={getPriorityColor(task.priority)}>
               {getPriorityIcon(task.priority)}
-              <span className="ml-1 capitalize">{task.priority}</span>
+              <span className="ml-1">Priority {task.priority}</span>
             </Badge>
           </div>
         </div>
@@ -258,7 +244,7 @@ export default function TemplateDetail() {
     id: task.id,
     name: task.title,
     description: task.description || '',
-    priority: task.priority || 'medium',
+    priority: typeof task.priority === 'number' ? task.priority : 25, // Default to middle priority
     estimatedDays: 1, // Default value since we don't store this in DB
     daysFromMeeting: 0, // Default value since we don't store this in DB
     parentTaskId: task.parentTaskId,
@@ -277,7 +263,7 @@ export default function TemplateDetail() {
       id: task.id,
       name: task.title,
       description: task.description || '',
-      priority: task.priority || 'medium',
+      priority: typeof task.priority === 'number' ? task.priority : 25, // Default to middle priority
       estimatedDays: 1,
       daysFromMeeting: 0,
       parentTaskId: task.parentTaskId,
