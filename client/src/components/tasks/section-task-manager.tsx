@@ -105,7 +105,13 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const teamMembers = contacts.filter(contact => contact.type === 'team_member');
+  const teamMembers = contacts.filter(contact => 
+    contact && contact.type === 'team_member'
+  );
+  
+  // Debug: Log team members to check data structure
+  console.log('Team members:', teamMembers);
+  console.log('All contacts:', contacts);
 
   // Create task mutation
   const createTaskMutation = useMutation({
@@ -373,8 +379,8 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+      <div className="flex justify-between items-center sticky top-0 bg-white z-10 py-4">
         <h2 className="text-xl font-semibold">Project Tasks</h2>
         <Button onClick={openSectionDialog}>
           <Plus className="h-4 w-4 mr-2" />
@@ -382,38 +388,40 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         </Button>
       </div>
 
-      {sections.map(section => {
-        const sectionTasks = buildTaskHierarchy(section.id);
-        
-        return (
-          <Card key={section.id}>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">{section.title}</CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => openTaskDialog(section.id)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Task
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {sectionTasks.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  No tasks in this section yet
+      <div className="space-y-6">
+        {sections.map(section => {
+          const sectionTasks = buildTaskHierarchy(section.id);
+          
+          return (
+            <Card key={section.id}>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">{section.title}</CardTitle>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => openTaskDialog(section.id)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Task
+                  </Button>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {sectionTasks.map(task => renderTaskNode(task))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
+              </CardHeader>
+              <CardContent>
+                {sectionTasks.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No tasks in this section yet
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {sectionTasks.map(task => renderTaskNode(task))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
       {/* Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
@@ -462,11 +470,17 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                   <SelectValue placeholder="Select team member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teamMembers.map(member => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      {member.firstName} {member.lastName}
+                  {teamMembers.length > 0 ? (
+                    teamMembers.map(member => (
+                      <SelectItem key={member.id} value={member.id.toString()}>
+                        {member.firstName} {member.lastName || ''}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      No team members available
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>
