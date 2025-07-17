@@ -71,6 +71,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
   const [editingSection, setEditingSection] = useState<EditingSectionState | null>(null);
+  const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
 
   // Mock sections for now - will be replaced with real data
   const [sections, setSections] = useState<TaskSection[]>([
@@ -320,14 +321,14 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         return children.map(child => ({
           ...child,
           children: buildChildren(child.id),
-          expanded: true,
+          expanded: expandedTasks.has(child.id),
         }));
       };
 
       return sectionTasks.map(task => ({
         ...task,
         children: buildChildren(task.id),
-        expanded: true,
+        expanded: expandedTasks.has(task.id),
       }));
     } catch (error) {
       console.error('Error building task hierarchy:', error);
@@ -337,11 +338,15 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Toggle task expansion
   const toggleTaskExpansion = (taskId: number) => {
-    setTasks(prevTasks => 
-      prevTasks?.map(task => 
-        task.id === taskId ? { ...task, expanded: !task.expanded } : task
-      ) || []
-    );
+    setExpandedTasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
   };
 
   const renderTaskNode = (task: TaskNode, level: number = 0) => {
