@@ -225,7 +225,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     const taskData = {
       ...taskForm,
       parentTaskId: taskForm.parentTaskId || null,
-      assignedTo: taskForm.assignedTo ? parseInt(taskForm.assignedTo) : null,
+      assignedTo: taskForm.assignedTo || null, // Keep as string to match schema
       projectId: projectId,
       milestoneId: null, // We'll use null for now since we're using sections
       priority: 'medium', // Default priority
