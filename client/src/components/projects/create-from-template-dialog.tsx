@@ -21,7 +21,6 @@ const createProjectSchema = z.object({
   projectName: z.string().min(1, "Project name is required"),
   clientId: z.number().min(1, "Client is required"),
   meetingDate: z.string().min(1, "Meeting date is required"),
-  drpmDate: z.string().min(1, "DRPM date is required"),
 });
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>;
@@ -42,7 +41,6 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
       projectName: "",
       clientId: 0,
       meetingDate: "",
-      drpmDate: "",
     },
   });
 
@@ -68,30 +66,52 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
     },
   });
 
+  // Fetch template milestones and tasks from database
+  const { data: templateTasks = [] } = useQuery({
+    queryKey: ['/api/template-tasks', template.id],
+    queryFn: async () => {
+      // First get milestones for this template
+      const milestonesResponse = await fetch(`/api/milestones?templateId=${template.id}`);
+      if (!milestonesResponse.ok) throw new Error('Failed to fetch milestones');
+      const milestones = await milestonesResponse.json();
+      
+      if (!milestones.length) return [];
+      
+      // Then get tasks for each milestone
+      const taskPromises = milestones.map(async (milestone: any) => {
+        const response = await fetch(`/api/milestones/${milestone.id}/tasks`);
+        if (!response.ok) throw new Error('Failed to fetch tasks');
+        const tasks = await response.json();
+        return tasks.map((task: any) => ({ ...task, milestone }));
+      });
+      
+      const taskArrays = await Promise.all(taskPromises);
+      return taskArrays.flat();
+    },
+    enabled: open,
+  });
+
   const createProjectMutation = useMutation({
     mutationFn: async (data: CreateProjectForm) => {
       try {
-        const tasks = Array.isArray(template.tasks) ? template.tasks : [];
-        
         // Validate and parse dates
         const meetingDate = new Date(data.meetingDate);
-        const drpmDate = new Date(data.drpmDate);
         
-        if (isNaN(meetingDate.getTime()) || isNaN(drpmDate.getTime())) {
+        if (isNaN(meetingDate.getTime())) {
           throw new Error('Invalid date format');
         }
         
         // Create a map of task IDs to tasks for hierarchy resolution
         const taskMap = new Map();
-        tasks.forEach(task => {
+        templateTasks.forEach(task => {
           taskMap.set(task.id, task);
         });
         
         // Function to build task hierarchy path
         const buildTaskHierarchy = (task: any): string => {
           if (!task.parentTaskId) {
-            // This is a milestone
-            return task.description?.includes('Milestone:') ? `🎯 ${task.name}` : task.name;
+            // This is a root task
+            return task.title;
           }
           
           const parentTask = taskMap.get(task.parentTaskId);
@@ -100,39 +120,28 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
               // This is a sub-task or sub-sub-task
               const grandParent = taskMap.get(parentTask.parentTaskId);
               if (grandParent) {
-                return `    ↳ ${task.name}`;
+                return `    ↳ ${task.title}`;
               } else {
-                return `  ↳ ${task.name}`;
+                return `  ↳ ${task.title}`;
               }
             } else {
-              // This is a direct task under a milestone
-              return `  • ${task.name}`;
+              // This is a direct task under a root task
+              return `  • ${task.title}`;
             }
           }
           
-          return task.name;
+          return task.title;
         };
         
-        const calculatedTasks = tasks.map((task: any) => {
+        const calculatedTasks = templateTasks.map((task: any) => {
           let dueDate: Date;
           
-          // Get the offset from the task (default to 0 if not found)
-          const daysFromMeeting = task.daysFromMeeting || 0;
+          // For now, use a simple offset - we'll make this more sophisticated later
+          const daysFromMeeting = 0; // Default offset
           
-          if (task.basedOnDrpm) {
-            // Calculate based on DRPM date
-            dueDate = new Date(drpmDate);
-            dueDate.setDate(dueDate.getDate() + daysFromMeeting);
-          } else {
-            // Calculate based on meeting date
-            dueDate = new Date(meetingDate);
-            dueDate.setDate(dueDate.getDate() + daysFromMeeting);
-          }
-          
-          // Find team member with matching role
-          const assignee = teamMembers.find(member => 
-            member.role === task.assigneeRole
-          );
+          // Calculate based on meeting date for now
+          dueDate = new Date(meetingDate);
+          dueDate.setDate(dueDate.getDate() + daysFromMeeting);
           
           // Build hierarchical title
           const hierarchicalTitle = buildTaskHierarchy(task);
@@ -143,13 +152,10 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
             priority: task.priority || 'medium',
             status: 'todo',
             dueDate: dueDate.toISOString().split('T')[0],
-            assignedTo: assignee?.id || null,
-            milestone: task.milestone || '',
-            parentTask: task.parentTask || '',
-            subTask: task.subTask || '',
-            subSubTask: task.subSubTask || '',
+            assignedTo: null, // No automatic assignment for now
+            parentTaskId: task.parentTaskId,
+            milestoneId: task.milestone?.id || null,
             daysFromMeeting: daysFromMeeting,
-            basedOnDrpm: task.basedOnDrpm || false,
           };
         });
 
@@ -159,7 +165,6 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
           description: `Project created from template: ${template.name}`,
           status: 'active',
           meetingDate: data.meetingDate,
-          drpmDate: data.drpmDate,
           tasks: calculatedTasks,
         };
 
@@ -222,10 +227,9 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
-  const tasks = Array.isArray(template.tasks) ? template.tasks : [];
-  const milestones = [...new Set(tasks.map((task: any) => task.milestone))];
-  const totalTasks = tasks.length;
-  const uniqueRoles = [...new Set(tasks.map((task: any) => task.assigneeRole))];
+  const totalTasks = templateTasks.length;
+  const milestones = [...new Set(templateTasks.map((task: any) => task.milestone?.title).filter(Boolean))];
+  const uniqueRoles = [...new Set(templateTasks.map((task: any) => task.assigneeRole).filter(Boolean))];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -341,30 +345,12 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
                   name="meetingDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Meeting Date</FormLabel>
+                      <FormLabel>Project Due Date</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           type="date"
-                          placeholder="Select meeting date"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="drpmDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>DRPM Date</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="date"
-                          placeholder="Select DRPM date"
+                          placeholder="Select project due date"
                         />
                       </FormControl>
                       <FormMessage />
@@ -374,11 +360,11 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-medium text-sm mb-2">Due Date Calculation:</h4>
+                <h4 className="font-medium text-sm mb-2">Project Creation:</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Tasks will be automatically assigned due dates based on the meeting date</li>
-                  <li>• Post-DRPM tasks will be calculated from the DRPM date</li>
-                  <li>• Team members will be auto-assigned based on their roles</li>
+                  <li>• All template tasks will be created for the new project</li>
+                  <li>• Tasks will maintain their hierarchical structure</li>
+                  <li>• Task priorities will be preserved from the template</li>
                 </ul>
               </div>
 
