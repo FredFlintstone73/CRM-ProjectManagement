@@ -31,7 +31,7 @@ export default function Tasks() {
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
   const [sortBy, setSortBy] = useState("priority");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed'>('all');
   const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_month' | 'next_four_months' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
@@ -177,8 +177,7 @@ export default function Tasks() {
 
     const matchesCompletion = 
       completionFilter === 'all' || 
-      (completionFilter === 'completed' && task.status === 'completed') ||
-      (completionFilter === 'pending' && task.status !== 'completed');
+      (completionFilter === 'completed' && task.status === 'completed');
 
     const matchesDueDate = () => {
       if (dueDateFilter === 'all') return true;
@@ -285,36 +284,72 @@ export default function Tasks() {
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
           {/* Search and Filter Bar */}
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search tasks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="priority">Sort by Priority</SelectItem>
-                  <SelectItem value="dueDate">Sort by Due Date</SelectItem>
-                  <SelectItem value="title">Sort by Title</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
 
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="priority">Sort by Priority</SelectItem>
+                <SelectItem value="dueDate">Sort by Due Date</SelectItem>
+                <SelectItem value="title">Sort by Title</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex gap-2">
+              <div className="flex border rounded-md">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none"
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'row' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('row')}
+                  className="rounded-l-none"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Task
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create New Task</DialogTitle>
+                  </DialogHeader>
+                  <TaskForm onSuccess={handleTaskCreated} />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-col gap-4 mb-6">
             {/* Completion Filter */}
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">Completion Status:</span>
               <RadioGroup
                 value={completionFilter}
-                onValueChange={(value) => setCompletionFilter(value as 'all' | 'completed' | 'pending')}
+                onValueChange={(value) => setCompletionFilter(value as 'all' | 'completed')}
                 className="flex gap-6"
               >
                 <div className="flex items-center space-x-2">
@@ -324,10 +359,6 @@ export default function Tasks() {
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="completed" id="completed" />
                   <Label htmlFor="completed">Completed</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="pending" id="pending" />
-                  <Label htmlFor="pending">Pending</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -392,62 +423,24 @@ export default function Tasks() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 mb-6">
-            <div className="flex gap-2">
-              <div className="flex border rounded-md">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-r-none"
-                >
-                  <Grid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'row' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('row')}
-                  className="rounded-l-none"
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Task
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Create New Task</DialogTitle>
-                  </DialogHeader>
-                  <TaskForm onSuccess={handleTaskCreated} />
-                </DialogContent>
-              </Dialog>
-
-              {/* Edit Task Dialog */}
-              <Dialog open={editingTask !== null} onOpenChange={(open) => !open && setEditingTask(null)}>
-                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Edit Task</DialogTitle>
-                  </DialogHeader>
-                  {editingTask && (
-                    <TaskForm 
-                      task={editingTask} 
-                      projectId={editingTask.projectId} 
-                      onSuccess={() => {
-                        setEditingTask(null);
-                        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-                      }} 
-                    />
-                  )}
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
+          {/* Edit Task Dialog */}
+          <Dialog open={editingTask !== null} onOpenChange={(open) => !open && setEditingTask(null)}>
+            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Task</DialogTitle>
+              </DialogHeader>
+              {editingTask && (
+                <TaskForm 
+                  task={editingTask} 
+                  projectId={editingTask.projectId} 
+                  onSuccess={() => {
+                    setEditingTask(null);
+                    queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+                  }} 
+                />
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* Tasks Display */}
           {viewMode === 'grid' ? (
@@ -456,7 +449,20 @@ export default function Tasks() {
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start flex-1">
+                      <div className="flex items-start flex-1 gap-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 mt-0.5"
+                          onClick={() => toggleTaskCompletion.mutate(task)}
+                          disabled={toggleTaskCompletion.isPending}
+                        >
+                          {task.status === 'completed' ? (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-gray-400" />
+                          )}
+                        </Button>
                         <Link href={`/task/${task.id}`} className="flex-1">
                           <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors">
                             {task.title}
@@ -491,20 +497,7 @@ export default function Tasks() {
                       </div>
                     )}
                     
-                    <div className="flex items-center justify-between pt-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => toggleTaskCompletion.mutate(task)}
-                        disabled={toggleTaskCompletion.isPending}
-                      >
-                        {task.status === 'completed' ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-gray-400" />
-                        )}
-                      </Button>
+                    <div className="flex items-center justify-end pt-2">
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
@@ -536,6 +529,19 @@ export default function Tasks() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4 flex-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => toggleTaskCompletion.mutate(task)}
+                          disabled={toggleTaskCompletion.isPending}
+                        >
+                          {task.status === 'completed' ? (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-gray-400" />
+                          )}
+                        </Button>
                         <Link href={`/task/${task.id}`}>
                           <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors">
                             {task.title}
@@ -563,20 +569,6 @@ export default function Tasks() {
                             )}
                           </div>
                         )}
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          onClick={() => toggleTaskCompletion.mutate(task)}
-                          disabled={toggleTaskCompletion.isPending}
-                        >
-                          {task.status === 'completed' ? (
-                            <CheckCircle className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <Circle className="h-5 w-5 text-gray-400" />
-                          )}
-                        </Button>
                         
                         <Button
                           variant="outline"
