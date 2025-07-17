@@ -35,8 +35,8 @@ const getDateRanges = (): Record<string, DateRange> => {
     },
     "next-1-month": {
       start: today,
-      end: endOfDay(addMonths(today, 1)),
-      label: "Next Month",
+      end: endOfDay(addDays(today, 30)),
+      label: "Next 30 Days",
     },
     "next-4-months": {
       start: today,

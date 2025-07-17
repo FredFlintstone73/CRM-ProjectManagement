@@ -186,14 +186,12 @@ export default function ProjectsTimelineChart({
       });
     }
     
-    // For "Next Month", show Week 1, Week 2, Week 3, Week 4
+    // For "Next 30 Days", show Week 1, Week 2, Week 3, Week 4
     if (selectedPeriod === "next-1-month") {
-      const nextMonth = addMonths(now, 1);
-      const monthStart = startOfMonth(nextMonth);
-      const monthEnd = endOfMonth(nextMonth);
+      const thirtyDaysEnd = addDays(now, 30);
       
       const weeks = eachWeekOfInterval(
-        { start: monthStart, end: monthEnd },
+        { start: now, end: thirtyDaysEnd },
         { weekStartsOn: 1 } // Monday = 1
       );
       
@@ -392,7 +390,7 @@ export default function ProjectsTimelineChart({
               <SelectContent>
                 <SelectItem value="next-1-week">This Week</SelectItem>
                 <SelectItem value="next-2-weeks">This 2 Weeks</SelectItem>
-                <SelectItem value="next-1-month">Next Month</SelectItem>
+                <SelectItem value="next-1-month">Next 30 Days</SelectItem>
                 <SelectItem value="next-4-months">Next 4 Months</SelectItem>
                 <SelectItem value="next-12-months">Next 12 Months</SelectItem>
                 <SelectItem value="custom-range">Custom Date Range</SelectItem>
