@@ -151,6 +151,41 @@ export default function ProjectsTimelineChart({
       });
     }
     
+    // For "This 2 Weeks", show all days from Monday to next Friday (10 days total)
+    if (selectedPeriod === "next-2-weeks") {
+      const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+      const twoWeeksEnd = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+      const allDays = eachDayOfInterval({
+        start: weekStart,
+        end: twoWeeksEnd
+      }).filter(day => {
+        const dayOfWeek = day.getDay();
+        return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday (1) through Friday (5)
+      });
+      
+      return allDays.map((day) => {
+        const dayProjects = projects?.filter(project => 
+          project.dueDate && isSameDay(new Date(project.dueDate), day)
+        ) || [];
+        
+        const projectCounts = {
+          frm: dayProjects.filter(p => p.projectType === 'frm').length,
+          im: dayProjects.filter(p => p.projectType === 'im').length,
+          ipu: dayProjects.filter(p => p.projectType === 'ipu').length,
+          csr: dayProjects.filter(p => p.projectType === 'csr').length,
+          gpo: dayProjects.filter(p => p.projectType === 'gpo').length,
+          tar: dayProjects.filter(p => p.projectType === 'tar').length,
+        };
+        
+        return {
+          period: format(day, 'EEE M/d'), // Mon 7/15, Tue 7/16, etc.
+          ...projectCounts,
+          total: dayProjects.length,
+          projects: dayProjects,
+        };
+      });
+    }
+    
     // For other periods, use the existing month-based logic
     const months = getPeriodMonths(selectedPeriod);
     return months.map((month, index) => {
