@@ -61,22 +61,36 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // Fetch tasks hierarchy
-  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'task-hierarchy'],
-    queryFn: () => apiRequest(`/api/projects/${projectId}/task-hierarchy`),
+  // Fetch tasks hierarchy - fallback to regular tasks endpoint if hierarchy endpoint doesn't exist
+  const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
+    queryKey: ['/api/projects', projectId, 'tasks'],
+    queryFn: async () => {
+      try {
+        // Try the hierarchy endpoint first
+        return await apiRequest(`/api/projects/${projectId}/task-hierarchy`);
+      } catch (error) {
+        // Fallback to regular tasks endpoint
+        return await apiRequest(`/api/projects/${projectId}/tasks`);
+      }
+    },
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Fetch milestones
-  const { data: milestones = [] } = useQuery<Milestone[]>({
+  const { data: milestones = [], error: milestonesError } = useQuery<Milestone[]>({
     queryKey: ['/api/milestones'],
     queryFn: () => apiRequest('/api/milestones', { params: { projectId } }),
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Fetch team members
-  const { data: contacts = [] } = useQuery<Contact[]>({
+  const { data: contacts = [], error: contactsError } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
     queryFn: () => apiRequest('/api/contacts'),
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Create task mutation
@@ -340,6 +354,19 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
 
   if (isLoadingTasks) {
     return <div className="p-6">Loading tasks...</div>;
+  }
+
+  if (tasksError || milestonesError || contactsError) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-8">
+          <p className="text-red-600">Error loading task data. Please try refreshing the page.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {tasksError?.message || milestonesError?.message || contactsError?.message}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

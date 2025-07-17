@@ -36,15 +36,32 @@ export function MilestoneManager({ projectId }: MilestoneManagerProps) {
   const [isEditMode, setIsEditMode] = useState(false);
 
   // Fetch milestones
-  const { data: milestones = [], isLoading } = useQuery<Milestone[]>({
-    queryKey: ['/api/milestones'],
-    queryFn: () => apiRequest('/api/milestones', { params: { projectId } }),
+  const { data: milestones = [], isLoading, error: milestonesError } = useQuery<Milestone[]>({
+    queryKey: ['/api/milestones', projectId],
+    queryFn: async () => {
+      try {
+        return await apiRequest(`/api/milestones?projectId=${projectId}`);
+      } catch (error) {
+        console.warn('Milestones endpoint not available yet, returning empty array');
+        return [];
+      }
+    },
+    retry: false,
+    enabled: !!projectId,
   });
 
   // Fetch tasks for progress calculation
-  const { data: tasks = [] } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'task-hierarchy'],
-    queryFn: () => apiRequest(`/api/projects/${projectId}/task-hierarchy`),
+  const { data: tasks = [], error: tasksError } = useQuery<Task[]>({
+    queryKey: ['/api/projects', projectId, 'tasks'],
+    queryFn: async () => {
+      try {
+        return await apiRequest(`/api/projects/${projectId}/task-hierarchy`);
+      } catch (error) {
+        return await apiRequest(`/api/projects/${projectId}/tasks`);
+      }
+    },
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Create milestone mutation
