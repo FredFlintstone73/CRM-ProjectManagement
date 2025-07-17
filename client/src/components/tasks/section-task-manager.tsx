@@ -108,10 +108,6 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const teamMembers = contacts.filter(contact => 
     contact && contact.type === 'team_member'
   );
-  
-  // Debug: Log team members to check data structure
-  console.log('Team members:', teamMembers);
-  console.log('All contacts:', contacts);
 
   // Create task mutation
   const createTaskMutation = useMutation({
