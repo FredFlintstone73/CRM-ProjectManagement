@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -20,7 +22,10 @@ import {
   Circle,
   FileText,
   Calendar,
-  Users
+  Users,
+  Edit2,
+  Check,
+  X
 } from "lucide-react";
 import { Link } from "wouter";
 import type { ProjectTemplate } from "@shared/schema";
@@ -138,7 +143,52 @@ export default function TemplateDetail() {
   const { id } = useParams<TemplateDetailParams>();
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const queryClient = useQueryClient();
   const [openPhases, setOpenPhases] = useState<string[]>([]);
+  const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>("");
+
+  // Mutation to update milestone title
+  const updateMilestoneMutation = useMutation({
+    mutationFn: async ({ milestoneId, title }: { milestoneId: number; title: string }) => {
+      return await apiRequest('PUT', `/api/milestones/${milestoneId}`, { title });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Section name updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      setEditingMilestone(null);
+      setEditingTitle("");
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update section name",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const startEditing = (milestone: any) => {
+    setEditingMilestone(milestone.id);
+    setEditingTitle(milestone.title);
+  };
+
+  const saveEditing = () => {
+    if (editingMilestone && editingTitle.trim()) {
+      updateMilestoneMutation.mutate({ 
+        milestoneId: editingMilestone, 
+        title: editingTitle.trim() 
+      });
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingMilestone(null);
+    setEditingTitle("");
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -252,14 +302,14 @@ export default function TemplateDetail() {
     comments: ''
   }));
 
-  // Group tasks by milestone
-  const tasksByMilestone = new Map<string, TaskTemplate[]>();
+  // Group tasks by milestone with milestone metadata
+  const tasksByMilestone = new Map<string, { milestone: any, tasks: TaskTemplate[] }>();
   allTasks.forEach((task: any) => {
     const milestoneTitle = task.milestone?.title || 'Uncategorized';
     if (!tasksByMilestone.has(milestoneTitle)) {
-      tasksByMilestone.set(milestoneTitle, []);
+      tasksByMilestone.set(milestoneTitle, { milestone: task.milestone, tasks: [] });
     }
-    tasksByMilestone.get(milestoneTitle)!.push({
+    tasksByMilestone.get(milestoneTitle)!.tasks.push({
       id: task.id,
       name: task.title,
       description: task.description || '',
@@ -346,13 +396,14 @@ export default function TemplateDetail() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Template Tasks</h2>
             
-            {Array.from(tasksByMilestone.entries()).map(([milestoneTitle, milestoneTasks], milestoneIndex) => {
+            {Array.from(tasksByMilestone.entries()).map(([milestoneTitle, { milestone, tasks: milestoneTasks }], milestoneIndex) => {
               const isOpen = openPhases.includes(milestoneTitle);
               const hierarchicalTasks = buildTaskHierarchy(milestoneTasks);
               const taskCount = milestoneTasks.length;
+              const isEditing = editingMilestone === milestone?.id;
               
               return (
-                <Card key={milestoneTitle} className="overflow-hidden">
+                <Card key={milestoneTitle} className="overflow-hidden group">
                   <Collapsible open={isOpen} onOpenChange={() => togglePhase(milestoneTitle)}>
                     <CollapsibleTrigger asChild>
                       <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
@@ -363,8 +414,47 @@ export default function TemplateDetail() {
                             ) : (
                               <ChevronRight className="w-5 h-5 text-gray-500" />
                             )}
-                            <div>
-                              <CardTitle className="text-lg">{milestoneTitle}</CardTitle>
+                            <div className="flex-1">
+                              {isEditing ? (
+                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                  <Input
+                                    value={editingTitle}
+                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                    className="text-lg font-semibold"
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        saveEditing();
+                                      } else if (e.key === 'Escape') {
+                                        cancelEditing();
+                                      }
+                                    }}
+                                    autoFocus
+                                  />
+                                  <Button size="sm" variant="outline" onClick={saveEditing}>
+                                    <Check className="w-4 h-4" />
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={cancelEditing}>
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <CardTitle className="text-lg">{milestoneTitle}</CardTitle>
+                                  {milestone?.id && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startEditing(milestone);
+                                      }}
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <Edit2 className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
                               <p className="text-sm text-gray-500 mt-1">
                                 {taskCount} tasks
                               </p>
