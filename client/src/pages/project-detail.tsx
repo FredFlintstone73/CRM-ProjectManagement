@@ -220,14 +220,28 @@ export default function ProjectDetail() {
 
   const handleEditDueDate = () => {
     setEditingDueDate(true);
-    setNewDueDate(project?.dueDate ? format(new Date(project.dueDate), 'yyyy-MM-dd') : "");
+    if (project?.dueDate) {
+      // Convert UTC date to local date for the date input
+      const utcDate = new Date(project.dueDate);
+      const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
+      setNewDueDate(format(localDate, 'yyyy-MM-dd'));
+    } else {
+      setNewDueDate("");
+    }
   };
 
   const handleSaveDueDate = () => {
     if (project) {
+      let dueDateToSave = null;
+      if (newDueDate) {
+        // Convert local date to UTC for saving
+        const localDate = new Date(newDueDate + 'T00:00:00');
+        dueDateToSave = localDate.toISOString();
+      }
+      
       updateDueDateMutation.mutate({ 
         projectId: project.id, 
-        dueDate: newDueDate || null 
+        dueDate: dueDateToSave 
       });
     }
   };
