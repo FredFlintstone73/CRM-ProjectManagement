@@ -441,8 +441,8 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Project Tasks</h2>
         <Button onClick={openSectionDialog}>
           <Plus className="h-4 w-4 mr-2" />
@@ -450,7 +450,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+      <div className="max-h-[600px] overflow-y-auto space-y-6 pr-2">
         {sections.map(section => {
           const sectionTasks = buildTaskHierarchy(section.id);
           
