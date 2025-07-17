@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Calendar, BarChart3, CalendarDays } from "lucide-react";
-import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks, eachDayOfInterval, isSameDay } from "date-fns";
+import { format, addMonths, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, startOfWeek, endOfWeek, addWeeks, eachDayOfInterval, isSameDay, eachWeekOfInterval, isWithinInterval } from "date-fns";
 import type { Project } from "@shared/schema";
 
 interface TimelineData {
@@ -182,6 +182,43 @@ export default function ProjectsTimelineChart({
           ...projectCounts,
           total: dayProjects.length,
           projects: dayProjects,
+        };
+      });
+    }
+    
+    // For "Next Month", show Week 1, Week 2, Week 3, Week 4
+    if (selectedPeriod === "next-1-month") {
+      const nextMonth = addMonths(now, 1);
+      const monthStart = startOfMonth(nextMonth);
+      const monthEnd = endOfMonth(nextMonth);
+      
+      const weeks = eachWeekOfInterval(
+        { start: monthStart, end: monthEnd },
+        { weekStartsOn: 1 } // Monday = 1
+      );
+      
+      return weeks.map((weekStart, index) => {
+        const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+        const weekProjects = projects?.filter(project => {
+          if (!project.dueDate) return false;
+          const projectDate = new Date(project.dueDate);
+          return isWithinInterval(projectDate, { start: weekStart, end: weekEnd });
+        }) || [];
+        
+        const projectCounts = {
+          frm: weekProjects.filter(p => p.projectType === 'frm').length,
+          im: weekProjects.filter(p => p.projectType === 'im').length,
+          ipu: weekProjects.filter(p => p.projectType === 'ipu').length,
+          csr: weekProjects.filter(p => p.projectType === 'csr').length,
+          gpo: weekProjects.filter(p => p.projectType === 'gpo').length,
+          tar: weekProjects.filter(p => p.projectType === 'tar').length,
+        };
+        
+        return {
+          period: `Week ${index + 1}`,
+          ...projectCounts,
+          total: weekProjects.length,
+          projects: weekProjects,
         };
       });
     }
