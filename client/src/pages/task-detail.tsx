@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import TaskForm from '@/components/tasks/task-form';
 import type { Task, Contact, Project } from '@shared/schema';
 
 interface TaskDetailParams {
@@ -74,7 +76,10 @@ export default function TaskDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', task?.projectId.toString(), 'tasks'] });
+      if (task?.projectId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       toast({ title: "Task updated successfully" });
     },
     onError: () => {
@@ -87,6 +92,10 @@ export default function TaskDetail() {
       return await apiRequest('DELETE', `/api/tasks/${id}`);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      if (task?.projectId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
+      }
       toast({ title: "Task deleted successfully" });
       window.history.back();
     },
@@ -310,6 +319,23 @@ export default function TaskDetail() {
           </Card>
         </div>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+          </DialogHeader>
+          <TaskForm 
+            task={task} 
+            projectId={task?.projectId} 
+            onSuccess={() => {
+              setIsEditing(false);
+              queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
+            }} 
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
