@@ -25,6 +25,7 @@ export default function Tasks() {
   const [selectedPriority, setSelectedPriority] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
+  const [sortBy, setSortBy] = useState("priority");
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -112,7 +113,7 @@ export default function Tasks() {
     },
   });
 
-  const filteredTasks = tasks?.filter((task) => {
+  const filteredAndSortedTasks = tasks?.filter((task) => {
     const matchesSearch = searchQuery === "" ||
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -121,6 +122,20 @@ export default function Tasks() {
     const matchesPriority = selectedPriority === "all" || task.priority === selectedPriority;
     
     return matchesSearch && matchesStatus && matchesPriority;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case "priority":
+        return (a.priority || 50) - (b.priority || 50); // Sort 1-50, with null/undefined treated as 50
+      case "dueDate":
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      case "title":
+        return a.title.localeCompare(b.title);
+      default:
+        return 0;
+    }
   }) || [];
 
   const getTaskStatusColor = (status: string) => {
@@ -234,6 +249,16 @@ export default function Tasks() {
                 <SelectItem value="urgent">Urgent</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="priority">Sort by Priority</SelectItem>
+                <SelectItem value="dueDate">Sort by Due Date</SelectItem>
+                <SelectItem value="title">Sort by Title</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
               <div className="flex border rounded-md">
                 <Button
@@ -273,7 +298,7 @@ export default function Tasks() {
           {/* Tasks Display */}
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredTasks.map((task) => (
+              {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -343,7 +368,7 @@ export default function Tasks() {
             </div>
           ) : (
             <div className="space-y-2">
-              {filteredTasks.map((task) => (
+              {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -410,7 +435,7 @@ export default function Tasks() {
             </div>
           )}
 
-          {filteredTasks.length === 0 && (
+          {filteredAndSortedTasks.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">No tasks found matching your criteria.</p>
             </div>
