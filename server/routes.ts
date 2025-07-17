@@ -603,9 +603,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
     try {
-      console.log("PATCH task body:", req.body);
       const taskData = insertTaskSchema.partial().parse(req.body);
-      console.log("Parsed task data:", taskData);
       
       // Convert assignedTo from string to number if provided and present
       const processedTaskData = {
@@ -615,9 +613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }),
       };
       
-      console.log("Processed task data:", processedTaskData);
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
-      console.log("Updated task:", task);
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);

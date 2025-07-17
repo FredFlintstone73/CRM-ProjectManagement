@@ -212,7 +212,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     const sectionTitle = sectionMatch ? sectionMatch[1] : '';
     const sectionId = sections.find(s => s.title === sectionTitle)?.id || "section-1";
     
-    // Convert assignedTo to correct format for form
+    // Convert assignedTo to correct format for form - fix null handling
     const assignedToValue = task.assignedTo ? task.assignedTo.toString() : "";
     
     setTaskForm({
@@ -335,14 +335,19 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     }
   };
 
+  // Toggle task expansion
+  const toggleTaskExpansion = (taskId: number) => {
+    setTasks(prevTasks => 
+      prevTasks?.map(task => 
+        task.id === taskId ? { ...task, expanded: !task.expanded } : task
+      ) || []
+    );
+  };
+
   const renderTaskNode = (task: TaskNode, level: number = 0) => {
     const hasChildren = task.children && task.children.length > 0;
     const assignedUser = teamMembers.find(member => member.id === task.assignedTo);
     const isCompleted = task.status === 'completed';
-    
-    // Clean up description by removing section prefix
-    const cleanDescription = task.description ? 
-      task.description.replace(/^\[.*?\]\s*/, '') : '';
     
     return (
       <div key={task.id} className="space-y-2">
@@ -357,9 +362,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0"
-              onClick={() => {
-                // Toggle expansion logic would go here
-              }}
+              onClick={() => toggleTaskExpansion(task.id)}
             >
               {task.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </Button>
@@ -380,9 +383,17 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`font-medium ${isCompleted ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+              <button
+                className={`font-medium text-left hover:text-blue-600 transition-colors ${
+                  isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
+                }`}
+                onClick={() => {
+                  // Navigate to task detail page
+                  window.location.href = `/task/${task.id}`;
+                }}
+              >
                 {task.title}
-              </span>
+              </button>
               {task.dueDate && (
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-3 w-3 mr-1" />
@@ -396,9 +407,6 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                 </Badge>
               )}
             </div>
-            {cleanDescription && (
-              <p className="text-sm text-gray-600 mt-1">{cleanDescription}</p>
-            )}
           </div>
           
           <div className="flex gap-1">

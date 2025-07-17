@@ -1,386 +1,315 @@
-import { useEffect, useState } from "react";
-import { useParams } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { apiRequest } from "@/lib/queryClient";
-import Header from "@/components/layout/header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  ArrowLeft, 
-  Calendar,
-  User,
-  FileText,
-  MessageSquare,
-  Edit,
-  Save,
-  X
-} from "lucide-react";
-import { Link } from "wouter";
-import type { Contact } from "@shared/schema";
+import { useState } from 'react';
+import { useParams } from 'wouter';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { ArrowLeft, Calendar, User, CheckCircle, Circle, Edit3, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import type { Task, Contact, Project } from '@shared/schema';
 
 interface TaskDetailParams {
-  templateId: string;
-  taskId: string;
-}
-
-interface TaskDetail {
   id: string;
-  name: string;
-  description: string;
-  assignedTo?: string;
-  assignedToName?: string;
-  dueDate?: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  estimatedDays: number;
-  comments: string;
-  parentTaskId?: string;
-  subtasks?: TaskDetail[];
 }
-
-const taskCommentSchema = z.object({
-  comments: z.string().min(1, "Comments are required"),
-});
-
-const taskUpdateSchema = z.object({
-  assignedTo: z.string().optional(),
-  dueDate: z.string().optional(),
-  comments: z.string().optional(),
-});
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'urgent':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'high':
-      return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'low':
-      return 'bg-green-100 text-green-800 border-green-200';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-};
 
 export default function TaskDetail() {
-  const { templateId, taskId } = useParams<TaskDetailParams>();
+  const { id } = useParams<TaskDetailParams>();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
-  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  const { data: task, isLoading: taskLoading } = useQuery<TaskDetail>({
-    queryKey: ['/api/template-tasks', templateId, taskId],
+  const { data: task, isLoading: taskLoading } = useQuery<Task>({
+    queryKey: ['/api/tasks', id],
     queryFn: async () => {
-      const response = await fetch(`/api/template-tasks/${templateId}/${taskId}`);
+      const response = await fetch(`/api/tasks/${id}`);
       if (!response.ok) throw new Error('Failed to fetch task');
       return response.json();
     },
-    enabled: isAuthenticated && !!templateId && !!taskId,
   });
 
-  const { data: teamMembers } = useQuery<Contact[]>({
-    queryKey: ['/api/contacts?type=team_member'],
+  const { data: project } = useQuery<Project>({
+    queryKey: ['/api/projects', task?.projectId.toString()],
+    enabled: !!task?.projectId,
     queryFn: async () => {
-      const response = await fetch('/api/contacts?type=team_member');
-      if (!response.ok) throw new Error('Failed to fetch team members');
+      const response = await fetch(`/api/projects/${task?.projectId}`);
+      if (!response.ok) throw new Error('Failed to fetch project');
       return response.json();
     },
-    enabled: isAuthenticated,
   });
 
-  const form = useForm<z.infer<typeof taskUpdateSchema>>({
-    resolver: zodResolver(taskUpdateSchema),
-    defaultValues: {
-      assignedTo: task?.assignedTo || "unassigned",
-      dueDate: task?.dueDate || "",
-      comments: task?.comments || "",
+  const { data: contacts } = useQuery<Contact[]>({
+    queryKey: ['/api/contacts'],
+  });
+
+  const { data: parentTask } = useQuery<Task>({
+    queryKey: ['/api/tasks', task?.parentTaskId?.toString()],
+    enabled: !!task?.parentTaskId,
+    queryFn: async () => {
+      const response = await fetch(`/api/tasks/${task?.parentTaskId}`);
+      if (!response.ok) throw new Error('Failed to fetch parent task');
+      return response.json();
     },
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof taskUpdateSchema>) => {
-      return await apiRequest(`/api/template-tasks/${templateId}/${taskId}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
+  const { data: subtasks } = useQuery<Task[]>({
+    queryKey: ['/api/tasks', id, 'subtasks'],
+    enabled: !!id,
+    queryFn: async () => {
+      const response = await fetch(`/api/tasks/${id}/subtasks`);
+      if (!response.ok) throw new Error('Failed to fetch subtasks');
+      return response.json();
+    },
+  });
+
+  const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
+  const assignedUser = teamMembers.find(member => member.id === task?.assignedTo);
+
+  const toggleTaskMutation = useMutation({
+    mutationFn: async (completed: boolean) => {
+      return await apiRequest('PATCH', `/api/tasks/${id}`, { 
+        status: completed ? 'completed' : 'todo' 
       });
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Task updated successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', templateId, taskId] });
-      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', task?.projectId.toString(), 'tasks'] });
+      toast({ title: "Task updated successfully" });
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to update task",
-        variant: "destructive",
-      });
+    onError: () => {
+      toast({ title: "Failed to update task", variant: "destructive" });
     },
   });
 
-  const onSubmit = (data: z.infer<typeof taskUpdateSchema>) => {
-    updateTaskMutation.mutate(data);
-  };
+  const deleteTaskMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('DELETE', `/api/tasks/${id}`);
+    },
+    onSuccess: () => {
+      toast({ title: "Task deleted successfully" });
+      window.history.back();
+    },
+    onError: () => {
+      toast({ title: "Failed to delete task", variant: "destructive" });
+    },
+  });
 
-  if (isLoading || taskLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (taskLoading) {
+    return <div className="p-6">Loading task...</div>;
   }
 
   if (!task) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Task Not Found</h2>
-          <p className="text-gray-500 mb-4">The task you're looking for doesn't exist.</p>
-          <Link href={`/templates/${templateId}`}>
-            <Button>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Template
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return <div className="p-6">Task not found</div>;
   }
 
-  return (
-    <>
-      <Header 
-        title={task.name}
-        subtitle="Task Details"
-        showActions={false}
-      />
-      
-      <main className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="px-6 py-6">
-          {/* Back Button */}
-          <div className="mb-6">
-            <Link href={`/templates/${templateId}`}>
-              <Button variant="ghost">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Template
-              </Button>
-            </Link>
-          </div>
+  const isCompleted = task.status === 'completed';
+  const cleanDescription = task.description ? 
+    task.description.replace(/^\[.*?\]\s*/, '') : '';
 
-          {/* Task Details Card */}
-          <Card className="mb-6">
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => window.history.back()}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => toggleTaskMutation.mutate(!isCompleted)}
+            >
+              {isCompleted ? (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              ) : (
+                <Circle className="h-5 w-5 text-gray-400" />
+              )}
+            </Button>
+            
+            <h1 className={`text-2xl font-bold ${
+              isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
+            }`}>
+              {task.title}
+            </h1>
+            
+            <Badge variant={isCompleted ? 'secondary' : 'default'}>
+              {isCompleted ? 'Completed' : 'Todo'}
+            </Badge>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit3 className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => deleteTaskMutation.mutate()}
+              className="text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <CardTitle className="text-xl">{task.name}</CardTitle>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge className={getPriorityColor(task.priority)}>
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
-                      </Badge>
-                      {task.estimatedDays > 0 && (
-                        <Badge variant="outline">
-                          {task.estimatedDays} day{task.estimatedDays !== 1 ? 's' : ''}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <Button 
-                  variant={isEditing ? "destructive" : "default"}
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {isEditing ? (
-                    <>
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </>
-                  )}
-                </Button>
-              </div>
+              <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
-              {task.description && (
-                <div className="mb-6">
-                  <h3 className="font-medium text-gray-900 mb-2">Description</h3>
-                  <p className="text-gray-600 leading-relaxed">{task.description}</p>
-                </div>
-              )}
-
-              <Separator className="my-6" />
-
-              {/* Task Assignment and Due Date */}
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="assignedTo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <User className="w-4 h-4" />
-                            Assigned To
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={!isEditing}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select team member" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="unassigned">Unassigned</SelectItem>
-                              {teamMembers?.map((member) => (
-                                <SelectItem key={member.id} value={member.id.toString()}>
-                                  {member.firstName} {member.lastName}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="dueDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            Due Date
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="date"
-                              {...field}
-                              disabled={!isEditing}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="comments"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4" />
-                          Comments
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Add your comments here..."
-                            rows={6}
-                            {...field}
-                            disabled={!isEditing}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {isEditing && (
-                    <div className="flex justify-end gap-2">
-                      <Button type="submit" disabled={updateTaskMutation.isPending}>
-                        <Save className="w-4 h-4 mr-2" />
-                        {updateTaskMutation.isPending ? 'Saving...' : 'Save Changes'}
-                      </Button>
-                    </div>
-                  )}
-                </form>
-              </Form>
+              <p className="text-gray-700 whitespace-pre-wrap">
+                {cleanDescription || 'No description provided'}
+              </p>
             </CardContent>
           </Card>
 
-          {/* Subtasks */}
-          {task.subtasks && task.subtasks.length > 0 && (
+          {subtasks && subtasks.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Subtasks</CardTitle>
+                <CardTitle>Subtasks ({subtasks.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {task.subtasks.map((subtask, index) => (
-                    <div key={index} className="border rounded-lg p-4 bg-white">
-                      <div className="flex items-start justify-between mb-2">
-                        <Link href={`/templates/${templateId}/tasks/${subtask.id}`}>
-                          <h4 className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer">
-                            {subtask.name}
-                          </h4>
-                        </Link>
-                        <Badge className={getPriorityColor(subtask.priority)}>
-                          {subtask.priority}
-                        </Badge>
+                <div className="space-y-2">
+                  {subtasks.map(subtask => {
+                    const subtaskAssignedUser = teamMembers.find(member => member.id === subtask.assignedTo);
+                    const subtaskCompleted = subtask.status === 'completed';
+                    
+                    return (
+                      <div key={subtask.id} className="flex items-center gap-2 p-2 rounded border">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => {
+                            // Toggle subtask completion
+                            apiRequest('PATCH', `/api/tasks/${subtask.id}`, { 
+                              status: subtaskCompleted ? 'todo' : 'completed' 
+                            }).then(() => {
+                              queryClient.invalidateQueries({ queryKey: ['/api/tasks', id, 'subtasks'] });
+                            });
+                          }}
+                        >
+                          {subtaskCompleted ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Circle className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                        
+                        <button
+                          className={`flex-1 text-left font-medium hover:text-blue-600 transition-colors ${
+                            subtaskCompleted ? 'line-through text-gray-500' : 'text-gray-900'
+                          }`}
+                          onClick={() => {
+                            window.location.href = `/task/${subtask.id}`;
+                          }}
+                        >
+                          {subtask.title}
+                        </button>
+                        
+                        {subtaskAssignedUser && (
+                          <Badge variant="secondary" className="text-xs">
+                            <User className="h-3 w-3 mr-1" />
+                            {subtaskAssignedUser.firstName} {subtaskAssignedUser.lastName}
+                          </Badge>
+                        )}
                       </div>
-                      {subtask.description && (
-                        <p className="text-sm text-gray-600 mt-2">{subtask.description}</p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
           )}
         </div>
-      </main>
-    </>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Task Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {task.dueDate && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">
+                    Due: {format(new Date(task.dueDate), 'MMM d, yyyy')}
+                  </span>
+                </div>
+              )}
+              
+              {assignedUser && (
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">
+                    Assigned to: {assignedUser.firstName} {assignedUser.lastName}
+                  </span>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Priority:</span>
+                <Badge variant="outline" className="capitalize">
+                  {task.priority}
+                </Badge>
+              </div>
+              
+              <Separator />
+              
+              {project && (
+                <div>
+                  <span className="text-sm text-gray-500">Project:</span>
+                  <button
+                    className="block text-sm font-medium text-blue-600 hover:text-blue-700 mt-1"
+                    onClick={() => {
+                      window.location.href = `/project/${project.id}`;
+                    }}
+                  >
+                    {project.name}
+                  </button>
+                </div>
+              )}
+              
+              {parentTask && (
+                <div>
+                  <span className="text-sm text-gray-500">Parent Task:</span>
+                  <button
+                    className="block text-sm font-medium text-blue-600 hover:text-blue-700 mt-1"
+                    onClick={() => {
+                      window.location.href = `/task/${parentTask.id}`;
+                    }}
+                  >
+                    {parentTask.title}
+                  </button>
+                </div>
+              )}
+              
+              <Separator />
+              
+              <div className="text-xs text-gray-500">
+                <div>Created: {format(new Date(task.createdAt), 'MMM d, yyyy')}</div>
+                <div>Updated: {format(new Date(task.updatedAt), 'MMM d, yyyy')}</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }
