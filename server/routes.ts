@@ -632,19 +632,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const taskData = insertTaskSchema.partial().parse(req.body);
       
+      console.log('Raw task data:', taskData);
+      
+      // Helper function to safely convert to integer
+      const safeParseInt = (value: any): number | null => {
+        if (value === null || value === undefined || value === '') {
+          return null;
+        }
+        if (typeof value === 'number') {
+          return value;
+        }
+        if (typeof value === 'string') {
+          const parsed = parseInt(value);
+          return isNaN(parsed) ? null : parsed;
+        }
+        return null;
+      };
+      
       // Convert assignedTo from string to number if provided and present
       // Convert priority to number if provided
       const processedTaskData = {
         ...taskData,
         ...(taskData.assignedTo !== undefined && { 
-          assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? parseInt(taskData.assignedTo) : null 
+          assignedTo: taskData.assignedTo && taskData.assignedTo !== "" ? 
+            safeParseInt(taskData.assignedTo) : null 
         }),
         ...(taskData.priority !== undefined && { 
           priority: taskData.priority !== null && taskData.priority !== undefined ? 
-            (typeof taskData.priority === 'string' ? parseInt(taskData.priority) : taskData.priority) : 
-            25 // Default priority
+            safeParseInt(taskData.priority) || 25 : 25 // Default priority
+        }),
+        ...(taskData.milestoneId !== undefined && {
+          milestoneId: safeParseInt(taskData.milestoneId)
+        }),
+        ...(taskData.parentTaskId !== undefined && {
+          parentTaskId: safeParseInt(taskData.parentTaskId)
         }),
       };
+      
+      console.log('Processed task data:', processedTaskData);
       
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
       res.json(task);

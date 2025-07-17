@@ -466,6 +466,8 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
+    console.log('Final processed task for update:', processedTask);
+    
     const [updatedTask] = await db
       .update(tasks)
       .set({ ...processedTask, updatedAt: new Date() })
