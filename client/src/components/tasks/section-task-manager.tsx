@@ -73,15 +73,36 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   ]);
 
   // Fetch tasks and organize by sections
-  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery<Task[]>({
+  const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
     queryKey: ['/api/projects', projectId, 'tasks'],
-    queryFn: () => apiRequest(`/api/projects/${projectId}/tasks`),
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to fetch tasks:', error);
+        return [];
+      }
+    },
+    enabled: !!projectId,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Fetch team members
-  const { data: contacts = [] } = useQuery<Contact[]>({
+  const { data: contacts = [], error: contactsError } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
-    queryFn: () => apiRequest('/api/contacts'),
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/contacts');
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to fetch contacts:', error);
+        return [];
+      }
+    },
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const teamMembers = contacts.filter(contact => contact.type === 'team_member');
@@ -89,14 +110,11 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: (taskData: TaskFormData) => 
-      apiRequest('/api/tasks', {
-        method: 'POST',
-        body: {
-          ...taskData,
-          projectId,
-          level: taskData.parentTaskId ? 
-            (tasks.find(t => t.id === taskData.parentTaskId)?.level || 0) + 1 : 1,
-        },
+      apiRequest('POST', '/api/tasks', {
+        ...taskData,
+        projectId,
+        level: taskData.parentTaskId ? 
+          (tasks.find(t => t.id === taskData.parentTaskId)?.level || 0) + 1 : 1,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
@@ -112,10 +130,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   // Update task mutation
   const updateTaskMutation = useMutation({
     mutationFn: (taskData: TaskFormData & { id: number }) => 
-      apiRequest(`/api/tasks/${taskData.id}`, {
-        method: 'PATCH',
-        body: taskData,
-      }),
+      apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       setIsTaskDialogOpen(false);
@@ -130,7 +145,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: (taskId: number) => 
-      apiRequest(`/api/tasks/${taskId}`, { method: 'DELETE' }),
+      apiRequest('DELETE', `/api/tasks/${taskId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       setDeleteTaskId(null);
@@ -144,12 +159,9 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   // Toggle task completion
   const toggleTaskCompletion = useMutation({
     mutationFn: (task: Task) => 
-      apiRequest(`/api/tasks/${task.id}`, {
-        method: 'PATCH',
-        body: { 
-          completed: !task.completed,
-          completedAt: !task.completed ? new Date().toISOString() : null,
-        },
+      apiRequest('PATCH', `/api/tasks/${task.id}`, { 
+        completed: !task.completed,
+        completedAt: !task.completed ? new Date().toISOString() : null,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
@@ -223,25 +235,39 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Build task hierarchy for a section
   const buildTaskHierarchy = (sectionId: string): TaskNode[] => {
-    const sectionTasks = tasks.filter(task => 
-      (task.milestoneId?.toString() === sectionId || sectionId === "section-1") && 
-      !task.parentTaskId
-    );
+    if (!tasks || !Array.isArray(tasks)) return [];
     
-    const buildChildren = (parentId: number): TaskNode[] => {
-      const children = tasks.filter(task => task.parentTaskId === parentId);
-      return children.map(child => ({
-        ...child,
-        children: buildChildren(child.id),
+    try {
+      const sectionTasks = tasks.filter(task => 
+        task && (
+          (task.milestoneId?.toString() === sectionId || sectionId === "section-1") && 
+          !task.parentTaskId
+        )
+      );
+      
+      const buildChildren = (parentId: number): TaskNode[] => {
+        if (!parentId || !tasks) return [];
+        
+        const children = tasks.filter(task => 
+          task && task.parentTaskId === parentId
+        );
+        
+        return children.map(child => ({
+          ...child,
+          children: buildChildren(child.id),
+          expanded: true,
+        }));
+      };
+
+      return sectionTasks.map(task => ({
+        ...task,
+        children: buildChildren(task.id),
         expanded: true,
       }));
-    };
-
-    return sectionTasks.map(task => ({
-      ...task,
-      children: buildChildren(task.id),
-      expanded: true,
-    }));
+    } catch (error) {
+      console.error('Error building task hierarchy:', error);
+      return [];
+    }
   };
 
   const renderTaskNode = (task: TaskNode, level: number = 0) => {
