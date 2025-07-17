@@ -11,8 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
-import { Search, Plus, Calendar, User, AlertCircle, Grid, List, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays, CheckCircle, Circle } from "lucide-react";
+import { format } from "date-fns";
 import TaskForm from "@/components/tasks/task-form";
 import type { Task, Project, User as UserType } from "@shared/schema";
 import { Link } from "wouter";
@@ -22,12 +27,14 @@ export default function Tasks() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
   const [sortBy, setSortBy] = useState("priority");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_month' | 'next_four_months' | 'custom'>('all');
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -84,14 +91,107 @@ export default function Tasks() {
     },
   });
 
+  const toggleTaskCompletion = useMutation({
+    mutationFn: (task: Task) => 
+      apiRequest('PATCH', `/api/tasks/${task.id}`, { 
+        status: task.status === 'completed' ? 'todo' : 'completed',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      toast({
+        title: "Success",
+        description: "Task updated successfully",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    },
+  });
 
+
+
+  const getDateRangeForFilter = (filter: typeof dueDateFilter) => {
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    
+    switch (filter) {
+      case 'today':
+        return { start: startOfDay, end: endOfDay };
+      case 'this_week':
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+        return { start: startOfWeek, end: endOfWeek };
+      case 'next_two_weeks':
+        const twoWeeksFromNow = new Date(today);
+        twoWeeksFromNow.setDate(today.getDate() + 14);
+        twoWeeksFromNow.setHours(23, 59, 59, 999);
+        return { start: startOfDay, end: twoWeeksFromNow };
+      case 'next_month':
+        const oneMonthFromNow = new Date(today);
+        oneMonthFromNow.setMonth(today.getMonth() + 1);
+        oneMonthFromNow.setHours(23, 59, 59, 999);
+        return { start: startOfDay, end: oneMonthFromNow };
+      case 'next_four_months':
+        const fourMonthsFromNow = new Date(today);
+        fourMonthsFromNow.setMonth(today.getMonth() + 4);
+        fourMonthsFromNow.setHours(23, 59, 59, 999);
+        return { start: startOfDay, end: fourMonthsFromNow };
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          const start = new Date(customStartDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(customEndDate);
+          end.setHours(23, 59, 59, 999);
+          return { start, end };
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
 
   const filteredAndSortedTasks = tasks?.filter((task) => {
     const matchesSearch = searchQuery === "" ||
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCompletion = 
+      completionFilter === 'all' || 
+      (completionFilter === 'completed' && task.status === 'completed') ||
+      (completionFilter === 'pending' && task.status !== 'completed');
+
+    const matchesDueDate = () => {
+      if (dueDateFilter === 'all') return true;
+      if (!task.dueDate) return false;
+      
+      const dateRange = getDateRangeForFilter(dueDateFilter);
+      if (!dateRange) return false;
+      
+      const taskDueDate = new Date(task.dueDate);
+      return taskDueDate >= dateRange.start && taskDueDate <= dateRange.end;
+    };
     
-    return matchesSearch;
+    return matchesSearch && matchesCompletion && matchesDueDate();
   }).sort((a, b) => {
     switch (sortBy) {
       case "priority":
@@ -185,28 +285,115 @@ export default function Tasks() {
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
           {/* Search and Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search tasks..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search tasks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="priority">Sort by Priority</SelectItem>
+                  <SelectItem value="dueDate">Sort by Due Date</SelectItem>
+                  <SelectItem value="title">Sort by Title</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
+            {/* Completion Filter */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium">Completion Status:</span>
+              <RadioGroup
+                value={completionFilter}
+                onValueChange={(value) => setCompletionFilter(value as 'all' | 'completed' | 'pending')}
+                className="flex gap-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="all" />
+                  <Label htmlFor="all">All Tasks</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="completed" id="completed" />
+                  <Label htmlFor="completed">Completed</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="pending" id="pending" />
+                  <Label htmlFor="pending">Pending</Label>
+                </div>
+              </RadioGroup>
+            </div>
 
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="priority">Sort by Priority</SelectItem>
-                <SelectItem value="dueDate">Sort by Due Date</SelectItem>
-                <SelectItem value="title">Sort by Title</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Due Date Filter */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <span className="text-sm font-medium">Due Date:</span>
+              <div className="flex flex-col sm:flex-row gap-2 flex-1">
+                <Select value={dueDateFilter} onValueChange={(value) => setDueDateFilter(value as typeof dueDateFilter)}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="Filter by due date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Dates</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="next_two_weeks">Next Two Weeks</SelectItem>
+                    <SelectItem value="next_month">Next Month</SelectItem>
+                    <SelectItem value="next_four_months">Next Four Months</SelectItem>
+                    <SelectItem value="custom">Custom Date Range</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {dueDateFilter === 'custom' && (
+                  <div className="flex gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-32">
+                          <CalendarDays className="mr-2 h-4 w-4" />
+                          {customStartDate ? format(customStartDate, "MMM d") : "Start Date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={customStartDate}
+                          onSelect={setCustomStartDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-32">
+                          <CalendarDays className="mr-2 h-4 w-4" />
+                          {customEndDate ? format(customEndDate, "MMM d") : "End Date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={customEndDate}
+                          onSelect={setCustomEndDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 mb-6">
             <div className="flex gap-2">
               <div className="flex border rounded-md">
                 <Button
@@ -294,7 +481,7 @@ export default function Tasks() {
                     
                     {task.dueDate && (
                       <div className="flex items-center space-x-2 text-sm">
-                        <Calendar className="w-4 h-4" />
+                        <CalendarDays className="w-4 h-4" />
                         <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
                           Due: {new Date(task.dueDate).toLocaleDateString()}
                         </span>
@@ -304,7 +491,20 @@ export default function Tasks() {
                       </div>
                     )}
                     
-                    <div className="flex items-center justify-end pt-2">
+                    <div className="flex items-center justify-between pt-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => toggleTaskCompletion.mutate(task)}
+                        disabled={toggleTaskCompletion.isPending}
+                      >
+                        {task.status === 'completed' ? (
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-gray-400" />
+                        )}
+                      </Button>
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
@@ -354,7 +554,7 @@ export default function Tasks() {
                         
                         {task.dueDate && (
                           <div className="flex items-center space-x-2 text-sm">
-                            <Calendar className="w-4 h-4" />
+                            <CalendarDays className="w-4 h-4" />
                             <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
                               {new Date(task.dueDate).toLocaleDateString()}
                             </span>
@@ -364,7 +564,19 @@ export default function Tasks() {
                           </div>
                         )}
                         
-
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => toggleTaskCompletion.mutate(task)}
+                          disabled={toggleTaskCompletion.isPending}
+                        >
+                          {task.status === 'completed' ? (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-gray-400" />
+                          )}
+                        </Button>
                         
                         <Button
                           variant="outline"
