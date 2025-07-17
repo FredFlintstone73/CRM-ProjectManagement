@@ -44,6 +44,11 @@ interface SectionFormData {
   title: string;
 }
 
+interface EditingSectionState {
+  id: string;
+  title: string;
+}
+
 export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const { toast } = useToast();
   
@@ -65,6 +70,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const [isSectionDialogOpen, setIsSectionDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
+  const [editingSection, setEditingSection] = useState<EditingSectionState | null>(null);
 
   // Mock sections for now - will be replaced with real data
   const [sections, setSections] = useState<TaskSection[]>([
@@ -210,6 +216,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const openSectionDialog = () => {
     setSectionForm({ title: "" });
     setSelectedSection(null);
+    setEditingSection(null);
     setIsSectionDialogOpen(true);
   };
 
@@ -223,16 +230,41 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   const handleSubmitSection = () => {
     if (sectionForm.title.trim()) {
-      const newSection: TaskSection = {
-        id: `section-${Date.now()}`,
-        title: sectionForm.title.trim(),
-        tasks: [],
-      };
-      setSections(prev => [...prev, newSection]);
+      if (editingSection) {
+        // Update existing section
+        setSections(prev => 
+          prev.map(section => 
+            section.id === editingSection.id 
+              ? { ...section, title: sectionForm.title.trim() }
+              : section
+          )
+        );
+        setEditingSection(null);
+        toast({ title: "Section updated successfully" });
+      } else {
+        // Create new section
+        const newSection: TaskSection = {
+          id: `section-${Date.now()}`,
+          title: sectionForm.title.trim(),
+          tasks: [],
+        };
+        setSections(prev => [...prev, newSection]);
+        toast({ title: "Section created successfully" });
+      }
       setIsSectionDialogOpen(false);
       setSectionForm({ title: "" });
-      toast({ title: "Section created successfully" });
     }
+  };
+
+  const openEditSectionDialog = (section: TaskSection) => {
+    setEditingSection({ id: section.id, title: section.title });
+    setSectionForm({ title: section.title });
+    setIsSectionDialogOpen(true);
+  };
+
+  const deleteSection = (sectionId: string) => {
+    setSections(prev => prev.filter(section => section.id !== sectionId));
+    toast({ title: "Section deleted successfully" });
   };
 
   // Build task hierarchy for a section
@@ -375,7 +407,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   }
 
   return (
-    <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+    <div className="space-y-6 h-[calc(100vh-200px)] overflow-y-auto">
       <div className="flex justify-between items-center sticky top-0 bg-white z-10 py-4">
         <h2 className="text-xl font-semibold">Project Tasks</h2>
         <Button onClick={openSectionDialog}>
@@ -393,14 +425,31 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg">{section.title}</CardTitle>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => openTaskDialog(section.id)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Task
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => openEditSectionDialog(section)}
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => deleteSection(section.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => openTaskDialog(section.id)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Task
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -473,7 +522,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="none" disabled>
                       No team members available
                     </SelectItem>
                   )}
@@ -505,7 +554,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       <Dialog open={isSectionDialogOpen} onOpenChange={setIsSectionDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New Section</DialogTitle>
+            <DialogTitle>{editingSection ? "Edit Section" : "Add New Section"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -523,7 +572,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                 disabled={!sectionForm.title.trim()}
                 className="flex-1"
               >
-                Create Section
+                {editingSection ? "Update Section" : "Create Section"}
               </Button>
               <Button 
                 variant="outline" 
