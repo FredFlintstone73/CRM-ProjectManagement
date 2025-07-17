@@ -537,6 +537,16 @@ export default function Tasks() {
                       <span>{getProjectName(task.projectId)}</span>
                     </div>
                     
+                    {task.assignedTo && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <User className="w-4 h-4" />
+                        <span>Assigned to: {(() => {
+                          const assignee = contacts?.find((c: any) => c.id === task.assignedTo);
+                          return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown';
+                        })()}</span>
+                      </div>
+                    )}
+                    
                     {task.dueDate && (
                       <div className="flex items-center space-x-2 text-sm">
                         <CalendarDays className="w-4 h-4" />
@@ -609,6 +619,16 @@ export default function Tasks() {
                           <User className="w-4 h-4" />
                           <span>{getProjectName(task.projectId)}</span>
                         </div>
+                        
+                        {task.assignedTo && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <User className="w-4 h-4" />
+                            <span>{(() => {
+                              const assignee = contacts?.find((c: any) => c.id === task.assignedTo);
+                              return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown';
+                            })()}</span>
+                          </div>
+                        )}
                         
                         {task.dueDate && (
                           <div className="flex items-center space-x-2 text-sm">

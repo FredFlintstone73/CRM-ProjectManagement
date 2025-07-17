@@ -438,7 +438,7 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
                     <SelectItem value="">Unassigned</SelectItem>
                     {contacts.filter(c => c.contactType === 'team_member').map(contact => (
                       <SelectItem key={contact.id} value={contact.id.toString()}>
-                        {contact.firstName} {contact.familyName}
+                        {contact.firstName} {contact.lastName}
                       </SelectItem>
                     ))}
                   </SelectContent>
