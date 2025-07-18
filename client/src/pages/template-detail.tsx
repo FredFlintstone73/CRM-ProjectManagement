@@ -227,7 +227,7 @@ const TaskDisplay = ({
                   <SelectContent className="max-h-60">
                     {Array.from({ length: 85 }, (_, i) => -80 + i).map((days) => (
                       <SelectItem key={days} value={days.toString()}>
-                        {days > 0 ? `+${days}` : days} days {days > 0 ? 'after' : 'before'} meeting
+                        P{days > 0 ? `+${days}` : days}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -322,7 +322,7 @@ const TaskDisplay = ({
                   {task.name || task.title}
                 </h4>
                 <Badge variant="secondary" className="text-xs">
-                  {task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting} days from meeting
+                  P{task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}
                 </Badge>
               </div>
               {task.assignedTo && (

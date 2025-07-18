@@ -499,3 +499,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Consistent Compact Design**: Unified compact task appearance across templates, projects, and task forms
 - **Custom Section Styling**: Updated CardTitle to use exact 14px font size with semibold weight and tracking-tight
 - **Add Task Button Styling**: Applied custom purple color (#8e7cc3) and 12px font size to template "Add Task" buttons
+
+### Meeting Date Offset Display Format Enhancement (July 18, 2025)
+- **P-Format Implementation**: Changed Days from Meeting display format to use "P-" prefix for days before and "P+" for days after meeting
+- **Dropdown Options Update**: Updated all 85 dropdown options from "-20 days before meeting" format to compact "P-20" format
+- **Task Badge Display**: Updated task row badges from "+3 days from meeting" to clean "P+3" format
+- **Consistent Notation**: Unified meeting date offset notation across template editor for cleaner, more professional appearance
