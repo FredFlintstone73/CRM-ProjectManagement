@@ -160,6 +160,8 @@ const TaskDisplay = ({
   setEditingTaskDueDate: (date: string) => void,
   editingTaskAssignedTo: string,
   setEditingTaskAssignedTo: (assignedTo: string) => void,
+  editingTaskAssignedToRole: string,
+  setEditingTaskAssignedToRole: (role: string) => void,
   editingTaskDaysFromMeeting: string,
   setEditingTaskDaysFromMeeting: (days: string) => void,
   startEditingTask: (task: any) => void,
@@ -213,7 +215,7 @@ const TaskDisplay = ({
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Days from Meeting</label>
                 <Select value={editingTaskDaysFromMeeting} onValueChange={setEditingTaskDaysFromMeeting}>
@@ -238,6 +240,8 @@ const TaskDisplay = ({
                   className="bg-gray-100 text-gray-500"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Assigned To</label>
                 <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
@@ -255,6 +259,31 @@ const TaskDisplay = ({
                         {member.firstName} {member.lastName}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Or Assign to Role</label>
+                <Select value={editingTaskAssignedToRole} onValueChange={setEditingTaskAssignedToRole}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Role Assignment</SelectItem>
+                    <SelectItem value="estate_planner">Estate Planner</SelectItem>
+                    <SelectItem value="financial_planner">Financial Planner</SelectItem>
+                    <SelectItem value="tax_planner">Tax Planner</SelectItem>
+                    <SelectItem value="money_manager">Money Manager</SelectItem>
+                    <SelectItem value="insurance_pc">Insurance P&C</SelectItem>
+                    <SelectItem value="insurance_business">Insurance Business</SelectItem>
+                    <SelectItem value="insurance_life_ltc_disability">Insurance Life/LTC/Disability</SelectItem>
+                    <SelectItem value="insurance_health">Insurance Health</SelectItem>
+                    <SelectItem value="trusted_advisor">Trusted Advisor</SelectItem>
+                    <SelectItem value="admin_assistant">Admin Assistant</SelectItem>
+                    <SelectItem value="deliverables_team_coordinator">Deliverables Team Coordinator</SelectItem>
+                    <SelectItem value="human_relations">Human Relations</SelectItem>
+                    <SelectItem value="accountant">Accountant</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -348,6 +377,8 @@ const TaskDisplay = ({
               setEditingTaskDueDate={setEditingTaskDueDate}
               editingTaskAssignedTo={editingTaskAssignedTo}
               setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+              editingTaskAssignedToRole={editingTaskAssignedToRole}
+              setEditingTaskAssignedToRole={setEditingTaskAssignedToRole}
               editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
               setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
               startEditingTask={startEditingTask}
@@ -387,6 +418,8 @@ const SortableSection = ({
   setEditingTaskDueDate,
   editingTaskAssignedTo,
   setEditingTaskAssignedTo,
+  editingTaskAssignedToRole,
+  setEditingTaskAssignedToRole,
   editingTaskDaysFromMeeting,
   setEditingTaskDaysFromMeeting,
   teamMembers,
@@ -551,6 +584,8 @@ const SortableSection = ({
                   setEditingTaskDueDate={setEditingTaskDueDate}
                   editingTaskAssignedTo={editingTaskAssignedTo}
                   setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                  editingTaskAssignedToRole={editingTaskAssignedToRole}
+                  setEditingTaskAssignedToRole={setEditingTaskAssignedToRole}
                   editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
                   setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
                   startEditingTask={startEditingTask}
@@ -582,6 +617,7 @@ export default function TemplateDetail() {
   const [editingTaskDescription, setEditingTaskDescription] = useState<string>("");
   const [editingTaskDueDate, setEditingTaskDueDate] = useState<string>("");
   const [editingTaskAssignedTo, setEditingTaskAssignedTo] = useState<string>("");
+  const [editingTaskAssignedToRole, setEditingTaskAssignedToRole] = useState<string>("");
   const [editingTaskDaysFromMeeting, setEditingTaskDaysFromMeeting] = useState<string>("");
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
@@ -756,8 +792,8 @@ export default function TemplateDetail() {
 
   // Mutation for updating task
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, title, description, dueDate, assignedTo, daysFromMeeting }: any) => {
-      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description, dueDate, assignedTo, daysFromMeeting });
+    mutationFn: async ({ taskId, title, description, dueDate, assignedTo, assignedToRole, daysFromMeeting }: any) => {
+      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description, dueDate, assignedTo, assignedToRole, daysFromMeeting });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
@@ -767,6 +803,7 @@ export default function TemplateDetail() {
       setEditingTaskDescription("");
       setEditingTaskDueDate("");
       setEditingTaskAssignedTo("");
+      setEditingTaskAssignedToRole("");
     },
   });
 
@@ -843,6 +880,9 @@ export default function TemplateDetail() {
       }
     }
     setEditingTaskAssignedTo(assignedValue);
+    
+    // Set role assignment if exists
+    setEditingTaskAssignedToRole(task.assignedToRole || "none");
   };
 
   const saveEditingTask = () => {
@@ -857,6 +897,7 @@ export default function TemplateDetail() {
       }
       
       const daysFromMeeting = editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0;
+      const assignedToRole = editingTaskAssignedToRole && editingTaskAssignedToRole !== "none" ? editingTaskAssignedToRole : null;
       
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
@@ -864,6 +905,7 @@ export default function TemplateDetail() {
         description: editingTaskDescription || null,
         dueDate: null, // Templates don't have specific due dates
         assignedTo: assignedTo,
+        assignedToRole: assignedToRole,
         daysFromMeeting: daysFromMeeting,
       });
     }
@@ -875,6 +917,7 @@ export default function TemplateDetail() {
     setEditingTaskDescription("");
     setEditingTaskDueDate("");
     setEditingTaskAssignedTo("unassigned");
+    setEditingTaskAssignedToRole("none");
     setEditingTaskDaysFromMeeting("");
   };
 
@@ -1119,6 +1162,8 @@ export default function TemplateDetail() {
                       setEditingTaskDueDate={setEditingTaskDueDate}
                       editingTaskAssignedTo={editingTaskAssignedTo}
                       setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                      editingTaskAssignedToRole={editingTaskAssignedToRole}
+                      setEditingTaskAssignedToRole={setEditingTaskAssignedToRole}
                       editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
                       setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
                       teamMembers={teamMembers}

@@ -152,7 +152,8 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
             priority: task.priority || 'medium',
             status: 'todo',
             dueDate: dueDate.toISOString().split('T')[0],
-            assignedTo: null, // No automatic assignment for now
+            assignedTo: task.assignedTo || null,
+            assignedToRole: task.assignedToRole || null,
             parentTaskId: task.parentTaskId,
             milestoneId: task.milestone?.id || null,
             daysFromMeeting: daysFromMeeting,

@@ -278,6 +278,7 @@ export const tasks = pgTable("tasks", {
   milestoneId: integer("milestone_id").references(() => milestones.id),
   parentTaskId: integer("parent_task_id").references(() => tasks.id),
   assignedTo: integer("assigned_to").references(() => contacts.id),
+  assignedToRole: contactRoleEnum("assigned_to_role"), // Role-based assignment for templates
   status: taskStatusEnum("status").default("todo"),
   priority: integer("priority").default(25), // 1-50 priority scale
   dueDate: timestamp("due_date"),
@@ -693,6 +694,23 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   dueDate: z.string().optional().nullable(),
   // Handle assignment field as string or number (will be converted server-side)
   assignedTo: z.union([z.string(), z.number()]).optional().nullable(),
+  // Handle role-based assignment for templates
+  assignedToRole: z.enum([
+    "estate_planner",
+    "financial_planner", 
+    "tax_planner",
+    "money_manager",
+    "insurance_pc",
+    "insurance_business",
+    "insurance_life_ltc_disability",
+    "insurance_health",
+    "trusted_advisor",
+    "admin_assistant",
+    "deliverables_team_coordinator",
+    "human_relations",
+    "accountant",
+    "other"
+  ]).optional().nullable(),
   // Handle priority field as string that will be converted to number
   priority: z.union([z.string(), z.number()]).optional(),
   // Make description nullable for partial updates

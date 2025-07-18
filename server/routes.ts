@@ -200,6 +200,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to resolve role-based assignments
+  const resolveRoleAssignment = async (role: string) => {
+    if (!role) return null;
+    
+    // Get all active team members
+    const teamMembers = await storage.getContactsByType('team_member');
+    const activeTeamMembers = teamMembers.filter(member => member.status === 'active');
+    
+    // Find a team member with the specified role
+    const assignedMember = activeTeamMembers.find(member => member.role === role);
+    
+    return assignedMember ? assignedMember.id : null;
+  };
+
   // Create project from template with due date calculations
   app.post('/api/projects/from-template', isAuthenticated, async (req: any, res) => {
     try {
@@ -223,6 +237,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create tasks from the calculated task data
       const createdTasks = [];
       for (const taskData of tasks || []) {
+        // Resolve role-based assignment if assignedToRole is provided
+        let assignedToId = null;
+        if (taskData.assignedToRole) {
+          assignedToId = await resolveRoleAssignment(taskData.assignedToRole);
+        } else if (taskData.assignedTo) {
+          assignedToId = parseInt(taskData.assignedTo);
+        }
+        
         const task = await storage.createTask({
           title: taskData.title,
           description: taskData.description || '',
@@ -231,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           priority: (taskData.priority || 'medium') as const,
           estimatedDays: 1,
           dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
-          assignedTo: taskData.assignedTo ? parseInt(taskData.assignedTo) : null,
+          assignedTo: assignedToId,
           description: `${taskData.description || ''}\nMilestone: ${taskData.milestone || 'N/A'}\nParent Task: ${taskData.parentTask || 'N/A'}\nSub-Task: ${taskData.subTask || 'N/A'}\nSub-Sub-Task: ${taskData.subSubTask || 'N/A'}\nDaysFromMeeting: ${taskData.daysFromMeeting || 0}\nBasedOnDrpm: ${taskData.basedOnDrpm || false}`
         }, userId);
         createdTasks.push(task);
@@ -605,6 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...taskData,
         assignedTo: assignedTo,
         priority: priority,
+        assignedToRole: taskData.assignedToRole || null,
       };
       
 
@@ -659,6 +682,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: taskData.description || null,
         dueDate: taskData.dueDate || null,
         daysFromMeeting: taskData.daysFromMeeting !== undefined ? parseInt(taskData.daysFromMeeting.toString()) : undefined,
+        assignedToRole: taskData.assignedToRole || null,
       };
       
       // Remove fields that are null/undefined from the update, but keep title if provided
