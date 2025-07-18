@@ -207,6 +207,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const templateTasks = await storage.getTemplateTasksByTemplate(matchingTemplate.id);
           const templateMilestones = await storage.getProjectTemplateMilestones(matchingTemplate.id);
           
+          console.log('Template tasks retrieved:', templateTasks);
+          console.log('Template milestones retrieved:', templateMilestones);
+          
           // Create the project
           const newProject = await storage.createProject(projectData, userId);
           
@@ -246,8 +249,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               templateMilestones.find(tm => tm.id === templateTask.milestoneId)?.title === m.title
             );
             
+            // Skip tasks with empty or null titles
+            if (!templateTask.title || templateTask.title.trim() === '') {
+              console.log('Skipping template task with empty title:', templateTask);
+              continue;
+            }
+            
             const task = await storage.createTask({
-              title: templateTask.title,
+              title: templateTask.title.trim(),
               description: templateTask.description || '',
               projectId: newProject.id,
               status: 'todo',
