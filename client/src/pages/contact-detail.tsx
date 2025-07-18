@@ -14,13 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera, StickyNote } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera, StickyNote, FolderOpen, Plus, ExternalLink } from "lucide-react";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
 import ContactNotes from "@/components/contacts/contact-notes";
 import NotesDisplay from "@/components/contacts/notes-display";
 import ContactFiles from "@/components/contacts/contact-files";
-import type { Contact } from "@shared/schema";
+import type { Contact, Project } from "@shared/schema";
 
 interface ContactDetailParams {
   id: string;
@@ -49,6 +49,21 @@ export default function ContactDetail() {
     enabled: isAuthenticated && !!id,
     staleTime: 0, // Force fresh data
     cacheTime: 0, // Don't cache data
+  });
+
+  // Query for projects associated with this contact
+  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
+    queryKey: ['/api/projects', 'client', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/projects?clientId=${id}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects');
+      }
+      return response.json();
+    },
+    enabled: isAuthenticated && !!id,
   });
 
   const updateStatusMutation = useMutation({
@@ -1087,12 +1102,89 @@ export default function ContactDetail() {
           <TabsContent value="projects" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Related Projects</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FolderOpen className="h-5 w-5" />
+                    Related Projects
+                  </CardTitle>
+                  <Button 
+                    onClick={() => navigate('/projects')}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    New Project
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-gray-500 text-center py-8">
-                  Related projects will be displayed here
-                </div>
+                {projectsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center space-x-4 animate-pulse">
+                        <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : projects && projects.length > 0 ? (
+                  <div className="space-y-4">
+                    {projects.map((project) => (
+                      <div 
+                        key={project.id} 
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <FolderOpen className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">{project.name}</h3>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span className="capitalize">{project.status}</span>
+                              {project.dueDate && (
+                                <span>Due: {new Date(project.dueDate).toLocaleDateString()}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            variant={project.status === 'active' ? 'default' : 'secondary'}
+                            className="capitalize"
+                          >
+                            {project.status}
+                          </Badge>
+                          <Button
+                            onClick={() => navigate(`/projects/${project.id}`)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-primary hover:text-primary/80"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FolderOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-lg font-medium mb-2">No projects yet</p>
+                    <p className="text-sm mb-4">This client doesn't have any projects associated with them.</p>
+                    <Button 
+                      onClick={() => navigate('/projects')}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Create First Project
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
