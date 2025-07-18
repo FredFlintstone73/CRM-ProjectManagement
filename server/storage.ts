@@ -89,6 +89,7 @@ export interface IStorage {
   deleteMilestone(id: number): Promise<void>;
   getMilestonesByProject(projectId: number): Promise<Milestone[]>;
   getMilestonesByTemplate(templateId: number): Promise<Milestone[]>;
+  reorderMilestones(milestoneIds: number[]): Promise<void>;
 
   // Task comment operations
   getTaskComments(taskId: number): Promise<TaskComment[]>;
@@ -662,6 +663,16 @@ export class DatabaseStorage implements IStorage {
       .from(milestones)
       .where(eq(milestones.templateId, templateId))
       .orderBy(milestones.sortOrder, desc(milestones.createdAt));
+  }
+
+  async reorderMilestones(milestoneIds: number[]): Promise<void> {
+    // Update sortOrder for each milestone based on its position in the array
+    for (let i = 0; i < milestoneIds.length; i++) {
+      await db
+        .update(milestones)
+        .set({ sortOrder: i + 1 })
+        .where(eq(milestones.id, milestoneIds[i]));
+    }
   }
 
   // Task comment operations

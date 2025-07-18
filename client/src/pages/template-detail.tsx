@@ -30,6 +30,23 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import type { ProjectTemplate } from "@shared/schema";
+import { 
+  DndContext, 
+  closestCenter, 
+  KeyboardSensor, 
+  PointerSensor, 
+  useSensor, 
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import { 
+  arrayMove, 
+  SortableContext, 
+  sortableKeyboardCoordinates, 
+  verticalListSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TemplateDetailParams {
   id: string;
@@ -371,6 +388,36 @@ export default function TemplateDetail() {
     },
   });
 
+  // Mutation to delete milestone
+  const deleteMilestoneMutation = useMutation({
+    mutationFn: async (milestoneId: number) => {
+      return await apiRequest('DELETE', `/api/milestones/${milestoneId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      toast({ title: 'Success', description: 'Section deleted successfully' });
+    },
+    onError: (error) => {
+      console.error('Error deleting milestone:', error);
+      toast({ title: 'Error', description: 'Failed to delete section', variant: 'destructive' });
+    }
+  });
+
+  // Mutation to reorder milestones
+  const reorderMilestonesMutation = useMutation({
+    mutationFn: async (milestoneIds: number[]) => {
+      return await apiRequest('PUT', '/api/milestones/reorder', { milestoneIds });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      toast({ title: 'Success', description: 'Sections reordered successfully' });
+    },
+    onError: (error) => {
+      console.error('Error reordering milestones:', error);
+      toast({ title: 'Error', description: 'Failed to reorder sections', variant: 'destructive' });
+    }
+  });
+
   const startEditing = (milestone: any) => {
     setEditingMilestone(milestone.id);
     setEditingTitle(milestone.title);
@@ -562,6 +609,181 @@ export default function TemplateDetail() {
     }
   };
 
+  const handleDeleteSection = (milestoneId: number, milestoneTitle: string) => {
+    if (confirm(`Are you sure you want to delete section "${milestoneTitle}"? This will remove all tasks in this section.`)) {
+      deleteMilestoneMutation.mutate(milestoneId);
+    }
+  };
+
+  // Set up drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = milestones.findIndex((milestone) => milestone.id === active.id);
+      const newIndex = milestones.findIndex((milestone) => milestone.id === over?.id);
+      
+      const reorderedMilestones = arrayMove(milestones, oldIndex, newIndex);
+      const milestoneIds = reorderedMilestones.map(m => m.id);
+      
+      reorderMilestonesMutation.mutate(milestoneIds);
+    }
+  };
+
+  // Sortable section component
+  const SortableSection = ({ milestone, milestoneIndex, milestoneTasks, hierarchicalTasks }: any) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: milestone.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+    };
+
+    const isOpen = openPhases.includes(milestone?.id);
+    const taskCount = milestoneTasks.length;
+    const isEditing = editingMilestone === milestone?.id;
+
+    return (
+      <Card 
+        ref={setNodeRef} 
+        style={style} 
+        className="overflow-hidden group"
+      >
+        <Collapsible open={isOpen} onOpenChange={() => togglePhase(milestone?.id)}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="hover:bg-gray-50 cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    {...attributes}
+                    {...listeners}
+                    className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded"
+                  >
+                    <GripVertical className="w-4 h-4 text-gray-400" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isOpen ? (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                  {isEditing ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && saveEditing()}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-lg font-medium"
+                        autoFocus
+                      />
+                      <Button size="sm" variant="outline" onClick={(e) => {
+                        e.stopPropagation();
+                        saveEditing();
+                      }}>
+                        <Save className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={(e) => {
+                        e.stopPropagation();
+                        cancelEditing();
+                      }}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-lg">{milestone?.title}</CardTitle>
+                      {milestone?.id && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditing(milestone);
+                            }}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSection(milestone.id, milestone.title);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Section {milestoneIndex + 1}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <CardContent className="pt-0">
+              <Separator className="mb-4" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleAddTask(milestone.id)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Task
+                  </Button>
+                </div>
+                {hierarchicalTasks.map((task: any) => (
+                  <TaskDisplay 
+                    key={task.id} 
+                    task={task} 
+                    templateId={id} 
+                    milestone={milestone}
+                    editingTask={editingTask}
+                    setEditingTask={setEditingTask}
+                    updateTaskMutation={updateTaskMutation}
+                    deleteTaskMutation={deleteTaskMutation}
+                    createTaskMutation={createTaskMutation}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
+    );
+  };
+
   return (
     <>
       <Header 
@@ -627,111 +849,30 @@ export default function TemplateDetail() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Template Tasks</h2>
             
-            {Array.from(tasksByMilestone.entries()).map(([milestoneId, { milestone, tasks: milestoneTasks }], milestoneIndex) => {
-              const isOpen = openPhases.includes(milestone?.id);
-              const hierarchicalTasks = buildTaskHierarchy(milestoneTasks);
-              const taskCount = milestoneTasks.length;
-              const isEditing = editingMilestone === milestone?.id;
-              
-              return (
-                <Card key={milestone?.id} className="overflow-hidden group">
-                  <Collapsible open={isOpen} onOpenChange={() => togglePhase(milestone?.id)}>
-                    <CollapsibleTrigger asChild>
-                      <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {isOpen ? (
-                              <ChevronDown className="w-5 h-5 text-gray-500" />
-                            ) : (
-                              <ChevronRight className="w-5 h-5 text-gray-500" />
-                            )}
-                            <div className="flex-1">
-                              {isEditing ? (
-                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                  <Input
-                                    value={editingTitle}
-                                    onChange={(e) => setEditingTitle(e.target.value)}
-                                    className="text-lg font-semibold"
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        saveEditing();
-                                      } else if (e.key === 'Escape') {
-                                        cancelEditing();
-                                      }
-                                    }}
-                                    autoFocus
-                                  />
-                                  <Button size="sm" variant="outline" onClick={saveEditing}>
-                                    <Check className="w-4 h-4" />
-                                  </Button>
-                                  <Button size="sm" variant="outline" onClick={cancelEditing}>
-                                    <X className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  <CardTitle className="text-lg">{milestone?.title}</CardTitle>
-                                  {milestone?.id && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startEditing(milestone);
-                                      }}
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                      <Edit2 className="w-4 h-4" />
-                                    </Button>
-                                  )}
-                                </div>
-                              )}
-                              <p className="text-sm text-gray-500 mt-1">
-                                {taskCount} tasks
-                              </p>
-                            </div>
-                          </div>
-                          <Badge variant="secondary" className="ml-2">
-                            Section {milestoneIndex + 1}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent>
-                      <CardContent className="pt-0">
-                        <Separator className="mb-4" />
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleAddTask(milestone.id)}
-                            >
-                              <Plus className="w-4 h-4 mr-2" />
-                              Add Task
-                            </Button>
-                          </div>
-                          {hierarchicalTasks.map((task) => (
-                            <TaskDisplay 
-                              key={task.id} 
-                              task={task} 
-                              templateId={id} 
-                              milestone={milestone}
-                              editingTask={editingTask}
-                              setEditingTask={setEditingTask}
-                              updateTaskMutation={updateTaskMutation}
-                              deleteTaskMutation={deleteTaskMutation}
-                              createTaskMutation={createTaskMutation}
-                            />
-                          ))}
-                        </div>
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </Card>
-              );
-            })}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={milestones.map(m => m.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {Array.from(tasksByMilestone.entries()).map(([milestoneId, { milestone, tasks: milestoneTasks }], milestoneIndex) => {
+                  const hierarchicalTasks = buildTaskHierarchy(milestoneTasks);
+                  
+                  return (
+                    <SortableSection
+                      key={milestone?.id}
+                      milestone={milestone}
+                      milestoneIndex={milestoneIndex}
+                      milestoneTasks={milestoneTasks}
+                      hierarchicalTasks={hierarchicalTasks}
+                    />
+                  );
+                })}
+              </SortableContext>
+            </DndContext>
           </div>
         </div>
       </main>

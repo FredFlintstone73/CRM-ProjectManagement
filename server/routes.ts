@@ -919,6 +919,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/milestones/reorder', isAuthenticated, async (req: any, res) => {
+    try {
+      const { milestoneIds } = req.body;
+      await storage.reorderMilestones(milestoneIds);
+      res.json({ message: "Milestones reordered successfully" });
+    } catch (error) {
+      console.error("Error reordering milestones:", error);
+      res.status(500).json({ message: "Failed to reorder milestones" });
+    }
+  });
+
   app.get('/api/milestones/:id/tasks', isAuthenticated, async (req: any, res) => {
     try {
       const tasks = await storage.getTasksByMilestone(parseInt(req.params.id));
