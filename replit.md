@@ -421,3 +421,8 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Error Resolution**: Resolved React hooks violations and infinite loop performance issues
 - **Section Ordering Fix**: New sections now appear at the bottom of the list instead of the top for better user experience
 - **Task Validation Enhancement**: Fixed Zod validation schema to properly handle nullable fields and prevent task saving failures
+- **Enhanced Date Display**: Template editor now shows actual due dates instead of day offset numbers for better user understanding
+- **Meeting Date Offset Dropdown**: Added comprehensive dropdown with 85 options from -80 days before to +4 days after meeting
+- **Improved Task Form Layout**: Enhanced 3-column layout with Days from Meeting, Due Date, and Assigned To fields
+- **Component Error Resolution**: Fixed missing prop destructuring that was causing template editor crashes
+- **Chronological Offset Ordering**: Days from meeting dropdown now correctly orders from earliest (-80) to latest (+4) relative to meeting date

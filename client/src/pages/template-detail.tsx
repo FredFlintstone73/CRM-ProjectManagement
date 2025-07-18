@@ -221,7 +221,7 @@ const TaskDisplay = ({
                     <SelectValue placeholder="Select days" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
-                    {Array.from({ length: 85 }, (_, i) => 80 - i).map((days) => (
+                    {Array.from({ length: 85 }, (_, i) => -80 + i).map((days) => (
                       <SelectItem key={days} value={days.toString()}>
                         {days > 0 ? `+${days}` : days} days {days > 0 ? 'after' : 'before'} meeting
                       </SelectItem>
