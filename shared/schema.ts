@@ -46,6 +46,7 @@ export const contactTypeEnum = pgEnum("contact_type", [
 // Contact roles enum (for team members and strategic partners)
 export const contactRoleEnum = pgEnum("contact_role", [
   "estate_planner",
+  "estate_attorney",
   "financial_planner", 
   "tax_planner",
   "money_manager",
@@ -58,6 +59,7 @@ export const contactRoleEnum = pgEnum("contact_role", [
   "deliverables_team_coordinator",
   "human_relations",
   "accountant",
+  "client_service_rep",
   "other"
 ]);
 
@@ -278,7 +280,7 @@ export const tasks = pgTable("tasks", {
   milestoneId: integer("milestone_id").references(() => milestones.id),
   parentTaskId: integer("parent_task_id").references(() => tasks.id),
   assignedTo: integer("assigned_to").references(() => contacts.id),
-  assignedToRole: contactRoleEnum("assigned_to_role"), // Role-based assignment for templates
+  assignedToRole: text("assigned_to_role"), // Role-based assignment for templates
   status: taskStatusEnum("status").default("todo"),
   priority: integer("priority").default(25), // 1-50 priority scale
   dueDate: timestamp("due_date"),
@@ -697,6 +699,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   // Handle role-based assignment for templates
   assignedToRole: z.enum([
     "estate_planner",
+    "estate_attorney",
     "financial_planner", 
     "tax_planner",
     "money_manager",
@@ -709,6 +712,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
     "deliverables_team_coordinator",
     "human_relations",
     "accountant",
+    "client_service_rep",
     "other"
   ]).optional().nullable(),
   // Handle priority field as string that will be converted to number
