@@ -129,8 +129,6 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assignedTo: selectedAssignees,
-      assignedToRole: selectedRoles,
       priority: task?.priority || 25,
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
     },
@@ -226,6 +224,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label htmlFor="assignedTo">Assign To People</Label>
+            <p className="text-xs text-muted-foreground mb-1">Click to select multiple people</p>
             <MultiSelect
               options={assigneeOptions}
               selected={selectedAssignees}
@@ -264,6 +263,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         {/* Role Assignment */}
         <div className="space-y-1">
           <Label htmlFor="assignedToRole">Assign To Roles</Label>
+          <p className="text-xs text-muted-foreground mb-1">Click to select multiple roles</p>
           <MultiSelect
             options={roleOptions}
             selected={selectedRoles}

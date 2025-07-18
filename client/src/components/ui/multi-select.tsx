@@ -72,7 +72,7 @@ export function MultiSelect({
                   <Badge
                     variant="secondary"
                     key={item}
-                    className="mr-1 mb-1"
+                    className="mr-1 mb-1 cursor-pointer hover:bg-secondary/80"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
