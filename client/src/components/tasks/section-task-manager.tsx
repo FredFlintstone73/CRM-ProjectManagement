@@ -112,14 +112,9 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   // Update sections when milestones and tasks are loaded
   useEffect(() => {
     if (milestones.length > 0 && tasks.length >= 0) {
-      console.log('Building sections from milestones:', milestones.length, 'tasks:', tasks.length);
-      console.log('Sample milestone:', milestones[0]);
-      console.log('Sample task:', tasks[0]);
-      
       const sectionsFromMilestones = milestones.map(milestone => {
         // Find tasks that belong to this milestone
         const milestoneTasks = tasks.filter(task => task.milestoneId === milestone.id);
-        console.log(`Milestone ${milestone.id} (${milestone.title}): ${milestoneTasks.length} tasks`);
         
         return {
           id: `milestone-${milestone.id}`,
@@ -127,7 +122,6 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           tasks: milestoneTasks
         };
       });
-      console.log('Final sections:', sectionsFromMilestones);
       setSections(sectionsFromMilestones);
     }
   }, [milestones, tasks]);
@@ -336,12 +330,13 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     if (!tasks || !Array.isArray(tasks)) return [];
     
     try {
-      const currentSection = sections.find(s => s.id === sectionId);
-      const sectionTitle = currentSection?.title || '';
+      // Extract milestone ID from section ID (format: milestone-123)
+      const milestoneId = parseInt(sectionId.replace('milestone-', ''));
       
+      // Get top-level tasks (no parent) for this milestone
       const sectionTasks = tasks.filter(task => {
         if (!task || task.parentTaskId) return false;
-        return task.description?.startsWith(`[${sectionTitle}]`);
+        return task.milestoneId === milestoneId;
       });
       
       const buildChildren = (parentId: number): TaskNode[] => {
