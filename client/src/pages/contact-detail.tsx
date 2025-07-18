@@ -1137,28 +1137,17 @@ export default function ContactDetail() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <FolderOpen className="h-5 w-5" />
-                    Related Projects
+                    Progress Meetings
                   </CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      onClick={toggleSortOrder}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                    >
-                      {sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
-                      Sort by Date
-                    </Button>
-                    <Button 
-                      onClick={() => navigate('/projects')}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      New Project
-                    </Button>
-                  </div>
+                  <Button 
+                    onClick={toggleSortOrder}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    {sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                    Sort by Date
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -1213,15 +1202,8 @@ export default function ContactDetail() {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <FolderOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p className="text-lg font-medium mb-2">No projects yet</p>
-                    <p className="text-sm mb-4">This client doesn't have any projects associated with them.</p>
-                    <Button 
-                      onClick={() => navigate('/projects')}
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Create First Project
-                    </Button>
+                    <p className="text-lg font-medium mb-2">No progress meetings yet</p>
+                    <p className="text-sm">This client doesn't have any progress meetings scheduled.</p>
                   </div>
                 )}
               </CardContent>
