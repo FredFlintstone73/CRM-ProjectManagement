@@ -396,17 +396,88 @@ const SortableSection = ({
                 </Button>
               </div>
               {hierarchicalTasks.map((task: any) => (
-                <TaskDisplay 
-                  key={task.id} 
-                  task={task} 
-                  templateId={templateId} 
-                  milestone={milestone}
-                  editingTask={editingTask}
-                  setEditingTask={setEditingTask}
-                  updateTaskMutation={updateTaskMutation}
-                  deleteTaskMutation={deleteTaskMutation}
-                  createTaskMutation={createTaskMutation}
-                />
+                <div key={task.id} className="border-l-2 border-blue-200 pl-4 space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-800">{task.title}</div>
+                      {task.description && (
+                        <div className="text-sm text-gray-600 mt-1">{task.description}</div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAddTask(milestone.id, task.id)}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Sub-task
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteTaskMutation.mutate(task.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Sub-tasks */}
+                  {task.subtasks && task.subtasks.map((subtask: any) => (
+                    <div key={subtask.id} className="ml-4 border-l-2 border-green-200 pl-4 space-y-2">
+                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-700">{subtask.title}</div>
+                          {subtask.description && (
+                            <div className="text-sm text-gray-500 mt-1">{subtask.description}</div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAddTask(milestone.id, subtask.id)}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Sub-sub-task
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deleteTaskMutation.mutate(subtask.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Sub-sub-tasks */}
+                      {subtask.subtasks && subtask.subtasks.map((subsubtask: any) => (
+                        <div key={subsubtask.id} className="ml-4 border-l-2 border-purple-200 pl-4">
+                          <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-600">{subsubtask.title}</div>
+                              {subsubtask.description && (
+                                <div className="text-sm text-gray-400 mt-1">{subsubtask.description}</div>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteTaskMutation.mutate(subsubtask.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               ))}
             </div>
           </CardContent>
@@ -578,10 +649,15 @@ export default function TemplateDetail() {
     }
   };
 
-  const handleAddTask = (milestoneId: number) => {
+  const handleAddTask = (milestoneId: number, parentTaskId?: number) => {
     const title = prompt('Enter task title:');
     if (title) {
-      createTaskMutation.mutate({ title, description: '', milestoneId });
+      createTaskMutation.mutate({ 
+        title, 
+        description: '', 
+        milestoneId, 
+        parentTaskId: parentTaskId || null 
+      });
     }
   };
 
@@ -635,8 +711,29 @@ export default function TemplateDetail() {
     }
   };
 
-  // For now, we'll use empty tasks arrays until we fix the milestone loading issue
-  const taskQueries = { data: [] };
+  // Fetch tasks for each milestone
+  const taskQueries = useQuery({
+    queryKey: ['template-tasks', id, milestones.map(m => m.id)],
+    queryFn: async () => {
+      if (!milestones || milestones.length === 0) return [];
+      
+      const taskPromises = milestones.map(async (milestone) => {
+        const response = await fetch(`/api/milestones/${milestone.id}/tasks`, {
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          console.error(`Failed to fetch tasks for milestone ${milestone.id}`);
+          return { milestoneId: milestone.id, tasks: [] };
+        }
+        const tasks = await response.json();
+        return { milestoneId: milestone.id, tasks };
+      });
+      
+      const results = await Promise.all(taskPromises);
+      return results;
+    },
+    enabled: !!id && isAuthenticated && milestones.length > 0,
+  });
 
   // Prepare data for rendering
   const tasksByMilestone = useMemo(() => {
