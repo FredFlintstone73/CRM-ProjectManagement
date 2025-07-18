@@ -1,32 +1,46 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
-import { 
-  ArrowLeft, 
-  ChevronDown, 
-  ChevronRight,
-  FileText,
-  Calendar,
-  Users,
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  ArrowLeft,
   Edit2,
-  Check,
+  Save,
   X,
   Plus,
   Trash2,
+  ChevronRight,
+  ChevronDown,
+  FileText,
+  Calendar,
+  Clock,
   GripVertical,
-  Save
 } from "lucide-react";
 import { Link } from "wouter";
 import type { ProjectTemplate } from "@shared/schema";
@@ -66,37 +80,172 @@ interface TaskTemplate {
 
 // Create hierarchical task structure using actual parentTaskId
 const buildTaskHierarchy = (tasks: TaskTemplate[]) => {
-  // Create a map for quick lookup
   const taskMap = new Map<number, TaskTemplate>();
   
-  // Initialize all tasks with empty subtasks array
   tasks.forEach(task => {
     taskMap.set(task.id, { ...task, subtasks: [] });
   });
   
-  // Build hierarchy by linking children to parents
   const rootTasks: TaskTemplate[] = [];
   
   tasks.forEach(task => {
     const currentTask = taskMap.get(task.id)!;
     
     if (task.parentTaskId === null || task.parentTaskId === undefined) {
-      // Root level task
       rootTasks.push(currentTask);
     } else {
-      // Child task - add to parent's subtasks
       const parentTask = taskMap.get(task.parentTaskId);
       if (parentTask) {
         if (!parentTask.subtasks) parentTask.subtasks = [];
         parentTask.subtasks.push(currentTask);
       } else {
-        // If parent not found, treat as root task
         rootTasks.push(currentTask);
       }
     }
   });
   
   return rootTasks;
+};
+
+// TaskDisplay component for recursive task rendering
+const TaskDisplay = ({ 
+  task, 
+  templateId, 
+  level = 0, 
+  milestone, 
+  editingTask, 
+  setEditingTask, 
+  updateTaskMutation, 
+  deleteTaskMutation, 
+  createTaskMutation 
+}: { 
+  task: TaskTemplate, 
+  templateId: string | undefined, 
+  level?: number,
+  milestone: any,
+  editingTask: number | null,
+  setEditingTask: (id: number | null) => void,
+  updateTaskMutation: any,
+  deleteTaskMutation: any,
+  createTaskMutation: any
+}) => {
+  const indentClass = level === 0 ? '' : level === 1 ? 'ml-6' : level === 2 ? 'ml-12' : 'ml-16';
+  const bgClass = level === 0 ? 'bg-white' : level === 1 ? 'bg-gray-50 border-l-4 border-l-blue-200' : level === 2 ? 'bg-gray-25 border-l-4 border-l-green-200' : 'bg-white border-l-4 border-l-purple-200';
+  
+  const [editTitle, setEditTitle] = useState(task.name);
+  const [editDescription, setEditDescription] = useState(task.description);
+  
+  const handleSaveTask = () => {
+    updateTaskMutation.mutate({ taskId: task.id, title: editTitle, description: editDescription });
+  };
+  
+  const handleCancelEdit = () => {
+    setEditTitle(task.name);
+    setEditDescription(task.description);
+    setEditingTask(null);
+  };
+  
+  const handleAddSubtask = () => {
+    const title = prompt('Enter subtask title:');
+    if (title) {
+      createTaskMutation.mutate({ 
+        title, 
+        description: '', 
+        milestoneId: milestone.id, 
+        parentTaskId: task.id 
+      });
+    }
+  };
+  
+  const handleDeleteTask = () => {
+    if (confirm('Are you sure you want to delete this task?')) {
+      deleteTaskMutation.mutate(task.id);
+    }
+  };
+  
+  const isEditing = editingTask === task.id;
+  
+  return (
+    <div className={`space-y-2 ${indentClass}`}>
+      <div className={`border rounded-lg p-4 ${bgClass} group`}>
+        {isEditing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Title</label>
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Enter task title"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Description</label>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Enter task description"
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSaveTask}>
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="font-medium">{task.name}</h4>
+                <Badge variant="secondary" className="text-xs">
+                  {task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting} days
+                </Badge>
+              </div>
+              {task.description && (
+                <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+              )}
+            </div>
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button size="sm" variant="ghost" onClick={() => setEditingTask(task.id)}>
+                <Edit2 className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={handleAddSubtask}>
+                <Plus className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={handleDeleteTask} className="text-red-500">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Recursively render subtasks */}
+      {task.subtasks && task.subtasks.length > 0 && (
+        <div className="space-y-2">
+          {task.subtasks.map((subtask) => (
+            <TaskDisplay 
+              key={subtask.id} 
+              task={subtask} 
+              templateId={templateId}
+              level={level + 1}
+              milestone={milestone}
+              editingTask={editingTask}
+              setEditingTask={setEditingTask}
+              updateTaskMutation={updateTaskMutation}
+              deleteTaskMutation={deleteTaskMutation}
+              createTaskMutation={createTaskMutation}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 // Sortable section component
@@ -267,502 +416,141 @@ const SortableSection = ({
   );
 };
 
-
-
-// TaskDisplay component for recursive task rendering with editing
-const TaskDisplay = ({ 
-  task, 
-  templateId, 
-  level = 0, 
-  milestone, 
-  editingTask, 
-  setEditingTask, 
-  updateTaskMutation, 
-  deleteTaskMutation, 
-  createTaskMutation 
-}: { 
-  task: TaskTemplate, 
-  templateId: string | undefined, 
-  level?: number,
-  milestone: any,
-  editingTask: number | null,
-  setEditingTask: (id: number | null) => void,
-  updateTaskMutation: any,
-  deleteTaskMutation: any,
-  createTaskMutation: any
-}) => {
-  const indentClass = level === 0 ? '' : level === 1 ? 'ml-6' : level === 2 ? 'ml-12' : 'ml-16';
-  const bgClass = level === 0 ? 'bg-white' : level === 1 ? 'bg-gray-50 border-l-4 border-l-blue-200' : level === 2 ? 'bg-gray-25 border-l-4 border-l-green-200' : 'bg-white border-l-4 border-l-purple-200';
-  
-  const [editTitle, setEditTitle] = useState(task.name);
-  const [editDescription, setEditDescription] = useState(task.description);
-  
-  const handleSaveTask = () => {
-    updateTaskMutation.mutate({ taskId: task.id, title: editTitle, description: editDescription });
-  };
-  
-  const handleCancelEdit = () => {
-    setEditTitle(task.name);
-    setEditDescription(task.description);
-    setEditingTask(null);
-  };
-  
-  const handleAddSubtask = () => {
-    const title = prompt('Enter subtask title:');
-    if (title) {
-      createTaskMutation.mutate({ 
-        title, 
-        description: '', 
-        milestoneId: milestone.id, 
-        parentTaskId: task.id 
-      });
-    }
-  };
-  
-  const handleDeleteTask = () => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      deleteTaskMutation.mutate(task.id);
-    }
-  };
-  
-  const isEditing = editingTask === task.id;
-  
-  return (
-    <div className={`space-y-2 ${indentClass}`}>
-      <div className={`border rounded-lg p-4 ${bgClass} group`}>
-        {isEditing ? (
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Title</label>
-              <Input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="Enter task title"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Description</label>
-              <Textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="Enter task description"
-                rows={3}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" onClick={handleSaveTask}>
-                <Save className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-start justify-between mb-2">
-              <h4 className="font-medium text-gray-900">
-                {task.name}
-              </h4>
-              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button size="sm" variant="ghost" onClick={() => setEditingTask(task.id)}>
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                {level < 2 && (
-                  <Button size="sm" variant="ghost" onClick={handleAddSubtask}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                )}
-                <Button size="sm" variant="ghost" onClick={handleDeleteTask}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-            {task.description && (
-              <p className="text-sm text-gray-600 mt-2">{task.description}</p>
-            )}
-          </>
-        )}
-      </div>
-      
-      {/* Render subtasks recursively */}
-      {task.subtasks && task.subtasks.length > 0 && (
-        <div className="space-y-2">
-          {task.subtasks.map((subtask) => (
-            <TaskDisplay 
-              key={subtask.id} 
-              task={subtask} 
-              templateId={templateId}
-              level={level + 1}
-              milestone={milestone}
-              editingTask={editingTask}
-              setEditingTask={setEditingTask}
-              updateTaskMutation={updateTaskMutation}
-              deleteTaskMutation={deleteTaskMutation}
-              createTaskMutation={createTaskMutation}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
 export default function TemplateDetail() {
   const { id } = useParams<TemplateDetailParams>();
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
+  
+  // State variables
   const [openPhases, setOpenPhases] = useState<number[]>([]);
   const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [editingTask, setEditingTask] = useState<number | null>(null);
-  const [isEditMode, setIsEditMode] = useState(true); // Start in edit mode
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
 
-  // Mutation to update milestone title
-  const updateMilestoneMutation = useMutation({
-    mutationFn: async ({ milestoneId, title }: { milestoneId: number; title: string }) => {
-      return await apiRequest('PUT', `/api/milestones/${milestoneId}`, { title });
+  // Fetch template data
+  const { data: template, isLoading: isTemplateLoading } = useQuery<ProjectTemplate>({
+    queryKey: ['/api/project-templates', id],
+    enabled: !!id && isAuthenticated,
+  });
+
+  // Fetch milestones
+  const { data: milestones = [], isLoading: isMilestonesLoading } = useQuery({
+    queryKey: ['/api/milestones', { templateId: id }],
+    enabled: !!id && isAuthenticated,
+  });
+
+  // Initialize template data
+  useEffect(() => {
+    if (template) {
+      setTemplateName(template.name);
+      setTemplateDescription(template.description || "");
+      setOpenPhases(milestones.map(m => m.id));
+    }
+  }, [template, milestones]);
+
+  // Toggle phase open/close
+  const togglePhase = (milestoneId: number) => {
+    setOpenPhases(prev => 
+      prev.includes(milestoneId)
+        ? prev.filter(id => id !== milestoneId)
+        : [...prev, milestoneId]
+    );
+  };
+
+  // Mutation for reordering milestones
+  const reorderMilestonesMutation = useMutation({
+    mutationFn: async (milestoneIds: number[]) => {
+      return await apiRequest('PUT', `/api/milestones/reorder`, { milestoneIds });
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Section name updated successfully",
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
-      setEditingMilestone(null);
-      setEditingTitle("");
     },
     onError: (error) => {
+      console.error('Error reordering milestones:', error);
       toast({
         title: "Error",
-        description: "Failed to update section name",
+        description: "Failed to reorder sections",
         variant: "destructive",
       });
     },
   });
 
-  // Mutation to update template details
-  const updateTemplateMutation = useMutation({
-    mutationFn: async ({ name, description }: { name: string; description: string }) => {
-      return await apiRequest('PUT', `/api/project-templates/${id}`, { name, description });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Template updated successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update template",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Mutation to create new milestone
+  // Mutation for creating milestone
   const createMilestoneMutation = useMutation({
     mutationFn: async ({ title }: { title: string }) => {
       return await apiRequest('POST', `/api/milestones`, { title, templateId: parseInt(id!) });
     },
-    onSuccess: (newMilestone) => {
-      toast({
-        title: "Success",
-        description: "Section created successfully",
-      });
-      // Auto-open the newly created milestone
-      setOpenPhases(prev => [...prev, newMilestone.id]);
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
-      queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to create section",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Mutation to create new task
-  const createTaskMutation = useMutation({
-    mutationFn: async ({ title, description, milestoneId, parentTaskId }: { title: string; description: string; milestoneId: number; parentTaskId?: number }) => {
-      return await apiRequest('POST', `/api/tasks`, { title, description, milestoneId, parentTaskId });
-    },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Task created successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to create task",
-        variant: "destructive",
-      });
-    },
   });
 
-  // Mutation to update task
-  const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, title, description }: { taskId: number; title: string; description: string }) => {
-      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Task updated successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', id] });
-      setEditingTask(null);
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update task",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Mutation to delete task
-  const deleteTaskMutation = useMutation({
-    mutationFn: async (taskId: number) => {
-      return await apiRequest('DELETE', `/api/tasks/${taskId}`);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Task deleted successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', id] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to delete task",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Mutation to delete milestone
+  // Mutation for deleting milestone
   const deleteMilestoneMutation = useMutation({
     mutationFn: async (milestoneId: number) => {
       return await apiRequest('DELETE', `/api/milestones/${milestoneId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
-      toast({ title: 'Success', description: 'Section deleted successfully' });
     },
-    onError: (error) => {
-      console.error('Error deleting milestone:', error);
-      toast({ title: 'Error', description: 'Failed to delete section', variant: 'destructive' });
-    }
   });
 
-  // Mutation to reorder milestones
-  const reorderMilestonesMutation = useMutation({
-    mutationFn: async (milestoneIds: number[]) => {
-      return await apiRequest('PUT', '/api/milestones/reorder', { milestoneIds });
+  // Mutation for updating milestone
+  const updateMilestoneMutation = useMutation({
+    mutationFn: async ({ milestoneId, title }: { milestoneId: number; title: string }) => {
+      return await apiRequest('PUT', `/api/milestones/${milestoneId}`, { title });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
-      toast({ title: 'Success', description: 'Sections reordered successfully' });
+      setEditingMilestone(null);
+      setEditingTitle("");
     },
-    onError: (error) => {
-      console.error('Error reordering milestones:', error);
-      toast({ title: 'Error', description: 'Failed to reorder sections', variant: 'destructive' });
-    }
   });
 
-  const startEditing = (milestone: any) => {
-    setEditingMilestone(milestone.id);
-    setEditingTitle(milestone.title);
-  };
-
-  const saveEditing = () => {
-    if (editingMilestone && editingTitle.trim()) {
-      updateMilestoneMutation.mutate({ 
-        milestoneId: editingMilestone, 
-        title: editingTitle.trim() 
+  // Mutation for creating task
+  const createTaskMutation = useMutation({
+    mutationFn: async ({ title, description, milestoneId, parentTaskId }: any) => {
+      return await apiRequest('POST', `/api/tasks`, { 
+        title, 
+        description, 
+        milestoneId, 
+        parentTaskId,
+        templateId: parseInt(id!)
       });
-    }
-  };
-
-  const cancelEditing = () => {
-    setEditingMilestone(null);
-    setEditingTitle("");
-  };
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  const { data: template, isLoading: templateLoading, error } = useQuery<ProjectTemplate>({
-    queryKey: ['/api/project-templates', id],
-    queryFn: async () => {
-      const response = await fetch(`/api/project-templates/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch template');
-      return response.json();
     },
-    enabled: isAuthenticated && !!id,
-  });
-
-  // Initialize template fields when template data is loaded
-  useEffect(() => {
-    if (template && !templateName) {
-      setTemplateName(template.name);
-      setTemplateDescription(template.description || '');
-    }
-  }, [template, templateName]);
-
-  // Fetch template milestones and tasks
-  const { data: milestones = [] } = useQuery({
-    queryKey: ['/api/milestones', { templateId: id }],
-    queryFn: async () => {
-      const response = await fetch(`/api/milestones?templateId=${id}`);
-      if (!response.ok) throw new Error('Failed to fetch milestones');
-      return response.json();
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
     },
-    enabled: isAuthenticated && !!id,
   });
 
-  // Initialize openPhases to show all milestones by default
-  useEffect(() => {
-    if (milestones.length > 0 && openPhases.length === 0) {
-      setOpenPhases(milestones.map(m => m.id));
-    }
-  }, [milestones, openPhases.length]);
-
-  // Fetch all tasks for the template milestones
-  const { data: allTasks = [] } = useQuery({
-    queryKey: ['/api/template-tasks', id],
-    queryFn: async () => {
-      if (!milestones.length) return [];
-      
-      const taskPromises = milestones.map(async (milestone: any) => {
-        const response = await fetch(`/api/milestones/${milestone.id}/tasks`);
-        if (!response.ok) throw new Error('Failed to fetch tasks');
-        const tasks = await response.json();
-        return tasks.map((task: any) => ({ ...task, milestone }));
-      });
-      
-      const taskArrays = await Promise.all(taskPromises);
-      return taskArrays.flat();
+  // Mutation for updating task
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, title, description }: any) => {
+      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description });
     },
-    enabled: isAuthenticated && milestones.length > 0,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
+      setEditingTask(null);
+    },
   });
 
-  if (error && isUnauthorizedError(error as Error)) {
-    toast({
-      title: "Unauthorized",
-      description: "You are logged out. Logging in again...",
-      variant: "destructive",
-    });
-    setTimeout(() => {
-      window.location.href = "/api/login";
-    }, 500);
-    return null;
-  }
-
-  const togglePhase = (milestoneId: number) => {
-    setOpenPhases(prev => 
-      prev.includes(milestoneId) 
-        ? prev.filter(p => p !== milestoneId)
-        : [...prev, milestoneId]
-    );
-  };
-
-  if (isLoading || templateLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!template) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Template Not Found</h2>
-          <p className="text-gray-500 mb-4">The template you're looking for doesn't exist.</p>
-          <Link href="/templates">
-            <Button>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Templates
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Process tasks from database - convert to TaskTemplate format
-  const tasks: TaskTemplate[] = allTasks.map((task: any) => ({
-    id: task.id,
-    name: task.title,
-    description: task.description || '',
-    estimatedDays: 1, // Default value since we don't store this in DB
-    daysFromMeeting: 0, // Default value since we don't store this in DB
-    parentTaskId: task.parentTaskId,
-    assignedTo: null, // Don't show assigned team members for templates
-    comments: ''
-  }));
-
-  // Group tasks by milestone with milestone metadata
-  const tasksByMilestone = new Map<number, { milestone: any, tasks: TaskTemplate[] }>();
-  
-  // First, initialize all milestones with empty task arrays
-  milestones.forEach((milestone: any) => {
-    tasksByMilestone.set(milestone.id, { milestone, tasks: [] });
-  });
-  
-  // Then add tasks to their respective milestones
-  allTasks.forEach((task: any) => {
-    const milestoneId = task.milestone?.id;
-    if (milestoneId && tasksByMilestone.has(milestoneId)) {
-      tasksByMilestone.get(milestoneId)!.tasks.push({
-        id: task.id,
-        name: task.title,
-        description: task.description || '',
-        estimatedDays: 1,
-        daysFromMeeting: 0,
-        parentTaskId: task.parentTaskId,
-        assignedTo: null,
-        comments: ''
-      });
-    }
+  // Mutation for deleting task
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: number) => {
+      return await apiRequest('DELETE', `/api/tasks/${taskId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
+    },
   });
 
-  const totalTasks = tasks.length;
-  const totalDays = tasks.reduce((sum, task) => sum + (task.estimatedDays || 0), 0);
-
-  const handleSaveTemplate = () => {
-    updateTemplateMutation.mutate({ name: templateName, description: templateDescription });
-  };
-
+  // Helper functions
   const handleAddSection = () => {
     const title = prompt('Enter section title:');
     if (title) {
@@ -783,7 +571,23 @@ export default function TemplateDetail() {
     }
   };
 
-  // Set up drag and drop sensors
+  const startEditing = (milestone: any) => {
+    setEditingMilestone(milestone.id);
+    setEditingTitle(milestone.title);
+  };
+
+  const saveEditing = () => {
+    if (editingMilestone && editingTitle.trim()) {
+      updateMilestoneMutation.mutate({ milestoneId: editingMilestone, title: editingTitle });
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingMilestone(null);
+    setEditingTitle("");
+  };
+
+  // Drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -805,7 +609,62 @@ export default function TemplateDetail() {
     }
   };
 
+  // Fetch tasks for each milestone
+  const taskQueries = useQuery({
+    queryKey: ['template-tasks', id, milestones.map(m => m.id)],
+    queryFn: async () => {
+      if (!milestones || milestones.length === 0) return [];
+      
+      const taskPromises = milestones.map(async (milestone) => {
+        const response = await fetch(`/api/milestones/${milestone.id}/tasks`, {
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          console.error(`Failed to fetch tasks for milestone ${milestone.id}`);
+          return { milestoneId: milestone.id, tasks: [] };
+        }
+        const tasks = await response.json();
+        return { milestoneId: milestone.id, tasks };
+      });
+      
+      const results = await Promise.all(taskPromises);
+      return results;
+    },
+    enabled: !!id && isAuthenticated && milestones.length > 0,
+  });
 
+  // Prepare data for rendering
+  const tasksByMilestone = useMemo(() => {
+    const map = new Map();
+    
+    milestones.forEach((milestone) => {
+      map.set(milestone.id, { milestone, tasks: [] });
+    });
+
+    // Add tasks to their respective milestones
+    if (taskQueries.data) {
+      taskQueries.data.forEach(({ milestoneId, tasks }) => {
+        if (map.has(milestoneId)) {
+          map.get(milestoneId).tasks = tasks;
+        }
+      });
+    }
+
+    return map;
+  }, [milestones, taskQueries.data]);
+
+  const totalTasks = Array.from(tasksByMilestone.values()).reduce((sum, { tasks }) => sum + tasks.length, 0);
+  const totalDays = Array.from(tasksByMilestone.values()).reduce((sum, { tasks }) => 
+    sum + tasks.reduce((taskSum: number, task: any) => taskSum + (task.estimatedDays || 0), 0), 0
+  );
+
+  if (isLoading || isTemplateLoading || isMilestonesLoading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <div className="flex items-center justify-center h-64">Please log in to view this template.</div>;
+  }
 
   return (
     <>
@@ -817,7 +676,6 @@ export default function TemplateDetail() {
       
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-6 py-6">
-          {/* Back Button */}
           <div className="mb-6">
             <Link href="/templates">
               <Button variant="ghost">
@@ -827,7 +685,6 @@ export default function TemplateDetail() {
             </Link>
           </div>
 
-          {/* Template Details */}
           <div className="mb-8">
             <Card>
               <CardHeader>
@@ -846,7 +703,7 @@ export default function TemplateDetail() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Description</label>
+                  <label className="text-sm font-medium mb-1 block">Template Description</label>
                   <Textarea
                     value={templateDescription}
                     onChange={(e) => setTemplateDescription(e.target.value)}
@@ -854,24 +711,18 @@ export default function TemplateDetail() {
                     rows={3}
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button onClick={handleSaveTemplate}>
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Template
-                  </Button>
-                  <Button variant="outline" onClick={handleAddSection}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Section
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Task Hierarchy */}
+          <div className="mb-6">
+            <Button onClick={handleAddSection} className="w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Section
+            </Button>
+          </div>
+
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Template Tasks</h2>
-            
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
