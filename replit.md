@@ -378,6 +378,13 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Consistent Across Components**: Applied fix to both task form and section task manager components
 - **Clean Assignment Interface**: Dropdown now shows "Unassigned", "Assign to Me", and other team members without duplication
 
+### Template Editor Assignment Dropdown Enhancement (July 18, 2025)
+- **Team Members Only Filter**: Fixed assignment dropdowns to show only active team members instead of all active contacts
+- **Correct Field Mapping**: Changed from `contact.type` to `contact.contactType` for proper contact type filtering
+- **Current User Exclusion**: Applied same logic as general tasks - current user appears only as "Assign to Me" option, not in team members list
+- **Hierarchical Consistency**: All task levels (tasks, sub-tasks, sub-sub-tasks) use consistent filtering logic
+- **Cache Optimization**: Forced fresh data retrieval to ensure proper filtering without stale cache issues
+
 ### Quick Action Floating Sidebar with Gamification (July 17, 2025)
 - **Floating Action Button**: Added floating action button in bottom-right corner with task count badges and urgency indicators
 - **Comprehensive Gamification System**: Implemented levels, XP, achievements, and streak tracking for task completion
