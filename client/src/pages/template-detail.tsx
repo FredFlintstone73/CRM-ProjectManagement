@@ -399,29 +399,55 @@ const SortableSection = ({
                 <div key={task.id} className="border-l-2 border-blue-200 pl-4 space-y-2">
                   <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
                     <div className="flex-1">
-                      <div className="font-medium text-gray-800">{task.title}</div>
-                      {task.description && (
-                        <div className="text-sm text-gray-600 mt-1">{task.description}</div>
+                      {editingTask === task.id ? (
+                        <div className="space-y-2">
+                          <Input
+                            value={editingTaskTitle}
+                            onChange={(e) => setEditingTaskTitle(e.target.value)}
+                            className="font-medium"
+                            placeholder="Task title"
+                          />
+                          <Textarea
+                            value={editingTaskDescription}
+                            onChange={(e) => setEditingTaskDescription(e.target.value)}
+                            placeholder="Task description"
+                            rows={2}
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={saveEditingTask}>Save</Button>
+                            <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div onClick={() => startEditingTask(task)} className="cursor-pointer">
+                          <div className="font-medium text-gray-800">{task.title}</div>
+                          {task.description && (
+                            <div className="text-sm text-gray-600 mt-1">{task.description}</div>
+                          )}
+                        </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAddTask(milestone.id, task.id)}
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Sub-task
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteTaskMutation.mutate(task.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    {editingTask !== task.id && (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAddTask(milestone.id, task.id)}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Sub-task
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteTaskMutation.mutate(task.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Sub-tasks */}
@@ -429,29 +455,55 @@ const SortableSection = ({
                     <div key={subtask.id} className="ml-4 border-l-2 border-green-200 pl-4 space-y-2">
                       <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
                         <div className="flex-1">
-                          <div className="font-medium text-gray-700">{subtask.title}</div>
-                          {subtask.description && (
-                            <div className="text-sm text-gray-500 mt-1">{subtask.description}</div>
+                          {editingTask === subtask.id ? (
+                            <div className="space-y-2">
+                              <Input
+                                value={editingTaskTitle}
+                                onChange={(e) => setEditingTaskTitle(e.target.value)}
+                                className="font-medium"
+                                placeholder="Sub-task title"
+                              />
+                              <Textarea
+                                value={editingTaskDescription}
+                                onChange={(e) => setEditingTaskDescription(e.target.value)}
+                                placeholder="Sub-task description"
+                                rows={2}
+                                className="text-sm"
+                              />
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={saveEditingTask}>Save</Button>
+                                <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div onClick={() => startEditingTask(subtask)} className="cursor-pointer">
+                              <div className="font-medium text-gray-700">{subtask.title}</div>
+                              {subtask.description && (
+                                <div className="text-sm text-gray-500 mt-1">{subtask.description}</div>
+                              )}
+                            </div>
                           )}
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleAddTask(milestone.id, subtask.id)}
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Sub-sub-task
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => deleteTaskMutation.mutate(subtask.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        {editingTask !== subtask.id && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAddTask(milestone.id, subtask.id)}
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Sub-sub-task
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteTaskMutation.mutate(subtask.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Sub-sub-tasks */}
@@ -459,19 +511,45 @@ const SortableSection = ({
                         <div key={subsubtask.id} className="ml-4 border-l-2 border-purple-200 pl-4">
                           <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border">
                             <div className="flex-1">
-                              <div className="font-medium text-gray-600">{subsubtask.title}</div>
-                              {subsubtask.description && (
-                                <div className="text-sm text-gray-400 mt-1">{subsubtask.description}</div>
+                              {editingTask === subsubtask.id ? (
+                                <div className="space-y-2">
+                                  <Input
+                                    value={editingTaskTitle}
+                                    onChange={(e) => setEditingTaskTitle(e.target.value)}
+                                    className="font-medium"
+                                    placeholder="Sub-sub-task title"
+                                  />
+                                  <Textarea
+                                    value={editingTaskDescription}
+                                    onChange={(e) => setEditingTaskDescription(e.target.value)}
+                                    placeholder="Sub-sub-task description"
+                                    rows={2}
+                                    className="text-sm"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button size="sm" onClick={saveEditingTask}>Save</Button>
+                                    <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div onClick={() => startEditingTask(subsubtask)} className="cursor-pointer">
+                                  <div className="font-medium text-gray-600">{subsubtask.title}</div>
+                                  {subsubtask.description && (
+                                    <div className="text-sm text-gray-400 mt-1">{subsubtask.description}</div>
+                                  )}
+                                </div>
                               )}
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => deleteTaskMutation.mutate(subsubtask.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {editingTask !== subsubtask.id && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => deleteTaskMutation.mutate(subsubtask.id)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -498,6 +576,8 @@ export default function TemplateDetail() {
   const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [editingTask, setEditingTask] = useState<number | null>(null);
+  const [editingTaskTitle, setEditingTaskTitle] = useState<string>("");
+  const [editingTaskDescription, setEditingTaskDescription] = useState<string>("");
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
 
@@ -624,9 +704,11 @@ export default function TemplateDetail() {
       return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
       queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
       setEditingTask(null);
+      setEditingTaskTitle("");
+      setEditingTaskDescription("");
     },
   });
 
@@ -681,6 +763,28 @@ export default function TemplateDetail() {
   const cancelEditing = () => {
     setEditingMilestone(null);
     setEditingTitle("");
+  };
+
+  const startEditingTask = (task: any) => {
+    setEditingTask(task.id);
+    setEditingTaskTitle(task.title);
+    setEditingTaskDescription(task.description || "");
+  };
+
+  const saveEditingTask = () => {
+    if (editingTask && editingTaskTitle.trim()) {
+      updateTaskMutation.mutate({ 
+        taskId: editingTask, 
+        title: editingTaskTitle, 
+        description: editingTaskDescription 
+      });
+    }
+  };
+
+  const cancelEditingTask = () => {
+    setEditingTask(null);
+    setEditingTaskTitle("");
+    setEditingTaskDescription("");
   };
 
   // Drag and drop
