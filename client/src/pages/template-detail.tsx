@@ -132,6 +132,8 @@ const TaskDisplay = ({
   setEditingTaskDueDate,
   editingTaskAssignedTo,
   setEditingTaskAssignedTo,
+  editingTaskDaysFromMeeting,
+  setEditingTaskDaysFromMeeting,
   startEditingTask,
   saveEditingTask,
   cancelEditingTask
