@@ -325,14 +325,11 @@ const TaskDisplay = ({
                   {task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting} days from meeting
                 </Badge>
               </div>
-              {(task.description || task.assignedTo) && (
-                <div className="text-sm text-gray-600 mt-1 space-y-1">
-                  {task.description && <p>{task.description}</p>}
-                  {task.assignedTo && (
-                    <p className="text-blue-600">
-                      Assigned to: {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
-                    </p>
-                  )}
+              {task.assignedTo && (
+                <div className="text-sm text-gray-600 mt-1">
+                  <p className="text-blue-600">
+                    Assigned to: {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
+                  </p>
                 </div>
               )}
             </div>
