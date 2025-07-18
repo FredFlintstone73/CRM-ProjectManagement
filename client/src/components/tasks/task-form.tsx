@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { insertTaskSchema, type InsertTask, type Task, type Contact } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
+import { MultiSelect, type MultiSelectOption } from "@/components/ui/multi-select";
 
 interface TaskFormProps {
   task?: Task | null;
@@ -27,9 +28,6 @@ interface TaskFormProps {
 export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [dueDate, setDueDate] = useState<Date | undefined>(
-    task?.dueDate ? new Date(task.dueDate) : undefined
-  );
 
   const { data: contacts } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
@@ -53,17 +51,77 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     return userContact?.id || null;
   };
 
-  // Determine the correct default value for assignedTo
+  // Determine the correct default value for assignedTo (now supporting arrays)
   const getDefaultAssignedTo = () => {
-    if (!task?.assignedTo) return '';
+    if (!task?.assignedTo) return [];
     
     const currentUserContactId = getCurrentUserContactId();
-    if (currentUserContactId && task.assignedTo === currentUserContactId) {
-      return `me_${user?.id}`;
-    }
+    const assignedToArray = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
     
-    return `team_${task.assignedTo}`;
+    return assignedToArray.map(id => {
+      if (currentUserContactId && id === currentUserContactId) {
+        return `me_${user?.id}`;
+      }
+      return `team_${id}`;
+    });
   };
+
+  // State for multi-select components
+  const [dueDate, setDueDate] = useState<Date | undefined>(
+    task?.dueDate ? new Date(task.dueDate) : undefined
+  );
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(() => 
+    Array.isArray(task?.assignedToRole) ? task.assignedToRole : (task?.assignedToRole ? [task.assignedToRole] : [])
+  );
+
+  // Initialize assignees when contacts data is available
+  useEffect(() => {
+    if (contacts && task?.assignedTo) {
+      const currentUserContactId = getCurrentUserContactId();
+      const assignedToArray = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
+      
+      const defaultAssignees = assignedToArray.map(id => {
+        if (currentUserContactId && id === currentUserContactId) {
+          return `me_${user?.id}`;
+        }
+        return `team_${id}`;
+      });
+      
+      setSelectedAssignees(defaultAssignees);
+    }
+  }, [contacts, task, user]);
+
+  // Create options for multi-select components
+  const assigneeOptions: MultiSelectOption[] = [
+    ...(user ? [{
+      label: `Assign to Me (${user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})`,
+      value: `me_${user.id}`
+    }] : []),
+    ...teamMembers.map(member => ({
+      label: `${member.firstName} ${member.lastName}`,
+      value: `team_${member.id}`
+    }))
+  ];
+
+  const roleOptions: MultiSelectOption[] = [
+    { label: "Estate Planner", value: "estate_planner" },
+    { label: "Estate Attorney", value: "estate_attorney" },
+    { label: "Financial Planner", value: "financial_planner" },
+    { label: "Tax Planner", value: "tax_planner" },
+    { label: "Money Manager", value: "money_manager" },
+    { label: "Insurance P&C", value: "insurance_pc" },
+    { label: "Insurance Business", value: "insurance_business" },
+    { label: "Insurance Life/LTC/Disability", value: "insurance_life_ltc_disability" },
+    { label: "Insurance Health", value: "insurance_health" },
+    { label: "Trusted Advisor", value: "trusted_advisor" },
+    { label: "Admin Assistant", value: "admin_assistant" },
+    { label: "Deliverables Team Coordinator", value: "deliverables_team_coordinator" },
+    { label: "Human Relations", value: "human_relations" },
+    { label: "Accountant", value: "accountant" },
+    { label: "Client Service Rep", value: "client_service_rep" },
+    { label: "Other", value: "other" }
+  ];
 
   const form = useForm<InsertTask>({
     resolver: zodResolver(insertTaskSchema),
@@ -71,7 +129,8 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       title: task?.title || '',
       description: task?.description || '',
       projectId: projectId,
-      assignedTo: getDefaultAssignedTo(),
+      assignedTo: selectedAssignees,
+      assignedToRole: selectedRoles,
       priority: task?.priority || 25,
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
     },
@@ -109,6 +168,8 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       ...data,
       dueDate: dueDate ? dueDate.toISOString() : undefined,
       projectId: projectId,
+      assignedTo: selectedAssignees,
+      assignedToRole: selectedRoles,
     };
     createTaskMutation.mutate(processedData);
   };
@@ -161,31 +222,16 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
           )}
         </div>
 
-        {/* Assigned To and Due Date side by side */}
+        {/* Assignment and Due Date side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label htmlFor="assignedTo">Assign To</Label>
-            <Select
-              value={form.watch('assignedTo') || 'unassigned'}
-              onValueChange={(value) => form.setValue('assignedTo', value === 'unassigned' ? '' : value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select assignee" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {user && (
-                  <SelectItem value={`me_${user.id}`}>
-                    Assign to Me ({user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})
-                  </SelectItem>
-                )}
-                {teamMembers.map((member) => (
-                  <SelectItem key={member.id} value={`team_${member.id}`}>
-                    {member.firstName} {member.lastName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="assignedTo">Assign To People</Label>
+            <MultiSelect
+              options={assigneeOptions}
+              selected={selectedAssignees}
+              onChange={setSelectedAssignees}
+              placeholder="Select assignees..."
+            />
           </div>
 
           <div className="space-y-1">
@@ -213,6 +259,17 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
               </PopoverContent>
             </Popover>
           </div>
+        </div>
+
+        {/* Role Assignment */}
+        <div className="space-y-1">
+          <Label htmlFor="assignedToRole">Assign To Roles</Label>
+          <MultiSelect
+            options={roleOptions}
+            selected={selectedRoles}
+            onChange={setSelectedRoles}
+            placeholder="Select roles..."
+          />
         </div>
 
         <div className="flex justify-end space-x-2">

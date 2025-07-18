@@ -279,8 +279,8 @@ export const tasks = pgTable("tasks", {
   projectId: integer("project_id").references(() => projects.id),
   milestoneId: integer("milestone_id").references(() => milestones.id),
   parentTaskId: integer("parent_task_id").references(() => tasks.id),
-  assignedTo: integer("assigned_to").references(() => contacts.id),
-  assignedToRole: text("assigned_to_role"), // Role-based assignment for templates
+  assignedTo: integer("assigned_to").array(), // Support multiple assignees
+  assignedToRole: text("assigned_to_role").array(), // Support multiple role assignments
   status: taskStatusEnum("status").default("todo"),
   priority: integer("priority").default(25), // 1-50 priority scale
   dueDate: timestamp("due_date"),
@@ -424,10 +424,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     references: [tasks.id],
   }),
   subtasks: many(tasks),
-  assignedTo: one(contacts, {
-    fields: [tasks.assignedTo],
-    references: [contacts.id],
-  }),
+  // Note: assignedTo is now an array, so we can't use simple one-to-one relations
   createdBy: one(users, {
     fields: [tasks.createdBy],
     references: [users.id],
@@ -694,10 +691,10 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 }).extend({
   // Handle string date inputs from forms
   dueDate: z.string().optional().nullable(),
-  // Handle assignment field as string or number (will be converted server-side)
-  assignedTo: z.union([z.string(), z.number()]).optional().nullable(),
-  // Handle role-based assignment for templates
-  assignedToRole: z.enum([
+  // Handle assignment field as array of strings or numbers (will be converted server-side)
+  assignedTo: z.array(z.union([z.string(), z.number()])).optional().nullable(),
+  // Handle role-based assignment for templates as array
+  assignedToRole: z.array(z.enum([
     "estate_planner",
     "estate_attorney",
     "financial_planner", 
@@ -714,7 +711,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
     "accountant",
     "client_service_rep",
     "other"
-  ]).optional().nullable(),
+  ])).optional().nullable(),
   // Handle priority field as string that will be converted to number
   priority: z.union([z.string(), z.number()]).optional(),
   // Make description nullable for partial updates
