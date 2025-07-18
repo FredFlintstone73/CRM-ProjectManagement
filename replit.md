@@ -209,6 +209,13 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Timeline Chart Update**: Updated ProjectsTimelineChart to handle new dropdown options
 - **Default Handling**: Improved fallback handling for undefined period selections
 
+### Dashboard Timeline Chart Enhancement (July 18, 2025)
+- **Next 30 Days Implementation**: Changed "Next Month" to "Next 30 Days" with precise day-based calculation
+- **Dynamic Custom Date Range**: Implemented dynamic x-axis formatting based on date range duration
+- **Multi-Level Granularity**: Custom ranges show days (<15 days), weeks (15-49 days), or months (50+ days)
+- **Week Breakdown**: "Next 30 Days" displays as Week 1, Week 2, Week 3, Week 4 for optimal visualization
+- **Enhanced Timeline Views**: Complete timeline system with appropriate granularity for each time period
+
 ### Custom Date Range Implementation (July 12, 2025)
 - **Date Picker Interface**: Added popover with start and end date inputs for custom range selection
 - **Timeline Chart Integration**: Custom dates now properly affect the timeline chart display
