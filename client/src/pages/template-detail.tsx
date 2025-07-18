@@ -248,7 +248,7 @@ export default function TemplateDetail() {
         title: "Success",
         description: "Section name updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
       setEditingMilestone(null);
       setEditingTitle("");
     },
@@ -292,7 +292,8 @@ export default function TemplateDetail() {
         title: "Success",
         description: "Section created successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
     },
     onError: (error) => {
       toast({
@@ -314,6 +315,7 @@ export default function TemplateDetail() {
         description: "Task created successfully",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
     },
     onError: (error) => {
       toast({
