@@ -109,17 +109,22 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Update sections when milestones are loaded
+  // Update sections when milestones and tasks are loaded
   useEffect(() => {
-    if (milestones.length > 0) {
-      const sectionsFromMilestones = milestones.map(milestone => ({
-        id: `milestone-${milestone.id}`,
-        title: milestone.title,
-        tasks: []
-      }));
+    if (milestones.length > 0 && tasks.length >= 0) {
+      const sectionsFromMilestones = milestones.map(milestone => {
+        // Find tasks that belong to this milestone
+        const milestoneTasks = tasks.filter(task => task.milestoneId === milestone.id);
+        
+        return {
+          id: `milestone-${milestone.id}`,
+          title: milestone.title,
+          tasks: milestoneTasks
+        };
+      });
       setSections(sectionsFromMilestones);
     }
-  }, [milestones]);
+  }, [milestones, tasks]);
 
   // Fetch team members
   const { data: contacts = [], error: contactsError } = useQuery<Contact[]>({
@@ -233,21 +238,15 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const openEditDialog = (task: Task) => {
     setSelectedTask(task as TaskNode);
     
-    // Extract section from description and clean it
-    const cleanDescription = task.description ? 
-      task.description.replace(/^\[.*?\]\s*/, '') : '';
-    
-    // Find section ID from description
-    const sectionMatch = task.description?.match(/^\[(.*?)\]/);
-    const sectionTitle = sectionMatch ? sectionMatch[1] : '';
-    const sectionId = sections.find(s => s.title === sectionTitle)?.id || "section-1";
+    // Find section ID from milestone
+    const sectionId = task.milestoneId ? `milestone-${task.milestoneId}` : sections[0]?.id || `milestone-${milestones[0]?.id}`;
     
     // Convert assignedTo to correct format for form - fix null handling
     const assignedToValue = task.assignedTo ? `team_${task.assignedTo}` : "unassigned";
     
     setTaskForm({
       title: task.title,
-      description: cleanDescription,
+      description: task.description || '',
       dueDate: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "",
       assignedTo: assignedToValue,
       parentTaskId: task.parentTaskId,
@@ -265,18 +264,18 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   };
 
   const handleSubmitTask = () => {
-    // Find the section title to store in description
+    // Find the milestone ID from section
     const currentSection = sections.find(s => s.id === taskForm.sectionId);
-    const sectionPrefix = currentSection ? `[${currentSection.title}] ` : '';
+    const milestoneId = currentSection ? parseInt(currentSection.id.replace('milestone-', '')) : null;
     
     // Prepare task data with proper type conversions
     const taskData = {
       ...taskForm,
-      description: sectionPrefix + (taskForm.description || ''), // Embed section in description
+      description: taskForm.description || '', // No section prefix needed
       parentTaskId: taskForm.parentTaskId || null,
       assignedTo: taskForm.assignedTo || "", // Keep as string for server conversion
       projectId: projectId,
-      milestoneId: null, // We'll use null for now since we're using sections
+      milestoneId: milestoneId, // Use the actual milestone ID
       priority: 25, // Default priority (1-50 scale)
     };
 
