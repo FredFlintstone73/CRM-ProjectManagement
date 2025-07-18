@@ -658,6 +658,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priority: priority,
         description: taskData.description || null,
         dueDate: taskData.dueDate || null,
+        daysFromMeeting: taskData.daysFromMeeting !== undefined ? parseInt(taskData.daysFromMeeting.toString()) : undefined,
       };
       
       // Remove fields that are null/undefined from the update, but keep title if provided
@@ -667,6 +668,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return value !== null && value !== undefined;
         })
       );
+      
+      console.log('Final processed task for update:', processedTaskData);
       
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
       res.json(task);
