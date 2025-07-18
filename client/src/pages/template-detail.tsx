@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   AlertDialog,
@@ -244,50 +245,49 @@ const TaskDisplay = ({
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-1 block">Assigned To</label>
-                <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select assignee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unassigned">Unassigned</SelectItem>
-                    <SelectItem value="me">Assign to Me</SelectItem>
-                    {teamMembers?.filter(member => {
+              <div className="space-y-1">
+                <label className="text-sm font-medium mb-1 block">Assign To People</label>
+                <p className="text-xs text-muted-foreground mb-1">Click to select multiple people</p>
+                <MultiSelect
+                  options={[
+                    { value: "me", label: "Assign to Me" },
+                    ...(teamMembers?.filter(member => {
                       const currentUserEmail = currentUser?.email;
                       return !(currentUserEmail && (member.personalEmail === currentUserEmail || member.workEmail === currentUserEmail));
-                    }).map((member) => (
-                      <SelectItem key={member.id} value={member.id.toString()}>
-                        {member.firstName} {member.lastName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    }).map((member) => ({
+                      value: member.id.toString(),
+                      label: `${member.firstName} ${member.lastName}`
+                    })) || [])
+                  ]}
+                  selected={editingTaskAssignedTo}
+                  onChange={setEditingTaskAssignedTo}
+                  placeholder="Select assignees..."
+                />
               </div>
-              <div>
-                <label className="text-sm font-medium mb-1 block">Or Assign to Role</label>
-                <Select value={editingTaskAssignedToRole} onValueChange={setEditingTaskAssignedToRole}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Role Assignment</SelectItem>
-                    <SelectItem value="estate_planner">Estate Planner</SelectItem>
-                    <SelectItem value="financial_planner">Financial Planner</SelectItem>
-                    <SelectItem value="tax_planner">Tax Planner</SelectItem>
-                    <SelectItem value="money_manager">Money Manager</SelectItem>
-                    <SelectItem value="insurance_pc">Insurance P&C</SelectItem>
-                    <SelectItem value="insurance_business">Insurance Business</SelectItem>
-                    <SelectItem value="insurance_life_ltc_disability">Insurance Life/LTC/Disability</SelectItem>
-                    <SelectItem value="insurance_health">Insurance Health</SelectItem>
-                    <SelectItem value="trusted_advisor">Trusted Advisor</SelectItem>
-                    <SelectItem value="admin_assistant">Admin Assistant</SelectItem>
-                    <SelectItem value="deliverables_team_coordinator">Deliverables Team Coordinator</SelectItem>
-                    <SelectItem value="human_relations">Human Relations</SelectItem>
-                    <SelectItem value="accountant">Accountant</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-1">
+                <label className="text-sm font-medium mb-1 block">Assign To Roles</label>
+                <p className="text-xs text-muted-foreground mb-1">Click to select multiple roles</p>
+                <MultiSelect
+                  options={[
+                    { value: "estate_planner", label: "Estate Planner" },
+                    { value: "financial_planner", label: "Financial Planner" },
+                    { value: "tax_planner", label: "Tax Planner" },
+                    { value: "money_manager", label: "Money Manager" },
+                    { value: "insurance_pc", label: "Insurance P&C" },
+                    { value: "insurance_business", label: "Insurance Business" },
+                    { value: "insurance_life_ltc_disability", label: "Insurance Life/LTC/Disability" },
+                    { value: "insurance_health", label: "Insurance Health" },
+                    { value: "trusted_advisor", label: "Trusted Advisor" },
+                    { value: "admin_assistant", label: "Admin Assistant" },
+                    { value: "deliverables_team_coordinator", label: "Deliverables Team Coordinator" },
+                    { value: "human_relations", label: "Human Relations" },
+                    { value: "accountant", label: "Accountant" },
+                    { value: "other", label: "Other" }
+                  ]}
+                  selected={editingTaskAssignedToRole}
+                  onChange={setEditingTaskAssignedToRole}
+                  placeholder="Select roles..."
+                />
               </div>
             </div>
             <div className="flex gap-2">
@@ -616,8 +616,8 @@ export default function TemplateDetail() {
   const [editingTaskTitle, setEditingTaskTitle] = useState<string>("");
   const [editingTaskDescription, setEditingTaskDescription] = useState<string>("");
   const [editingTaskDueDate, setEditingTaskDueDate] = useState<string>("");
-  const [editingTaskAssignedTo, setEditingTaskAssignedTo] = useState<string>("");
-  const [editingTaskAssignedToRole, setEditingTaskAssignedToRole] = useState<string>("");
+  const [editingTaskAssignedTo, setEditingTaskAssignedTo] = useState<string[]>([]);
+  const [editingTaskAssignedToRole, setEditingTaskAssignedToRole] = useState<string[]>([]);
   const [editingTaskDaysFromMeeting, setEditingTaskDaysFromMeeting] = useState<string>("");
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
@@ -869,37 +869,75 @@ export default function TemplateDetail() {
     setEditingTaskDueDate(""); // Templates don't have specific due dates
     setEditingTaskDaysFromMeeting(task.daysFromMeeting?.toString() || "0");
     
-    // Check if the assigned user is the current user
-    let assignedValue = "unassigned";
+    // Handle assigned users (convert to array)
+    const assignedUsers = [];
     if (task.assignedTo) {
-      const currentUserEmail = currentUser?.email;
-      const assignedUser = allTeamMembers?.find((member: any) => member.id === task.assignedTo);
-      if (assignedUser && currentUserEmail && 
-          (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail)) {
-        assignedValue = "me";
+      if (Array.isArray(task.assignedTo)) {
+        // Already an array
+        assignedUsers.push(...task.assignedTo.map((id: any) => {
+          const currentUserEmail = currentUser?.email;
+          const assignedUser = allTeamMembers?.find((member: any) => member.id === id);
+          if (assignedUser && currentUserEmail && 
+              (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail)) {
+            return "me";
+          }
+          return id.toString();
+        }));
       } else {
-        assignedValue = task.assignedTo.toString();
+        // Single assignment, convert to array
+        const currentUserEmail = currentUser?.email;
+        const assignedUser = allTeamMembers?.find((member: any) => member.id === task.assignedTo);
+        if (assignedUser && currentUserEmail && 
+            (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail)) {
+          assignedUsers.push("me");
+        } else {
+          assignedUsers.push(task.assignedTo.toString());
+        }
       }
     }
-    setEditingTaskAssignedTo(assignedValue);
+    setEditingTaskAssignedTo(assignedUsers);
     
-    // Set role assignment if exists
-    setEditingTaskAssignedToRole(task.assignedToRole || "none");
+    // Handle role assignments (convert to array)
+    const assignedRoles = [];
+    if (task.assignedToRole) {
+      if (Array.isArray(task.assignedToRole)) {
+        assignedRoles.push(...task.assignedToRole);
+      } else {
+        assignedRoles.push(task.assignedToRole);
+      }
+    }
+    setEditingTaskAssignedToRole(assignedRoles);
   };
 
   const saveEditingTask = () => {
     if (editingTask && editingTaskTitle.trim()) {
+      // Handle multiple assignees
       let assignedTo = null;
-      if (editingTaskAssignedTo && editingTaskAssignedTo !== "unassigned") {
-        if (editingTaskAssignedTo === "me") {
-          assignedTo = "me";
+      if (editingTaskAssignedTo && editingTaskAssignedTo.length > 0) {
+        if (editingTaskAssignedTo.length === 1) {
+          // Single assignment
+          if (editingTaskAssignedTo[0] === "me") {
+            assignedTo = "me";
+          } else {
+            assignedTo = parseInt(editingTaskAssignedTo[0]);
+          }
         } else {
-          assignedTo = parseInt(editingTaskAssignedTo);
+          // Multiple assignments - send as array
+          assignedTo = editingTaskAssignedTo.map(id => id === "me" ? "me" : parseInt(id));
         }
       }
       
       const daysFromMeeting = editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0;
-      const assignedToRole = editingTaskAssignedToRole && editingTaskAssignedToRole !== "none" ? editingTaskAssignedToRole : null;
+      
+      // Handle multiple roles
+      let assignedToRole = null;
+      if (editingTaskAssignedToRole && editingTaskAssignedToRole.length > 0) {
+        if (editingTaskAssignedToRole.length === 1) {
+          assignedToRole = editingTaskAssignedToRole[0];
+        } else {
+          assignedToRole = editingTaskAssignedToRole;
+        }
+      }
       
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
@@ -918,8 +956,8 @@ export default function TemplateDetail() {
     setEditingTaskTitle("");
     setEditingTaskDescription("");
     setEditingTaskDueDate("");
-    setEditingTaskAssignedTo("unassigned");
-    setEditingTaskAssignedToRole("none");
+    setEditingTaskAssignedTo([]);
+    setEditingTaskAssignedToRole([]);
     setEditingTaskDaysFromMeeting("");
   };
 
