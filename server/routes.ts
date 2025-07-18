@@ -700,22 +700,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
 
       
-      // Convert assignedTo from string to number if provided
+      // Handle assignedTo - can be array (multi-select) or single value
       let assignedTo = null;
-      if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
-        if (taskData.assignedTo.startsWith("me_")) {
-          // Find the current user's contact ID from the contacts table
-          const userEmail = req.user.email || req.user.claims?.email;
-          const userContacts = await storage.getContacts();
-          const userContact = userContacts.find(contact => 
-            contact.personalEmail === userEmail || 
-            contact.workEmail === userEmail
+      if (taskData.assignedTo) {
+        const processAssignedTo = async (value: string | number) => {
+          if (typeof value === 'string') {
+            if (value === "me" || value.startsWith("me_")) {
+              // Find the current user's contact ID from the contacts table
+              const userEmail = req.user.email || req.user.claims?.email;
+              const userContacts = await storage.getContacts();
+              const userContact = userContacts.find(contact => 
+                contact.personalEmail === userEmail || 
+                contact.workEmail === userEmail
+              );
+              return userContact ? userContact.id : null;
+            } else if (value.startsWith("team_")) {
+              return parseInt(value.replace("team_", ""));
+            } else {
+              return parseInt(value.toString());
+            }
+          } else if (typeof value === 'number') {
+            return value;
+          }
+          return null;
+        };
+
+        if (Array.isArray(taskData.assignedTo)) {
+          // Multi-select: process each assignment
+          const processedAssignments = await Promise.all(
+            taskData.assignedTo.map(processAssignedTo)
           );
-          assignedTo = userContact ? userContact.id : null;
-        } else if (taskData.assignedTo.startsWith("team_")) {
-          assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
+          const validAssignments = processedAssignments.filter(id => id !== null);
+          assignedTo = validAssignments.length > 0 ? (validAssignments.length === 1 ? validAssignments[0] : validAssignments) : null;
         } else {
-          assignedTo = parseInt(taskData.assignedTo);
+          // Single assignment
+          assignedTo = await processAssignedTo(taskData.assignedTo);
+        }
+      }
+      
+      // Handle assignedToRole - can be array (multi-select) or single value
+      let assignedToRole = null;
+      if (taskData.assignedToRole) {
+        if (Array.isArray(taskData.assignedToRole)) {
+          // Multi-select roles
+          const validRoles = taskData.assignedToRole.filter(role => role && role !== "none");
+          assignedToRole = validRoles.length > 0 ? (validRoles.length === 1 ? validRoles[0] : validRoles) : null;
+        } else {
+          // Single role
+          assignedToRole = taskData.assignedToRole !== "none" ? taskData.assignedToRole : null;
         }
       }
       
@@ -730,7 +762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...taskData,
         assignedTo: assignedTo,
         priority: priority,
-        assignedToRole: taskData.assignedToRole || null,
+        assignedToRole: assignedToRole,
       };
       
 
@@ -747,26 +779,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const taskData = insertTaskSchema.partial().parse(req.body);
       
-      // Convert assignedTo from string to number if provided
+      // Handle assignedTo - can be array (multi-select) or single value
       let assignedTo = null;
-      if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
-        if (typeof taskData.assignedTo === 'string') {
-          if (taskData.assignedTo === "me" || taskData.assignedTo.startsWith("me_")) {
-            // Find the current user's contact ID from the contacts table
-            const userEmail = req.user.email || req.user.claims?.email;
-            const userContacts = await storage.getContacts();
-            const userContact = userContacts.find(contact => 
-              contact.personalEmail === userEmail || 
-              contact.workEmail === userEmail
-            );
-            assignedTo = userContact ? userContact.id : null;
-          } else if (taskData.assignedTo.startsWith("team_")) {
-            assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
-          } else {
-            assignedTo = parseInt(taskData.assignedTo);
+      if (taskData.assignedTo) {
+        const processAssignedTo = async (value: string | number) => {
+          if (typeof value === 'string') {
+            if (value === "me" || value.startsWith("me_")) {
+              // Find the current user's contact ID from the contacts table
+              const userEmail = req.user.email || req.user.claims?.email;
+              const userContacts = await storage.getContacts();
+              const userContact = userContacts.find(contact => 
+                contact.personalEmail === userEmail || 
+                contact.workEmail === userEmail
+              );
+              return userContact ? userContact.id : null;
+            } else if (value.startsWith("team_")) {
+              return parseInt(value.replace("team_", ""));
+            } else {
+              return parseInt(value.toString());
+            }
+          } else if (typeof value === 'number') {
+            return value;
           }
-        } else if (typeof taskData.assignedTo === 'number') {
-          assignedTo = taskData.assignedTo;
+          return null;
+        };
+
+        if (Array.isArray(taskData.assignedTo)) {
+          // Multi-select: process each assignment
+          const processedAssignments = await Promise.all(
+            taskData.assignedTo.map(processAssignedTo)
+          );
+          const validAssignments = processedAssignments.filter(id => id !== null);
+          assignedTo = validAssignments.length > 0 ? (validAssignments.length === 1 ? validAssignments[0] : validAssignments) : null;
+        } else {
+          // Single assignment
+          assignedTo = await processAssignedTo(taskData.assignedTo);
         }
       }
       
@@ -777,6 +824,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priority = isNaN(priorityNum) ? 25 : priorityNum;
       }
       
+      // Handle assignedToRole - can be array (multi-select) or single value
+      let assignedToRole = null;
+      if (taskData.assignedToRole) {
+        if (Array.isArray(taskData.assignedToRole)) {
+          // Multi-select roles
+          const validRoles = taskData.assignedToRole.filter(role => role && role !== "none");
+          assignedToRole = validRoles.length > 0 ? (validRoles.length === 1 ? validRoles[0] : validRoles) : null;
+        } else {
+          // Single role
+          assignedToRole = taskData.assignedToRole !== "none" ? taskData.assignedToRole : null;
+        }
+      }
+
       // Clean up null/empty values
       const cleanedTaskData = {
         ...taskData,
@@ -785,7 +845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: taskData.description || null,
         dueDate: taskData.dueDate || null,
         daysFromMeeting: taskData.daysFromMeeting !== undefined ? parseInt(taskData.daysFromMeeting.toString()) : undefined,
-        assignedToRole: taskData.assignedToRole || null,
+        assignedToRole: assignedToRole,
       };
       
       // Remove fields that are null/undefined from the update, but keep title if provided
