@@ -439,7 +439,7 @@ const SortableSection = ({
                                 <SelectValue placeholder="Assign to..." />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Unassigned</SelectItem>
+                                <SelectItem value="unassigned">Unassigned</SelectItem>
                                 {teamMembers.map((member: any) => (
                                   <SelectItem key={member.id} value={member.id.toString()}>
                                     {member.firstName} {member.lastName}
@@ -521,7 +521,7 @@ const SortableSection = ({
                                     <SelectValue placeholder="Assign to..." />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="">Unassigned</SelectItem>
+                                    <SelectItem value="unassigned">Unassigned</SelectItem>
                                     {teamMembers.map((member: any) => (
                                       <SelectItem key={member.id} value={member.id.toString()}>
                                         {member.firstName} {member.lastName}
@@ -603,7 +603,7 @@ const SortableSection = ({
                                         <SelectValue placeholder="Assign to..." />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        <SelectItem value="">Unassigned</SelectItem>
+                                        <SelectItem value="unassigned">Unassigned</SelectItem>
                                         {teamMembers.map((member: any) => (
                                           <SelectItem key={member.id} value={member.id.toString()}>
                                             {member.firstName} {member.lastName}
@@ -879,7 +879,7 @@ export default function TemplateDetail() {
     setEditingTaskTitle(task.title);
     setEditingTaskDescription(task.description || "");
     setEditingTaskDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
-    setEditingTaskAssignedTo(task.assignedTo ? task.assignedTo.toString() : "");
+    setEditingTaskAssignedTo(task.assignedTo ? task.assignedTo.toString() : "unassigned");
   };
 
   const saveEditingTask = () => {
@@ -889,7 +889,7 @@ export default function TemplateDetail() {
         title: editingTaskTitle, 
         description: editingTaskDescription,
         dueDate: editingTaskDueDate || null,
-        assignedTo: editingTaskAssignedTo ? parseInt(editingTaskAssignedTo) : null,
+        assignedTo: editingTaskAssignedTo && editingTaskAssignedTo !== "unassigned" ? parseInt(editingTaskAssignedTo) : null,
       });
     }
   };
@@ -899,7 +899,7 @@ export default function TemplateDetail() {
     setEditingTaskTitle("");
     setEditingTaskDescription("");
     setEditingTaskDueDate("");
-    setEditingTaskAssignedTo("");
+    setEditingTaskAssignedTo("unassigned");
   };
 
   // Drag and drop
