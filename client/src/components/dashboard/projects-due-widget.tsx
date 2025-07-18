@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Clock, FolderOpen, User } from "lucide-react";
 import { format, addDays, addWeeks, addMonths, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
+import { useLocation } from "wouter";
 import type { Project, Contact } from "@shared/schema";
 
 interface DateRange {
@@ -57,8 +58,13 @@ const getDateRanges = (): Record<string, DateRange> => {
 };
 
 export default function ProjectsDueWidget({ selectedPeriod, customStartDate, customEndDate }: ProjectsDueWidgetProps) {
+  const [, navigate] = useLocation();
   const dateRanges = getDateRanges();
   const currentRange = dateRanges[selectedPeriod] || dateRanges["next-4-months"];
+  
+  const handleProjectClick = (projectId: number) => {
+    navigate(`/project/${projectId}`);
+  };
 
   // Use custom dates if available and period is custom-range
   const actualStartDate = selectedPeriod === "custom-range" && customStartDate 
@@ -174,7 +180,12 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-primary rounded-full"></div>
                         <div>
-                          <p className="font-medium text-[16px]">{project.name}</p>
+                          <button
+                            onClick={() => handleProjectClick(project.id)}
+                            className="font-medium text-[16px] hover:text-primary cursor-pointer transition-colors text-left bg-transparent border-none p-0 underline"
+                          >
+                            {project.name}
+                          </button>
                           <div className="flex items-center gap-2 mt-1">
                             {project.dueDate && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">

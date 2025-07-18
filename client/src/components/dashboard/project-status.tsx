@@ -117,16 +117,18 @@ export default function ProjectStatus() {
             {activeProjects.map((project) => (
               <div key={project.id} className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <button 
+                  <div 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      console.log('Clicked on project:', project.name, project.id);
                       handleProjectClick(project.id);
                     }}
-                    className="text-sm font-medium text-gray-900 hover:text-primary cursor-pointer transition-colors text-left bg-transparent border-none p-0 underline"
+                    className="text-sm font-medium text-gray-900 hover:text-primary cursor-pointer transition-colors text-left underline select-none"
+                    style={{ zIndex: 10 }}
                   >
                     {project.name}
-                  </button>
+                  </div>
                   <span className="text-xs text-gray-500">{projectTaskData[project.id]?.progress || 0}%</span>
                 </div>
                 <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2" />
