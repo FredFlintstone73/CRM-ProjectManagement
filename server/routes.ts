@@ -624,19 +624,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert assignedTo from string to number if provided
       let assignedTo = null;
       if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
-        if (taskData.assignedTo.startsWith("me_")) {
-          // Find the current user's contact ID from the contacts table
-          const userEmail = req.user.email || req.user.claims?.email;
-          const userContacts = await storage.getContacts();
-          const userContact = userContacts.find(contact => 
-            contact.personalEmail === userEmail || 
-            contact.workEmail === userEmail
-          );
-          assignedTo = userContact ? userContact.id : null;
-        } else if (taskData.assignedTo.startsWith("team_")) {
-          assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
-        } else {
-          assignedTo = parseInt(taskData.assignedTo);
+        if (typeof taskData.assignedTo === 'string') {
+          if (taskData.assignedTo.startsWith("me_")) {
+            // Find the current user's contact ID from the contacts table
+            const userEmail = req.user.email || req.user.claims?.email;
+            const userContacts = await storage.getContacts();
+            const userContact = userContacts.find(contact => 
+              contact.personalEmail === userEmail || 
+              contact.workEmail === userEmail
+            );
+            assignedTo = userContact ? userContact.id : null;
+          } else if (taskData.assignedTo.startsWith("team_")) {
+            assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
+          } else {
+            assignedTo = parseInt(taskData.assignedTo);
+          }
+        } else if (typeof taskData.assignedTo === 'number') {
+          assignedTo = taskData.assignedTo;
         }
       }
       

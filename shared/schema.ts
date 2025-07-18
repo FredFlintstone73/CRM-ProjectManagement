@@ -689,8 +689,8 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 }).extend({
   // Handle string date inputs from forms
   dueDate: z.string().optional(),
-  // Handle assignment field as string (will be converted server-side)
-  assignedTo: z.string().optional(),
+  // Handle assignment field as string or number (will be converted server-side)
+  assignedTo: z.union([z.string(), z.number()]).optional().nullable(),
   // Handle priority field as string that will be converted to number
   priority: z.union([z.string(), z.number()]).optional(),
 });
