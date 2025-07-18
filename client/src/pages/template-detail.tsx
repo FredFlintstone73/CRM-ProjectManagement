@@ -1100,7 +1100,7 @@ export default function TemplateDetail() {
                       placeholder="Enter template name"
                     />
                   </div>
-                  <div className="w-80">
+                  <div style={{ width: '640px' }}>
                     <label className="text-sm font-medium mb-1 block">Meeting Type</label>
                     <Select value={meetingType} onValueChange={setMeetingType}>
                       <SelectTrigger>
