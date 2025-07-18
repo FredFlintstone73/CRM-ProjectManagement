@@ -725,16 +725,28 @@ export default function TemplateDetail() {
 
   // Fetch team members for assignment
   const { data: teamMembers = [] } = useQuery({
-    queryKey: ['/api/contacts'],
+    queryKey: ['/api/contacts', 'team-members'],
     queryFn: async () => {
+      console.log('Fetching contacts for team members...');
       const response = await fetch('/api/contacts', {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch contacts');
       const contacts = await response.json();
-      console.log('All contacts:', contacts.map(c => ({ name: `${c.firstName} ${c.lastName}`, type: c.contactType, status: c.status })));
+      console.log('All contacts raw:', contacts);
+      console.log('All contacts details:', contacts.map(c => ({ 
+        id: c.id, 
+        name: `${c.firstName} ${c.lastName}`, 
+        contactType: c.contactType, 
+        status: c.status 
+      })));
       const filtered = contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
-      console.log('Filtered team members:', filtered.map(c => ({ name: `${c.firstName} ${c.lastName}`, type: c.contactType, status: c.status })));
+      console.log('Filtered team members:', filtered.map(c => ({ 
+        id: c.id, 
+        name: `${c.firstName} ${c.lastName}`, 
+        contactType: c.contactType, 
+        status: c.status 
+      })));
       return filtered;
     },
     enabled: isAuthenticated,
