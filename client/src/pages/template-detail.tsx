@@ -374,7 +374,9 @@ const SortableSection = ({
   updateTaskMutation, 
   deleteTaskMutation, 
   createTaskMutation, 
-  templateId 
+  templateId,
+  expandedTasks,
+  toggleTaskExpansion
 }: any) => {
   const {
     attributes,
