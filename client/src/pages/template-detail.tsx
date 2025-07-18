@@ -756,8 +756,8 @@ export default function TemplateDetail() {
 
   // Mutation for updating task
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, title, description, dueDate, assignedTo }: any) => {
-      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description, dueDate, assignedTo });
+    mutationFn: async ({ taskId, title, description, dueDate, assignedTo, daysFromMeeting }: any) => {
+      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description, dueDate, assignedTo, daysFromMeeting });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
