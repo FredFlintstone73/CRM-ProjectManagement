@@ -123,12 +123,6 @@ export default function Templates() {
     },
   });
 
-  // Add refresh button for testing
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
-    refetch();
-  };
-  
   const filteredTemplates = templates?.filter((template) =>
     searchQuery === "" ||
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -239,9 +233,7 @@ export default function Templates() {
                 {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
               </Button>
               
-              <Button onClick={handleRefresh} variant="outline">
-                Refresh
-              </Button>
+
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
