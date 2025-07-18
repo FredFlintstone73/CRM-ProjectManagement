@@ -427,3 +427,4 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Component Error Resolution**: Fixed missing prop destructuring that was causing template editor crashes
 - **Chronological Offset Ordering**: Days from meeting dropdown now correctly orders from earliest (-80) to latest (+4) relative to meeting date
 - **Template Due Date Handling**: Due date field in templates shows "Will be calculated from meeting date" since templates don't have specific dates until used to create projects
+- **Days from Meeting Persistence**: Fixed complete data flow from frontend to database for `daysFromMeeting` field in template tasks, ensuring day offset values are properly saved and retrieved
