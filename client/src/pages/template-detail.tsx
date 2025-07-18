@@ -503,7 +503,7 @@ const SortableSection = ({
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <CardTitle className="font-semibold tracking-tight flex items-center gap-2 text-[20px]">{milestone?.title}</CardTitle>
+                    <CardTitle className="tracking-tight flex items-center gap-2 text-[16px] font-bold">{milestone?.title}</CardTitle>
                     {milestone?.id && (
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
