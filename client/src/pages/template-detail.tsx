@@ -253,7 +253,6 @@ const TaskDisplay = ({
                   <SelectContent>
                     <SelectItem value="unassigned">Unassigned</SelectItem>
                     <SelectItem value="me">Assign to Me</SelectItem>
-                    <SelectItem value="all_team_members">All Active Team Members</SelectItem>
                     {teamMembers?.filter(member => {
                       const currentUserEmail = currentUser?.email;
                       return !(currentUserEmail && (member.personalEmail === currentUserEmail || member.workEmail === currentUserEmail));
@@ -327,11 +326,6 @@ const TaskDisplay = ({
                 {task.assignedTo && (
                   <div className="text-sm text-blue-600">
                     {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
-                  </div>
-                )}
-                {task.assignedToRole === "all_team_members" && (
-                  <div className="text-sm text-green-600 font-medium">
-                    All Team Members
                   </div>
                 )}
                 <Badge variant="secondary" className="text-xs">
