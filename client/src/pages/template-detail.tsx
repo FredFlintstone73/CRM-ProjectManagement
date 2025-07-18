@@ -118,7 +118,23 @@ const TaskDisplay = ({
   setEditingTask, 
   updateTaskMutation, 
   deleteTaskMutation, 
-  createTaskMutation 
+  createTaskMutation,
+  expandedTasks,
+  toggleTaskExpansion,
+  teamMembers = [],
+  allTeamMembers = [],
+  currentUser,
+  editingTaskTitle,
+  setEditingTaskTitle,
+  editingTaskDescription,
+  setEditingTaskDescription,
+  editingTaskDueDate,
+  setEditingTaskDueDate,
+  editingTaskAssignedTo,
+  setEditingTaskAssignedTo,
+  startEditingTask,
+  saveEditingTask,
+  cancelEditingTask
 }: { 
   task: TaskTemplate, 
   templateId: string | undefined, 
@@ -128,23 +144,26 @@ const TaskDisplay = ({
   setEditingTask: (id: number | null) => void,
   updateTaskMutation: any,
   deleteTaskMutation: any,
-  createTaskMutation: any
+  createTaskMutation: any,
+  expandedTasks: Set<number>,
+  toggleTaskExpansion: (id: number) => void,
+  teamMembers?: any[],
+  allTeamMembers?: any[],
+  currentUser?: any,
+  editingTaskTitle: string,
+  setEditingTaskTitle: (title: string) => void,
+  editingTaskDescription: string,
+  setEditingTaskDescription: (description: string) => void,
+  editingTaskDueDate: string,
+  setEditingTaskDueDate: (date: string) => void,
+  editingTaskAssignedTo: string,
+  setEditingTaskAssignedTo: (assignedTo: string) => void,
+  startEditingTask: (task: any) => void,
+  saveEditingTask: () => void,
+  cancelEditingTask: () => void
 }) => {
   const indentClass = level === 0 ? '' : level === 1 ? 'ml-6' : level === 2 ? 'ml-12' : 'ml-16';
   const bgClass = level === 0 ? 'bg-white' : level === 1 ? 'bg-gray-50 border-l-4 border-l-blue-200' : level === 2 ? 'bg-gray-25 border-l-4 border-l-green-200' : 'bg-white border-l-4 border-l-purple-200';
-  
-  const [editTitle, setEditTitle] = useState(task.name);
-  const [editDescription, setEditDescription] = useState(task.description);
-  
-  const handleSaveTask = () => {
-    updateTaskMutation.mutate({ taskId: task.id, title: editTitle, description: editDescription });
-  };
-  
-  const handleCancelEdit = () => {
-    setEditTitle(task.name);
-    setEditDescription(task.description);
-    setEditingTask(null);
-  };
   
   const handleAddSubtask = () => {
     const title = prompt('Enter subtask title:');
@@ -165,6 +184,8 @@ const TaskDisplay = ({
   };
   
   const isEditing = editingTask === task.id;
+  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+  const isExpanded = expandedTasks.has(task.id);
   
   return (
     <div className={`space-y-2 ${indentClass}`}>
@@ -174,26 +195,56 @@ const TaskDisplay = ({
             <div>
               <label className="text-sm font-medium mb-1 block">Title</label>
               <Input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
+                value={editingTaskTitle}
+                onChange={(e) => setEditingTaskTitle(e.target.value)}
                 placeholder="Enter task title"
               />
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Description</label>
               <Textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
+                value={editingTaskDescription}
+                onChange={(e) => setEditingTaskDescription(e.target.value)}
                 placeholder="Enter task description"
                 rows={3}
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Due Date</label>
+                <Input
+                  type="date"
+                  value={editingTaskDueDate}
+                  onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Assigned To</label>
+                <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select assignee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    <SelectItem value="me">Assign to Me</SelectItem>
+                    {teamMembers?.filter(member => {
+                      const currentUserEmail = currentUser?.email;
+                      return !(currentUserEmail && (member.personalEmail === currentUserEmail || member.workEmail === currentUserEmail));
+                    }).map((member) => (
+                      <SelectItem key={member.id} value={member.id.toString()}>
+                        {member.firstName} {member.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleSaveTask}>
+              <Button size="sm" onClick={saveEditingTask}>
                 <Save className="w-4 h-4 mr-2" />
                 Save
               </Button>
-              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+              <Button size="sm" variant="outline" onClick={cancelEditingTask}>
                 Cancel
               </Button>
             </div>
@@ -202,17 +253,40 @@ const TaskDisplay = ({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h4 className="font-medium">{task.name}</h4>
+                {hasSubtasks && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleTaskExpansion(task.id)}
+                    className="p-1 h-6 w-6"
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </Button>
+                )}
+                <h4 className="font-medium cursor-pointer" onClick={() => startEditingTask(task)}>
+                  {task.name || task.title}
+                </h4>
                 <Badge variant="secondary" className="text-xs">
                   {task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting} days
                 </Badge>
               </div>
-              {task.description && (
-                <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+              {(task.description || task.assignedTo) && (
+                <div className="text-sm text-gray-600 mt-1 space-y-1">
+                  {task.description && <p>{task.description}</p>}
+                  {task.assignedTo && (
+                    <p className="text-blue-600">
+                      Assigned to: {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button size="sm" variant="ghost" onClick={() => setEditingTask(task.id)}>
+              <Button size="sm" variant="ghost" onClick={() => startEditingTask(task)}>
                 <Edit2 className="w-4 h-4" />
               </Button>
               <Button size="sm" variant="ghost" onClick={handleAddSubtask}>
@@ -227,7 +301,7 @@ const TaskDisplay = ({
       </div>
       
       {/* Recursively render subtasks */}
-      {task.subtasks && task.subtasks.length > 0 && (
+      {hasSubtasks && isExpanded && (
         <div className="space-y-2">
           {task.subtasks.map((subtask) => (
             <TaskDisplay 
@@ -241,6 +315,22 @@ const TaskDisplay = ({
               updateTaskMutation={updateTaskMutation}
               deleteTaskMutation={deleteTaskMutation}
               createTaskMutation={createTaskMutation}
+              expandedTasks={expandedTasks}
+              toggleTaskExpansion={toggleTaskExpansion}
+              teamMembers={teamMembers}
+              allTeamMembers={allTeamMembers}
+              currentUser={currentUser}
+              editingTaskTitle={editingTaskTitle}
+              setEditingTaskTitle={setEditingTaskTitle}
+              editingTaskDescription={editingTaskDescription}
+              setEditingTaskDescription={setEditingTaskDescription}
+              editingTaskDueDate={editingTaskDueDate}
+              setEditingTaskDueDate={setEditingTaskDueDate}
+              editingTaskAssignedTo={editingTaskAssignedTo}
+              setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+              startEditingTask={startEditingTask}
+              saveEditingTask={saveEditingTask}
+              cancelEditingTask={cancelEditingTask}
             />
           ))}
         </div>
@@ -411,280 +501,34 @@ const SortableSection = ({
                 </Button>
               </div>
               {hierarchicalTasks.map((task: any) => (
-                <div key={task.id} className="border-l-2 border-blue-200 pl-4 space-y-2">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
-                    <div className="flex-1">
-                      {editingTask === task.id ? (
-                        <div className="space-y-2">
-                          <Input
-                            value={editingTaskTitle}
-                            onChange={(e) => setEditingTaskTitle(e.target.value)}
-                            className="font-medium"
-                            placeholder="Task title"
-                          />
-                          <Textarea
-                            value={editingTaskDescription}
-                            onChange={(e) => setEditingTaskDescription(e.target.value)}
-                            placeholder="Task description"
-                            rows={2}
-                            className="text-sm"
-                          />
-                          <div className="flex gap-2">
-                            <Input
-                              type="date"
-                              value={editingTaskDueDate}
-                              onChange={(e) => setEditingTaskDueDate(e.target.value)}
-                              className="text-sm"
-                            />
-                            <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
-                              <SelectTrigger className="text-sm">
-                                <SelectValue placeholder="Assign to..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="unassigned">Unassigned</SelectItem>
-                                {currentUser && (
-                                  <SelectItem value="me">Assign to Me</SelectItem>
-                                )}
-                                {teamMembers.map((member: any) => (
-                                  <SelectItem key={member.id} value={member.id.toString()}>
-                                    {member.firstName} {member.lastName}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" onClick={saveEditingTask}>Save</Button>
-                            <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div onClick={() => startEditingTask(task)} className="cursor-pointer">
-                          <div className="font-medium text-gray-800">{task.title}</div>
-                          <div className="flex gap-2 text-sm text-gray-500 mt-1">
-                            {task.dueDate && (
-                              <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
-                            )}
-                            {task.assignedTo && (() => {
-                              const assignedUser = allTeamMembers?.find((m: any) => m.id === task.assignedTo);
-                              if (assignedUser) {
-                                const currentUserEmail = currentUser?.email;
-                                const isCurrentUser = currentUserEmail && 
-                                  (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail);
-                                return (
-                                  <span>Assigned to: {isCurrentUser ? 'Me' : `${assignedUser.firstName} ${assignedUser.lastName}`}</span>
-                                );
-                              }
-                              return null;
-                            })()}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {editingTask !== task.id && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAddTask(milestone.id, task.id)}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Sub-task
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteTaskMutation.mutate(task.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Sub-tasks */}
-                  {task.subtasks && task.subtasks.map((subtask: any) => (
-                    <div key={subtask.id} className="ml-4 border-l-2 border-green-200 pl-4 space-y-2">
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
-                        <div className="flex-1">
-                          {editingTask === subtask.id ? (
-                            <div className="space-y-2">
-                              <Input
-                                value={editingTaskTitle}
-                                onChange={(e) => setEditingTaskTitle(e.target.value)}
-                                className="font-medium"
-                                placeholder="Sub-task title"
-                              />
-                              <Textarea
-                                value={editingTaskDescription}
-                                onChange={(e) => setEditingTaskDescription(e.target.value)}
-                                placeholder="Sub-task description"
-                                rows={2}
-                                className="text-sm"
-                              />
-                              <div className="flex gap-2">
-                                <Input
-                                  type="date"
-                                  value={editingTaskDueDate}
-                                  onChange={(e) => setEditingTaskDueDate(e.target.value)}
-                                  className="text-sm"
-                                />
-                                <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
-                                  <SelectTrigger className="text-sm">
-                                    <SelectValue placeholder="Assign to..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="unassigned">Unassigned</SelectItem>
-                                    {currentUser && (
-                                      <SelectItem value="me">Assign to Me</SelectItem>
-                                    )}
-                                    {teamMembers.map((member: any) => (
-                                      <SelectItem key={member.id} value={member.id.toString()}>
-                                        {member.firstName} {member.lastName}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={saveEditingTask}>Save</Button>
-                                <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div onClick={() => startEditingTask(subtask)} className="cursor-pointer">
-                              <div className="font-medium text-gray-700">{subtask.title}</div>
-                              <div className="flex gap-2 text-sm text-gray-500 mt-1">
-                                {subtask.dueDate && (
-                                  <span>Due: {new Date(subtask.dueDate).toLocaleDateString()}</span>
-                                )}
-                                {subtask.assignedTo && (() => {
-                                  const assignedUser = teamMembers.find((m: any) => m.id === subtask.assignedTo);
-                                  if (assignedUser) {
-                                    const currentUserEmail = currentUser?.email;
-                                    const isCurrentUser = currentUserEmail && 
-                                      (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail);
-                                    return (
-                                      <span>Assigned to: {isCurrentUser ? 'Me' : `${assignedUser.firstName} ${assignedUser.lastName}`}</span>
-                                    );
-                                  }
-                                  return null;
-                                })()}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {editingTask !== subtask.id && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleAddTask(milestone.id, subtask.id)}
-                            >
-                              <Plus className="w-4 h-4 mr-1" />
-                              Sub-sub-task
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => deleteTaskMutation.mutate(subtask.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Sub-sub-tasks */}
-                      {subtask.subtasks && subtask.subtasks.map((subsubtask: any) => (
-                        <div key={subsubtask.id} className="ml-4 border-l-2 border-purple-200 pl-4">
-                          <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border">
-                            <div className="flex-1">
-                              {editingTask === subsubtask.id ? (
-                                <div className="space-y-2">
-                                  <Input
-                                    value={editingTaskTitle}
-                                    onChange={(e) => setEditingTaskTitle(e.target.value)}
-                                    className="font-medium"
-                                    placeholder="Sub-sub-task title"
-                                  />
-                                  <Textarea
-                                    value={editingTaskDescription}
-                                    onChange={(e) => setEditingTaskDescription(e.target.value)}
-                                    placeholder="Sub-sub-task description"
-                                    rows={2}
-                                    className="text-sm"
-                                  />
-                                  <div className="flex gap-2">
-                                    <Input
-                                      type="date"
-                                      value={editingTaskDueDate}
-                                      onChange={(e) => setEditingTaskDueDate(e.target.value)}
-                                      className="text-sm"
-                                    />
-                                    <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
-                                      <SelectTrigger className="text-sm">
-                                        <SelectValue placeholder="Assign to..." />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                                        {currentUser && (
-                                          <SelectItem value="me">Assign to Me</SelectItem>
-                                        )}
-                                        {teamMembers.map((member: any) => (
-                                          <SelectItem key={member.id} value={member.id.toString()}>
-                                            {member.firstName} {member.lastName}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button size="sm" onClick={saveEditingTask}>Save</Button>
-                                    <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div onClick={() => startEditingTask(subsubtask)} className="cursor-pointer">
-                                  <div className="font-medium text-gray-600">{subsubtask.title}</div>
-                                  <div className="flex gap-2 text-sm text-gray-400 mt-1">
-                                    {subsubtask.dueDate && (
-                                      <span>Due: {new Date(subsubtask.dueDate).toLocaleDateString()}</span>
-                                    )}
-                                    {subsubtask.assignedTo && (() => {
-                                      const assignedUser = teamMembers.find((m: any) => m.id === subsubtask.assignedTo);
-                                      if (assignedUser) {
-                                        const currentUserEmail = currentUser?.email;
-                                        const isCurrentUser = currentUserEmail && 
-                                          (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail);
-                                        return (
-                                          <span>Assigned to: {isCurrentUser ? 'Me' : `${assignedUser.firstName} ${assignedUser.lastName}`}</span>
-                                        );
-                                      }
-                                      return null;
-                                    })()}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                            {editingTask !== subsubtask.id && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => deleteTaskMutation.mutate(subsubtask.id)}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
+                <TaskDisplay 
+                  key={task.id} 
+                  task={task} 
+                  templateId={templateId}
+                  level={0}
+                  milestone={milestone}
+                  editingTask={editingTask}
+                  setEditingTask={setEditingTask}
+                  updateTaskMutation={updateTaskMutation}
+                  deleteTaskMutation={deleteTaskMutation}
+                  createTaskMutation={createTaskMutation}
+                  expandedTasks={expandedTasks}
+                  toggleTaskExpansion={toggleTaskExpansion}
+                  teamMembers={teamMembers}
+                  allTeamMembers={allTeamMembers}
+                  currentUser={currentUser}
+                  editingTaskTitle={editingTaskTitle}
+                  setEditingTaskTitle={setEditingTaskTitle}
+                  editingTaskDescription={editingTaskDescription}
+                  setEditingTaskDescription={setEditingTaskDescription}
+                  editingTaskDueDate={editingTaskDueDate}
+                  setEditingTaskDueDate={setEditingTaskDueDate}
+                  editingTaskAssignedTo={editingTaskAssignedTo}
+                  setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                  startEditingTask={startEditingTask}
+                  saveEditingTask={saveEditingTask}
+                  cancelEditingTask={cancelEditingTask}
+                />
               ))}
             </div>
           </CardContent>
@@ -702,6 +546,7 @@ export default function TemplateDetail() {
   
   // State variables
   const [openPhases, setOpenPhases] = useState<number[]>([]);
+  const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
   const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [editingTask, setEditingTask] = useState<number | null>(null);
@@ -794,6 +639,18 @@ export default function TemplateDetail() {
         ? prev.filter(id => id !== milestoneId)
         : [...prev, milestoneId]
     );
+  };
+
+  const toggleTaskExpansion = (taskId: number) => {
+    setExpandedTasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
   };
 
   // Mutation for reordering milestones
@@ -939,7 +796,7 @@ export default function TemplateDetail() {
 
   const startEditingTask = (task: any) => {
     setEditingTask(task.id);
-    setEditingTaskTitle(task.title);
+    setEditingTaskTitle(task.title || task.name || "");
     setEditingTaskDescription(task.description || "");
     setEditingTaskDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
     
@@ -1238,6 +1095,8 @@ export default function TemplateDetail() {
                       deleteTaskMutation={deleteTaskMutation}
                       createTaskMutation={createTaskMutation}
                       templateId={id}
+                      expandedTasks={expandedTasks}
+                      toggleTaskExpansion={toggleTaskExpansion}
                     />
                   );
                 })}
