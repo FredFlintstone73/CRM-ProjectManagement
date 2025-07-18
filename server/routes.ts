@@ -190,6 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('POST /api/projects called with body:', req.body);
       const projectData = insertProjectSchema.parse(req.body);
       const userId = req.user.claims.sub;
       
@@ -287,6 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Fallback to regular project creation if no template found
+      console.log('No template found, creating regular project');
       const project = await storage.createProject(projectData, userId);
       res.json(project);
     } catch (error) {

@@ -214,7 +214,15 @@ export default function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                 <Input
                   type="date"
                   value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                  onChange={(e) => field.onChange(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      // Parse the date and set it to local time to avoid timezone issues
+                      const localDate = new Date(e.target.value + 'T00:00:00');
+                      field.onChange(localDate.toISOString());
+                    } else {
+                      field.onChange(e.target.value);
+                    }
+                  }}
                 />
               </FormControl>
               <FormMessage />
