@@ -713,6 +713,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
     "human_relations",
     "accountant",
     "client_service_rep",
+    "all_team_members",
     "other"
   ]).optional().nullable(),
   // Handle priority field as string that will be converted to number
