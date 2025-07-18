@@ -731,10 +731,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             taskData.assignedTo.map(processAssignedTo)
           );
           const validAssignments = processedAssignments.filter(id => id !== null);
-          assignedTo = validAssignments.length > 0 ? (validAssignments.length === 1 ? validAssignments[0] : validAssignments) : null;
+          assignedTo = validAssignments.length > 0 ? validAssignments : null;
         } else {
-          // Single assignment
-          assignedTo = await processAssignedTo(taskData.assignedTo);
+          // Single assignment - convert to array for database consistency
+          const processed = await processAssignedTo(taskData.assignedTo);
+          assignedTo = processed ? [processed] : null;
         }
       }
       
@@ -744,10 +745,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (Array.isArray(taskData.assignedToRole)) {
           // Multi-select roles
           const validRoles = taskData.assignedToRole.filter(role => role && role !== "none");
-          assignedToRole = validRoles.length > 0 ? (validRoles.length === 1 ? validRoles[0] : validRoles) : null;
+          assignedToRole = validRoles.length > 0 ? validRoles : null;
         } else {
-          // Single role
-          assignedToRole = taskData.assignedToRole !== "none" ? taskData.assignedToRole : null;
+          // Single role - convert to array for database consistency
+          assignedToRole = taskData.assignedToRole !== "none" ? [taskData.assignedToRole] : null;
         }
       }
       
@@ -810,10 +811,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             taskData.assignedTo.map(processAssignedTo)
           );
           const validAssignments = processedAssignments.filter(id => id !== null);
-          assignedTo = validAssignments.length > 0 ? (validAssignments.length === 1 ? validAssignments[0] : validAssignments) : null;
+          assignedTo = validAssignments.length > 0 ? validAssignments : null;
         } else {
-          // Single assignment
-          assignedTo = await processAssignedTo(taskData.assignedTo);
+          // Single assignment - convert to array for database consistency
+          const processed = await processAssignedTo(taskData.assignedTo);
+          assignedTo = processed ? [processed] : null;
         }
       }
       
@@ -830,10 +832,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (Array.isArray(taskData.assignedToRole)) {
           // Multi-select roles
           const validRoles = taskData.assignedToRole.filter(role => role && role !== "none");
-          assignedToRole = validRoles.length > 0 ? (validRoles.length === 1 ? validRoles[0] : validRoles) : null;
+          assignedToRole = validRoles.length > 0 ? validRoles : null;
         } else {
-          // Single role
-          assignedToRole = taskData.assignedToRole !== "none" ? taskData.assignedToRole : null;
+          // Single role - convert to array for database consistency
+          assignedToRole = taskData.assignedToRole !== "none" ? [taskData.assignedToRole] : null;
         }
       }
 
