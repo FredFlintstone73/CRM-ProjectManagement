@@ -517,22 +517,28 @@ export default function TemplateDetail() {
   }));
 
   // Group tasks by milestone with milestone metadata
-  const tasksByMilestone = new Map<string, { milestone: any, tasks: TaskTemplate[] }>();
+  const tasksByMilestone = new Map<number, { milestone: any, tasks: TaskTemplate[] }>();
+  
+  // First, initialize all milestones with empty task arrays
+  milestones.forEach((milestone: any) => {
+    tasksByMilestone.set(milestone.id, { milestone, tasks: [] });
+  });
+  
+  // Then add tasks to their respective milestones
   allTasks.forEach((task: any) => {
-    const milestoneTitle = task.milestone?.title || 'Uncategorized';
-    if (!tasksByMilestone.has(milestoneTitle)) {
-      tasksByMilestone.set(milestoneTitle, { milestone: task.milestone, tasks: [] });
+    const milestoneId = task.milestone?.id;
+    if (milestoneId && tasksByMilestone.has(milestoneId)) {
+      tasksByMilestone.get(milestoneId)!.tasks.push({
+        id: task.id,
+        name: task.title,
+        description: task.description || '',
+        estimatedDays: 1,
+        daysFromMeeting: 0,
+        parentTaskId: task.parentTaskId,
+        assignedTo: null,
+        comments: ''
+      });
     }
-    tasksByMilestone.get(milestoneTitle)!.tasks.push({
-      id: task.id,
-      name: task.title,
-      description: task.description || '',
-      estimatedDays: 1,
-      daysFromMeeting: 0,
-      parentTaskId: task.parentTaskId,
-      assignedTo: null,
-      comments: ''
-    });
   });
 
   const totalTasks = tasks.length;
@@ -621,14 +627,14 @@ export default function TemplateDetail() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Template Tasks</h2>
             
-            {Array.from(tasksByMilestone.entries()).map(([milestoneTitle, { milestone, tasks: milestoneTasks }], milestoneIndex) => {
+            {Array.from(tasksByMilestone.entries()).map(([milestoneId, { milestone, tasks: milestoneTasks }], milestoneIndex) => {
               const isOpen = openPhases.includes(milestone?.id);
               const hierarchicalTasks = buildTaskHierarchy(milestoneTasks);
               const taskCount = milestoneTasks.length;
               const isEditing = editingMilestone === milestone?.id;
               
               return (
-                <Card key={milestone?.id || milestoneTitle} className="overflow-hidden group">
+                <Card key={milestone?.id} className="overflow-hidden group">
                   <Collapsible open={isOpen} onOpenChange={() => togglePhase(milestone?.id)}>
                     <CollapsibleTrigger asChild>
                       <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
@@ -664,7 +670,7 @@ export default function TemplateDetail() {
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2">
-                                  <CardTitle className="text-lg">{milestoneTitle}</CardTitle>
+                                  <CardTitle className="text-lg">{milestone?.title}</CardTitle>
                                   {milestone?.id && (
                                     <Button
                                       size="sm"
