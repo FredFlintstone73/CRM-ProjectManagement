@@ -8,13 +8,14 @@ import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera, StickyNote, FolderOpen, Plus, ExternalLink } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera, StickyNote, FolderOpen, Plus } from "lucide-react";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
 import ContactNotes from "@/components/contacts/contact-notes";
@@ -64,6 +65,28 @@ export default function ContactDetail() {
       return response.json();
     },
     enabled: isAuthenticated && !!id,
+  });
+
+  // Query for tasks to calculate progress for each project
+  const { data: allTasks } = useQuery({
+    queryKey: ['/api/tasks'],
+    enabled: isAuthenticated && projects && projects.length > 0,
+  });
+
+  // Calculate progress for each project
+  const projectsWithProgress = projects?.map(project => {
+    const projectTasks = allTasks?.filter((task: any) => task.projectId === project.id) || [];
+    const completedTasks = projectTasks.filter((task: any) => task.completed);
+    const progress = projectTasks.length > 0 ? (completedTasks.length / projectTasks.length) * 100 : 0;
+    return { ...project, progress };
+  }) || [];
+
+  // Sort projects by due date (meeting date)
+  const sortedProjects = [...projectsWithProgress].sort((a, b) => {
+    if (!a.dueDate && !b.dueDate) return 0;
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
   });
 
   const updateStatusMutation = useMutation({
@@ -1131,42 +1154,38 @@ export default function ContactDetail() {
                       </div>
                     ))}
                   </div>
-                ) : projects && projects.length > 0 ? (
+                ) : sortedProjects && sortedProjects.length > 0 ? (
                   <div className="space-y-4">
-                    {projects.map((project) => (
+                    {sortedProjects.map((project) => (
                       <div 
                         key={project.id} 
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 mb-3">
                           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                             <FolderOpen className="h-5 w-5 text-primary" />
                           </div>
-                          <div>
-                            <h3 className="font-medium text-gray-900">{project.name}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span className="capitalize">{project.status}</span>
+                          <div className="flex-1">
+                            <Button
+                              variant="ghost"
+                              className="p-0 h-auto text-left justify-start font-medium text-gray-900 hover:text-primary"
+                              onClick={() => navigate(`/projects/${project.id}`)}
+                            >
+                              {project.name}
+                            </Button>
+                            <div className="text-sm text-gray-500 mt-1">
                               {project.dueDate && (
-                                <span>Due: {new Date(project.dueDate).toLocaleDateString()}</span>
+                                <span>Meeting Date: {new Date(project.dueDate).toLocaleDateString()}</span>
                               )}
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            variant={project.status === 'active' ? 'default' : 'secondary'}
-                            className="capitalize"
-                          >
-                            {project.status}
-                          </Badge>
-                          <Button
-                            onClick={() => navigate(`/projects/${project.id}`)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-primary hover:text-primary/80"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Progress</span>
+                            <span className="text-gray-600">{Math.round(project.progress)}%</span>
+                          </div>
+                          <Progress value={project.progress} className="h-2" />
                         </div>
                       </div>
                     ))}
