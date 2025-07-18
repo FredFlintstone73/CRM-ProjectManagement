@@ -978,6 +978,44 @@ export default function TemplateDetail() {
     setEditingTaskAssignedTo("unassigned");
   };
 
+  // Save template data
+  const handleSaveTemplate = async () => {
+    if (!templateName.trim()) {
+      toast({
+        title: "Error",
+        description: "Template name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await apiRequest(`/api/project-templates/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: templateName,
+          description: templateDescription,
+          meetingType: meetingType,
+        }),
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
+      
+      toast({
+        title: "Success",
+        description: "Template saved successfully",
+      });
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save template",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -1125,6 +1163,12 @@ export default function TemplateDetail() {
                     placeholder="Enter template description"
                     rows={3}
                   />
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleSaveTemplate} className="min-w-24">
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Template
+                  </Button>
                 </div>
               </CardContent>
             </Card>
