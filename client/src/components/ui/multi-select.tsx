@@ -50,6 +50,7 @@ export function MultiSelect({
     } else {
       onChange([...selected, item]);
     }
+    // Keep dropdown open for multi-selection
   };
 
   return (
@@ -113,9 +114,10 @@ export function MultiSelect({
           <CommandEmpty>No item found.</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {options.map((option) => (
-              <CommandItem
+              <div
                 key={option.value}
-                onSelect={() => handleSelect(option.value)}
+                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                onClick={() => handleSelect(option.value)}
               >
                 <Check
                   className={cn(
@@ -124,7 +126,7 @@ export function MultiSelect({
                   )}
                 />
                 {option.label}
-              </CommandItem>
+              </div>
             ))}
           </CommandGroup>
         </Command>
