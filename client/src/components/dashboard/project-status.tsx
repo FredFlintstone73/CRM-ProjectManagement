@@ -7,6 +7,12 @@ import type { Project, Contact } from "@shared/schema";
 
 export default function ProjectStatus() {
   const [, navigate] = useLocation();
+  
+  const handleProjectClick = (projectId: number) => {
+    console.log('Navigating to project:', projectId);
+    navigate(`/project/${projectId}`);
+  };
+  
   const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
   });
@@ -112,8 +118,12 @@ export default function ProjectStatus() {
               <div key={project.id} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <button 
-                    onClick={() => navigate(`/project/${project.id}`)}
-                    className="text-sm font-medium text-gray-900 hover:text-primary cursor-pointer transition-colors text-left"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleProjectClick(project.id);
+                    }}
+                    className="text-sm font-medium text-gray-900 hover:text-primary cursor-pointer transition-colors text-left bg-transparent border-none p-0 underline"
                   >
                     {project.name}
                   </button>
