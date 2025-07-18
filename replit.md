@@ -534,3 +534,8 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **People and Roles**: Users can select multiple team members AND multiple roles for comprehensive assignment flexibility
 - **Template-to-Project Flow**: Multi-select assignments in templates properly carry over when creating projects from templates
 - **No Control Key Required**: Simple click-to-select interface without keyboard modifiers for better user experience
+- **Database Schema Resolution**: Fixed array storage requirements - all assignments stored as arrays even for single selections
+- **Server-Side Processing**: Enhanced POST/PUT routes to handle both array and single value inputs with proper array conversion
+- **React DOM Warning Fix**: Resolved nested button warning in MultiSelect component by converting button to span element
+- **Schema Validation**: Updated Zod schemas to accept both arrays and single values for backward compatibility
+- **Verified Working**: Template task editing successfully saves multi-select assignments with proper database storage
