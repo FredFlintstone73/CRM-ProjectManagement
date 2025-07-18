@@ -110,7 +110,9 @@ export default function ProjectStatus() {
             {activeProjects.map((project) => (
               <div key={project.id} className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-900">{project.name}</p>
+                  <Link href={`/project/${project.id}`}>
+                    <p className="text-sm font-medium text-gray-900 hover:text-primary cursor-pointer transition-colors">{project.name}</p>
+                  </Link>
                   <span className="text-xs text-gray-500">{projectTaskData[project.id]?.progress || 0}%</span>
                 </div>
                 <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2" />
