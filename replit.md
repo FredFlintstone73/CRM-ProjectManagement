@@ -518,3 +518,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Dynamic Resizing**: Fields automatically adjust width based on browser window size for optimal viewing
 - **Removed Fixed Width**: Eliminated fixed 640px width constraint on Meeting Type field for better flexibility
 - **Header Typography**: Updated Template Details title to 20px font size with bold weight for improved visual hierarchy
+
+### Automatic Task Sorting in Template Sections (July 18, 2025)
+- **Dynamic Task Ordering**: Tasks within each template section now automatically sort by daysFromMeeting (earliest first)
+- **Real-time Reordering**: When a task's due date (Days from Meeting) is changed, it automatically repositions itself within its section
+- **Consistent Chronological Flow**: Tasks display in chronological order from earliest to latest meeting date offset
+- **Enhanced Cache Invalidation**: Improved query invalidation to ensure immediate UI updates after task date changes

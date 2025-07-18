@@ -796,8 +796,10 @@ export default function TemplateDetail() {
       return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description, dueDate, assignedTo, assignedToRole, daysFromMeeting });
     },
     onSuccess: () => {
+      // Invalidate queries to trigger re-fetch and re-sort
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
       queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
+      queryClient.invalidateQueries({ queryKey: ['template-tasks', id, milestones.map(m => m.id)] });
       setEditingTask(null);
       setEditingTaskTitle("");
       setEditingTaskDescription("");
@@ -1017,11 +1019,17 @@ export default function TemplateDetail() {
       map.set(milestone.id, { milestone, tasks: [] });
     });
 
-    // Add tasks to their respective milestones
+    // Add tasks to their respective milestones and sort by daysFromMeeting
     if (taskQueries.data) {
       taskQueries.data.forEach(({ milestoneId, tasks }) => {
         if (map.has(milestoneId)) {
-          map.get(milestoneId).tasks = tasks;
+          // Sort tasks by daysFromMeeting (earliest first)
+          const sortedTasks = [...tasks].sort((a, b) => {
+            const aDays = a.daysFromMeeting || 0;
+            const bDays = b.daysFromMeeting || 0;
+            return aDays - bDays;
+          });
+          map.get(milestoneId).tasks = sortedTasks;
         }
       });
     }
