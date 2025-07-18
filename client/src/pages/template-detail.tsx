@@ -732,7 +732,7 @@ export default function TemplateDetail() {
       });
       if (!response.ok) throw new Error('Failed to fetch contacts');
       const contacts = await response.json();
-      return contacts.filter((contact: any) => contact.type === 'team_member' && contact.status === 'active');
+      return contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
     },
     enabled: isAuthenticated,
   });
