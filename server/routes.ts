@@ -625,7 +625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let assignedTo = null;
       if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
         if (typeof taskData.assignedTo === 'string') {
-          if (taskData.assignedTo.startsWith("me_")) {
+          if (taskData.assignedTo === "me" || taskData.assignedTo.startsWith("me_")) {
             // Find the current user's contact ID from the contacts table
             const userEmail = req.user.email || req.user.claims?.email;
             const userContacts = await storage.getContacts();

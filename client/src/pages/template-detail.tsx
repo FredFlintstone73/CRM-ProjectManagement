@@ -276,6 +276,7 @@ const SortableSection = ({
   editingTaskAssignedTo,
   setEditingTaskAssignedTo,
   teamMembers,
+  currentUser,
   startEditingTask,
   saveEditingTask,
   cancelEditingTask,
@@ -440,6 +441,9 @@ const SortableSection = ({
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="unassigned">Unassigned</SelectItem>
+                                {currentUser && (
+                                  <SelectItem value="me">Assign to Me</SelectItem>
+                                )}
                                 {teamMembers.map((member: any) => (
                                   <SelectItem key={member.id} value={member.id.toString()}>
                                     {member.firstName} {member.lastName}
@@ -460,9 +464,18 @@ const SortableSection = ({
                             {task.dueDate && (
                               <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
                             )}
-                            {task.assignedTo && teamMembers.find((m: any) => m.id === task.assignedTo) && (
-                              <span>Assigned to: {teamMembers.find((m: any) => m.id === task.assignedTo)?.firstName} {teamMembers.find((m: any) => m.id === task.assignedTo)?.lastName}</span>
-                            )}
+                            {task.assignedTo && (() => {
+                              const assignedUser = teamMembers.find((m: any) => m.id === task.assignedTo);
+                              if (assignedUser) {
+                                const currentUserEmail = currentUser?.email;
+                                const isCurrentUser = currentUserEmail && 
+                                  (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail);
+                                return (
+                                  <span>Assigned to: {isCurrentUser ? 'Me' : `${assignedUser.firstName} ${assignedUser.lastName}`}</span>
+                                );
+                              }
+                              return null;
+                            })()}
                           </div>
                         </div>
                       )}
@@ -522,6 +535,9 @@ const SortableSection = ({
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="unassigned">Unassigned</SelectItem>
+                                    {currentUser && (
+                                      <SelectItem value="me">Assign to Me</SelectItem>
+                                    )}
                                     {teamMembers.map((member: any) => (
                                       <SelectItem key={member.id} value={member.id.toString()}>
                                         {member.firstName} {member.lastName}
@@ -542,9 +558,18 @@ const SortableSection = ({
                                 {subtask.dueDate && (
                                   <span>Due: {new Date(subtask.dueDate).toLocaleDateString()}</span>
                                 )}
-                                {subtask.assignedTo && teamMembers.find((m: any) => m.id === subtask.assignedTo) && (
-                                  <span>Assigned to: {teamMembers.find((m: any) => m.id === subtask.assignedTo)?.firstName} {teamMembers.find((m: any) => m.id === subtask.assignedTo)?.lastName}</span>
-                                )}
+                                {subtask.assignedTo && (() => {
+                                  const assignedUser = teamMembers.find((m: any) => m.id === subtask.assignedTo);
+                                  if (assignedUser) {
+                                    const currentUserEmail = currentUser?.email;
+                                    const isCurrentUser = currentUserEmail && 
+                                      (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail);
+                                    return (
+                                      <span>Assigned to: {isCurrentUser ? 'Me' : `${assignedUser.firstName} ${assignedUser.lastName}`}</span>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                               </div>
                             </div>
                           )}
@@ -604,6 +629,9 @@ const SortableSection = ({
                                       </SelectTrigger>
                                       <SelectContent>
                                         <SelectItem value="unassigned">Unassigned</SelectItem>
+                                        {currentUser && (
+                                          <SelectItem value="me">Assign to Me</SelectItem>
+                                        )}
                                         {teamMembers.map((member: any) => (
                                           <SelectItem key={member.id} value={member.id.toString()}>
                                             {member.firstName} {member.lastName}
@@ -624,9 +652,18 @@ const SortableSection = ({
                                     {subsubtask.dueDate && (
                                       <span>Due: {new Date(subsubtask.dueDate).toLocaleDateString()}</span>
                                     )}
-                                    {subsubtask.assignedTo && teamMembers.find((m: any) => m.id === subsubtask.assignedTo) && (
-                                      <span>Assigned to: {teamMembers.find((m: any) => m.id === subsubtask.assignedTo)?.firstName} {teamMembers.find((m: any) => m.id === subsubtask.assignedTo)?.lastName}</span>
-                                    )}
+                                    {subsubtask.assignedTo && (() => {
+                                      const assignedUser = teamMembers.find((m: any) => m.id === subsubtask.assignedTo);
+                                      if (assignedUser) {
+                                        const currentUserEmail = currentUser?.email;
+                                        const isCurrentUser = currentUserEmail && 
+                                          (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail);
+                                        return (
+                                          <span>Assigned to: {isCurrentUser ? 'Me' : `${assignedUser.firstName} ${assignedUser.lastName}`}</span>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
                                   </div>
                                 </div>
                               )}
@@ -678,6 +715,12 @@ export default function TemplateDetail() {
   const { data: template, isLoading: isTemplateLoading } = useQuery<ProjectTemplate>({
     queryKey: ['/api/project-templates', id],
     enabled: !!id && isAuthenticated,
+  });
+
+  // Fetch current user for "Assign to Me" option
+  const { data: currentUser } = useQuery({
+    queryKey: ['/api/auth/user'],
+    enabled: isAuthenticated,
   });
 
   // Fetch team members for assignment
@@ -879,17 +922,39 @@ export default function TemplateDetail() {
     setEditingTaskTitle(task.title);
     setEditingTaskDescription(task.description || "");
     setEditingTaskDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
-    setEditingTaskAssignedTo(task.assignedTo ? task.assignedTo.toString() : "unassigned");
+    
+    // Check if the assigned user is the current user
+    let assignedValue = "unassigned";
+    if (task.assignedTo) {
+      const currentUserEmail = currentUser?.email;
+      const assignedUser = teamMembers.find((member: any) => member.id === task.assignedTo);
+      if (assignedUser && currentUserEmail && 
+          (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail)) {
+        assignedValue = "me";
+      } else {
+        assignedValue = task.assignedTo.toString();
+      }
+    }
+    setEditingTaskAssignedTo(assignedValue);
   };
 
   const saveEditingTask = () => {
     if (editingTask && editingTaskTitle.trim()) {
+      let assignedTo = null;
+      if (editingTaskAssignedTo && editingTaskAssignedTo !== "unassigned") {
+        if (editingTaskAssignedTo === "me") {
+          assignedTo = "me";
+        } else {
+          assignedTo = parseInt(editingTaskAssignedTo);
+        }
+      }
+      
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
         title: editingTaskTitle, 
         description: editingTaskDescription,
         dueDate: editingTaskDueDate || null,
-        assignedTo: editingTaskAssignedTo && editingTaskAssignedTo !== "unassigned" ? parseInt(editingTaskAssignedTo) : null,
+        assignedTo: assignedTo,
       });
     }
   };
@@ -1084,6 +1149,7 @@ export default function TemplateDetail() {
                       editingTaskAssignedTo={editingTaskAssignedTo}
                       setEditingTaskAssignedTo={setEditingTaskAssignedTo}
                       teamMembers={teamMembers}
+                      currentUser={currentUser}
                       startEditingTask={startEditingTask}
                       saveEditingTask={saveEditingTask}
                       cancelEditingTask={cancelEditingTask}
