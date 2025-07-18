@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera, StickyNote, FolderOpen, Plus } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Users, Building, Edit, Upload, Camera, StickyNote, FolderOpen, Plus, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import Header from "@/components/layout/header";
 import ContactForm from "@/components/contacts/contact-form";
 import ContactNotes from "@/components/contacts/contact-notes";
@@ -37,6 +37,7 @@ export default function ContactDetail() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -86,8 +87,16 @@ export default function ContactDetail() {
     if (!a.dueDate && !b.dueDate) return 0;
     if (!a.dueDate) return 1;
     if (!b.dueDate) return -1;
-    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    
+    const dateA = new Date(a.dueDate).getTime();
+    const dateB = new Date(b.dueDate).getTime();
+    
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
+
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -1130,15 +1139,26 @@ export default function ContactDetail() {
                     <FolderOpen className="h-5 w-5" />
                     Related Projects
                   </CardTitle>
-                  <Button 
-                    onClick={() => navigate('/projects')}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    New Project
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      onClick={toggleSortOrder}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      {sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                      Sort by Date
+                    </Button>
+                    <Button 
+                      onClick={() => navigate('/projects')}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      New Project
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
