@@ -422,13 +422,6 @@ export default function TemplateDetail() {
     }
   }, [template, templateName]);
 
-  // Initialize openPhases to show all milestones by default
-  useEffect(() => {
-    if (milestones.length > 0 && openPhases.length === 0) {
-      setOpenPhases(milestones.map(m => m.id));
-    }
-  }, [milestones, openPhases.length]);
-
   // Fetch template milestones and tasks
   const { data: milestones = [] } = useQuery({
     queryKey: ['/api/milestones', { templateId: id }],
@@ -439,6 +432,13 @@ export default function TemplateDetail() {
     },
     enabled: isAuthenticated && !!id,
   });
+
+  // Initialize openPhases to show all milestones by default
+  useEffect(() => {
+    if (milestones.length > 0 && openPhases.length === 0) {
+      setOpenPhases(milestones.map(m => m.id));
+    }
+  }, [milestones, openPhases.length]);
 
   // Fetch all tasks for the template milestones
   const { data: allTasks = [] } = useQuery({
