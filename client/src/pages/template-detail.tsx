@@ -911,33 +911,16 @@ export default function TemplateDetail() {
 
   const saveEditingTask = () => {
     if (editingTask && editingTaskTitle.trim()) {
-      // Handle multiple assignees
-      let assignedTo = null;
-      if (editingTaskAssignedTo && editingTaskAssignedTo.length > 0) {
-        if (editingTaskAssignedTo.length === 1) {
-          // Single assignment
-          if (editingTaskAssignedTo[0] === "me") {
-            assignedTo = "me";
-          } else {
-            assignedTo = parseInt(editingTaskAssignedTo[0]);
-          }
-        } else {
-          // Multiple assignments - send as array
-          assignedTo = editingTaskAssignedTo.map(id => id === "me" ? "me" : parseInt(id));
-        }
-      }
+      // Always send arrays to match schema expectations
+      const assignedTo = editingTaskAssignedTo && editingTaskAssignedTo.length > 0 
+        ? editingTaskAssignedTo.map(id => id === "me" ? "me" : id.toString())
+        : [];
+      
+      const assignedToRole = editingTaskAssignedToRole && editingTaskAssignedToRole.length > 0 
+        ? editingTaskAssignedToRole 
+        : [];
       
       const daysFromMeeting = editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0;
-      
-      // Handle multiple roles
-      let assignedToRole = null;
-      if (editingTaskAssignedToRole && editingTaskAssignedToRole.length > 0) {
-        if (editingTaskAssignedToRole.length === 1) {
-          assignedToRole = editingTaskAssignedToRole[0];
-        } else {
-          assignedToRole = editingTaskAssignedToRole;
-        }
-      }
       
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
