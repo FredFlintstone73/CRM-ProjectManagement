@@ -732,7 +732,10 @@ export default function TemplateDetail() {
       });
       if (!response.ok) throw new Error('Failed to fetch contacts');
       const contacts = await response.json();
-      return contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
+      console.log('All contacts:', contacts.map(c => ({ name: `${c.firstName} ${c.lastName}`, type: c.contactType, status: c.status })));
+      const filtered = contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
+      console.log('Filtered team members:', filtered.map(c => ({ name: `${c.firstName} ${c.lastName}`, type: c.contactType, status: c.status })));
+      return filtered;
     },
     enabled: isAuthenticated,
   });
