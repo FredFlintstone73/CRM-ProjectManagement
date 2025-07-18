@@ -75,32 +75,22 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const [editingSection, setEditingSection] = useState<EditingSectionState | null>(null);
   const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
 
-  // Get sections from localStorage or use defaults
-  const getSavedSections = () => {
-    try {
-      const saved = localStorage.getItem(`project-${projectId}-sections`);
-      if (saved) {
-        return JSON.parse(saved);
+  const [sections, setSections] = useState<TaskSection[]>([]);
+
+  // Fetch milestones for this project
+  const { data: milestones = [], isLoading: isLoadingMilestones } = useQuery({
+    queryKey: ['/api/milestones', projectId],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', `/api/milestones?projectId=${projectId}`);
+        return response;
+      } catch (error) {
+        console.error('Failed to fetch milestones:', error);
+        return [];
       }
-    } catch (error) {
-      console.error('Error loading saved sections:', error);
-    }
-    return [
-      { id: "section-1", title: "Planning Phase", tasks: [] },
-      { id: "section-2", title: "Execution Phase", tasks: [] },
-    ];
-  };
-
-  const [sections, setSections] = useState<TaskSection[]>(getSavedSections);
-
-  // Save sections to localStorage whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem(`project-${projectId}-sections`, JSON.stringify(sections));
-    } catch (error) {
-      console.error('Error saving sections:', error);
-    }
-  }, [sections, projectId]);
+    },
+    enabled: !!projectId,
+  });
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
@@ -108,7 +98,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
-        return await response.json();
+        return response;
       } catch (error) {
         console.error('Failed to fetch tasks:', error);
         return [];
@@ -118,6 +108,18 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     retry: 1,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Update sections when milestones are loaded
+  useEffect(() => {
+    if (milestones.length > 0) {
+      const sectionsFromMilestones = milestones.map(milestone => ({
+        id: `milestone-${milestone.id}`,
+        title: milestone.title,
+        tasks: []
+      }));
+      setSections(sectionsFromMilestones);
+    }
+  }, [milestones]);
 
   // Fetch team members
   const { data: contacts = [], error: contactsError } = useQuery<Contact[]>({
