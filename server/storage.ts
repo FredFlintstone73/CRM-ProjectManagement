@@ -110,6 +110,8 @@ export interface IStorage {
   updateProjectTemplate(id: number, template: Partial<InsertProjectTemplate>): Promise<ProjectTemplate>;
   deleteProjectTemplate(id: number): Promise<void>;
   getTemplateTaskCount(templateId: number): Promise<number>;
+  getTemplateTasksByTemplate(templateId: number): Promise<Task[]>;
+  getProjectTemplateMilestones(templateId: number): Promise<Milestone[]>;
 
   // Email interaction operations
   getEmailInteractions(): Promise<EmailInteraction[]>;
@@ -836,6 +838,23 @@ export class DatabaseStorage implements IStorage {
       .where(eq(milestones.templateId, templateId));
     
     return result[0]?.count || 0;
+  }
+
+  async getTemplateTasksByTemplate(templateId: number): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .leftJoin(milestones, eq(tasks.milestoneId, milestones.id))
+      .where(eq(milestones.templateId, templateId))
+      .orderBy(tasks.createdAt);
+  }
+
+  async getProjectTemplateMilestones(templateId: number): Promise<Milestone[]> {
+    return await db
+      .select()
+      .from(milestones)
+      .where(eq(milestones.templateId, templateId))
+      .orderBy(milestones.createdAt);
   }
 
   // Email interaction operations

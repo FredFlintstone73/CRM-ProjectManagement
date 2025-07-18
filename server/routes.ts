@@ -192,6 +192,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const projectData = insertProjectSchema.parse(req.body);
       const userId = req.user.claims.sub;
+      
+      // Check if this is a meeting with a template-supported type
+      const meetingType = projectData.projectType;
+      const meetingDate = projectData.dueDate;
+      
+      if (meetingType && meetingDate) {
+        // Try to find a template for this meeting type
+        const templates = await storage.getProjectTemplates();
+        const matchingTemplate = templates.find(template => template.meetingType === meetingType);
+        
+        if (matchingTemplate) {
+          // Create project from template instead of regular project creation
+          const templateTasks = await storage.getTemplateTasksByTemplate(matchingTemplate.id);
+          const templateMilestones = await storage.getProjectTemplateMilestones(matchingTemplate.id);
+          
+          // Create the project
+          const newProject = await storage.createProject(projectData, userId);
+          
+          // Create milestones first
+          const createdMilestones = [];
+          for (const milestone of templateMilestones) {
+            const createdMilestone = await storage.createMilestone({
+              title: milestone.title,
+              projectId: newProject.id,
+              dueDate: null,
+              description: milestone.description || '',
+              status: 'active'
+            }, userId);
+            createdMilestones.push(createdMilestone);
+          }
+          
+          // Create tasks from template with calculated due dates
+          const createdTasks = [];
+          for (const templateTask of templateTasks) {
+            let taskDueDate = null;
+            if (templateTask.daysFromMeeting !== null && templateTask.daysFromMeeting !== undefined) {
+              const baseDate = new Date(meetingDate);
+              baseDate.setDate(baseDate.getDate() + templateTask.daysFromMeeting);
+              taskDueDate = baseDate;
+            }
+            
+            // Resolve role-based assignment if assignedToRole is provided
+            let assignedToId = null;
+            if (templateTask.assignedToRole) {
+              assignedToId = await resolveRoleAssignment(templateTask.assignedToRole);
+            } else if (templateTask.assignedTo) {
+              assignedToId = templateTask.assignedTo;
+            }
+            
+            // Find the corresponding milestone
+            const milestone = createdMilestones.find(m => 
+              templateMilestones.find(tm => tm.id === templateTask.milestoneId)?.title === m.title
+            );
+            
+            const task = await storage.createTask({
+              title: templateTask.title,
+              description: templateTask.description || '',
+              projectId: newProject.id,
+              status: 'todo',
+              priority: templateTask.priority || 25,
+              estimatedDays: 1,
+              dueDate: taskDueDate,
+              assignedTo: assignedToId,
+              assignedToRole: templateTask.assignedToRole || null,
+              parentTaskId: templateTask.parentTaskId,
+              milestoneId: milestone?.id || null,
+              daysFromMeeting: templateTask.daysFromMeeting
+            }, userId);
+            createdTasks.push(task);
+          }
+          
+          return res.status(201).json({
+            project: newProject,
+            tasks: createdTasks,
+            milestones: createdMilestones,
+            message: `Created project with ${createdTasks.length} tasks from ${matchingTemplate.name} template`
+          });
+        }
+      }
+      
+      // Fallback to regular project creation if no template found
       const project = await storage.createProject(projectData, userId);
       res.json(project);
     } catch (error) {
