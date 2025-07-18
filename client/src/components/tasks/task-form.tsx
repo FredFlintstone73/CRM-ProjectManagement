@@ -114,11 +114,11 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   };
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <div className="space-y-3">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 task-compact">
         {/* Task Title and Priority side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
             <Label htmlFor="title">Task Title</Label>
             <Input
               id="title"
@@ -130,7 +130,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label htmlFor="priority">Priority (1-50)</Label>
             <Select
               value={String(form.watch('priority') || 25)}
@@ -148,7 +148,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
@@ -162,8 +162,8 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         </div>
 
         {/* Assigned To and Due Date side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
             <Label htmlFor="assignedTo">Assign To</Label>
             <Select
               value={form.watch('assignedTo') || 'unassigned'}
@@ -188,7 +188,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label>Due Date</Label>
             <Popover>
               <PopoverTrigger asChild>

@@ -386,7 +386,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     return (
       <div key={task.id} className="space-y-2">
         <div 
-          className={`flex items-center gap-2 p-3 rounded-lg border ${
+          className={`flex items-center gap-2 task-compact rounded-lg border ${
             isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
           }`}
           style={{ marginLeft: `${level * 24}px` }}
@@ -519,7 +519,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <CardTitle className="text-lg">{section.title}</CardTitle>
+                    <CardTitle className="text-lg section-title">{section.title}</CardTitle>
                     <Badge variant="outline" className="text-xs">
                       {completedTasks}/{totalTasks} completed
                     </Badge>

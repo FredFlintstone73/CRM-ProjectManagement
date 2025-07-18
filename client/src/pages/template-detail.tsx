@@ -197,7 +197,7 @@ const TaskDisplay = ({
   
   return (
     <div className={`space-y-2 ${indentClass}`}>
-      <div className={`border rounded-lg p-4 ${bgClass} group`}>
+      <div className={`border rounded-lg task-compact ${bgClass} group`}>
         {isEditing ? (
           <div className="space-y-3">
             <div>
@@ -503,7 +503,7 @@ const SortableSection = ({
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-lg">{milestone?.title}</CardTitle>
+                    <CardTitle className="text-lg section-title">{milestone?.title}</CardTitle>
                     {milestone?.id && (
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button

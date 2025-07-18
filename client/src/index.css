@@ -143,4 +143,14 @@
   .task-title {
     @apply text-xs;
   }
+  
+  /* Section font size styling */
+  .section-title {
+    @apply text-sm;
+  }
+  
+  /* Compact task styling */
+  .task-compact {
+    @apply py-2 px-3;
+  }
 }
