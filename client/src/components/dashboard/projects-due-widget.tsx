@@ -2,10 +2,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Clock, FolderOpen, User } from "lucide-react";
-import { format, addDays, addWeeks, addMonths, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
+import { Calendar, FolderOpen } from "lucide-react";
+import { addDays, addWeeks, addMonths, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
 import { useLocation } from "wouter";
-import type { Project, Contact } from "@shared/schema";
+import type { Project } from "@shared/schema";
 
 interface DateRange {
   start: Date;
@@ -89,9 +89,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
     },
   });
 
-  const { data: contacts } = useQuery<Contact[]>({
-    queryKey: ['/api/contacts'],
-  });
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -118,11 +116,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
     return diffDays;
   };
 
-  const getFamilyName = (clientId: number | null) => {
-    if (!clientId || !contacts) return 'No family assigned';
-    const client = contacts.find(c => c.id === clientId);
-    return client ? (client.familyName || `${client.firstName} ${client.lastName}`) : 'Unknown family';
-  };
+
 
   return (
     <Card className="col-span-full">
@@ -186,18 +180,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
                           >
                             {project.name}
                           </button>
-                          <div className="flex items-center gap-2 mt-1">
-                            {project.dueDate && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="w-3 h-3" />
-                                <span className="text-[14px]">Meeting {format(new Date(project.dueDate), 'MMM dd, yyyy')}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <User className="w-3 h-3" />
-                              <span className="text-[14px]">{getFamilyName(project.clientId)}</span>
-                            </div>
-                          </div>
+
                         </div>
                       </div>
                       {daysUntilDue !== null && (
