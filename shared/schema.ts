@@ -316,6 +316,7 @@ export const projectTemplates = pgTable("project_templates", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: varchar("name").notNull(),
   description: text("description"),
+  meetingType: varchar("meeting_type"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   createdBy: varchar("created_by").references(() => users.id),
