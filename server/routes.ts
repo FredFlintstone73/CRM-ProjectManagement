@@ -853,16 +853,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/milestones', isAuthenticated, async (req: any, res) => {
     try {
       const { projectId, templateId } = req.query;
+      console.log('Milestones request - projectId:', projectId, 'templateId:', templateId);
       let milestones;
       
       if (projectId) {
+        console.log('Getting milestones by project:', projectId);
         milestones = await storage.getMilestonesByProject(parseInt(projectId as string));
       } else if (templateId) {
+        console.log('Getting milestones by template:', templateId);
         milestones = await storage.getMilestonesByTemplate(parseInt(templateId as string));
       } else {
+        console.log('Getting all milestones');
         milestones = await storage.getMilestones();
       }
       
+      console.log('Returning milestones:', milestones.map(m => ({ id: m.id, title: m.title, templateId: m.templateId })));
       res.json(milestones);
     } catch (error) {
       console.error("Error fetching milestones:", error);
