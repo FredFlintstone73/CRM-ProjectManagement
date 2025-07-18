@@ -232,9 +232,10 @@ const TaskDisplay = ({
               <div>
                 <label className="text-sm font-medium mb-1 block">Due Date</label>
                 <Input
-                  type="date"
-                  value={editingTaskDueDate}
-                  onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                  type="text"
+                  value="Will be calculated from meeting date"
+                  disabled
+                  className="bg-gray-100 text-gray-500"
                 />
               </div>
               <div>
@@ -290,7 +291,7 @@ const TaskDisplay = ({
                   {task.name || task.title}
                 </h4>
                 <Badge variant="secondary" className="text-xs">
-                  {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
+                  {task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting} days from meeting
                 </Badge>
               </div>
               {(task.description || task.assignedTo) && (
@@ -826,7 +827,7 @@ export default function TemplateDetail() {
     setEditingTask(task.id);
     setEditingTaskTitle(task.title || task.name || "");
     setEditingTaskDescription(task.description || "");
-    setEditingTaskDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
+    setEditingTaskDueDate(""); // Templates don't have specific due dates
     setEditingTaskDaysFromMeeting(task.daysFromMeeting?.toString() || "0");
     
     // Check if the assigned user is the current user
@@ -859,7 +860,7 @@ export default function TemplateDetail() {
         taskId: editingTask, 
         title: editingTaskTitle.trim(), 
         description: editingTaskDescription || null,
-        dueDate: editingTaskDueDate || null,
+        dueDate: null, // Templates don't have specific due dates
         assignedTo: assignedTo,
         daysFromMeeting: editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0,
       });
