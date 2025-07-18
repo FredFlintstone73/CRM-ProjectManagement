@@ -604,7 +604,36 @@ export class DatabaseStorage implements IStorage {
       processedMilestone.dueDate = null;
     }
     
-    const milestoneData = { ...processedMilestone, createdBy: userId } as any;
+    // Calculate the next sort order to place the new milestone at the end
+    let maxSortOrder = 0;
+    if (processedMilestone.templateId) {
+      const existingMilestones = await db
+        .select()
+        .from(milestones)
+        .where(eq(milestones.templateId, processedMilestone.templateId))
+        .orderBy(desc(milestones.sortOrder));
+      
+      if (existingMilestones.length > 0) {
+        maxSortOrder = existingMilestones[0].sortOrder || 0;
+      }
+    } else if (processedMilestone.projectId) {
+      const existingMilestones = await db
+        .select()
+        .from(milestones)
+        .where(eq(milestones.projectId, processedMilestone.projectId))
+        .orderBy(desc(milestones.sortOrder));
+      
+      if (existingMilestones.length > 0) {
+        maxSortOrder = existingMilestones[0].sortOrder || 0;
+      }
+    }
+    
+    const milestoneData = { 
+      ...processedMilestone, 
+      createdBy: userId,
+      sortOrder: maxSortOrder + 1
+    } as any;
+    
     const [newMilestone] = await db
       .insert(milestones)
       .values(milestoneData)

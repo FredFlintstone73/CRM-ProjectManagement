@@ -419,3 +419,5 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Template Focus**: Simplified template system without priority numbers or status fields
 - **Proper State Management**: Fixed component prop passing and editing state management
 - **Error Resolution**: Resolved React hooks violations and infinite loop performance issues
+- **Section Ordering Fix**: New sections now appear at the bottom of the list instead of the top for better user experience
+- **Task Validation Enhancement**: Fixed Zod validation schema to properly handle nullable fields and prevent task saving failures
