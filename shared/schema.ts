@@ -743,6 +743,12 @@ export const insertProjectCommentSchema = createInsertSchema(projectComments).om
   createdAt: true,
 });
 
+export const insertTaskCommentSchema = createInsertSchema(taskComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertContactNoteSchema = createInsertSchema(contactNotes).omit({
   id: true,
   createdAt: true,
@@ -751,13 +757,6 @@ export const insertContactNoteSchema = createInsertSchema(contactNotes).omit({
 });
 
 export const insertContactFileSchema = createInsertSchema(contactFiles).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  userId: true,
-});
-
-export const insertTaskCommentSchema = createInsertSchema(taskComments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

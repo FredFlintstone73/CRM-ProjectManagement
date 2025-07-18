@@ -712,11 +712,28 @@ export class DatabaseStorage implements IStorage {
 
   // Task comment operations
   async getTaskComments(taskId: number): Promise<TaskComment[]> {
-    return await db
-      .select()
+    const result = await db
+      .select({
+        id: taskComments.id,
+        taskId: taskComments.taskId,
+        userId: taskComments.userId,
+        comment: taskComments.comment,
+        createdAt: taskComments.createdAt,
+        updatedAt: taskComments.updatedAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
       .from(taskComments)
+      .leftJoin(users, eq(taskComments.userId, users.id))
       .where(eq(taskComments.taskId, taskId))
       .orderBy(desc(taskComments.createdAt));
+    
+    return result as any;
   }
 
   async createTaskComment(comment: InsertTaskComment, userId: string): Promise<TaskComment> {

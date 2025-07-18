@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import TaskForm from '@/components/tasks/task-form';
+import { TaskComments } from '@/components/tasks/task-comments';
 import type { Task, Contact, Project } from '@shared/schema';
 
 interface TaskDetailParams {
@@ -246,6 +247,9 @@ export default function TaskDetail() {
               </CardContent>
             </Card>
           )}
+
+          {/* Task Comments Section */}
+          <TaskComments taskId={parseInt(id)} taskTitle={task.title} />
         </div>
 
         <div className="space-y-6">

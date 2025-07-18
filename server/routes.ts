@@ -10,7 +10,8 @@ import {
   insertEmailInteractionSchema,
   insertCallTranscriptSchema,
   insertProjectCommentSchema,
-  insertContactNoteSchema
+  insertContactNoteSchema,
+  insertTaskCommentSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
