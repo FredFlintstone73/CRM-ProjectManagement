@@ -710,6 +710,7 @@ export default function TemplateDetail() {
   const [editingTaskAssignedTo, setEditingTaskAssignedTo] = useState<string>("");
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
+  const [meetingType, setMeetingType] = useState<string>("csr");
 
   // Fetch template data
   const { data: template, isLoading: isTemplateLoading } = useQuery<ProjectTemplate>({
@@ -1090,13 +1091,31 @@ export default function TemplateDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Template Name</label>
-                  <Input
-                    value={templateName}
-                    onChange={(e) => setTemplateName(e.target.value)}
-                    placeholder="Enter template name"
-                  />
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-1 block">Template Name</label>
+                    <Input
+                      value={templateName}
+                      onChange={(e) => setTemplateName(e.target.value)}
+                      placeholder="Enter template name"
+                    />
+                  </div>
+                  <div className="w-80">
+                    <label className="text-sm font-medium mb-1 block">Meeting Type</label>
+                    <Select value={meetingType} onValueChange={setMeetingType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select meeting type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="frm">Financial Road Map Interview (FRM)</SelectItem>
+                        <SelectItem value="im">Implementation Meeting (IM)</SelectItem>
+                        <SelectItem value="ipu">Initial Progress Update (IPU)</SelectItem>
+                        <SelectItem value="csr">Comprehensive Safety Review (CSR)</SelectItem>
+                        <SelectItem value="gpo">Goals Progress Update (GPO)</SelectItem>
+                        <SelectItem value="tar">The Annual Review (TAR)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">Template Description</label>
