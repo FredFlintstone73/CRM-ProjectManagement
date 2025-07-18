@@ -48,7 +48,7 @@ export default function Dashboard() {
         subtitle="Welcome back! Here's what's happening today."
       />
       
-      <main className="flex-1 overflow-y-auto bg-gray-50">
+      <main className="flex-1 bg-gray-50">
         <div className="px-6 py-6">
           <div className="grid grid-cols-1 gap-6">
             <ProjectsTimelineChart 

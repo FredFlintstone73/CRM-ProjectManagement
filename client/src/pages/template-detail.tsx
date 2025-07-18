@@ -1007,7 +1007,7 @@ export default function TemplateDetail() {
         showActions={false}
       />
       
-      <main className="flex-1 overflow-y-auto bg-gray-50">
+      <main className="flex-1 bg-gray-50">
         <div className="px-6 py-6">
           <div className="mb-6">
             <Link href="/templates">

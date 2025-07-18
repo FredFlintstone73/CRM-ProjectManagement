@@ -352,7 +352,7 @@ export default function Tasks() {
         showActions={false}
       />
       
-      <main className="flex-1 overflow-y-auto bg-gray-50">
+      <main className="flex-1 bg-gray-50">
         <div className="px-6 py-6">
           {/* Search and Filter Bar */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">

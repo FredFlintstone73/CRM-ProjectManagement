@@ -213,7 +213,7 @@ export default function Projects() {
         subtitle="Manage your client projects and track progress"
         showActions={false}
       />
-      <main className="flex-1 overflow-y-auto bg-gray-50">
+      <main className="flex-1 bg-gray-50">
         <div className="px-6 py-6">
           {/* Search and Actions Bar */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">

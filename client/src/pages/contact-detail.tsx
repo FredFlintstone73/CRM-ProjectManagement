@@ -402,7 +402,7 @@ export default function ContactDetail() {
   const showSidebar = contact.contactType === "client" || contact.contactType === "prospect";
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1">
       <Header
         title={contact.familyName || `${contact.firstName} ${contact.lastName}`}
         subtitle={getDetailPageTitle()}
