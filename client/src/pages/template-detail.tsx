@@ -971,8 +971,8 @@ export default function TemplateDetail() {
       
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
-        title: editingTaskTitle, 
-        description: editingTaskDescription,
+        title: editingTaskTitle.trim(), 
+        description: editingTaskDescription || null,
         dueDate: editingTaskDueDate || null,
         assignedTo: assignedTo,
       });

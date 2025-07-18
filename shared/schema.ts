@@ -689,11 +689,13 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   createdBy: true,
 }).extend({
   // Handle string date inputs from forms
-  dueDate: z.string().optional(),
+  dueDate: z.string().optional().nullable(),
   // Handle assignment field as string or number (will be converted server-side)
   assignedTo: z.union([z.string(), z.number()]).optional().nullable(),
   // Handle priority field as string that will be converted to number
   priority: z.union([z.string(), z.number()]).optional(),
+  // Make description nullable for partial updates
+  description: z.string().optional().nullable(),
 });
 
 export const insertProjectTemplateSchema = createInsertSchema(projectTemplates).omit({

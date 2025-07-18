@@ -651,11 +651,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priority = isNaN(priorityNum) ? 25 : priorityNum;
       }
       
-      const processedTaskData = {
+      // Clean up null/empty values
+      const cleanedTaskData = {
         ...taskData,
         assignedTo: assignedTo,
         priority: priority,
+        description: taskData.description || null,
+        dueDate: taskData.dueDate || null,
       };
+      
+      // Remove fields that are null/undefined from the update, but keep title if provided
+      const processedTaskData = Object.fromEntries(
+        Object.entries(cleanedTaskData).filter(([key, value]) => {
+          if (key === 'title') return value !== null && value !== undefined && value !== '';
+          return value !== null && value !== undefined;
+        })
+      );
       
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
       res.json(task);
