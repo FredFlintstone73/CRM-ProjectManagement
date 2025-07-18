@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Plus, FileText, Edit, Trash2, MoreHorizontal, Copy, Eye, Rocket } from "lucide-react";
+import { Search, Plus, FileText, Edit, Trash2, MoreHorizontal, Copy, Rocket } from "lucide-react";
 import ProjectTemplateForm from "@/components/projects/project-template-form";
 import CreateFromTemplateDialog from "@/components/projects/create-from-template-dialog";
 import type { ProjectTemplate } from "@shared/schema";
@@ -230,12 +230,6 @@ export default function Templates() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <Link href={`/templates/${template.id}`}>
-                            <DropdownMenuItem>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                          </Link>
                           <CreateFromTemplateDialog template={template}>
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                               <Rocket className="h-4 w-4 mr-2" />
