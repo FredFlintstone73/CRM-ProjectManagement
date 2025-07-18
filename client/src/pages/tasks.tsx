@@ -658,7 +658,7 @@ export default function Tasks() {
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4 flex-1">
+                      <div className="flex items-center space-x-4">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -688,27 +688,29 @@ export default function Tasks() {
                           <span>{getProjectName(task.projectId)}</span>
                         </div>
                         
-                        {task.assignedTo && (
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <User className="w-4 h-4" />
-                            <span>{(() => {
-                              const assignee = contacts?.find((c: any) => c.id === task.assignedTo);
-                              return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown';
-                            })()}</span>
-                          </div>
-                        )}
-                        
-                        {task.dueDate && (
-                          <div className="flex items-center space-x-2 text-sm">
-                            <CalendarDays className="w-4 h-4" />
-                            <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
-                              {new Date(task.dueDate).toLocaleDateString()}
-                            </span>
-                            {isOverdue(task.dueDate) && (
-                              <AlertCircle className="w-4 h-4 text-red-600" />
-                            )}
-                          </div>
-                        )}
+                        <div className="text-right">
+                          {task.assignedTo && (
+                            <div className="flex items-center justify-end space-x-2 text-sm text-gray-600">
+                              <User className="w-4 h-4" />
+                              <span>{(() => {
+                                const assignee = contacts?.find((c: any) => c.id === task.assignedTo);
+                                return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown';
+                              })()}</span>
+                            </div>
+                          )}
+                          
+                          {task.dueDate && (
+                            <div className="flex items-center justify-end space-x-2 text-sm mt-1">
+                              <CalendarDays className="w-4 h-4" />
+                              <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
+                                {new Date(task.dueDate).toLocaleDateString()}
+                              </span>
+                              {isOverdue(task.dueDate) && (
+                                <AlertCircle className="w-4 h-4 text-red-600" />
+                              )}
+                            </div>
+                          )}
+                        </div>
                         
                         <Button
                           variant="outline"

@@ -302,47 +302,47 @@ const TaskDisplay = ({
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                {hasSubtasks && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleTaskExpansion(task.id)}
-                    className="p-1 h-6 w-6"
-                  >
-                    {isExpanded ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
-                  </Button>
+            <div className="flex items-center gap-2">
+              {hasSubtasks && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleTaskExpansion(task.id)}
+                  className="p-1 h-6 w-6"
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
+                </Button>
+              )}
+              <h4 className="font-medium cursor-pointer task-title" onClick={() => startEditingTask(task)}>
+                {task.name || task.title}
+              </h4>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                {task.assignedTo && (
+                  <div className="text-sm text-blue-600">
+                    {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
+                  </div>
                 )}
-                <h4 className="font-medium cursor-pointer task-title" onClick={() => startEditingTask(task)}>
-                  {task.name || task.title}
-                </h4>
                 <Badge variant="secondary" className="text-xs">
                   P{task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}
                 </Badge>
               </div>
-              {task.assignedTo && (
-                <div className="text-sm text-gray-600 mt-1">
-                  <p className="text-blue-600">
-                    Assigned to: {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button size="sm" variant="ghost" onClick={() => startEditingTask(task)}>
-                <Edit2 className="w-4 h-4" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={handleAddSubtask}>
-                <Plus className="w-4 h-4" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={handleDeleteTask} className="text-red-500">
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button size="sm" variant="ghost" onClick={() => startEditingTask(task)}>
+                  <Edit2 className="w-4 h-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleAddSubtask}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleDeleteTask} className="text-red-500">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
