@@ -318,7 +318,7 @@ const TaskDisplay = ({
                     )}
                   </Button>
                 )}
-                <h4 className="font-medium cursor-pointer" onClick={() => startEditingTask(task)}>
+                <h4 className="font-medium cursor-pointer task-title" onClick={() => startEditingTask(task)}>
                   {task.name || task.title}
                 </h4>
                 <Badge variant="secondary" className="text-xs">

@@ -589,7 +589,7 @@ export default function Tasks() {
                           {task.priority || 25}
                         </Badge>
                         <Link href={`/task/${task.id}`} className="flex-1">
-                          <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors">
+                          <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors task-title">
                             {task.title}
                           </CardTitle>
                         </Link>
@@ -676,7 +676,7 @@ export default function Tasks() {
                           {task.priority || 25}
                         </Badge>
                         <Link href={`/task/${task.id}`}>
-                          <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors">
+                          <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors task-title">
                             {task.title}
                           </span>
                         </Link>

@@ -138,4 +138,9 @@
   .contact-type-strategic_partner {
     @apply bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400;
   }
+  
+  /* Task font size styling */
+  .task-title {
+    @apply text-xs;
+  }
 }

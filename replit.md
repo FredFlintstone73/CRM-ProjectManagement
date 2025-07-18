@@ -482,3 +482,10 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Task Detail Focus**: Task descriptions now only visible when clicking task names to access detail pages
 - **Assignment Display**: Preserved assignment information display in template view while removing description clutter
 - **Streamlined View**: Template editor now shows only essential information (title, days from meeting, assignment) for better overview
+
+### Font Size Standardization (July 18, 2025)
+- **Task Title Font Size**: Standardized all task titles to font size 12 (text-xs) across the application
+- **Template Tasks**: Applied 12px font size to task titles in template editor views
+- **Project Tasks**: Applied 12px font size to task titles in section task manager
+- **Tasks Page**: Applied 12px font size to task titles in both grid and row views
+- **Consistent Typography**: Unified task title typography throughout all task management interfaces
