@@ -875,6 +875,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Specific routes should come before parameterized routes
+  app.put('/api/milestones/reorder', isAuthenticated, async (req: any, res) => {
+    try {
+      const { milestoneIds } = req.body;
+      console.log('Received milestone IDs for reordering:', milestoneIds);
+      console.log('Types:', milestoneIds.map((id: any) => typeof id));
+      
+      // Ensure all IDs are valid integers
+      const validIds = milestoneIds.map((id: any) => {
+        const parsed = parseInt(String(id));
+        if (isNaN(parsed)) {
+          throw new Error(`Invalid milestone ID: ${id}`);
+        }
+        return parsed;
+      });
+      
+      console.log('Valid milestone IDs:', validIds);
+      await storage.reorderMilestones(validIds);
+      res.json({ message: "Milestones reordered successfully" });
+    } catch (error) {
+      console.error("Error reordering milestones:", error);
+      res.status(500).json({ message: "Failed to reorder milestones" });
+    }
+  });
+
   app.get('/api/milestones/:id', isAuthenticated, async (req: any, res) => {
     try {
       const milestone = await storage.getMilestone(parseInt(req.params.id));
@@ -916,30 +941,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting milestone:", error);
       res.status(500).json({ message: "Failed to delete milestone" });
-    }
-  });
-
-  app.put('/api/milestones/reorder', isAuthenticated, async (req: any, res) => {
-    try {
-      const { milestoneIds } = req.body;
-      console.log('Received milestone IDs for reordering:', milestoneIds);
-      console.log('Types:', milestoneIds.map((id: any) => typeof id));
-      
-      // Ensure all IDs are valid integers
-      const validIds = milestoneIds.map((id: any) => {
-        const parsed = parseInt(String(id));
-        if (isNaN(parsed)) {
-          throw new Error(`Invalid milestone ID: ${id}`);
-        }
-        return parsed;
-      });
-      
-      console.log('Valid milestone IDs:', validIds);
-      await storage.reorderMilestones(validIds);
-      res.json({ message: "Milestones reordered successfully" });
-    } catch (error) {
-      console.error("Error reordering milestones:", error);
-      res.status(500).json({ message: "Failed to reorder milestones" });
     }
   });
 

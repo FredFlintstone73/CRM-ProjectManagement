@@ -670,7 +670,10 @@ export class DatabaseStorage implements IStorage {
     for (let i = 0; i < milestoneIds.length; i++) {
       await db
         .update(milestones)
-        .set({ sortOrder: i + 1 })
+        .set({ 
+          sortOrder: i + 1,
+          updatedAt: new Date()
+        })
         .where(eq(milestones.id, milestoneIds[i]));
     }
   }
