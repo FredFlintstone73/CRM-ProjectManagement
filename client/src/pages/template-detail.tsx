@@ -503,7 +503,7 @@ const SortableSection = ({
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <CardTitle className="tracking-tight section-title text-[16px] font-bold">{milestone?.title}</CardTitle>
+                    <CardTitle className="font-semibold tracking-tight section-title text-[14px]">{milestone?.title}</CardTitle>
                     {milestone?.id && (
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
@@ -553,6 +553,7 @@ const SortableSection = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleAddTask(milestone.id)}
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 text-[12px] text-[#3c83f6]"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Task

@@ -497,3 +497,5 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Project Tasks**: Applied compact styling to section task manager tasks
 - **Task Forms**: Reduced spacing in task creation/edit forms from space-y-4 to space-y-3 and space-y-1
 - **Consistent Compact Design**: Unified compact task appearance across templates, projects, and task forms
+- **Custom Section Styling**: Updated CardTitle to use exact 14px font size with semibold weight and tracking-tight
+- **Add Task Button Styling**: Applied custom purple color (#8e7cc3) and 12px font size to template "Add Task" buttons
