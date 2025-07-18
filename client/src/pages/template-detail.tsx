@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   AlertDialog,
@@ -270,6 +271,11 @@ const SortableSection = ({
   setEditingTaskTitle,
   editingTaskDescription,
   setEditingTaskDescription,
+  editingTaskDueDate,
+  setEditingTaskDueDate,
+  editingTaskAssignedTo,
+  setEditingTaskAssignedTo,
+  teamMembers,
   startEditingTask,
   saveEditingTask,
   cancelEditingTask,
@@ -422,6 +428,27 @@ const SortableSection = ({
                             className="text-sm"
                           />
                           <div className="flex gap-2">
+                            <Input
+                              type="date"
+                              value={editingTaskDueDate}
+                              onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                              className="text-sm"
+                            />
+                            <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
+                              <SelectTrigger className="text-sm">
+                                <SelectValue placeholder="Assign to..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Unassigned</SelectItem>
+                                {teamMembers.map((member: any) => (
+                                  <SelectItem key={member.id} value={member.id.toString()}>
+                                    {member.firstName} {member.lastName}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex gap-2">
                             <Button size="sm" onClick={saveEditingTask}>Save</Button>
                             <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
                           </div>
@@ -429,9 +456,14 @@ const SortableSection = ({
                       ) : (
                         <div onClick={() => startEditingTask(task)} className="cursor-pointer">
                           <div className="font-medium text-gray-800">{task.title}</div>
-                          {task.description && (
-                            <div className="text-sm text-gray-600 mt-1">{task.description}</div>
-                          )}
+                          <div className="flex gap-2 text-sm text-gray-500 mt-1">
+                            {task.dueDate && (
+                              <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+                            )}
+                            {task.assignedTo && teamMembers.find((m: any) => m.id === task.assignedTo) && (
+                              <span>Assigned to: {teamMembers.find((m: any) => m.id === task.assignedTo)?.firstName} {teamMembers.find((m: any) => m.id === task.assignedTo)?.lastName}</span>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -478,6 +510,27 @@ const SortableSection = ({
                                 className="text-sm"
                               />
                               <div className="flex gap-2">
+                                <Input
+                                  type="date"
+                                  value={editingTaskDueDate}
+                                  onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                                  className="text-sm"
+                                />
+                                <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
+                                  <SelectTrigger className="text-sm">
+                                    <SelectValue placeholder="Assign to..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="">Unassigned</SelectItem>
+                                    {teamMembers.map((member: any) => (
+                                      <SelectItem key={member.id} value={member.id.toString()}>
+                                        {member.firstName} {member.lastName}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex gap-2">
                                 <Button size="sm" onClick={saveEditingTask}>Save</Button>
                                 <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
                               </div>
@@ -485,9 +538,14 @@ const SortableSection = ({
                           ) : (
                             <div onClick={() => startEditingTask(subtask)} className="cursor-pointer">
                               <div className="font-medium text-gray-700">{subtask.title}</div>
-                              {subtask.description && (
-                                <div className="text-sm text-gray-500 mt-1">{subtask.description}</div>
-                              )}
+                              <div className="flex gap-2 text-sm text-gray-500 mt-1">
+                                {subtask.dueDate && (
+                                  <span>Due: {new Date(subtask.dueDate).toLocaleDateString()}</span>
+                                )}
+                                {subtask.assignedTo && teamMembers.find((m: any) => m.id === subtask.assignedTo) && (
+                                  <span>Assigned to: {teamMembers.find((m: any) => m.id === subtask.assignedTo)?.firstName} {teamMembers.find((m: any) => m.id === subtask.assignedTo)?.lastName}</span>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -534,6 +592,27 @@ const SortableSection = ({
                                     className="text-sm"
                                   />
                                   <div className="flex gap-2">
+                                    <Input
+                                      type="date"
+                                      value={editingTaskDueDate}
+                                      onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                                      className="text-sm"
+                                    />
+                                    <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
+                                      <SelectTrigger className="text-sm">
+                                        <SelectValue placeholder="Assign to..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="">Unassigned</SelectItem>
+                                        {teamMembers.map((member: any) => (
+                                          <SelectItem key={member.id} value={member.id.toString()}>
+                                            {member.firstName} {member.lastName}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="flex gap-2">
                                     <Button size="sm" onClick={saveEditingTask}>Save</Button>
                                     <Button size="sm" variant="outline" onClick={cancelEditingTask}>Cancel</Button>
                                   </div>
@@ -541,9 +620,14 @@ const SortableSection = ({
                               ) : (
                                 <div onClick={() => startEditingTask(subsubtask)} className="cursor-pointer">
                                   <div className="font-medium text-gray-600">{subsubtask.title}</div>
-                                  {subsubtask.description && (
-                                    <div className="text-sm text-gray-400 mt-1">{subsubtask.description}</div>
-                                  )}
+                                  <div className="flex gap-2 text-sm text-gray-400 mt-1">
+                                    {subsubtask.dueDate && (
+                                      <span>Due: {new Date(subsubtask.dueDate).toLocaleDateString()}</span>
+                                    )}
+                                    {subsubtask.assignedTo && teamMembers.find((m: any) => m.id === subsubtask.assignedTo) && (
+                                      <span>Assigned to: {teamMembers.find((m: any) => m.id === subsubtask.assignedTo)?.firstName} {teamMembers.find((m: any) => m.id === subsubtask.assignedTo)?.lastName}</span>
+                                    )}
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -585,6 +669,8 @@ export default function TemplateDetail() {
   const [editingTask, setEditingTask] = useState<number | null>(null);
   const [editingTaskTitle, setEditingTaskTitle] = useState<string>("");
   const [editingTaskDescription, setEditingTaskDescription] = useState<string>("");
+  const [editingTaskDueDate, setEditingTaskDueDate] = useState<string>("");
+  const [editingTaskAssignedTo, setEditingTaskAssignedTo] = useState<string>("");
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
 
@@ -592,6 +678,20 @@ export default function TemplateDetail() {
   const { data: template, isLoading: isTemplateLoading } = useQuery<ProjectTemplate>({
     queryKey: ['/api/project-templates', id],
     enabled: !!id && isAuthenticated,
+  });
+
+  // Fetch team members for assignment
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ['/api/contacts'],
+    queryFn: async () => {
+      const response = await fetch('/api/contacts', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch contacts');
+      const contacts = await response.json();
+      return contacts.filter((contact: any) => contact.type === 'team_member' && contact.status === 'active');
+    },
+    enabled: isAuthenticated,
   });
 
   // Fetch milestones
@@ -707,8 +807,8 @@ export default function TemplateDetail() {
 
   // Mutation for updating task
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, title, description }: any) => {
-      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description });
+    mutationFn: async ({ taskId, title, description, dueDate, assignedTo }: any) => {
+      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description, dueDate, assignedTo });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
@@ -716,6 +816,8 @@ export default function TemplateDetail() {
       setEditingTask(null);
       setEditingTaskTitle("");
       setEditingTaskDescription("");
+      setEditingTaskDueDate("");
+      setEditingTaskAssignedTo("");
     },
   });
 
@@ -776,6 +878,8 @@ export default function TemplateDetail() {
     setEditingTask(task.id);
     setEditingTaskTitle(task.title);
     setEditingTaskDescription(task.description || "");
+    setEditingTaskDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
+    setEditingTaskAssignedTo(task.assignedTo ? task.assignedTo.toString() : "");
   };
 
   const saveEditingTask = () => {
@@ -783,7 +887,9 @@ export default function TemplateDetail() {
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
         title: editingTaskTitle, 
-        description: editingTaskDescription 
+        description: editingTaskDescription,
+        dueDate: editingTaskDueDate || null,
+        assignedTo: editingTaskAssignedTo ? parseInt(editingTaskAssignedTo) : null,
       });
     }
   };
@@ -792,6 +898,8 @@ export default function TemplateDetail() {
     setEditingTask(null);
     setEditingTaskTitle("");
     setEditingTaskDescription("");
+    setEditingTaskDueDate("");
+    setEditingTaskAssignedTo("");
   };
 
   // Drag and drop
@@ -971,6 +1079,11 @@ export default function TemplateDetail() {
                       setEditingTaskTitle={setEditingTaskTitle}
                       editingTaskDescription={editingTaskDescription}
                       setEditingTaskDescription={setEditingTaskDescription}
+                      editingTaskDueDate={editingTaskDueDate}
+                      setEditingTaskDueDate={setEditingTaskDueDate}
+                      editingTaskAssignedTo={editingTaskAssignedTo}
+                      setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                      teamMembers={teamMembers}
                       startEditingTask={startEditingTask}
                       saveEditingTask={saveEditingTask}
                       cancelEditingTask={cancelEditingTask}
