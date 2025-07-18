@@ -108,8 +108,8 @@ const buildTaskHierarchy = (tasks: TaskTemplate[]) => {
   return rootTasks;
 };
 
-// Sortable Task Component
-const SortableTask = ({ 
+// TaskDisplay component for recursive task rendering
+const TaskDisplay = ({ 
   task, 
   templateId, 
   level = 0, 
@@ -118,23 +118,7 @@ const SortableTask = ({
   setEditingTask, 
   updateTaskMutation, 
   deleteTaskMutation, 
-  createTaskMutation,
-  expandedTasks,
-  toggleTask,
-  currentUser,
-  teamMembers,
-  allTeamMembers,
-  editingTaskTitle,
-  setEditingTaskTitle,
-  editingTaskDescription,
-  setEditingTaskDescription,
-  editingTaskDueDate,
-  setEditingTaskDueDate,
-  editingTaskAssignedTo,
-  setEditingTaskAssignedTo,
-  startEditingTask,
-  saveEditingTask,
-  cancelEditingTask
+  createTaskMutation 
 }: { 
   task: TaskTemplate, 
   templateId: string | undefined, 
@@ -144,41 +128,23 @@ const SortableTask = ({
   setEditingTask: (id: number | null) => void,
   updateTaskMutation: any,
   deleteTaskMutation: any,
-  createTaskMutation: any,
-  expandedTasks: Set<number>,
-  toggleTask: (taskId: number) => void,
-  currentUser: any,
-  teamMembers: any[],
-  allTeamMembers: any[],
-  editingTaskTitle: string,
-  setEditingTaskTitle: (title: string) => void,
-  editingTaskDescription: string,
-  setEditingTaskDescription: (description: string) => void,
-  editingTaskDueDate: string,
-  setEditingTaskDueDate: (date: string) => void,
-  editingTaskAssignedTo: string,
-  setEditingTaskAssignedTo: (assignee: string) => void,
-  startEditingTask: (task: any) => void,
-  saveEditingTask: () => void,
-  cancelEditingTask: () => void
+  createTaskMutation: any
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   const indentClass = level === 0 ? '' : level === 1 ? 'ml-6' : level === 2 ? 'ml-12' : 'ml-16';
   const bgClass = level === 0 ? 'bg-white' : level === 1 ? 'bg-gray-50 border-l-4 border-l-blue-200' : level === 2 ? 'bg-gray-25 border-l-4 border-l-green-200' : 'bg-white border-l-4 border-l-purple-200';
+  
+  const [editTitle, setEditTitle] = useState(task.name);
+  const [editDescription, setEditDescription] = useState(task.description);
+  
+  const handleSaveTask = () => {
+    updateTaskMutation.mutate({ taskId: task.id, title: editTitle, description: editDescription });
+  };
+  
+  const handleCancelEdit = () => {
+    setEditTitle(task.name);
+    setEditDescription(task.description);
+    setEditingTask(null);
+  };
   
   const handleAddSubtask = () => {
     const title = prompt('Enter subtask title:');
@@ -199,287 +165,74 @@ const SortableTask = ({
   };
   
   const isEditing = editingTask === task.id;
-  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
-  const isExpanded = expandedTasks.has(task.id);
   
   return (
-    <div ref={setNodeRef} style={style} className={`space-y-2 ${indentClass}`}>
-      <div className={`border rounded-lg p-4 ${bgClass} group ${isDragging ? 'shadow-lg' : ''}`}>
+    <div className={`space-y-2 ${indentClass}`}>
+      <div className={`border rounded-lg p-4 ${bgClass} group`}>
         {isEditing ? (
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium mb-1 block">Title</label>
-              <Input 
-                value={editingTaskTitle} 
-                onChange={(e) => setEditingTaskTitle(e.target.value)} 
-                placeholder="Task title"
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Enter task title"
               />
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Description</label>
-              <Textarea 
-                value={editingTaskDescription} 
-                onChange={(e) => setEditingTaskDescription(e.target.value)} 
-                placeholder="Task description"
-                rows={2}
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Enter task description"
+                rows={3}
               />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Due Date</label>
-              <Input 
-                type="date"
-                value={editingTaskDueDate} 
-                onChange={(e) => setEditingTaskDueDate(e.target.value)} 
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Assigned To</label>
-              <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {currentUser && <SelectItem value="me">Assign to Me</SelectItem>}
-                  {teamMembers?.map((member: any) => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      {member.firstName} {member.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="flex gap-2">
-              <Button onClick={saveEditingTask} size="sm">
+              <Button size="sm" onClick={handleSaveTask}>
                 <Save className="w-4 h-4 mr-2" />
                 Save
               </Button>
-              <Button onClick={cancelEditingTask} variant="outline" size="sm">
-                <X className="w-4 h-4 mr-2" />
+              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
                 Cancel
               </Button>
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-1 cursor-grab"
-                  {...attributes}
-                  {...listeners}
-                >
-                  <GripVertical className="w-4 h-4" />
-                </Button>
-                {hasSubtasks && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleTask(task.id)}
-                    className="p-1"
-                  >
-                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                  </Button>
-                )}
-                <h4 
-                  className="font-medium cursor-pointer hover:text-blue-600"
-                  onClick={() => startEditingTask(task)}
-                >
-                  {task.name}
-                </h4>
+                <h4 className="font-medium">{task.name}</h4>
+                <Badge variant="secondary" className="text-xs">
+                  {task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting} days
+                </Badge>
               </div>
-              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => startEditingTask(task)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleAddSubtask}
-                  className="text-green-600 hover:text-green-800"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDeleteTask}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+              {task.description && (
+                <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+              )}
             </div>
-            {task.description && (
-              <p className="text-sm text-gray-600 mt-1">{task.description}</p>
-            )}
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button size="sm" variant="ghost" onClick={() => setEditingTask(task.id)}>
+                <Edit2 className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={handleAddSubtask}>
+                <Plus className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={handleDeleteTask} className="text-red-500">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
       
-      {/* Render subtasks */}
-      {hasSubtasks && isExpanded && (
-        <div className="pl-4">
-          <SortableContext
-            items={task.subtasks?.map(subtask => subtask.id) || []}
-            strategy={verticalListSortingStrategy}
-          >
-            {task.subtasks?.map((subtask) => (
-              <SortableTask
-                key={subtask.id}
-                task={subtask}
-                templateId={templateId}
-                level={level + 1}
-                milestone={milestone}
-                editingTask={editingTask}
-                setEditingTask={setEditingTask}
-                updateTaskMutation={updateTaskMutation}
-                deleteTaskMutation={deleteTaskMutation}
-                createTaskMutation={createTaskMutation}
-                expandedTasks={expandedTasks}
-                toggleTask={toggleTask}
-                currentUser={currentUser}
-                teamMembers={teamMembers}
-                allTeamMembers={allTeamMembers}
-                editingTaskTitle={editingTaskTitle}
-                setEditingTaskTitle={setEditingTaskTitle}
-                editingTaskDescription={editingTaskDescription}
-                setEditingTaskDescription={setEditingTaskDescription}
-                editingTaskDueDate={editingTaskDueDate}
-                setEditingTaskDueDate={setEditingTaskDueDate}
-                editingTaskAssignedTo={editingTaskAssignedTo}
-                setEditingTaskAssignedTo={setEditingTaskAssignedTo}
-                startEditingTask={startEditingTask}
-                saveEditingTask={saveEditingTask}
-                cancelEditingTask={cancelEditingTask}
-              />
-            ))}
-          </SortableContext>
-        </div>
-      )}
-    </div>
-  );
-};
-              <Input 
-                value={editingTaskTitle} 
-                onChange={(e) => setEditingTaskTitle(e.target.value)} 
-                placeholder="Task title"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Description</label>
-              <Textarea 
-                value={editingTaskDescription} 
-                onChange={(e) => setEditingTaskDescription(e.target.value)} 
-                placeholder="Task description"
-                rows={2}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Due Date</label>
-              <Input 
-                type="date"
-                value={editingTaskDueDate} 
-                onChange={(e) => setEditingTaskDueDate(e.target.value)} 
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Assigned To</label>
-              <Select value={editingTaskAssignedTo} onValueChange={setEditingTaskAssignedTo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {currentUser && <SelectItem value="me">Assign to Me</SelectItem>}
-                  {teamMembers?.map((member: any) => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      {member.firstName} {member.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={saveEditingTask} size="sm">
-                <Save className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-              <Button onClick={cancelEditingTask} variant="outline" size="sm">
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {hasSubtasks && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleTask(task.id)}
-                    className="p-1"
-                  >
-                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                  </Button>
-                )}
-                <h4 
-                  className="font-medium cursor-pointer hover:text-blue-600"
-                  onClick={() => startEditingTask(task)}
-                >
-                  {task.name}
-                </h4>
-              </div>
-              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => startEditingTask(task)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleAddSubtask}
-                  className="text-green-600 hover:text-green-800"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDeleteTask}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-            {task.description && (
-              <p className="text-sm text-gray-600 mt-1">{task.description}</p>
-            )}
-          </div>
-        )}
-      </div>
-      
-      {/* Render subtasks */}
-      {hasSubtasks && isExpanded && (
-        <div className="pl-4">
-          {task.subtasks?.map((subtask) => (
-            <TaskDisplay
-              key={subtask.id}
-              task={subtask}
+      {/* Recursively render subtasks */}
+      {task.subtasks && task.subtasks.length > 0 && (
+        <div className="space-y-2">
+          {task.subtasks.map((subtask) => (
+            <TaskDisplay 
+              key={subtask.id} 
+              task={subtask} 
               templateId={templateId}
               level={level + 1}
               milestone={milestone}
@@ -488,22 +241,6 @@ const SortableTask = ({
               updateTaskMutation={updateTaskMutation}
               deleteTaskMutation={deleteTaskMutation}
               createTaskMutation={createTaskMutation}
-              expandedTasks={expandedTasks}
-              toggleTask={toggleTask}
-              currentUser={currentUser}
-              teamMembers={teamMembers}
-              allTeamMembers={allTeamMembers}
-              editingTaskTitle={editingTaskTitle}
-              setEditingTaskTitle={setEditingTaskTitle}
-              editingTaskDescription={editingTaskDescription}
-              setEditingTaskDescription={setEditingTaskDescription}
-              editingTaskDueDate={editingTaskDueDate}
-              setEditingTaskDueDate={setEditingTaskDueDate}
-              editingTaskAssignedTo={editingTaskAssignedTo}
-              setEditingTaskAssignedTo={setEditingTaskAssignedTo}
-              startEditingTask={startEditingTask}
-              saveEditingTask={saveEditingTask}
-              cancelEditingTask={cancelEditingTask}
             />
           ))}
         </div>
@@ -965,7 +702,6 @@ export default function TemplateDetail() {
   
   // State variables
   const [openPhases, setOpenPhases] = useState<number[]>([]);
-  const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
   const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [editingTask, setEditingTask] = useState<number | null>(null);
@@ -1058,19 +794,6 @@ export default function TemplateDetail() {
         ? prev.filter(id => id !== milestoneId)
         : [...prev, milestoneId]
     );
-  };
-
-  // Toggle task expand/collapse
-  const toggleTask = (taskId: number) => {
-    setExpandedTasks(prev => {
-      const newExpanded = new Set(prev);
-      if (newExpanded.has(taskId)) {
-        newExpanded.delete(taskId);
-      } else {
-        newExpanded.add(taskId);
-      }
-      return newExpanded;
-    });
   };
 
   // Mutation for reordering milestones
