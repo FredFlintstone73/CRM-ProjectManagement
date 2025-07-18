@@ -511,3 +511,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Tasks Page Row View**: Right-aligned assignee and due date information in tasks page row view layout
 - **Improved Visual Hierarchy**: Better visual separation between task titles (left) and metadata (right) for easier scanning
 - **Consistent Alignment**: Unified right-alignment approach across both template editor and tasks page interfaces
+
+### Template Details Responsive Layout Enhancement (July 18, 2025)
+- **Equal Width Fields**: Template Name and Meeting Type fields now use equal width distribution via CSS Grid
+- **Responsive Design**: Fields stack vertically on mobile (grid-cols-1) and display side-by-side on desktop (md:grid-cols-2)
+- **Dynamic Resizing**: Fields automatically adjust width based on browser window size for optimal viewing
+- **Removed Fixed Width**: Eliminated fixed 640px width constraint on Meeting Type field for better flexibility
