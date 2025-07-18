@@ -281,6 +281,7 @@ export const tasks = pgTable("tasks", {
   status: taskStatusEnum("status").default("todo"),
   priority: integer("priority").default(25), // 1-50 priority scale
   dueDate: timestamp("due_date"),
+  daysFromMeeting: integer("days_from_meeting").default(0), // Days offset from meeting date for templates
   completedAt: timestamp("completed_at"),
   sortOrder: integer("sort_order").default(0),
   level: integer("level").default(0), // 0 = parent, 1 = child, 2 = grandchild
