@@ -732,9 +732,18 @@ export default function TemplateDetail() {
       });
       if (!response.ok) throw new Error('Failed to fetch contacts');
       const contacts = await response.json();
-      return contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
+      const activeTeamMembers = contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
+      
+      // Filter out current user from team members list since they have "Assign to Me" option
+      const currentUserEmail = currentUser?.email;
+      if (currentUserEmail) {
+        return activeTeamMembers.filter((member: any) => 
+          member.personalEmail !== currentUserEmail && member.workEmail !== currentUserEmail
+        );
+      }
+      return activeTeamMembers;
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !!currentUser,
     staleTime: 0, // Force fresh data
   });
 
