@@ -40,10 +40,10 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   });
 
   // Fetch team members for @mentions
-  const { data: teamMembers = [] } = useQuery<User[]>({
+  const { data: teamMembers = [] } = useQuery<any[]>({
     queryKey: ["/api/contacts"],
     queryFn: async () => {
-      const response = await fetch("/api/contacts?type=team_member", {
+      const response = await fetch("/api/contacts", {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to fetch team members");
@@ -55,10 +55,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   // Create comment mutation
   const createCommentMutation = useMutation({
     mutationFn: async (comment: string) => {
-      return apiRequest(`/api/tasks/${taskId}/comments`, {
-        method: "POST",
-        body: { comment },
-      });
+      return apiRequest("POST", `/api/tasks/${taskId}/comments`, { comment });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });
@@ -80,10 +77,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   // Update comment mutation
   const updateCommentMutation = useMutation({
     mutationFn: async ({ commentId, comment }: { commentId: number; comment: string }) => {
-      return apiRequest(`/api/task-comments/${commentId}`, {
-        method: "PUT",
-        body: { comment },
-      });
+      return apiRequest("PUT", `/api/task-comments/${commentId}`, { comment });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });
@@ -106,9 +100,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   // Delete comment mutation
   const deleteCommentMutation = useMutation({
     mutationFn: async (commentId: number) => {
-      return apiRequest(`/api/task-comments/${commentId}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/task-comments/${commentId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });

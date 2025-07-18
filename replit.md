@@ -464,3 +464,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Fixed Sidebar Implementation**: Changed sidebar from sticky to fixed positioning with proper z-index and left margin on main content
 - **Document Body Scrolling**: Set html/body to handle all scrolling naturally, removing competing scroll containers
 - **Result**: Application now has single scroll bar for main content area across all pages without affecting sidebar navigation - **VERIFIED WORKING**
+
+### Task Commenting System Implementation (July 18, 2025)
+- **Database Schema**: Task comments table already existed with proper user relationships and timestamps
+- **API Endpoints**: Task comment CRUD endpoints already implemented in server routes with user authentication
+- **TaskComments Component**: Created comprehensive commenting interface with user avatars, timestamps, and @mention support
+- **Real-time Updates**: Comments display immediately with proper query cache invalidation
+- **User Attribution**: Comments show user names, profile pictures, and creation timestamps
+- **Edit/Delete Functionality**: Comment authors can edit and delete their own comments
+- **@Mention Highlighting**: Comments highlight @mentions with blue background styling
+- **Task Detail Integration**: Comments section added to task detail pages below description and subtasks
+- **Storage Enhancement**: Updated getTaskComments to include user data via JOIN query for rich comment display
+- **Error Resolution**: Fixed apiRequest parameter order to resolve comment posting failures
