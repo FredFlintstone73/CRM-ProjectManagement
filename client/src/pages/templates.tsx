@@ -242,10 +242,12 @@ export default function Templates() {
                               Create Project
                             </DropdownMenuItem>
                           </CreateFromTemplateDialog>
-                          <DropdownMenuItem onClick={() => handleEditClick(template)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
+                          <Link href={`/templates/${template.id}`}>
+                            <DropdownMenuItem>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                          </Link>
                           <DropdownMenuItem onClick={() => handleCopyTemplate(template)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copy

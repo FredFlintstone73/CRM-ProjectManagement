@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -21,7 +22,11 @@ import {
   Users,
   Edit2,
   Check,
-  X
+  X,
+  Plus,
+  Trash2,
+  GripVertical,
+  Save
 } from "lucide-react";
 import { Link } from "wouter";
 import type { ProjectTemplate } from "@shared/schema";
@@ -79,21 +84,121 @@ const buildTaskHierarchy = (tasks: TaskTemplate[]) => {
 
 
 
-// TaskDisplay component for recursive task rendering
-const TaskDisplay = ({ task, templateId, level = 0 }: { task: TaskTemplate, templateId: string | undefined, level?: number }) => {
+// TaskDisplay component for recursive task rendering with editing
+const TaskDisplay = ({ 
+  task, 
+  templateId, 
+  level = 0, 
+  milestone, 
+  editingTask, 
+  setEditingTask, 
+  updateTaskMutation, 
+  deleteTaskMutation, 
+  createTaskMutation 
+}: { 
+  task: TaskTemplate, 
+  templateId: string | undefined, 
+  level?: number,
+  milestone: any,
+  editingTask: number | null,
+  setEditingTask: (id: number | null) => void,
+  updateTaskMutation: any,
+  deleteTaskMutation: any,
+  createTaskMutation: any
+}) => {
   const indentClass = level === 0 ? '' : level === 1 ? 'ml-6' : level === 2 ? 'ml-12' : 'ml-16';
   const bgClass = level === 0 ? 'bg-white' : level === 1 ? 'bg-gray-50 border-l-4 border-l-blue-200' : level === 2 ? 'bg-gray-25 border-l-4 border-l-green-200' : 'bg-white border-l-4 border-l-purple-200';
   
+  const [editTitle, setEditTitle] = useState(task.name);
+  const [editDescription, setEditDescription] = useState(task.description);
+  
+  const handleSaveTask = () => {
+    updateTaskMutation.mutate({ taskId: task.id, title: editTitle, description: editDescription });
+  };
+  
+  const handleCancelEdit = () => {
+    setEditTitle(task.name);
+    setEditDescription(task.description);
+    setEditingTask(null);
+  };
+  
+  const handleAddSubtask = () => {
+    const title = prompt('Enter subtask title:');
+    if (title) {
+      createTaskMutation.mutate({ 
+        title, 
+        description: '', 
+        milestoneId: milestone.id, 
+        parentTaskId: task.id 
+      });
+    }
+  };
+  
+  const handleDeleteTask = () => {
+    if (confirm('Are you sure you want to delete this task?')) {
+      deleteTaskMutation.mutate(task.id);
+    }
+  };
+  
+  const isEditing = editingTask === task.id;
+  
   return (
     <div className={`space-y-2 ${indentClass}`}>
-      <div className={`border rounded-lg p-4 ${bgClass}`}>
-        <div className="flex items-start justify-between mb-2">
-          <h4 className="font-medium text-gray-900">
-            {task.name}
-          </h4>
-        </div>
-        {task.description && (
-          <p className="text-sm text-gray-600 mt-2">{task.description}</p>
+      <div className={`border rounded-lg p-4 ${bgClass} group`}>
+        {isEditing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Title</label>
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Enter task title"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Description</label>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Enter task description"
+                rows={3}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={handleSaveTask}>
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-2">
+              <h4 className="font-medium text-gray-900">
+                {task.name}
+              </h4>
+              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button size="sm" variant="ghost" onClick={() => setEditingTask(task.id)}>
+                  <Edit2 className="w-4 h-4" />
+                </Button>
+                {level < 2 && (
+                  <Button size="sm" variant="ghost" onClick={handleAddSubtask}>
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" onClick={handleDeleteTask}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            {task.description && (
+              <p className="text-sm text-gray-600 mt-2">{task.description}</p>
+            )}
+          </>
         )}
       </div>
       
@@ -106,6 +211,12 @@ const TaskDisplay = ({ task, templateId, level = 0 }: { task: TaskTemplate, temp
               task={subtask} 
               templateId={templateId}
               level={level + 1}
+              milestone={milestone}
+              editingTask={editingTask}
+              setEditingTask={setEditingTask}
+              updateTaskMutation={updateTaskMutation}
+              deleteTaskMutation={deleteTaskMutation}
+              createTaskMutation={createTaskMutation}
             />
           ))}
         </div>
@@ -122,6 +233,10 @@ export default function TemplateDetail() {
   const [openPhases, setOpenPhases] = useState<string[]>([]);
   const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
+  const [editingTask, setEditingTask] = useState<number | null>(null);
+  const [isEditMode, setIsEditMode] = useState(true); // Start in edit mode
+  const [templateName, setTemplateName] = useState<string>("");
+  const [templateDescription, setTemplateDescription] = useState<string>("");
 
   // Mutation to update milestone title
   const updateMilestoneMutation = useMutation({
@@ -141,6 +256,112 @@ export default function TemplateDetail() {
       toast({
         title: "Error",
         description: "Failed to update section name",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to update template details
+  const updateTemplateMutation = useMutation({
+    mutationFn: async ({ name, description }: { name: string; description: string }) => {
+      return await apiRequest('PUT', `/api/project-templates/${id}`, { name, description });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Template updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update template",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to create new milestone
+  const createMilestoneMutation = useMutation({
+    mutationFn: async ({ title }: { title: string }) => {
+      return await apiRequest('POST', `/api/milestones`, { title, templateId: parseInt(id!) });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Section created successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create section",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to create new task
+  const createTaskMutation = useMutation({
+    mutationFn: async ({ title, description, milestoneId, parentTaskId }: { title: string; description: string; milestoneId: number; parentTaskId?: number }) => {
+      return await apiRequest('POST', `/api/tasks`, { title, description, milestoneId, parentTaskId });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Task created successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create task",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to update task
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, title, description }: { taskId: number; title: string; description: string }) => {
+      return await apiRequest('PUT', `/api/tasks/${taskId}`, { title, description });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Task updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', id] });
+      setEditingTask(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to delete task
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: number) => {
+      return await apiRequest('DELETE', `/api/tasks/${taskId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Task deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/template-tasks', id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete task",
         variant: "destructive",
       });
     },
@@ -188,6 +409,14 @@ export default function TemplateDetail() {
     },
     enabled: isAuthenticated && !!id,
   });
+
+  // Initialize template fields when template data is loaded
+  useEffect(() => {
+    if (template && !templateName) {
+      setTemplateName(template.name);
+      setTemplateDescription(template.description || '');
+    }
+  }, [template, templateName]);
 
   // Fetch template milestones and tasks
   const { data: milestones = [] } = useQuery({
@@ -298,10 +527,28 @@ export default function TemplateDetail() {
   const totalTasks = tasks.length;
   const totalDays = tasks.reduce((sum, task) => sum + (task.estimatedDays || 0), 0);
 
+  const handleSaveTemplate = () => {
+    updateTemplateMutation.mutate({ name: templateName, description: templateDescription });
+  };
+
+  const handleAddSection = () => {
+    const title = prompt('Enter section title:');
+    if (title) {
+      createMilestoneMutation.mutate({ title });
+    }
+  };
+
+  const handleAddTask = (milestoneId: number) => {
+    const title = prompt('Enter task title:');
+    if (title) {
+      createTaskMutation.mutate({ title, description: '', milestoneId });
+    }
+  };
+
   return (
     <>
       <Header 
-        title={template.name}
+        title="Edit Template"
         subtitle={`${totalTasks} tasks • ${totalDays} estimated days`}
         showActions={false}
       />
@@ -318,48 +565,42 @@ export default function TemplateDetail() {
             </Link>
           </div>
 
-          {/* Template Overview */}
+          {/* Template Details */}
           <div className="mb-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  Template Overview
+                  Template Details
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">{template.description}</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <FileText className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{totalTasks}</p>
-                      <p className="text-sm text-gray-500">Total Tasks</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <Calendar className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{totalDays}</p>
-                      <p className="text-sm text-gray-500">Estimated Days</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Users className="w-4 h-4 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{milestones.length}</p>
-                      <p className="text-sm text-gray-500">Main Milestones</p>
-                    </div>
-                  </div>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Template Name</label>
+                  <Input
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="Enter template name"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Description</label>
+                  <Textarea
+                    value={templateDescription}
+                    onChange={(e) => setTemplateDescription(e.target.value)}
+                    placeholder="Enter template description"
+                    rows={3}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button onClick={handleSaveTemplate}>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Template
+                  </Button>
+                  <Button variant="outline" onClick={handleAddSection}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Section
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -444,8 +685,28 @@ export default function TemplateDetail() {
                       <CardContent className="pt-0">
                         <Separator className="mb-4" />
                         <div className="space-y-3">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleAddTask(milestone.id)}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Task
+                            </Button>
+                          </div>
                           {hierarchicalTasks.map((task) => (
-                            <TaskDisplay key={task.id} task={task} templateId={id} />
+                            <TaskDisplay 
+                              key={task.id} 
+                              task={task} 
+                              templateId={id} 
+                              milestone={milestone}
+                              editingTask={editingTask}
+                              setEditingTask={setEditingTask}
+                              updateTaskMutation={updateTaskMutation}
+                              deleteTaskMutation={deleteTaskMutation}
+                              createTaskMutation={createTaskMutation}
+                            />
                           ))}
                         </div>
                       </CardContent>
