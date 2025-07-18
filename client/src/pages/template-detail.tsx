@@ -990,13 +990,10 @@ export default function TemplateDetail() {
     }
 
     try {
-      await apiRequest(`/api/project-templates/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          name: templateName,
-          description: templateDescription,
-          meetingType: meetingType,
-        }),
+      await apiRequest('PUT', `/api/project-templates/${id}`, {
+        name: templateName,
+        description: templateDescription,
+        meetingType: meetingType,
       });
 
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
@@ -1164,7 +1161,7 @@ export default function TemplateDetail() {
                     rows={3}
                   />
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-center">
                   <Button onClick={handleSaveTemplate} className="min-w-24">
                     <Save className="w-4 h-4 mr-2" />
                     Save Template
