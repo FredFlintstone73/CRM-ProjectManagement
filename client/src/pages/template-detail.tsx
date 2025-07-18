@@ -465,7 +465,7 @@ const SortableSection = ({
                               <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
                             )}
                             {task.assignedTo && (() => {
-                              const assignedUser = teamMembers.find((m: any) => m.id === task.assignedTo);
+                              const assignedUser = allTeamMembers.find((m: any) => m.id === task.assignedTo);
                               if (assignedUser) {
                                 const currentUserEmail = currentUser?.email;
                                 const isCurrentUser = currentUserEmail && 
@@ -724,27 +724,34 @@ export default function TemplateDetail() {
     enabled: isAuthenticated,
   });
 
-  // Fetch team members for assignment
-  const { data: teamMembers = [] } = useQuery({
-    queryKey: ['/api/contacts', 'team-members', 'v2'],
+  // Fetch all team members for assignment matching
+  const { data: allTeamMembers = [] } = useQuery({
+    queryKey: ['/api/contacts', 'all-team-members', 'v2'],
     queryFn: async () => {
       const response = await fetch('/api/contacts', {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch contacts');
       const contacts = await response.json();
-      const activeTeamMembers = contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
-      
-      // Filter out current user from team members list since they have "Assign to Me" option
+      return contacts.filter((contact: any) => contact.contactType === 'team_member' && contact.status === 'active');
+    },
+    enabled: isAuthenticated && !!currentUser,
+    staleTime: 0, // Force fresh data
+  });
+
+  // Fetch team members for assignment dropdown (excluding current user)
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ['/api/contacts', 'team-members', 'v2'],
+    queryFn: async () => {
       const currentUserEmail = currentUser?.email;
       if (currentUserEmail) {
-        return activeTeamMembers.filter((member: any) => 
+        return allTeamMembers.filter((member: any) => 
           member.personalEmail !== currentUserEmail && member.workEmail !== currentUserEmail
         );
       }
-      return activeTeamMembers;
+      return allTeamMembers;
     },
-    enabled: isAuthenticated && !!currentUser,
+    enabled: isAuthenticated && !!currentUser && allTeamMembers.length > 0,
     staleTime: 0, // Force fresh data
   });
 
@@ -939,7 +946,7 @@ export default function TemplateDetail() {
     let assignedValue = "unassigned";
     if (task.assignedTo) {
       const currentUserEmail = currentUser?.email;
-      const assignedUser = teamMembers.find((member: any) => member.id === task.assignedTo);
+      const assignedUser = allTeamMembers.find((member: any) => member.id === task.assignedTo);
       if (assignedUser && currentUserEmail && 
           (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail)) {
         assignedValue = "me";
