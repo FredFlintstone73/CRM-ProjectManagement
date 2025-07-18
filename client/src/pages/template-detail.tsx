@@ -438,7 +438,16 @@ export default function TemplateDetail() {
 
   // Fetch milestones
   const { data: milestones = [], isLoading: isMilestonesLoading } = useQuery({
-    queryKey: ['/api/milestones', { templateId: id }],
+    queryKey: ['/api/milestones', 'template', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/milestones?templateId=${id}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch milestones for template ${id}`);
+      }
+      return await response.json();
+    },
     enabled: !!id && isAuthenticated,
   });
 
@@ -609,29 +618,8 @@ export default function TemplateDetail() {
     }
   };
 
-  // Fetch tasks for each milestone
-  const taskQueries = useQuery({
-    queryKey: ['template-tasks', id, milestones.map(m => m.id)],
-    queryFn: async () => {
-      if (!milestones || milestones.length === 0) return [];
-      
-      const taskPromises = milestones.map(async (milestone) => {
-        const response = await fetch(`/api/milestones/${milestone.id}/tasks`, {
-          credentials: 'include'
-        });
-        if (!response.ok) {
-          console.error(`Failed to fetch tasks for milestone ${milestone.id}`);
-          return { milestoneId: milestone.id, tasks: [] };
-        }
-        const tasks = await response.json();
-        return { milestoneId: milestone.id, tasks };
-      });
-      
-      const results = await Promise.all(taskPromises);
-      return results;
-    },
-    enabled: !!id && isAuthenticated && milestones.length > 0,
-  });
+  // For now, we'll use empty tasks arrays until we fix the milestone loading issue
+  const taskQueries = { data: [] };
 
   // Prepare data for rendering
   const tasksByMilestone = useMemo(() => {
