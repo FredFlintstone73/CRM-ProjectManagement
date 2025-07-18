@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Plus, FileText, Trash2, MoreHorizontal, Copy, Rocket } from "lucide-react";
+import { Search, Plus, FileText, Trash2, MoreHorizontal, Copy, Rocket, Grid3X3, List, ArrowUpDown } from "lucide-react";
 import ProjectTemplateForm from "@/components/projects/project-template-form";
 import CreateFromTemplateDialog from "@/components/projects/create-from-template-dialog";
 import type { ProjectTemplate } from "@shared/schema";
@@ -27,6 +27,8 @@ export default function Templates() {
   const [editingTemplate, setEditingTemplate] = useState<ProjectTemplate | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<ProjectTemplate | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [viewMode, setViewMode] = useState<'card' | 'row'>('card');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -131,7 +133,10 @@ export default function Templates() {
     searchQuery === "" ||
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  ).sort((a, b) => {
+    const comparison = a.name.localeCompare(b.name);
+    return sortOrder === 'asc' ? comparison : -comparison;
+  }) || [];
 
   const handleTemplateCreated = () => {
     setIsDialogOpen(false);
@@ -203,6 +208,37 @@ export default function Templates() {
               />
             </div>
             <div className="flex gap-2">
+              {/* View Toggle */}
+              <div className="flex rounded-lg border border-gray-200 p-1">
+                <Button
+                  variant={viewMode === 'card' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('card')}
+                  className="px-2 py-1"
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'row' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('row')}
+                  className="px-2 py-1"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {/* Sort Toggle */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                className="flex items-center gap-1"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
+              </Button>
+              
               <Button onClick={handleRefresh} variant="outline">
                 Refresh
               </Button>
@@ -242,7 +278,7 @@ export default function Templates() {
                 </Button>
               </CardContent>
             </Card>
-          ) : (
+          ) : viewMode === 'card' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTemplates.map((template) => (
                 <Card key={template.id} className="hover:shadow-md transition-shadow">
@@ -291,6 +327,70 @@ export default function Templates() {
                         Created {new Date(template.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredTemplates.map((template) => (
+                <Card key={template.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <Link href={`/templates/${template.id}`}>
+                          <h3 className="font-semibold text-lg hover:text-blue-600 transition-colors cursor-pointer">
+                            {template.name}
+                          </h3>
+                        </Link>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">
+                            {getTaskCount(template)} tasks
+                          </Badge>
+                          {template.meetingType && (
+                            <Badge variant="secondary">
+                              {template.meetingType.toUpperCase()}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-500">
+                          Created {new Date(template.createdAt).toLocaleDateString()}
+                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <CreateFromTemplateDialog template={template}>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Rocket className="h-4 w-4 mr-2" />
+                                Create Project
+                              </DropdownMenuItem>
+                            </CreateFromTemplateDialog>
+                            <DropdownMenuItem onClick={() => handleCopyTemplate(template)}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteClick(template)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                    {template.description && (
+                      <p className="text-sm text-gray-600 mt-2 line-clamp-1">
+                        {template.description}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               ))}
