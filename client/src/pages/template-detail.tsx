@@ -266,6 +266,13 @@ const SortableSection = ({
   handleDeleteSection, 
   editingTask, 
   setEditingTask, 
+  editingTaskTitle,
+  setEditingTaskTitle,
+  editingTaskDescription,
+  setEditingTaskDescription,
+  startEditingTask,
+  saveEditingTask,
+  cancelEditingTask,
   updateTaskMutation, 
   deleteTaskMutation, 
   createTaskMutation, 
@@ -960,6 +967,13 @@ export default function TemplateDetail() {
                       handleDeleteSection={handleDeleteSection}
                       editingTask={editingTask}
                       setEditingTask={setEditingTask}
+                      editingTaskTitle={editingTaskTitle}
+                      setEditingTaskTitle={setEditingTaskTitle}
+                      editingTaskDescription={editingTaskDescription}
+                      setEditingTaskDescription={setEditingTaskDescription}
+                      startEditingTask={startEditingTask}
+                      saveEditingTask={saveEditingTask}
+                      cancelEditingTask={cancelEditingTask}
                       updateTaskMutation={updateTaskMutation}
                       deleteTaskMutation={deleteTaskMutation}
                       createTaskMutation={createTaskMutation}
