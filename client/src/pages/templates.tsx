@@ -163,14 +163,36 @@ export default function Templates() {
     copyTemplateMutation.mutate(template.id);
   };
 
-  const getTaskCount = (template: ProjectTemplate) => {
-    try {
-      const tasks = JSON.parse(template.tasks as string || '[]');
-      return tasks.length;
-    } catch {
-      return 0;
-    }
-  };
+  // Task count will be fetched separately for each template
+  const [taskCounts, setTaskCounts] = useState<Record<number, number>>({});
+
+  // Fetch task counts for all templates
+  useEffect(() => {
+    const fetchTaskCounts = async () => {
+      if (!templates || !isAuthenticated) return;
+      
+      const counts: Record<number, number> = {};
+      
+      for (const template of templates) {
+        try {
+          const response = await fetch(`/api/project-templates/${template.id}/task-count`, {
+            credentials: 'include',
+          });
+          if (response.ok) {
+            const data = await response.json();
+            counts[template.id] = data.taskCount;
+          }
+        } catch (error) {
+          console.error(`Error fetching task count for template ${template.id}:`, error);
+          counts[template.id] = 0;
+        }
+      }
+      
+      setTaskCounts(counts);
+    };
+
+    fetchTaskCounts();
+  }, [templates, isAuthenticated]);
 
   if (isLoading || templatesLoading) {
     return (
@@ -313,7 +335,7 @@ export default function Templates() {
                     )}
                     <div className="flex items-center justify-between">
                       <Badge variant="outline">
-                        {getTaskCount(template)} tasks
+                        {taskCounts[template.id] || 0} tasks
                       </Badge>
                       <span className="text-xs text-gray-500">
                         Created {new Date(template.createdAt).toLocaleDateString()}
@@ -337,7 +359,7 @@ export default function Templates() {
                         </Link>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">
-                            {getTaskCount(template)} tasks
+                            {taskCounts[template.id] || 0} tasks
                           </Badge>
                           {template.meetingType && (
                             <Badge variant="secondary">

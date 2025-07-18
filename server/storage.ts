@@ -43,7 +43,7 @@ import {
   type InsertContactFile,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, count } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -109,6 +109,7 @@ export interface IStorage {
   createProjectTemplate(template: InsertProjectTemplate, userId: string): Promise<ProjectTemplate>;
   updateProjectTemplate(id: number, template: Partial<InsertProjectTemplate>): Promise<ProjectTemplate>;
   deleteProjectTemplate(id: number): Promise<void>;
+  getTemplateTaskCount(templateId: number): Promise<number>;
 
   // Email interaction operations
   getEmailInteractions(): Promise<EmailInteraction[]>;
@@ -796,6 +797,16 @@ export class DatabaseStorage implements IStorage {
       console.error(`Error deleting project template ${id}:`, error);
       throw error;
     }
+  }
+
+  async getTemplateTaskCount(templateId: number): Promise<number> {
+    const result = await db
+      .select({ count: count() })
+      .from(tasks)
+      .leftJoin(milestones, eq(tasks.milestoneId, milestones.id))
+      .where(eq(milestones.templateId, templateId));
+    
+    return result[0]?.count || 0;
   }
 
   // Email interaction operations

@@ -1286,6 +1286,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get task count for a specific template
+  app.get('/api/project-templates/:id/task-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const taskCount = await storage.getTemplateTaskCount(templateId);
+      res.json({ taskCount });
+    } catch (error) {
+      console.error("Error fetching template task count:", error);
+      res.status(500).json({ message: "Failed to fetch template task count" });
+    }
+  });
+
   // Email interaction routes
   app.get('/api/email-interactions', isAuthenticated, async (req: any, res) => {
     try {
