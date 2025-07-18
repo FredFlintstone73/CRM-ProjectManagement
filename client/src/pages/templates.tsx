@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Plus, FileText, Edit, Trash2, MoreHorizontal, Copy, Rocket } from "lucide-react";
+import { Search, Plus, FileText, Trash2, MoreHorizontal, Copy, Rocket } from "lucide-react";
 import ProjectTemplateForm from "@/components/projects/project-template-form";
 import CreateFromTemplateDialog from "@/components/projects/create-from-template-dialog";
 import type { ProjectTemplate } from "@shared/schema";
@@ -236,12 +236,6 @@ export default function Templates() {
                               Create Project
                             </DropdownMenuItem>
                           </CreateFromTemplateDialog>
-                          <Link href={`/templates/${template.id}`}>
-                            <DropdownMenuItem>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                          </Link>
                           <DropdownMenuItem onClick={() => handleCopyTemplate(template)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copy
