@@ -768,6 +768,7 @@ export default function TemplateDetail() {
     if (template) {
       setTemplateName(template.name);
       setTemplateDescription(template.description || "");
+      setMeetingType(template.meetingType || "csr");
     }
   }, [template]);
 
