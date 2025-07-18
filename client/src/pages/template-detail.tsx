@@ -456,9 +456,15 @@ export default function TemplateDetail() {
     if (template) {
       setTemplateName(template.name);
       setTemplateDescription(template.description || "");
+    }
+  }, [template]);
+
+  // Initialize open phases when milestones are loaded
+  useEffect(() => {
+    if (milestones.length > 0 && openPhases.length === 0) {
       setOpenPhases(milestones.map(m => m.id));
     }
-  }, [template, milestones]);
+  }, [milestones, openPhases.length]);
 
   // Toggle phase open/close
   const togglePhase = (milestoneId: number) => {
