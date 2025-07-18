@@ -856,13 +856,17 @@ export default function TemplateDetail() {
         }
       }
       
+      const daysFromMeeting = editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0;
+      
+      console.log('Frontend saving task with daysFromMeeting:', daysFromMeeting);
+      
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
         title: editingTaskTitle.trim(), 
         description: editingTaskDescription || null,
         dueDate: null, // Templates don't have specific due dates
         assignedTo: assignedTo,
-        daysFromMeeting: editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0,
+        daysFromMeeting: daysFromMeeting,
       });
     }
   };
