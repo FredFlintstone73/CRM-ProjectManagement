@@ -1064,7 +1064,7 @@ export default function TemplateDetail() {
           <div className="mb-8">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="tracking-tight flex items-center gap-2 text-[20px] font-bold">
                   <FileText className="w-5 h-5" />
                   Template Details
                 </CardTitle>
