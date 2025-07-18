@@ -111,18 +111,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Update sections when milestones and tasks are loaded
   useEffect(() => {
-    console.log('SectionTaskManager useEffect triggered:', { 
-      milestonesLength: milestones.length, 
-      tasksLength: tasks.length,
-      milestones,
-      tasks 
-    });
-    
     if (milestones.length > 0 && tasks.length >= 0) {
       const sectionsFromMilestones = milestones.map(milestone => {
         // Find tasks that belong to this milestone
         const milestoneTasks = tasks.filter(task => task.milestoneId === milestone.id);
-        console.log(`Milestone ${milestone.id} (${milestone.title}): ${milestoneTasks.length} tasks`);
         
         return {
           id: `milestone-${milestone.id}`,
@@ -131,7 +123,6 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         };
       });
       
-      console.log('Setting sections:', sectionsFromMilestones);
       setSections(sectionsFromMilestones);
     }
   }, [milestones, tasks]);
@@ -504,7 +495,6 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       </div>
 
       <div className="space-y-6">
-        {console.log('Rendering sections:', sections) || null}
         {sections.map(section => {
           const sectionTasks = buildTaskHierarchy(section.id);
           
