@@ -817,7 +817,7 @@ export default function TemplateDetail() {
       return await apiRequest('POST', `/api/milestones`, { title, templateId: parseInt(id!) });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
     },
   });
 
@@ -827,7 +827,7 @@ export default function TemplateDetail() {
       return await apiRequest('DELETE', `/api/milestones/${milestoneId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
     },
   });
 
@@ -837,7 +837,7 @@ export default function TemplateDetail() {
       return await apiRequest('PUT', `/api/milestones/${milestoneId}`, { title });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
       setEditingMilestone(null);
       setEditingTitle("");
     },
@@ -855,7 +855,7 @@ export default function TemplateDetail() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
       queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
     },
   });
@@ -882,7 +882,7 @@ export default function TemplateDetail() {
       return await apiRequest('DELETE', `/api/tasks/${taskId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
       queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
     },
   });
@@ -999,6 +999,7 @@ export default function TemplateDetail() {
 
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
       
       toast({
         title: "Success",
