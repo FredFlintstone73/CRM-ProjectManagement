@@ -190,8 +190,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('POST /api/projects called with body:', req.body);
+      console.log('==================== POST /api/projects CALLED ====================');
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
       const projectData = insertProjectSchema.parse(req.body);
+      console.log('Parsed project data:', JSON.stringify(projectData, null, 2));
       const userId = req.user.claims.sub;
       
       // Check if this is a meeting with a template-supported type
@@ -290,7 +292,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Fallback to regular project creation if no template found
-      console.log('No template found, creating regular project');
+      console.log('==================== NO TEMPLATE FOUND ====================');
+      console.log('Creating regular project with default milestones');
       const project = await storage.createProject(projectData, userId);
       res.json(project);
     } catch (error) {
