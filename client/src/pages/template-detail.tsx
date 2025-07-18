@@ -276,6 +276,7 @@ const SortableSection = ({
   editingTaskAssignedTo,
   setEditingTaskAssignedTo,
   teamMembers,
+  allTeamMembers,
   currentUser,
   startEditingTask,
   saveEditingTask,
@@ -465,7 +466,7 @@ const SortableSection = ({
                               <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
                             )}
                             {task.assignedTo && (() => {
-                              const assignedUser = allTeamMembers.find((m: any) => m.id === task.assignedTo);
+                              const assignedUser = allTeamMembers?.find((m: any) => m.id === task.assignedTo);
                               if (assignedUser) {
                                 const currentUserEmail = currentUser?.email;
                                 const isCurrentUser = currentUserEmail && 
@@ -946,7 +947,7 @@ export default function TemplateDetail() {
     let assignedValue = "unassigned";
     if (task.assignedTo) {
       const currentUserEmail = currentUser?.email;
-      const assignedUser = allTeamMembers.find((member: any) => member.id === task.assignedTo);
+      const assignedUser = allTeamMembers?.find((member: any) => member.id === task.assignedTo);
       if (assignedUser && currentUserEmail && 
           (assignedUser.personalEmail === currentUserEmail || assignedUser.workEmail === currentUserEmail)) {
         assignedValue = "me";
@@ -1228,6 +1229,7 @@ export default function TemplateDetail() {
                       editingTaskAssignedTo={editingTaskAssignedTo}
                       setEditingTaskAssignedTo={setEditingTaskAssignedTo}
                       teamMembers={teamMembers}
+                      allTeamMembers={allTeamMembers}
                       currentUser={currentUser}
                       startEditingTask={startEditingTask}
                       saveEditingTask={saveEditingTask}
