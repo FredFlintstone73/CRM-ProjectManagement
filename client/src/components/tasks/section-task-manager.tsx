@@ -83,7 +83,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/milestones?projectId=${projectId}`);
-        return response;
+        return await response.json();
       } catch (error) {
         console.error('Failed to fetch milestones:', error);
         return [];
@@ -98,7 +98,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
-        return response;
+        return await response.json();
       } catch (error) {
         console.error('Failed to fetch tasks:', error);
         return [];
