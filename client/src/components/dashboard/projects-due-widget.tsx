@@ -63,7 +63,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
   const currentRange = dateRanges[selectedPeriod] || dateRanges["next-4-months"];
   
   const handleProjectClick = (projectId: number) => {
-    navigate(`/project/${projectId}`);
+    navigate(`/projects/${projectId}`);
   };
 
   // Use custom dates if available and period is custom-range
