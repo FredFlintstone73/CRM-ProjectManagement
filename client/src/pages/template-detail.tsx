@@ -230,7 +230,7 @@ export default function TemplateDetail() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
-  const [openPhases, setOpenPhases] = useState<string[]>([]);
+  const [openPhases, setOpenPhases] = useState<number[]>([]);
   const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [editingTask, setEditingTask] = useState<number | null>(null);
@@ -287,11 +287,13 @@ export default function TemplateDetail() {
     mutationFn: async ({ title }: { title: string }) => {
       return await apiRequest('POST', `/api/milestones`, { title, templateId: parseInt(id!) });
     },
-    onSuccess: () => {
+    onSuccess: (newMilestone) => {
       toast({
         title: "Success",
         description: "Section created successfully",
       });
+      // Auto-open the newly created milestone
+      setOpenPhases(prev => [...prev, newMilestone.id]);
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
     },
@@ -420,6 +422,13 @@ export default function TemplateDetail() {
     }
   }, [template, templateName]);
 
+  // Initialize openPhases to show all milestones by default
+  useEffect(() => {
+    if (milestones.length > 0 && openPhases.length === 0) {
+      setOpenPhases(milestones.map(m => m.id));
+    }
+  }, [milestones, openPhases.length]);
+
   // Fetch template milestones and tasks
   const { data: milestones = [] } = useQuery({
     queryKey: ['/api/milestones', { templateId: id }],
@@ -462,11 +471,11 @@ export default function TemplateDetail() {
     return null;
   }
 
-  const togglePhase = (phaseName: string) => {
+  const togglePhase = (milestoneId: number) => {
     setOpenPhases(prev => 
-      prev.includes(phaseName) 
-        ? prev.filter(p => p !== phaseName)
-        : [...prev, phaseName]
+      prev.includes(milestoneId) 
+        ? prev.filter(p => p !== milestoneId)
+        : [...prev, milestoneId]
     );
   };
 
@@ -613,14 +622,14 @@ export default function TemplateDetail() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Template Tasks</h2>
             
             {Array.from(tasksByMilestone.entries()).map(([milestoneTitle, { milestone, tasks: milestoneTasks }], milestoneIndex) => {
-              const isOpen = openPhases.includes(milestoneTitle);
+              const isOpen = openPhases.includes(milestone?.id);
               const hierarchicalTasks = buildTaskHierarchy(milestoneTasks);
               const taskCount = milestoneTasks.length;
               const isEditing = editingMilestone === milestone?.id;
               
               return (
-                <Card key={milestoneTitle} className="overflow-hidden group">
-                  <Collapsible open={isOpen} onOpenChange={() => togglePhase(milestoneTitle)}>
+                <Card key={milestone?.id || milestoneTitle} className="overflow-hidden group">
+                  <Collapsible open={isOpen} onOpenChange={() => togglePhase(milestone?.id)}>
                     <CollapsibleTrigger asChild>
                       <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
