@@ -199,6 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const meetingDate = projectData.dueDate;
       
       console.log('Project creation - meetingType:', meetingType, 'meetingDate:', meetingDate);
+      console.log('ProjectData parsed:', projectData);
       
       if (meetingType && meetingDate) {
         // Try to find a template for this meeting type
@@ -207,6 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const matchingTemplate = templates.find(template => template.meetingType === meetingType);
         
         console.log('Matching template:', matchingTemplate);
+        console.log('Template comparison - looking for:', meetingType, 'found templates with types:', templates.map(t => t.meetingType));
         
         if (matchingTemplate) {
           // Create project from template instead of regular project creation
