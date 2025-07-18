@@ -922,7 +922,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/milestones/reorder', isAuthenticated, async (req: any, res) => {
     try {
       const { milestoneIds } = req.body;
-      await storage.reorderMilestones(milestoneIds);
+      console.log('Received milestone IDs for reordering:', milestoneIds);
+      console.log('Types:', milestoneIds.map((id: any) => typeof id));
+      
+      // Ensure all IDs are valid integers
+      const validIds = milestoneIds.map((id: any) => {
+        const parsed = parseInt(String(id));
+        if (isNaN(parsed)) {
+          throw new Error(`Invalid milestone ID: ${id}`);
+        }
+        return parsed;
+      });
+      
+      console.log('Valid milestone IDs:', validIds);
+      await storage.reorderMilestones(validIds);
       res.json({ message: "Milestones reordered successfully" });
     } catch (error) {
       console.error("Error reordering milestones:", error);

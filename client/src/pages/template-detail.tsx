@@ -472,10 +472,15 @@ export default function TemplateDetail() {
   // Mutation for reordering milestones
   const reorderMilestonesMutation = useMutation({
     mutationFn: async (milestoneIds: number[]) => {
+      console.log('Sending reorder request with IDs:', milestoneIds);
       return await apiRequest('PUT', `/api/milestones/reorder`, { milestoneIds });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones', { templateId: id }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
+      toast({
+        title: "Success",
+        description: "Sections reordered successfully",
+      });
     },
     onError: (error) => {
       console.error('Error reordering milestones:', error);
@@ -611,10 +616,16 @@ export default function TemplateDetail() {
       const oldIndex = milestones.findIndex((milestone) => milestone.id === active.id);
       const newIndex = milestones.findIndex((milestone) => milestone.id === over?.id);
       
-      const reorderedMilestones = arrayMove(milestones, oldIndex, newIndex);
-      const milestoneIds = reorderedMilestones.map(m => parseInt(m.id.toString()));
-      
-      reorderMilestonesMutation.mutate(milestoneIds);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedMilestones = arrayMove(milestones, oldIndex, newIndex);
+        const milestoneIds = reorderedMilestones.map(m => {
+          const id = parseInt(String(m.id));
+          return isNaN(id) ? m.id : id;
+        });
+        
+        console.log('Reordering milestones:', milestoneIds);
+        reorderMilestonesMutation.mutate(milestoneIds);
+      }
     }
   };
 
