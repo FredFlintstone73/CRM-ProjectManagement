@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import type { Project, Contact } from "@shared/schema";
 
 export default function ProjectStatus() {
+  const [, navigate] = useLocation();
   const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
   });
@@ -110,9 +111,12 @@ export default function ProjectStatus() {
             {activeProjects.map((project) => (
               <div key={project.id} className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Link href={`/project/${project.id}`}>
-                    <p className="text-sm font-medium text-gray-900 hover:text-primary cursor-pointer transition-colors">{project.name}</p>
-                  </Link>
+                  <button 
+                    onClick={() => navigate(`/project/${project.id}`)}
+                    className="text-sm font-medium text-gray-900 hover:text-primary cursor-pointer transition-colors text-left"
+                  >
+                    {project.name}
+                  </button>
                   <span className="text-xs text-gray-500">{projectTaskData[project.id]?.progress || 0}%</span>
                 </div>
                 <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2" />
