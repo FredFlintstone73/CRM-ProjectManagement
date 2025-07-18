@@ -162,7 +162,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
                 <p>No projects due in the {currentRange.label.toLowerCase()}</p>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              <div className="space-y-3">
                 {projects.map((project) => {
                   const daysUntilDue = project.dueDate ? getDaysUntilDue(project.dueDate) : null;
                   

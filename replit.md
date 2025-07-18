@@ -428,3 +428,12 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Chronological Offset Ordering**: Days from meeting dropdown now correctly orders from earliest (-80) to latest (+4) relative to meeting date
 - **Template Due Date Handling**: Due date field in templates shows "Will be calculated from meeting date" since templates don't have specific dates until used to create projects
 - **Days from Meeting Persistence**: Fixed complete data flow from frontend to database for `daysFromMeeting` field in template tasks, ensuring day offset values are properly saved and retrieved
+
+### Single Scroll Bar Implementation (July 18, 2025)
+- **Main Layout Fix**: Modified App.tsx to use single scroll container on main content area while preserving fixed sidebar
+- **Page Container Updates**: Removed overflow-y-auto classes from all page main containers (dashboard, contacts, tasks, templates, projects, contact-detail, project-detail)
+- **Nested Scroll Removal**: Fixed section-task-manager.tsx max-h-[600px] overflow container that was causing dual scroll bars
+- **Dashboard Widget Fix**: Removed max-h-[400px] overflow from projects-due-widget.tsx to prevent nested scrolling
+- **Contact Detail Layout**: Removed h-full constraint from contact detail flex container to allow natural flow
+- **Dialog Preservation**: Maintained overflow-y-auto for dialog content areas since they need independent scrolling for long forms
+- **Result**: Application now has single scroll bar for main content area across all pages without affecting sidebar navigation

@@ -408,7 +408,7 @@ export default function ContactDetail() {
         subtitle={getDetailPageTitle()}
         showActions={false}
       />
-      <div className="flex h-full">
+      <div className="flex">
         {/* Left Sidebar - only for clients and prospects */}
         {showSidebar && (
           <div className="w-80 bg-white border-r p-6 space-y-6">

@@ -491,7 +491,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         </Button>
       </div>
 
-      <div className="max-h-[600px] overflow-y-auto space-y-6 pr-2">
+      <div className="space-y-6">
         {sections.map(section => {
           const sectionTasks = buildTaskHierarchy(section.id);
           
