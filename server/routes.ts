@@ -190,10 +190,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('==================== POST /api/projects CALLED ====================');
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      console.error('==================== POST /api/projects CALLED ====================');
+      console.error('Request body:', JSON.stringify(req.body, null, 2));
       const projectData = insertProjectSchema.parse(req.body);
-      console.log('Parsed project data:', JSON.stringify(projectData, null, 2));
+      console.error('Parsed project data:', JSON.stringify(projectData, null, 2));
       const userId = req.user.claims.sub;
       
       // Check if this is a meeting with a template-supported type
