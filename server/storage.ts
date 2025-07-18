@@ -842,30 +842,14 @@ export class DatabaseStorage implements IStorage {
 
   async getTemplateTasksByTemplate(templateId: number): Promise<Task[]> {
     const result = await db
-      .select({
-        id: tasks.id,
-        title: tasks.title,
-        description: tasks.description,
-        projectId: tasks.projectId,
-        status: tasks.status,
-        priority: tasks.priority,
-        estimatedDays: tasks.estimatedDays,
-        dueDate: tasks.dueDate,
-        assignedTo: tasks.assignedTo,
-        assignedToRole: tasks.assignedToRole,
-        parentTaskId: tasks.parentTaskId,
-        milestoneId: tasks.milestoneId,
-        daysFromMeeting: tasks.daysFromMeeting,
-        createdAt: tasks.createdAt,
-        updatedAt: tasks.updatedAt,
-        createdBy: tasks.createdBy
-      })
+      .select()
       .from(tasks)
-      .leftJoin(milestones, eq(tasks.milestoneId, milestones.id))
+      .innerJoin(milestones, eq(tasks.milestoneId, milestones.id))
       .where(eq(milestones.templateId, templateId))
       .orderBy(tasks.createdAt);
     
-    return result;
+    // Extract just the task data from the joined result
+    return result.map(row => row.tasks);
   }
 
   async getProjectTemplateMilestones(templateId: number): Promise<Milestone[]> {
