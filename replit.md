@@ -215,6 +215,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Multi-Level Granularity**: Custom ranges show days (<15 days), weeks (15-49 days), or months (50+ days)
 - **Week Breakdown**: "Next 30 Days" displays as Week 1, Week 2, Week 3, Week 4 for optimal visualization
 - **Enhanced Timeline Views**: Complete timeline system with appropriate granularity for each time period
+- **Clickable Project Links**: Added clickable project names in "Status - Upcoming Progress Meetings" section that navigate to individual project detail pages
 
 ### Custom Date Range Implementation (July 12, 2025)
 - **Date Picker Interface**: Added popover with start and end date inputs for custom range selection
