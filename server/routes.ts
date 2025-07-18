@@ -1212,6 +1212,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Copy project template
+  app.post('/api/project-templates/:id/copy', isAuthenticated, async (req: any, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get the original template
+      const originalTemplate = await storage.getProjectTemplate(templateId);
+      if (!originalTemplate) {
+        return res.status(404).json({ message: "Project template not found" });
+      }
+      
+      // Create a new template with copied data
+      const newTemplate = await storage.createProjectTemplate({
+        name: `${originalTemplate.name} (Copy)`,
+        description: originalTemplate.description,
+        meetingType: originalTemplate.meetingType,
+      }, userId);
+      
+      // Get all milestones from the original template
+      const originalMilestones = await storage.getMilestonesByTemplate(templateId);
+      
+      // Copy milestones and their tasks
+      for (const milestone of originalMilestones) {
+        const newMilestone = await storage.createMilestone({
+          title: milestone.title,
+          description: milestone.description,
+          templateId: newTemplate.id,
+        }, userId);
+        
+        // Get tasks for this milestone
+        const originalTasks = await storage.getTasksByMilestone(milestone.id);
+        
+        // Copy tasks with their hierarchy
+        const taskIdMap = new Map<number, number>();
+        
+        // First pass: create all tasks
+        for (const task of originalTasks) {
+          const newTask = await storage.createTask({
+            title: task.title,
+            description: task.description,
+            milestoneId: newMilestone.id,
+            assignedTo: task.assignedTo,
+            priority: task.priority,
+            dueDate: task.dueDate,
+            completed: false, // Reset completion status for copied tasks
+            parentTaskId: null, // Will be set in second pass
+          }, userId);
+          
+          taskIdMap.set(task.id, newTask.id);
+        }
+        
+        // Second pass: set parent task relationships
+        for (const task of originalTasks) {
+          if (task.parentTaskId) {
+            const newTaskId = taskIdMap.get(task.id);
+            const newParentTaskId = taskIdMap.get(task.parentTaskId);
+            
+            if (newTaskId && newParentTaskId) {
+              await storage.updateTask(newTaskId, {
+                parentTaskId: newParentTaskId,
+              });
+            }
+          }
+        }
+      }
+      
+      res.json(newTemplate);
+    } catch (error) {
+      console.error("Error copying project template:", error);
+      res.status(500).json({ message: "Failed to copy project template" });
+    }
+  });
+
   // Email interaction routes
   app.get('/api/email-interactions', isAuthenticated, async (req: any, res) => {
     try {

@@ -88,6 +88,39 @@ export default function Templates() {
     },
   });
 
+  const copyTemplateMutation = useMutation({
+    mutationFn: async (templateId: number) => {
+      const response = await apiRequest('POST', `/api/project-templates/${templateId}/copy`);
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Template copied successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      console.error("Template copy error:", error);
+      toast({
+        title: "Error",
+        description: `Failed to copy template: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Add refresh button for testing
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
@@ -128,12 +161,7 @@ export default function Templates() {
   };
 
   const handleCopyTemplate = (template: ProjectTemplate) => {
-    // Create a copy of the template
-    setEditingTemplate({
-      ...template,
-      id: 0, // New template
-      name: `${template.name} (Copy)`,
-    } as ProjectTemplate);
+    copyTemplateMutation.mutate(template.id);
   };
 
   const getTaskCount = (template: ProjectTemplate) => {
