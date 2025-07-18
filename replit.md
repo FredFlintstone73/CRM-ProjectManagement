@@ -385,6 +385,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Hierarchical Consistency**: All task levels (tasks, sub-tasks, sub-sub-tasks) use consistent filtering logic
 - **Cache Optimization**: Forced fresh data retrieval to ensure proper filtering without stale cache issues
 
+### Role-Based Template Assignment System (July 18, 2025)
+- **Database Schema Enhancement**: Added `assignedToRole` varchar field to tasks table for role-based assignments
+- **Template Role Selection**: Added role selection dropdown in template editor supporting roles like "Money Manager", "Financial Planner", "Estate Attorney", "Tax Planner", etc.
+- **Dual Assignment System**: Templates can assign tasks either to specific individuals OR to roles for automatic resolution during project creation
+- **Server-Side Role Resolution**: Enhanced create-from-template functionality to automatically assign tasks to active team members matching the specified role
+- **Template-to-Project Conversion**: When creating projects from templates, role-based assignments automatically resolve to appropriate team members
+- **Backend Processing**: Updated task creation, update, and template processing routes to handle `assignedToRole` field
+- **Error Resolution**: Fixed missing parameters in TaskDisplay component to prevent JavaScript errors during template editing
+- **Verified Working**: Role assignments successfully save to templates and process correctly through the system
+
 ### Quick Action Floating Sidebar with Gamification (July 17, 2025)
 - **Floating Action Button**: Added floating action button in bottom-right corner with task count badges and urgency indicators
 - **Comprehensive Gamification System**: Implemented levels, XP, achievements, and streak tracking for task completion
