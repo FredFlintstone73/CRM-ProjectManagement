@@ -158,6 +158,8 @@ const TaskDisplay = ({
   setEditingTaskDueDate: (date: string) => void,
   editingTaskAssignedTo: string,
   setEditingTaskAssignedTo: (assignedTo: string) => void,
+  editingTaskDaysFromMeeting: string,
+  setEditingTaskDaysFromMeeting: (days: string) => void,
   startEditingTask: (task: any) => void,
   saveEditingTask: () => void,
   cancelEditingTask: () => void
@@ -209,7 +211,22 @@ const TaskDisplay = ({
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Days from Meeting</label>
+                <Select value={editingTaskDaysFromMeeting} onValueChange={setEditingTaskDaysFromMeeting}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select days" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {Array.from({ length: 85 }, (_, i) => 80 - i).map((days) => (
+                      <SelectItem key={days} value={days.toString()}>
+                        {days > 0 ? `+${days}` : days} days {days > 0 ? 'after' : 'before'} meeting
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">Due Date</label>
                 <Input
@@ -271,7 +288,7 @@ const TaskDisplay = ({
                   {task.name || task.title}
                 </h4>
                 <Badge variant="secondary" className="text-xs">
-                  {task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting} days
+                  {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
                 </Badge>
               </div>
               {(task.description || task.assignedTo) && (
@@ -328,6 +345,8 @@ const TaskDisplay = ({
               setEditingTaskDueDate={setEditingTaskDueDate}
               editingTaskAssignedTo={editingTaskAssignedTo}
               setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+              editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
+              setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
               startEditingTask={startEditingTask}
               saveEditingTask={saveEditingTask}
               cancelEditingTask={cancelEditingTask}
@@ -365,6 +384,8 @@ const SortableSection = ({
   setEditingTaskDueDate,
   editingTaskAssignedTo,
   setEditingTaskAssignedTo,
+  editingTaskDaysFromMeeting,
+  setEditingTaskDaysFromMeeting,
   teamMembers,
   allTeamMembers,
   currentUser,
@@ -527,6 +548,8 @@ const SortableSection = ({
                   setEditingTaskDueDate={setEditingTaskDueDate}
                   editingTaskAssignedTo={editingTaskAssignedTo}
                   setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                  editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
+                  setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
                   startEditingTask={startEditingTask}
                   saveEditingTask={saveEditingTask}
                   cancelEditingTask={cancelEditingTask}
@@ -556,6 +579,7 @@ export default function TemplateDetail() {
   const [editingTaskDescription, setEditingTaskDescription] = useState<string>("");
   const [editingTaskDueDate, setEditingTaskDueDate] = useState<string>("");
   const [editingTaskAssignedTo, setEditingTaskAssignedTo] = useState<string>("");
+  const [editingTaskDaysFromMeeting, setEditingTaskDaysFromMeeting] = useState<string>("");
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
   const [meetingType, setMeetingType] = useState<string>("csr");
@@ -801,6 +825,7 @@ export default function TemplateDetail() {
     setEditingTaskTitle(task.title || task.name || "");
     setEditingTaskDescription(task.description || "");
     setEditingTaskDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
+    setEditingTaskDaysFromMeeting(task.daysFromMeeting?.toString() || "0");
     
     // Check if the assigned user is the current user
     let assignedValue = "unassigned";
@@ -834,6 +859,7 @@ export default function TemplateDetail() {
         description: editingTaskDescription || null,
         dueDate: editingTaskDueDate || null,
         assignedTo: assignedTo,
+        daysFromMeeting: editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0,
       });
     }
   };
@@ -844,6 +870,7 @@ export default function TemplateDetail() {
     setEditingTaskDescription("");
     setEditingTaskDueDate("");
     setEditingTaskAssignedTo("unassigned");
+    setEditingTaskDaysFromMeeting("");
   };
 
   // Save template data
@@ -1087,6 +1114,8 @@ export default function TemplateDetail() {
                       setEditingTaskDueDate={setEditingTaskDueDate}
                       editingTaskAssignedTo={editingTaskAssignedTo}
                       setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                      editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
+                      setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
                       teamMembers={teamMembers}
                       allTeamMembers={allTeamMembers}
                       currentUser={currentUser}
