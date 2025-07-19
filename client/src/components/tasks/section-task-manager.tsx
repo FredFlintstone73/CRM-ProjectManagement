@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { getDueDateBadgeProps } from "@/lib/dueDateUtils";
 import type { Task, Contact } from "@shared/schema";
 
 interface SectionTaskManagerProps {
@@ -382,32 +383,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     });
   };
 
-  const getDueDateBadgeProps = (dueDate: string | null) => {
-    if (!dueDate) return { variant: "outline" as const, style: {} };
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const taskDate = new Date(dueDate);
-    taskDate.setHours(0, 0, 0, 0);
-    
-    if (taskDate < today) {
-      // Overdue - red background
-      return { 
-        variant: "outline" as const, 
-        style: { backgroundColor: "#ea4335", color: "white", borderColor: "#ea4335" } 
-      };
-    } else if (taskDate.getTime() === today.getTime()) {
-      // Due today - yellow background
-      return { 
-        variant: "outline" as const, 
-        style: { backgroundColor: "#ffe79f", color: "#333", borderColor: "#ffe79f" } 
-      };
-    } else {
-      // Future date - default outline
-      return { variant: "outline" as const, style: {} };
-    }
-  };
+
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
@@ -471,7 +447,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                 </Button>
               )}
               {task.dueDate && (
-                <Badge {...getDueDateBadgeProps(task.dueDate)} className="text-xs">
+                <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
                   <CalendarDays className="h-3 w-3 mr-1" />
                   {format(new Date(task.dueDate), 'MMM d')}
                 </Badge>
