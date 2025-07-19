@@ -90,19 +90,11 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   // Save expanded state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem(`expandedTasks-${projectId}`, JSON.stringify([...expandedTasks]));
-    console.log('Saved expandedTasks:', [...expandedTasks]);
   }, [expandedTasks, projectId]);
 
   useEffect(() => {
     localStorage.setItem(`expandedSections-${projectId}`, JSON.stringify([...expandedSections]));
-    console.log('Saved expandedSections:', [...expandedSections]);
   }, [expandedSections, projectId]);
-
-  // Debug: Log what we restore from localStorage
-  useEffect(() => {
-    console.log('Restored expandedTasks:', [...expandedTasks]);
-    console.log('Restored expandedSections:', [...expandedSections]);
-  }, []);
 
   // Fetch milestones for this project
   const { data: milestones = [], isLoading: isLoadingMilestones } = useQuery({
