@@ -261,6 +261,27 @@ const TaskDisplay = ({
                     />
                   </div>
                 </>
+              ) : editingTaskTitle === "Packet Sealed and Made Available to TA" ? (
+                <>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Due Date</label>
+                    <Input
+                      type="text"
+                      value="3 days after DRPM task due date"
+                      disabled
+                      className="bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Dependency</label>
+                    <Input
+                      type="text"
+                      value="DRPM @ ________________ (Time) + 3 days"
+                      disabled
+                      className="bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                </>
               ) : (
                 <>
                   <div>
@@ -1024,6 +1045,7 @@ export default function TemplateDetail() {
       // Handle special tasks differently
       const isDRPMTask = editingTaskTitle.trim() === "DRPM @ ________________ (Time)";
       const isCorrectionTask = editingTaskTitle.trim() === "Corrections from DRPM Notes Made to Progress Meeting Packets";
+      const isPacketTask = editingTaskTitle.trim() === "Packet Sealed and Made Available to TA";
       
       let daysFromMeeting = null;
       let dueDate = null;
@@ -1031,8 +1053,8 @@ export default function TemplateDetail() {
       if (isDRPMTask) {
         // DRPM task uses custom due date
         dueDate = editingTaskDueDate ? editingTaskDueDate : null;
-      } else if (isCorrectionTask) {
-        // Corrections task has dependency on DRPM task - no days from meeting
+      } else if (isCorrectionTask || isPacketTask) {
+        // Tasks with dependencies on DRPM task - no days from meeting
         daysFromMeeting = null;
       } else {
         // Regular tasks use days from meeting
@@ -1047,7 +1069,7 @@ export default function TemplateDetail() {
         assignedTo: assignedTo,
         assignedToRole: assignedToRole,
         daysFromMeeting: daysFromMeeting,
-        dependsOnTaskId: isCorrectionTask ? 308 : null, // Task ID 308 is the DRPM task
+        dependsOnTaskId: (isCorrectionTask || isPacketTask) ? 308 : null, // Task ID 308 is the DRPM task
       });
     }
   };

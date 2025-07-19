@@ -602,6 +602,17 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Consistent Chevron Positioning**: All task management interfaces now consistently show expand/collapse chevrons on the right side for better user experience
 - **Template Detail Specific Fix**: In template detail page, chevrons now appear between task name and days badge (P-format) for optimal visual hierarchy
 
+### Task Dependency System Implementation (July 19, 2025)
+- **Database Schema Enhancement**: Added dependsOnTaskId field to tasks table for task dependency relationships
+- **DRPM Task Due Date Replacement**: Replaced "Days from Meeting" with custom due date entry field for DRPM task
+- **Automatic Dependency Calculation**: Implemented automatic due date calculation for tasks that depend on DRPM task
+- **Corrections Task Dependency**: "Corrections from DRPM Notes Made to Progress Meeting Packets" automatically calculates as DRPM due date + 1 day
+- **Packet Task Dependency**: "Packet Sealed and Made Available to TA" automatically calculates as DRPM due date + 3 days
+- **Two-Pass Project Creation**: Enhanced server-side project creation to process non-dependent tasks first, then dependent tasks
+- **Template UI Updates**: Modified template editor to show dependency information instead of "Days from Meeting" for dependent tasks
+- **Dependency Display**: Dependent tasks show descriptive text like "DRPM @ ________________ (Time) + 1 day" in UI
+- **Server-Side Processing**: Implemented variable day offsets (1 day for Corrections, 3 days for Packet) based on task type
+
 ### Conditional Due Date Badge Styling Implementation (July 19, 2025)
 - **Color-Coded Due Date Badges**: Implemented conditional styling for task due date badges across all task management interfaces
 - **Overdue Tasks**: Red background (#ea4335) with white text for tasks past their due date

@@ -307,9 +307,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const dependentTask = createdTasks.find(t => t.id === dependentTaskId);
             
             if (dependentTask && dependentTask.dueDate) {
-              // Calculate due date as 1 day after the dependent task
+              // Calculate due date based on the task type
               const baseDate = new Date(dependentTask.dueDate);
-              baseDate.setDate(baseDate.getDate() + 1);
+              if (templateTask.title === "Packet Sealed and Made Available to TA") {
+                // 3 days after DRPM task
+                baseDate.setDate(baseDate.getDate() + 3);
+              } else {
+                // 1 day after DRPM task (for Corrections task)
+                baseDate.setDate(baseDate.getDate() + 1);
+              }
               taskDueDate = baseDate;
             }
             
