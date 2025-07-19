@@ -173,10 +173,16 @@ export default function TaskDetail() {
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="outline"
-            onClick={() => window.history.back()}
+            onClick={() => {
+              if (task?.projectId) {
+                window.location.href = `/projects/${task.projectId}`;
+              } else {
+                window.history.back();
+              }
+            }}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Project
           </Button>
 
           <div className="flex items-center gap-2">
