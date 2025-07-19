@@ -141,6 +141,17 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Complete Drag-and-Drop Task Reordering System (July 19, 2025)
+- **Comprehensive Drag-and-Drop Implementation**: Successfully implemented full drag-and-drop functionality for all task hierarchy levels (main tasks, sub-tasks, sub-sub-tasks)
+- **@dnd-kit Integration**: Integrated @dnd-kit library with SortableContext and DragOverlay components for smooth drag interactions
+- **Hierarchical Task Reordering**: Tasks can be reordered within their respective parent levels while maintaining proper hierarchy structure
+- **Backend API Enhancement**: Enhanced task reordering API endpoint to handle sortOrder updates with proper parentTaskId validation
+- **React Hooks Fix**: Resolved critical React hooks ordering violation by properly passing taskSensors as props to child components
+- **Sort Order Priority**: Fixed task display to prioritize sortOrder field over daysFromMeeting for proper drag-and-drop persistence
+- **Real-time UI Updates**: Implemented comprehensive query cache invalidation to ensure immediate visual feedback after reordering
+- **Template Editor Integration**: Full drag-and-drop support integrated into template detail pages for efficient template customization
+- **User Confirmation**: All drag-and-drop functionality verified working by user across multiple task levels and scenarios
+
 ### Database Schema Fix (July 19, 2025)
 - **Fixed Application Startup Issue**: Resolved database schema conflicts that were preventing application startup
 - **Schema Column Type Alignment**: Updated all ID columns from `integer().primaryKey().generatedAlwaysAsIdentity()` to `serial().primaryKey()` to match existing database structure
