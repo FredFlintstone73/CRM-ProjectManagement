@@ -110,7 +110,6 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     { label: "Client Service Rep", value: "client_service_rep" },
     { label: "Deliverables Team Coordinator", value: "deliverables_team_coordinator" },
     { label: "Estate Attorney", value: "estate_attorney" },
-    { label: "Estate Planner", value: "estate_planner" },
     { label: "Financial Planner", value: "financial_planner" },
     { label: "Human Relations", value: "human_relations" },
     { label: "Insurance Business", value: "insurance_business" },

@@ -274,7 +274,6 @@ const TaskDisplay = ({
                     { value: "client_service_rep", label: "Client Service Rep" },
                     { value: "deliverables_team_coordinator", label: "Deliverables Team Coordinator" },
                     { value: "estate_attorney", label: "Estate Attorney" },
-                    { value: "estate_planner", label: "Estate Planner" },
                     { value: "financial_planner", label: "Financial Planner" },
                     { value: "human_relations", label: "Human Relations" },
                     { value: "insurance_business", label: "Insurance Business" },

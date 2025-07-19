@@ -551,7 +551,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Alphabetical Organization**: Organized all role dropdown lists in alphabetical order for better user experience
 - **Schema Validation Update**: Updated database schema validation to include Client Service Rep and maintain alphabetical order
 - **Consistent Role Options**: Standardized role options across contact forms, task forms, and template editors
-- **Available Roles**: Accountant, Admin Assistant, Client Service Rep, Deliverables Team Coordinator, Estate Attorney, Estate Planner, Financial Planner, Human Relations, Insurance Business, Insurance Health, Insurance Life/LTC/Disability, Insurance P&C, Money Manager, Tax Planner, Trusted Advisor, Other
+- **Available Roles**: Accountant, Admin Assistant, Client Service Rep, Deliverables Team Coordinator, Estate Attorney, Financial Planner, Human Relations, Insurance Business, Insurance Health, Insurance Life/LTC/Disability, Insurance P&C, Money Manager, Tax Planner, Trusted Advisor, Other
 
 ### Default Collapsed Sections Implementation (July 18, 2025)
 - **Template Detail Pages**: Removed auto-opening behavior so all milestone sections start collapsed by default
@@ -560,3 +560,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Consistent Behavior**: Both template and project detail pages now require explicit user action to view task details
 - **Improved Organization**: Cleaner initial view showing only section headers with completion progress badges
 - **Interactive Headers**: Section headers are clickable with hover effects and chevron indicators
+
+### Role Management Update (July 19, 2025)
+- **Estate Planner Removal**: Removed "Estate Planner" from all team member role dropdown options across the application
+- **Updated Schema**: Removed estate_planner from database enum and schema validation
+- **Consistent Removal**: Updated all frontend components including contact forms, task forms, and template editors
+- **Database Cleanup**: Deprecated estate_planner enum value in database to prevent data loss
