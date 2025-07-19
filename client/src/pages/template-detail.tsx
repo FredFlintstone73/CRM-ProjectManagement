@@ -219,30 +219,55 @@ const TaskDisplay = ({
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-1 block">Days from Meeting</label>
-                <Select value={editingTaskDaysFromMeeting} onValueChange={setEditingTaskDaysFromMeeting}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select days" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {Array.from({ length: 85 }, (_, i) => -80 + i).map((days) => (
-                      <SelectItem key={days} value={days.toString()}>
-                        P{days > 0 ? `+${days}` : days}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1 block">Due Date</label>
-                <Input
-                  type="text"
-                  value="Will be calculated from meeting date"
-                  disabled
-                  className="bg-gray-100 text-gray-500"
-                />
-              </div>
+              {editingTaskTitle === "DRPM @ ________________ (Time)" ? (
+                <>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Due Date</label>
+                    <Input
+                      type="date"
+                      value={editingTaskDueDate}
+                      onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                      placeholder="Select due date"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Days from Meeting</label>
+                    <Input
+                      type="text"
+                      value="Custom due date selected"
+                      disabled
+                      className="bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Days from Meeting</label>
+                    <Select value={editingTaskDaysFromMeeting} onValueChange={setEditingTaskDaysFromMeeting}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select days" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {Array.from({ length: 85 }, (_, i) => -80 + i).map((days) => (
+                          <SelectItem key={days} value={days.toString()}>
+                            P{days > 0 ? `+${days}` : days}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Due Date</label>
+                    <Input
+                      type="text"
+                      value="Will be calculated from meeting date"
+                      disabled
+                      className="bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                </>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
@@ -910,8 +935,19 @@ export default function TemplateDetail() {
     setEditingTask(task.id);
     setEditingTaskTitle(task.title || task.name || "");
     setEditingTaskDescription(task.description || "");
-    setEditingTaskDueDate(""); // Templates don't have specific due dates
-    setEditingTaskDaysFromMeeting(task.daysFromMeeting?.toString() || "0");
+    
+    // Handle DRPM task differently - initialize due date if it has one
+    const isDRPMTask = (task.title || task.name || "").trim() === "DRPM @ ________________ (Time)";
+    if (isDRPMTask && task.dueDate) {
+      // Convert date to YYYY-MM-DD format for date input
+      const date = new Date(task.dueDate);
+      const dateStr = date.toISOString().split('T')[0];
+      setEditingTaskDueDate(dateStr);
+      setEditingTaskDaysFromMeeting(""); // Clear days from meeting for DRPM task
+    } else {
+      setEditingTaskDueDate(""); // Templates don't have specific due dates normally
+      setEditingTaskDaysFromMeeting(task.daysFromMeeting?.toString() || "0");
+    }
     
     // Handle assigned users (convert to array)
     const assignedUsers = [];
@@ -964,13 +1000,16 @@ export default function TemplateDetail() {
         ? editingTaskAssignedToRole 
         : [];
       
-      const daysFromMeeting = editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0;
+      // Handle DRPM task differently - use custom due date instead of days from meeting
+      const isDRPMTask = editingTaskTitle.trim() === "DRPM @ ________________ (Time)";
+      const daysFromMeeting = isDRPMTask ? null : (editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0);
+      const dueDate = isDRPMTask && editingTaskDueDate ? editingTaskDueDate : null;
       
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
         title: editingTaskTitle.trim(), 
         description: editingTaskDescription || null,
-        dueDate: null, // Templates don't have specific due dates
+        dueDate: dueDate,
         assignedTo: assignedTo,
         assignedToRole: assignedToRole,
         daysFromMeeting: daysFromMeeting,
