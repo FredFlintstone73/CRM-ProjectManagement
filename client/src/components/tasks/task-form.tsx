@@ -67,9 +67,14 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   };
 
   // State for multi-select components
-  const [dueDate, setDueDate] = useState<Date | undefined>(
-    task?.dueDate ? new Date(task.dueDate) : undefined
-  );
+  // Initialize date state with proper timezone handling
+  const [dueDate, setDueDate] = useState<Date | undefined>(() => {
+    if (!task?.dueDate) return undefined;
+    // Parse date string as local date (YYYY-MM-DD format)
+    const dateStr = task.dueDate.split('T')[0]; // Remove time portion if present
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed
+  });
   const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>(() => 
     Array.isArray(task?.assignedToRole) ? task.assignedToRole : (task?.assignedToRole ? [task.assignedToRole] : [])
@@ -129,7 +134,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       description: task?.description || '',
       projectId: projectId,
       priority: task?.priority || 25,
-      dueDate: task?.dueDate ? new Date(task.dueDate).toISOString() : undefined,
+      dueDate: task?.dueDate || undefined,
     },
   });
 
@@ -161,9 +166,17 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   });
 
   const onSubmit = (data: InsertTask) => {
+    // Convert date to local timezone-safe format (YYYY-MM-DD)
+    const formatDateForServer = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     const processedData = {
       ...data,
-      dueDate: dueDate ? dueDate.toISOString() : undefined,
+      dueDate: dueDate ? formatDateForServer(dueDate) : undefined,
       projectId: projectId,
       assignedTo: selectedAssignees,
       assignedToRole: selectedRoles,

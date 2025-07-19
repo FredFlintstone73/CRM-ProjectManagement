@@ -228,7 +228,11 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
     setTaskFormData({
       title: task.title,
       description: task.description || '',
-      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
+      dueDate: task.dueDate ? (() => {
+        // Parse date string as local date to avoid timezone issues
+        const dateStr = task.dueDate.split('T')[0];
+        return dateStr;
+      })() : '',
       assignedTo: task.assignedTo?.toString() || '',
       milestoneId: task.milestoneId,
       parentTaskId: task.parentTaskId,
