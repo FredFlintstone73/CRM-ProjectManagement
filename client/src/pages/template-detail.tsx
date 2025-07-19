@@ -397,7 +397,15 @@ const TaskDisplay = ({
                   </div>
                 )}
                 <Badge variant="secondary" className="text-xs">
-                  P{task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}
+                  {task.title === "DRPM @ ________________ (Time)" ? (
+                    "D-0"
+                  ) : task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" ? (
+                    "D+1"
+                  ) : task.title === "Packet Sealed and Made Available to TA" ? (
+                    "D+3"
+                  ) : (
+                    `P${task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}`
+                  )}
                 </Badge>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
