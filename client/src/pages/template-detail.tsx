@@ -1047,10 +1047,7 @@ export default function TemplateDetail() {
   // Task reordering mutation
   const reorderTasksMutation = useMutation({
     mutationFn: (taskUpdates: Array<{ id: number; sortOrder: number; parentTaskId?: number | null }>) =>
-      apiRequest(`/api/tasks/reorder`, {
-        method: 'POST',
-        body: JSON.stringify({ taskUpdates }),
-      }),
+      apiRequest('POST', `/api/tasks/reorder`, { taskUpdates }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
       queryClient.invalidateQueries({ queryKey: [`/api/milestones`, id] });
