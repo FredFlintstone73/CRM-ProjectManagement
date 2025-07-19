@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+
 import { insertContactSchema, type InsertContact, type Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,7 +26,7 @@ type ContactCategory = "client_prospect" | "team_strategic" | null;
 type ContactType = "client" | "prospect" | "team_member" | "strategic_partner";
 
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
-  const { toast } = useToast();
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   

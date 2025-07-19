@@ -4,7 +4,7 @@ import { MessageCircle, Send, User, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -19,7 +19,7 @@ interface ProjectCommentsProps {
 
 export default function ProjectComments({ projectId, projectName, isOpen, onClose }: ProjectCommentsProps) {
   const [newComment, setNewComment] = useState("");
-  const { toast } = useToast();
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -36,28 +36,14 @@ export default function ProjectComments({ projectId, projectName, isOpen, onClos
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'comments'] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects/comment-counts'] });
       setNewComment("");
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully.",
-      });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to add comment. Please try again.",
-        variant: "destructive",
-      });
     },
   });
 

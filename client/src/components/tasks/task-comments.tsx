@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+
 import type { TaskComment, User } from "@shared/schema";
 
 interface TaskCommentsProps {
@@ -20,7 +20,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+
 
   // Fetch current user
   const { data: currentUser } = useQuery<User>({
@@ -60,17 +60,6 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });
       setNewComment("");
-      toast({
-        title: "Comment added",
-        description: "Your comment has been posted successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to post comment. Please try again.",
-        variant: "destructive",
-      });
     },
   });
 
@@ -83,17 +72,6 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });
       setEditingCommentId(null);
       setEditingText("");
-      toast({
-        title: "Comment updated",
-        description: "Your comment has been updated successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update comment. Please try again.",
-        variant: "destructive",
-      });
     },
   });
 
@@ -104,17 +82,6 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });
-      toast({
-        title: "Comment deleted",
-        description: "The comment has been deleted successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to delete comment. Please try again.",
-        variant: "destructive",
-      });
     },
   });
 

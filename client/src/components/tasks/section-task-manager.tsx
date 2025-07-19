@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Plus, Edit3, Trash2, CheckCircle, Circle, CalendarDays, ChevronRight, ChevronDown, User } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { getDueDateBadgeProps } from "@/lib/dueDateUtils";
@@ -54,7 +54,7 @@ interface EditingSectionState {
 }
 
 export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
-  const { toast } = useToast();
+
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   
@@ -169,10 +169,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       setIsTaskDialogOpen(false);
       resetTaskForm();
-      toast({ title: "Task created successfully" });
+
     },
     onError: () => {
-      toast({ title: "Failed to create task", variant: "destructive" });
+
     },
   });
 
@@ -184,10 +184,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       setIsTaskDialogOpen(false);
       resetTaskForm();
-      toast({ title: "Task updated successfully" });
+
     },
     onError: () => {
-      toast({ title: "Failed to update task", variant: "destructive" });
+
     },
   });
 
@@ -198,10 +198,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       setDeleteTaskId(null);
-      toast({ title: "Task deleted successfully" });
+
     },
     onError: () => {
-      toast({ title: "Failed to delete task", variant: "destructive" });
+
     },
   });
 
@@ -304,7 +304,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           )
         );
         setEditingSection(null);
-        toast({ title: "Section updated successfully" });
+
       } else {
         // Create new section
         const newSection: TaskSection = {
@@ -313,7 +313,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           tasks: [],
         };
         setSections(prev => [...prev, newSection]);
-        toast({ title: "Section created successfully" });
+
       }
       setIsSectionDialogOpen(false);
       setSectionForm({ title: "" });
@@ -328,7 +328,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   const deleteSection = (sectionId: string) => {
     setSections(prev => prev.filter(section => section.id !== sectionId));
-    toast({ title: "Section deleted successfully" });
+
   };
 
   // Build task hierarchy for a section

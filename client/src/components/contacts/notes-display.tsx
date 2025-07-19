@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Clock, User, Edit, Trash2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { ContactNote } from "@shared/schema";
@@ -16,7 +16,7 @@ interface NotesDisplayProps {
 export default function NotesDisplay({ contactId, legacyNotes }: NotesDisplayProps) {
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState("");
-  const { toast } = useToast();
+
   const queryClient = useQueryClient();
 
   const { data: notes = [], isLoading } = useQuery<ContactNote[]>({
@@ -31,28 +31,14 @@ export default function NotesDisplay({ contactId, legacyNotes }: NotesDisplayPro
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', contactId, 'notes'] });
       setEditingNoteId(null);
       setEditingContent("");
-      toast({
-        title: "Success",
-        description: "Note updated successfully",
-      });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to update note",
-        variant: "destructive",
-      });
     },
   });
 
@@ -62,28 +48,14 @@ export default function NotesDisplay({ contactId, legacyNotes }: NotesDisplayPro
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', contactId, 'notes'] });
-      toast({
-        title: "Success",
-        description: "Note deleted successfully",
-      });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to delete note",
-        variant: "destructive",
-      });
     },
   });
 

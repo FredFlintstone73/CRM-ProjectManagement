@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { insertTaskSchema, type InsertTask, type Task, type Contact } from "@shared/schema";
@@ -26,7 +26,7 @@ interface TaskFormProps {
 }
 
 export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) {
-  const { toast } = useToast();
+
   const { user } = useAuth();
 
   const { data: contacts } = useQuery<Contact[]>({

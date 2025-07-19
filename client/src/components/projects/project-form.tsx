@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { insertProjectSchema, type InsertProject, type Project, type Contact } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm({ project, onSuccess }: ProjectFormProps) {
-  const { toast } = useToast();
+
   
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),

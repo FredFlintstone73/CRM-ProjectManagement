@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
@@ -19,7 +19,7 @@ import type { ProjectTemplate } from "@shared/schema";
 import { Link } from "wouter";
 
 export default function Templates() {
-  const { toast } = useToast();
+
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,17 +32,12 @@ export default function Templates() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading]);
 
   const { data: templates, isLoading: templatesLoading, refetch } = useQuery<ProjectTemplate[]>({
     queryKey: ['/api/project-templates'],
@@ -63,30 +58,16 @@ export default function Templates() {
       await apiRequest('DELETE', `/api/project-templates/${templateId}`);
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Template deleted successfully",
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
       console.error("Template deletion error:", error);
-      toast({
-        title: "Error",
-        description: `Failed to delete template: ${error.message}`,
-        variant: "destructive",
-      });
     },
   });
 
@@ -96,30 +77,16 @@ export default function Templates() {
       return await response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Template copied successfully",
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
       console.error("Template copy error:", error);
-      toast({
-        title: "Error",
-        description: `Failed to copy template: ${error.message}`,
-        variant: "destructive",
-      });
     },
   });
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Link, useSearch } from "wouter";
@@ -21,7 +21,7 @@ import ContactForm from "@/components/contacts/contact-form";
 import type { Contact } from "@shared/schema";
 
 export default function Contacts() {
-  const { toast } = useToast();
+
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -175,17 +175,12 @@ export default function Contacts() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading]);
 
   const { data: contacts, isLoading: contactsLoading } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
@@ -198,28 +193,14 @@ export default function Contacts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-      toast({
-        title: "Success",
-        description: "Contact deleted successfully",
-      });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to delete contact",
-        variant: "destructive",
-      });
     },
   });
 

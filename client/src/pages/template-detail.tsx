@@ -3,7 +3,7 @@ import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import Header from "@/components/layout/header";
 import {
   Card,
@@ -661,7 +661,7 @@ const SortableSection = ({
 
 export default function TemplateDetail() {
   const { id } = useParams<TemplateDetailParams>();
-  const { toast } = useToast();
+
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   
@@ -779,18 +779,9 @@ export default function TemplateDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
-      toast({
-        title: "Success",
-        description: "Sections reordered successfully",
-      });
     },
     onError: (error) => {
       console.error('Error reordering milestones:', error);
-      toast({
-        title: "Error",
-        description: "Failed to reorder sections",
-        variant: "destructive",
-      });
     },
   });
 
@@ -1000,11 +991,6 @@ export default function TemplateDetail() {
   // Save template data
   const handleSaveTemplate = async () => {
     if (!templateName.trim()) {
-      toast({
-        title: "Error",
-        description: "Template name is required",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -1018,18 +1004,8 @@ export default function TemplateDetail() {
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
-      
-      toast({
-        title: "Success",
-        description: "Template saved successfully",
-      });
     } catch (error) {
       console.error('Error saving template:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save template",
-        variant: "destructive",
-      });
     }
   };
 
@@ -1068,15 +1044,9 @@ export default function TemplateDetail() {
       milestones.forEach(milestone => {
         queryClient.invalidateQueries({ queryKey: [`/api/milestones/${milestone.id}/tasks`] });
       });
-      toast({ title: "Tasks reordered successfully" });
     },
     onError: (error: any) => {
       console.error('Error reordering tasks:', error);
-      toast({ 
-        title: "Error", 
-        description: "Failed to reorder tasks", 
-        variant: "destructive" 
-      });
     },
   });
 

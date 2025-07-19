@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ interface ContactFilesProps {
 }
 
 export default function ContactFiles({ contactId }: ContactFilesProps) {
-  const { toast } = useToast();
+
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const [isAddFileDialogOpen, setIsAddFileDialogOpen] = useState(false);
@@ -48,28 +48,15 @@ export default function ContactFiles({ contactId }: ContactFilesProps) {
       setFileName('');
       setFileUrl('');
       setUploadType('file');
-      toast({
-        title: "Success",
-        description: "File added successfully",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to add file",
-        variant: "destructive",
-      });
     },
   });
 
@@ -82,28 +69,15 @@ export default function ContactFiles({ contactId }: ContactFilesProps) {
       setIsEditDialogOpen(false);
       setEditingFile(null);
       setEditFileName('');
-      toast({
-        title: "Success",
-        description: "File renamed successfully",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to rename file",
-        variant: "destructive",
-      });
     },
   });
 
@@ -113,28 +87,15 @@ export default function ContactFiles({ contactId }: ContactFilesProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', contactId, 'files'] });
-      toast({
-        title: "Success",
-        description: "File deleted successfully",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to delete file",
-        variant: "destructive",
-      });
     },
   });
 
@@ -164,11 +125,7 @@ export default function ContactFiles({ contactId }: ContactFilesProps) {
 
   const handleUrlSubmit = () => {
     if (!fileUrl.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid URL",
-        variant: "destructive",
-      });
+
       return;
     }
 

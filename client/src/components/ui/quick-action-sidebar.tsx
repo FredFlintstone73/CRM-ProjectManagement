@@ -21,7 +21,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
 import { CelebrationParticles, Confetti } from "./celebration-particles";
@@ -43,7 +43,7 @@ interface TaskStats {
 
 export function QuickActionSidebar({ isOpen, onClose }: QuickActionSidebarProps) {
   const { user } = useAuth();
-  const { toast } = useToast();
+
   const [celebrationTask, setCelebrationTask] = useState<Task | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
@@ -137,16 +137,9 @@ export function QuickActionSidebar({ isOpen, onClose }: QuickActionSidebarProps)
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       
-      toast({
-        title: "Task completed! 🎉",
-        description: `Great job completing "${completedTask?.title}"`,
-      });
+
     },
     onError: () => {
-      toast({
-        title: "Failed to complete task",
-        variant: "destructive",
-      });
     },
   });
 
@@ -188,10 +181,7 @@ export function QuickActionSidebar({ isOpen, onClose }: QuickActionSidebarProps)
       setShowParticles(false);
     }, 4000);
     
-    toast({
-      title: `Level Up! 🎉`,
-      description: `You've reached level ${level}!`,
-    });
+
   }
 
   // Get priority color

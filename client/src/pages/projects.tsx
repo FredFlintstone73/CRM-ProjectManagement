@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
@@ -19,7 +19,7 @@ import ProjectComments from "@/components/projects/project-comments";
 import type { Project, Contact } from "@shared/schema";
 
 export default function Projects() {
-  const { toast } = useToast();
+
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,17 +31,12 @@ export default function Projects() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading]);
 
   const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
@@ -192,10 +187,6 @@ export default function Projects() {
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     queryClient.invalidateQueries({ queryKey: ['/api/projects/comment-counts'] });
-    toast({
-      title: "Projects refreshed",
-      description: "Project data has been updated",
-    });
   };
 
   if (isLoading || projectsLoading) {

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import TaskForm from '@/components/tasks/task-form';
 import { TaskComments } from '@/components/tasks/task-comments';
@@ -20,7 +20,7 @@ interface TaskDetailParams {
 
 export default function TaskDetail() {
   const { id } = useParams<TaskDetailParams>();
-  const { toast } = useToast();
+
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: task, isLoading: taskLoading } = useQuery<Task>({
@@ -81,10 +81,6 @@ export default function TaskDetail() {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
       }
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      toast({ title: "Task updated successfully" });
-    },
-    onError: () => {
-      toast({ title: "Failed to update task", variant: "destructive" });
     },
   });
 
@@ -97,11 +93,7 @@ export default function TaskDetail() {
       if (task?.projectId) {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
       }
-      toast({ title: "Task deleted successfully" });
       window.history.back();
-    },
-    onError: () => {
-      toast({ title: "Failed to delete task", variant: "destructive" });
     },
   });
 

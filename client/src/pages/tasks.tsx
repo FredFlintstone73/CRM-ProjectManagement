@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
@@ -26,7 +26,7 @@ import type { Task, Project, User as UserType } from "@shared/schema";
 import { Link } from "wouter";
 
 export default function Tasks() {
-  const { toast } = useToast();
+
   const { isAuthenticated, isLoading, user } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,17 +42,12 @@ export default function Tasks() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading]);
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
@@ -75,28 +70,15 @@ export default function Tasks() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      toast({
-        title: "Success",
-        description: "Task deleted successfully",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to delete task",
-        variant: "destructive",
-      });
     },
   });
 
@@ -107,28 +89,15 @@ export default function Tasks() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      toast({
-        title: "Success",
-        description: "Task updated successfully",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to update task",
-        variant: "destructive",
-      });
     },
   });
 

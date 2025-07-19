@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import Header from "@/components/layout/header";
 
 import ProjectsDueWidget from "@/components/dashboard/projects-due-widget";
@@ -8,7 +8,7 @@ import ProjectsTimelineChart from "@/components/dashboard/projects-timeline-char
 import ActionCard from "@/components/dashboard/action-card";
 
 export default function Dashboard() {
-  const { toast } = useToast();
+
   const { isAuthenticated, isLoading } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
   const [customStartDate, setCustomStartDate] = useState<string>("");
@@ -21,17 +21,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading]);
 
   if (isLoading) {
     return (

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { useParams, useLocation, useSearch } from "wouter";
@@ -29,7 +29,7 @@ interface ContactDetailParams {
 
 export default function ContactDetail() {
   // All hooks must be called in the same order every time
-  const { toast } = useToast();
+
   const { isAuthenticated, isLoading } = useAuth();
   const { id } = useParams<ContactDetailParams>();
   const [, navigate] = useLocation();
@@ -105,28 +105,15 @@ export default function ContactDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-      toast({
-        title: "Success",
-        description: "Contact status updated successfully",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to update contact status",
-        variant: "destructive",
-      });
     },
   });
 
@@ -235,11 +222,6 @@ export default function ContactDetail() {
     if (file) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "File size must be less than 5MB",
-          variant: "destructive",
-        });
         return;
       }
 
@@ -261,28 +243,15 @@ export default function ContactDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-      toast({
-        title: "Success",
-        description: "Profile photo updated successfully",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to upload photo",
-        variant: "destructive",
-      });
     },
   });
 
@@ -291,21 +260,11 @@ export default function ContactDetail() {
     if (file) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "File size must be less than 5MB",
-          variant: "destructive",
-        });
         return;
       }
 
       // Check file type
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Error",
-          description: "Please select a valid image file",
-          variant: "destructive",
-        });
         return;
       }
 
@@ -361,11 +320,6 @@ export default function ContactDetail() {
   // Authentication redirect - but only after all hooks are called
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);

@@ -15,7 +15,7 @@ import { SectionTaskManager } from "@/components/tasks/section-task-manager";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -28,7 +28,7 @@ interface ProjectDetailParams {
 export default function ProjectDetail() {
   const { id } = useParams<ProjectDetailParams>();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
+
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showProjectEdit, setShowProjectEdit] = useState(false);
@@ -73,10 +73,10 @@ export default function ProjectDetail() {
     },
     onSuccess: () => {
       setRefreshKey(prev => prev + 1);
-      toast({ title: "Task deleted successfully" });
+
     },
     onError: () => {
-      toast({ title: "Failed to delete task", variant: "destructive" });
+
     },
   });
 
@@ -92,10 +92,10 @@ export default function ProjectDetail() {
     },
     onSuccess: () => {
       setRefreshKey(prev => prev + 1);
-      toast({ title: "Task updated successfully" });
+
     },
     onError: () => {
-      toast({ title: "Failed to update task", variant: "destructive" });
+
     },
   });
 
@@ -106,17 +106,13 @@ export default function ProjectDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
-      toast({ title: "Project deleted successfully" });
+
       setLocation('/projects');
     },
     onError: (error: any) => {
       console.error('Delete project error:', error);
       const errorMessage = error.message || "Failed to delete project";
-      toast({ 
-        title: "Delete Failed", 
-        description: errorMessage,
-        variant: "destructive" 
-      });
+
     },
   });
 
@@ -137,10 +133,10 @@ export default function ProjectDetail() {
       
       setEditingDueDate(false);
       setNewDueDate("");
-      toast({ title: "Due date and all task dates updated successfully" });
+
     },
     onError: () => {
-      toast({ title: "Failed to update due date", variant: "destructive" });
+
     },
   });
 
@@ -210,7 +206,7 @@ export default function ProjectDetail() {
   const handleProjectUpdated = () => {
     setShowProjectEdit(false);
     setRefreshKey(prev => prev + 1);
-    toast({ title: "Project updated successfully" });
+
   };
 
   const handleEditDueDate = () => {

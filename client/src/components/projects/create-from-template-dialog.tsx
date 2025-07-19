@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -32,7 +32,7 @@ interface CreateFromTemplateDialogProps {
 
 export default function CreateFromTemplateDialog({ template, children }: CreateFromTemplateDialogProps) {
   const [open, setOpen] = useState(false);
-  const { toast } = useToast();
+
   const queryClient = useQueryClient();
 
   const form = useForm<CreateProjectForm>({

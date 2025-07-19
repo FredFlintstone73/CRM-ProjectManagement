@@ -4,7 +4,7 @@ import { StickyNote, Plus, User, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -19,7 +19,7 @@ interface ContactNotesProps {
 
 export default function ContactNotes({ contactId, contactName, isOpen, onClose }: ContactNotesProps) {
   const [newNote, setNewNote] = useState("");
-  const { toast } = useToast();
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -35,28 +35,15 @@ export default function ContactNotes({ contactId, contactName, isOpen, onClose }
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', contactId, 'notes'] });
       setNewNote("");
-      toast({
-        title: "Note added",
-        description: "Your note has been added successfully.",
-      });
+
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: "Failed to add note. Please try again.",
-        variant: "destructive",
-      });
     },
   });
 
