@@ -536,9 +536,6 @@ const SortableSection = ({
                 <Badge variant="outline" className="text-xs">
                   {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
                 </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  Section {milestoneIndex + 1}
-                </Badge>
               </div>
             </div>
           </CardHeader>
@@ -1147,7 +1144,7 @@ export default function TemplateDetail() {
           <div className="mb-6">
             <Button onClick={handleAddSection} className="w-full">
               <Plus className="w-4 h-4 mr-2" />
-              Add Section
+              Add Milestone
             </Button>
           </div>
 
