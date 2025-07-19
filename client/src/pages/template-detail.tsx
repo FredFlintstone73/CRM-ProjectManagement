@@ -304,6 +304,9 @@ const TaskDisplay = ({
         ) : (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
+              <h4 className="font-medium cursor-pointer task-title" onClick={() => startEditingTask(task)}>
+                {task.name || task.title}
+              </h4>
               {hasSubtasks && (
                 <Button
                   variant="ghost"
@@ -318,9 +321,6 @@ const TaskDisplay = ({
                   )}
                 </Button>
               )}
-              <h4 className="font-medium cursor-pointer task-title" onClick={() => startEditingTask(task)}>
-                {task.name || task.title}
-              </h4>
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right">
