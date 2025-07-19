@@ -241,12 +241,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const createdTasks = [];
           const taskMapping = new Map(); // Map template task IDs to created task IDs
           
-          // First pass: Create tasks without dependencies
-          const tasksWithoutDependencies = templateTasks.filter(task => !task.dependsOnTaskId);
-          const tasksWithDependencies = templateTasks.filter(task => task.dependsOnTaskId);
+          // Sort template tasks chronologically by daysFromMeeting (earliest first)
+          // Then separate by dependencies and hierarchical structure
+          const sortedTasks = [...templateTasks].sort((a, b) => {
+            // First sort by daysFromMeeting (null values go to end)
+            const aDays = a.daysFromMeeting ?? 999;
+            const bDays = b.daysFromMeeting ?? 999;
+            if (aDays !== bDays) return aDays - bDays;
+            
+            // Then by milestone order
+            const aMilestoneSort = templateMilestones.find(m => m.id === a.milestoneId)?.sortOrder ?? 999;
+            const bMilestoneSort = templateMilestones.find(m => m.id === b.milestoneId)?.sortOrder ?? 999;
+            if (aMilestoneSort !== bMilestoneSort) return aMilestoneSort - bMilestoneSort;
+            
+            // Finally by sort order within milestone
+            return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+          });
           
-          // Process tasks without dependencies first
-          for (const templateTask of tasksWithoutDependencies) {
+          // Separate tasks by dependencies and parent relationships
+          const tasksWithoutDependencies = sortedTasks.filter(task => !task.dependsOnTaskId);
+          const tasksWithDependencies = sortedTasks.filter(task => task.dependsOnTaskId);
+          
+          // Helper function to create a task with parent mapping
+          const createTaskFromTemplate = async (templateTask: any, parentTaskId?: number) => {
             let taskDueDate = null;
             
             if (templateTask.dueDate) {
@@ -272,11 +289,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               templateMilestones.find(tm => tm.id === templateTask.milestoneId)?.title === m.title
             );
             
-            // Skip tasks with empty or null titles
-            if (!templateTask.title || templateTask.title.trim() === '') {
-              console.log('Skipping template task with empty title:', templateTask);
-              continue;
-            }
+            // Map parent task ID if it was remapped during creation
+            const mappedParentTaskId = templateTask.parentTaskId ? 
+              taskMapping.get(templateTask.parentTaskId) : null;
             
             const task = await storage.createTask({
               title: templateTask.title.trim(),
@@ -288,14 +303,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
               dueDate: taskDueDate,
               assignedTo: assignedToId,
               assignedToRole: templateTask.assignedToRole || null,
-              parentTaskId: templateTask.parentTaskId,
+              parentTaskId: mappedParentTaskId,
               milestoneId: milestone?.id || null,
+              level: templateTask.level || 0,
+              sortOrder: templateTask.sortOrder || 0,
               daysFromMeeting: templateTask.daysFromMeeting
             }, userId);
             
-            // Store the mapping for dependency resolution
+            // Store the mapping for dependency resolution and child task creation
             taskMapping.set(templateTask.id, task.id);
             createdTasks.push(task);
+            
+            return task;
+          };
+          
+          // First pass: Create all tasks without dependencies (including parent tasks and their children)
+          const processedTaskIds = new Set();
+          
+          for (const templateTask of tasksWithoutDependencies) {
+            // Skip tasks with empty or null titles
+            if (!templateTask.title || templateTask.title.trim() === '') {
+              console.log('Skipping template task with empty title:', templateTask);
+              continue;
+            }
+            
+            // Skip if already processed as a child task
+            if (processedTaskIds.has(templateTask.id)) {
+              continue;
+            }
+            
+            await createTaskFromTemplate(templateTask);
+            processedTaskIds.add(templateTask.id);
+            
+            // After creating parent task, create all its children (sub-tasks, sub-sub-tasks)
+            const createChildTasks = async (parentId: number) => {
+              const childTasks = tasksWithoutDependencies.filter(task => 
+                task.parentTaskId === parentId && !processedTaskIds.has(task.id)
+              );
+              
+              // Sort children by sort order and days from meeting
+              childTasks.sort((a, b) => {
+                const aDays = a.daysFromMeeting ?? 999;
+                const bDays = b.daysFromMeeting ?? 999;
+                if (aDays !== bDays) return aDays - bDays;
+                return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+              });
+              
+              for (const childTask of childTasks) {
+                if (!childTask.title || childTask.title.trim() === '') {
+                  continue;
+                }
+                
+                await createTaskFromTemplate(childTask);
+                processedTaskIds.add(childTask.id);
+                
+                // Recursively create sub-sub-tasks
+                await createChildTasks(childTask.id);
+              }
+            };
+            
+            // Create child tasks for this parent
+            await createChildTasks(templateTask.id);
           }
           
           // Second pass: Process tasks with dependencies
@@ -338,6 +406,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               continue;
             }
             
+            // Map parent task ID if it was remapped during creation
+            const mappedParentTaskId = templateTask.parentTaskId ? 
+              taskMapping.get(templateTask.parentTaskId) : null;
+            
             const task = await storage.createTask({
               title: templateTask.title.trim(),
               description: templateTask.description || '',
@@ -348,12 +420,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               dueDate: taskDueDate,
               assignedTo: assignedToId,
               assignedToRole: templateTask.assignedToRole || null,
-              parentTaskId: templateTask.parentTaskId,
+              parentTaskId: mappedParentTaskId,
               milestoneId: milestone?.id || null,
+              level: templateTask.level || 0,
+              sortOrder: templateTask.sortOrder || 0,
+              dependsOnTaskId: dependentTaskId, // Use mapped created task ID
               daysFromMeeting: null // Dependent tasks don't use days from meeting
             }, userId);
             
             createdTasks.push(task);
+            taskMapping.set(templateTask.id, task.id);
           }
           
           return res.status(201).json({
