@@ -407,17 +407,6 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           }`}
           style={{ marginLeft: `${level * 24}px` }}
         >
-          {hasChildren && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => toggleTaskExpansion(task.id)}
-            >
-              {task.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            </Button>
-          )}
-          
           <Button
             variant="ghost"
             size="sm"
@@ -444,6 +433,16 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
               >
                 {task.title}
               </Button>
+              {hasChildren && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 ml-2"
+                  onClick={() => toggleTaskExpansion(task.id)}
+                >
+                  {task.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
+              )}
               {task.dueDate && (
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-3 w-3 mr-1" />

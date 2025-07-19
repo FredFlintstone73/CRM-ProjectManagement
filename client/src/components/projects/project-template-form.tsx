@@ -189,24 +189,26 @@ export default function ProjectTemplateForm({ template, onSuccess }: ProjectTemp
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="flex items-center gap-2">
-                {hasChildren && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleTaskExpanded(sectionId, task.id)}
-                    className="p-1 h-6 w-6"
-                  >
-                    {task.expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                  </Button>
-                )}
                 <div className="text-sm font-medium text-gray-600">
                   {level === 0 ? 'Task' : level === 1 ? 'Sub-task' : 'Sub-sub-task'}
                 </div>
               </div>
               <div className="flex-1 space-y-3">
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Title</label>
+                  <div className="flex items-center gap-2 mb-1">
+                    <label className="text-sm font-medium">Title</label>
+                    {hasChildren && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleTaskExpanded(sectionId, task.id)}
+                        className="p-1 h-6 w-6"
+                      >
+                        {task.expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                      </Button>
+                    )}
+                  </div>
                   <Input
                     placeholder="Enter task title"
                     value={task.title}

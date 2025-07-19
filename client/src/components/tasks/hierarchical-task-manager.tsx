@@ -250,17 +250,6 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1">
-              {hasChildren && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleExpanded(task.id)}
-                  className="p-1 h-6 w-6"
-                >
-                  {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                </Button>
-              )}
-              
               <Button
                 variant="ghost"
                 size="sm"
@@ -279,6 +268,16 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
                   <h4 className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
                     {task.title}
                   </h4>
+                  {hasChildren && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleExpanded(task.id)}
+                      className="p-1 h-6 w-6"
+                    >
+                      {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                    </Button>
+                  )}
                   <Badge variant="outline" className="text-xs">
                     Level {task.level}
                   </Badge>
