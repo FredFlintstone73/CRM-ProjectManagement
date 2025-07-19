@@ -410,24 +410,35 @@ const TaskDisplay = ({
                     {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
                   </div>
                 )}
-                {(task.daysFromMeeting !== null && task.daysFromMeeting !== undefined) || 
-                 task.title === "DRPM @ ________________ (Time)" || 
-                 task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" || 
-                 task.title === "Packet Sealed and Made Available to TA" ? (
-                  <Badge variant="secondary" className="text-xs">
-                    {task.title === "DRPM @ ________________ (Time)" ? (
-                      "D-Day"
-                    ) : task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" ? (
-                      "D+1"
-                    ) : task.title === "Packet Sealed and Made Available to TA" ? (
-                      "D+3"
-                    ) : task.daysFromMeeting === 0 ? (
-                      "P-Day"
-                    ) : (
-                      `P${task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}`
-                    )}
-                  </Badge>
-                ) : null}
+{(() => {
+                  // Hide badges for child tasks under "Generate Database Reports and Documents for Preliminary Packet"
+                  const shouldShowBadge = !(level === 1 && task.parentTaskId && 
+                    milestoneTasks.find((t: any) => 
+                      t.id === task.parentTaskId && 
+                      t.title === "Generate Database Reports and Documents for Preliminary Packet"
+                    ));
+                  
+                  const hasBadgeContent = (task.daysFromMeeting !== null && task.daysFromMeeting !== undefined) || 
+                                         task.title === "DRPM @ ________________ (Time)" || 
+                                         task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" || 
+                                         task.title === "Packet Sealed and Made Available to TA";
+                  
+                  return shouldShowBadge && hasBadgeContent ? (
+                    <Badge variant="secondary" className="text-xs">
+                      {task.title === "DRPM @ ________________ (Time)" ? (
+                        "D-Day"
+                      ) : task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" ? (
+                        "D+1"
+                      ) : task.title === "Packet Sealed and Made Available to TA" ? (
+                        "D+3"
+                      ) : task.daysFromMeeting === 0 ? (
+                        "P-Day"
+                      ) : (
+                        `P${task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}`
+                      )}
+                    </Badge>
+                  ) : null;
+                })()}
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button size="sm" variant="ghost" onClick={() => startEditingTask(task)}>
