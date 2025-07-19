@@ -8,6 +8,7 @@ import {
   integer,
   boolean,
   pgEnum,
+  serial,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -107,7 +108,7 @@ export const taskPriorityEnum = pgEnum("task_priority", [
 
 // Contacts table
 export const contacts = pgTable("contacts", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   
   // Basic Information
   familyName: varchar("family_name"),
@@ -241,7 +242,7 @@ export const contacts = pgTable("contacts", {
 
 // Projects table
 export const projects = pgTable("projects", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   name: varchar("name").notNull(),
   description: text("description"),
   clientId: integer("client_id").references(() => contacts.id),
@@ -258,7 +259,7 @@ export const projects = pgTable("projects", {
 
 // Milestones table - For organizing tasks within projects and templates
 export const milestones = pgTable("milestones", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   description: text("description"),
   projectId: integer("project_id").references(() => projects.id),
@@ -272,7 +273,7 @@ export const milestones = pgTable("milestones", {
 
 // Tasks table - Enhanced with hierarchy support
 export const tasks = pgTable("tasks", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   description: text("description"),
   projectId: integer("project_id").references(() => projects.id),
@@ -294,7 +295,7 @@ export const tasks = pgTable("tasks", {
 
 // Task comments table
 export const taskComments = pgTable("task_comments", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   taskId: integer("task_id").references(() => tasks.id),
   userId: varchar("user_id").references(() => users.id),
   comment: text("comment").notNull(),
@@ -304,7 +305,7 @@ export const taskComments = pgTable("task_comments", {
 
 // Task files table
 export const taskFiles = pgTable("task_files", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   taskId: integer("task_id").references(() => tasks.id),
   fileName: varchar("file_name").notNull(),
   originalName: varchar("original_name").notNull(),
@@ -316,7 +317,7 @@ export const taskFiles = pgTable("task_files", {
 
 // Project templates table - Enhanced with milestone support
 export const projectTemplates = pgTable("project_templates", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   name: varchar("name").notNull(),
   description: text("description"),
   meetingType: varchar("meeting_type"),
@@ -327,7 +328,7 @@ export const projectTemplates = pgTable("project_templates", {
 
 // Email interactions table
 export const emailInteractions = pgTable("email_interactions", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   contactId: integer("contact_id").references(() => contacts.id),
   subject: varchar("subject"),
   body: text("body"),
@@ -340,7 +341,7 @@ export const emailInteractions = pgTable("email_interactions", {
 
 // Call transcripts table
 export const callTranscripts = pgTable("call_transcripts", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   contactId: integer("contact_id").references(() => contacts.id),
   transcript: text("transcript"),
   duration: integer("duration"), // in seconds
@@ -351,7 +352,7 @@ export const callTranscripts = pgTable("call_transcripts", {
 
 // Activity log table
 export const activityLog = pgTable("activity_log", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id),
   action: varchar("action").notNull(),
   entityType: varchar("entity_type"), // contact, project, task, etc.
@@ -362,7 +363,7 @@ export const activityLog = pgTable("activity_log", {
 
 // Project comments table
 export const projectComments = pgTable("project_comments", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   projectId: integer("project_id").references(() => projects.id),
   userId: varchar("user_id").references(() => users.id),
   comment: text("comment").notNull(),
@@ -520,7 +521,7 @@ export const projectCommentsRelations = relations(projectComments, ({ one }) => 
 
 // Contact notes table
 export const contactNotes = pgTable("contact_notes", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   contactId: integer("contact_id").notNull().references(() => contacts.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id),
   content: text("content").notNull(),
@@ -541,7 +542,7 @@ export const contactNotesRelations = relations(contactNotes, ({ one }) => ({
 
 // Contact files table
 export const contactFiles = pgTable("contact_files", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: serial("id").primaryKey(),
   contactId: integer("contact_id").notNull().references(() => contacts.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id),
   fileName: varchar("file_name").notNull(),
