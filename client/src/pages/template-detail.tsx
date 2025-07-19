@@ -1115,10 +1115,14 @@ export default function TemplateDetail() {
       
       if (!activeTask || !overTask) return;
       
+      // Normalize null/undefined parentTaskId to null for comparison
+      const activeParentId = activeTask.parentTaskId || null;
+      const overParentId = overTask.parentTaskId || null;
+      
       // Handle reordering within the same parent level
-      if (activeTask.parentTaskId === overTask.parentTaskId) {
+      if (activeParentId === overParentId) {
         // Get all sibling tasks at the same level
-        const siblingTasks = flatTasks.filter(task => task.parentTaskId === activeTask.parentTaskId);
+        const siblingTasks = flatTasks.filter(task => (task.parentTaskId || null) === activeParentId);
         siblingTasks.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
         
         const activeIndex = siblingTasks.findIndex(task => task.id === active.id);
@@ -1132,11 +1136,27 @@ export default function TemplateDetail() {
         const taskUpdates = reorderedSiblings.map((task, index) => ({
           id: task.id,
           sortOrder: index + 1,
-          parentTaskId: task.parentTaskId
+          parentTaskId: task.parentTaskId || null
         }));
+        
+        console.log('Task reorder data:', {
+          activeTask: activeTask.title,
+          overTask: overTask.title,
+          activeParentId,
+          overParentId,
+          siblingCount: siblingTasks.length,
+          taskUpdates
+        });
         
         // Update backend
         reorderTasksMutation.mutate(taskUpdates);
+      } else {
+        console.log('Tasks are not at the same level:', {
+          activeTask: activeTask.title,
+          overTask: overTask.title,
+          activeParentId,
+          overParentId
+        });
       }
     }
   };
