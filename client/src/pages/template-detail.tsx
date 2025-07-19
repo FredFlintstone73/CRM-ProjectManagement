@@ -115,6 +115,7 @@ const TaskDisplay = ({
   templateId, 
   level = 0, 
   milestone, 
+  milestoneTasks = [],
   editingTask, 
   setEditingTask, 
   updateTaskMutation, 
@@ -145,6 +146,7 @@ const TaskDisplay = ({
   templateId: string | undefined, 
   level?: number,
   milestone: any,
+  milestoneTasks?: any[],
   editingTask: number | null,
   setEditingTask: (id: number | null) => void,
   updateTaskMutation: any,
@@ -222,24 +224,10 @@ const TaskDisplay = ({
                 Also hide date fields for child tasks under "Generate Database Reports and Documents for Preliminary Packet" */}
             {(() => {
               const shouldShowDateFields = level < 2 && !(level === 1 && task.parentTaskId && 
-                milestone.tasks?.find((t: any) => 
+                milestoneTasks.find((t: any) => 
                   t.id === task.parentTaskId && 
                   t.title === "Generate Database Reports and Documents for Preliminary Packet"
                 ));
-              
-              // Debug logging for "Generate Database Reports" child tasks
-              if (level === 1 && task.parentTaskId) {
-                const parentTask = milestone.tasks?.find((t: any) => t.id === task.parentTaskId);
-                console.log(`Debug task ${task.title}:`, {
-                  level,
-                  parentTaskId: task.parentTaskId,
-                  parentTask: parentTask,
-                  parentTitle: parentTask?.title,
-                  shouldShow: shouldShowDateFields,
-                  milestoneTasks: milestone.tasks?.map((t: any) => ({ id: t.id, title: t.title })),
-                  milestoneId: milestone.id
-                });
-              }
               
               return shouldShowDateFields;
             })() ? (
@@ -471,6 +459,7 @@ const TaskDisplay = ({
                 templateId={templateId}
                 level={level + 1}
                 milestone={milestone}
+                milestoneTasks={milestoneTasks}
                 editingTask={editingTask}
                 setEditingTask={setEditingTask}
                 updateTaskMutation={updateTaskMutation}
@@ -506,7 +495,7 @@ const TaskDisplay = ({
 };
 
 // Sortable task display component
-const SortableTaskDisplay = ({ task, templateId, level, milestone, ...props }: any) => {
+const SortableTaskDisplay = ({ task, templateId, level, milestone, milestoneTasks, ...props }: any) => {
   const {
     attributes,
     listeners,
@@ -538,6 +527,7 @@ const SortableTaskDisplay = ({ task, templateId, level, milestone, ...props }: a
             templateId={templateId}
             level={level}
             milestone={milestone}
+            milestoneTasks={milestoneTasks}
             {...props}
           />
         </div>
@@ -730,6 +720,7 @@ const SortableSection = ({
                       templateId={templateId}
                       level={0}
                       milestone={milestone}
+                      milestoneTasks={milestoneTasks}
                       editingTask={editingTask}
                       setEditingTask={setEditingTask}
                       updateTaskMutation={updateTaskMutation}
