@@ -7,8 +7,10 @@ import { useState, useEffect } from "react";
 
 export default function Sidebar() {
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [isContactsExpanded, setIsContactsExpanded] = useState(false);
+
+  console.log('Sidebar render:', { location, user, isAuthenticated, isLoading });
 
   // Auto-expand contacts when on contacts page
   useEffect(() => {
