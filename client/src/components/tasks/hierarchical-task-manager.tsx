@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { 
   ChevronRight, 
@@ -49,6 +50,7 @@ interface TaskFormData {
 
 export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerProps) {
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskFormData, setTaskFormData] = useState<TaskFormData>({
@@ -276,7 +278,7 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
                   <h4 
                     className={`font-medium cursor-pointer hover:text-blue-600 transition-colors ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}
                     onClick={() => {
-                      window.location.href = `/task/${task.id}`;
+                      setLocation(`/task/${task.id}`);
                     }}
                   >
                     {task.title}

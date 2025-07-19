@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'wouter';
+import { useParams, useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ArrowLeft, ArrowRight, Calendar, User, CheckCircle, Circle, Edit3, Trash2 } from 'lucide-react';
@@ -20,6 +20,7 @@ interface TaskDetailParams {
 
 export default function TaskDetail() {
   const { id } = useParams<TaskDetailParams>();
+  const [, setLocation] = useLocation();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -174,7 +175,11 @@ export default function TaskDetail() {
           <Button
             variant="outline"
             onClick={() => {
-              window.history.back();
+              if (task?.projectId) {
+                setLocation(`/projects/${task.projectId}`);
+              } else {
+                window.history.back();
+              }
             }}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -186,7 +191,7 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  window.location.href = `/task/${previousTask.id}`;
+                  setLocation(`/task/${previousTask.id}`);
                 }}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -198,7 +203,7 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  window.location.href = `/task/${nextTask.id}`;
+                  setLocation(`/task/${nextTask.id}`);
                 }}
               >
                 Next Task

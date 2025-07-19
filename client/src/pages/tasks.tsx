@@ -23,12 +23,13 @@ import { format } from "date-fns";
 import TaskForm from "@/components/tasks/task-form";
 import { getDueDateBadgeProps } from "@/lib/dueDateUtils";
 import type { Task, Project, User as UserType } from "@shared/schema";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function Tasks() {
 
   const { isAuthenticated, isLoading, user } = useAuth();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
@@ -561,7 +562,7 @@ export default function Tasks() {
                           {task.priority || 25}
                         </Badge>
                         <button 
-                          onClick={() => window.location.href = `/task/${task.id}`}
+                          onClick={() => setLocation(`/task/${task.id}`)}
                           className="flex-1 text-left"
                         >
                           <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors task-title">
@@ -648,7 +649,7 @@ export default function Tasks() {
                           {task.priority || 25}
                         </Badge>
                         <button 
-                          onClick={() => window.location.href = `/task/${task.id}`}
+                          onClick={() => setLocation(`/task/${task.id}`)}
                           className="text-left"
                         >
                           <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors task-title">
