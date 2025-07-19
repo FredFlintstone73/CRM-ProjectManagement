@@ -141,6 +141,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### CSR Template Hierarchical Task Structure Fix (July 19, 2025)
+- **Database Parent-Child Relationship Fix**: Corrected missing parent_task_id relationships in CSR project tasks
+- **Hierarchy Structure Restoration**: Fixed "Submit Critical Reports and Final Highest Priority Conversation Topic" to properly contain all professional role sub-tasks
+- **Child Task Assignment**: Updated 9 tasks (Estate Attorney, Financial Planner, Insurance Planners) to have correct parent_task_id = 1041
+- **Template Project Creation Enhancement**: Resolved issue where professional role tasks were created as root tasks instead of proper hierarchical children
+- **Visual Display Fix**: Removed task.expanded condition from child rendering to ensure all hierarchical relationships display automatically
+- **Debug System Implementation**: Added comprehensive hierarchy building debug output to track parent-child relationships during template-to-project conversion
+- **Infinite Loop Resolution**: Fixed maximum update depth error by converting sections from state-based to computed values from milestones and tasks
+
 ### Complete Drag-and-Drop Task Reordering System (July 19, 2025)
 - **Comprehensive Drag-and-Drop Implementation**: Successfully implemented full drag-and-drop functionality for all task hierarchy levels (main tasks, sub-tasks, sub-sub-tasks)
 - **@dnd-kit Integration**: Integrated @dnd-kit library with SortableContext and DragOverlay components for smooth drag interactions
