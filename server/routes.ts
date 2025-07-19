@@ -870,9 +870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('Raw request body:', req.body);
       const taskData = insertTaskSchema.partial().parse(req.body);
-      console.log('Parsed task data:', taskData);
       
 
       
@@ -937,7 +935,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }),
       };
       
-      console.log('Processed task data:', processedTaskData);
+
       
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
       res.json(task);
