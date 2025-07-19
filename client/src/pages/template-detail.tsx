@@ -396,19 +396,24 @@ const TaskDisplay = ({
                     {allTeamMembers?.find(m => m.id === task.assignedTo)?.firstName} {allTeamMembers?.find(m => m.id === task.assignedTo)?.lastName}
                   </div>
                 )}
-                <Badge variant="secondary" className="text-xs">
-                  {task.title === "DRPM @ ________________ (Time)" ? (
-                    "D-Day"
-                  ) : task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" ? (
-                    "D+1"
-                  ) : task.title === "Packet Sealed and Made Available to TA" ? (
-                    "D+3"
-                  ) : task.daysFromMeeting === 0 ? (
-                    "P-Day"
-                  ) : (
-                    `P${task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}`
-                  )}
-                </Badge>
+                {(task.daysFromMeeting !== null && task.daysFromMeeting !== undefined) || 
+                 task.title === "DRPM @ ________________ (Time)" || 
+                 task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" || 
+                 task.title === "Packet Sealed and Made Available to TA" ? (
+                  <Badge variant="secondary" className="text-xs">
+                    {task.title === "DRPM @ ________________ (Time)" ? (
+                      "D-Day"
+                    ) : task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" ? (
+                      "D+1"
+                    ) : task.title === "Packet Sealed and Made Available to TA" ? (
+                      "D+3"
+                    ) : task.daysFromMeeting === 0 ? (
+                      "P-Day"
+                    ) : (
+                      `P${task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}`
+                    )}
+                  </Badge>
+                ) : null}
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button size="sm" variant="ghost" onClick={() => startEditingTask(task)}>
@@ -1245,7 +1250,7 @@ export default function TemplateDetail() {
 
   // Fetch tasks for each milestone
   const taskQueries = useQuery({
-    queryKey: ['template-tasks', id, milestones.map(m => m.id)],
+    queryKey: ['template-tasks', id, milestones.map(m => m.id), 'v2'], // Force refresh after removing sub-child due dates
     queryFn: async () => {
       if (!milestones || milestones.length === 0) return [];
       
