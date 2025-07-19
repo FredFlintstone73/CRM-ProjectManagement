@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { 
   ChevronRight, 
   ChevronDown, 
@@ -168,6 +169,33 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
     setExpandedTasks(newExpanded);
   };
 
+  const getDueDateBadgeProps = (dueDate: string | null) => {
+    if (!dueDate) return { variant: "outline" as const, style: {} };
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const taskDate = new Date(dueDate);
+    taskDate.setHours(0, 0, 0, 0);
+    
+    if (taskDate < today) {
+      // Overdue - red background
+      return { 
+        variant: "outline" as const, 
+        style: { backgroundColor: "#ea4335", color: "white", borderColor: "#ea4335" } 
+      };
+    } else if (taskDate.getTime() === today.getTime()) {
+      // Due today - yellow background
+      return { 
+        variant: "outline" as const, 
+        style: { backgroundColor: "#ffe79f", color: "#333", borderColor: "#ffe79f" } 
+      };
+    } else {
+      // Future date - default outline
+      return { variant: "outline" as const, style: {} };
+    }
+  };
+
   const resetForm = () => {
     setTaskFormData({
       title: '',
@@ -289,10 +317,10 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
                 
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   {task.dueDate && (
-                    <div className="flex items-center gap-1">
-                      <Calendar size={12} />
-                      {new Date(task.dueDate).toLocaleDateString()}
-                    </div>
+                    <Badge {...getDueDateBadgeProps(task.dueDate)} className="text-xs">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {format(new Date(task.dueDate), 'MMM d')}
+                    </Badge>
                   )}
                   
                   {assignedContact && (

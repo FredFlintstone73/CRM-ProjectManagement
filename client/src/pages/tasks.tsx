@@ -331,6 +331,33 @@ export default function Tasks() {
     return new Date(dueDate) < new Date();
   };
 
+  const getDueDateBadgeProps = (dueDate: string | null) => {
+    if (!dueDate) return { variant: "outline" as const, style: {} };
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const taskDate = new Date(dueDate);
+    taskDate.setHours(0, 0, 0, 0);
+    
+    if (taskDate < today) {
+      // Overdue - red background
+      return { 
+        variant: "outline" as const, 
+        style: { backgroundColor: "#ea4335", color: "white", borderColor: "#ea4335" } 
+      };
+    } else if (taskDate.getTime() === today.getTime()) {
+      // Due today - yellow background
+      return { 
+        variant: "outline" as const, 
+        style: { backgroundColor: "#ffe79f", color: "#333", borderColor: "#ffe79f" } 
+      };
+    } else {
+      // Future date - default outline
+      return { variant: "outline" as const, style: {} };
+    }
+  };
+
   const handleTaskCreated = () => {
     setIsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -616,14 +643,11 @@ export default function Tasks() {
                     )}
                     
                     {task.dueDate && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <CalendarDays className="w-4 h-4" />
-                        <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
-                          Due: {new Date(task.dueDate).toLocaleDateString()}
-                        </span>
-                        {isOverdue(task.dueDate) && (
-                          <AlertCircle className="w-4 h-4 text-red-600" />
-                        )}
+                      <div className="flex items-center space-x-2">
+                        <Badge {...getDueDateBadgeProps(task.dueDate)} className="text-xs">
+                          <CalendarDays className="w-3 h-3 mr-1" />
+                          {format(new Date(task.dueDate), 'MMM d')}
+                        </Badge>
                       </div>
                     )}
                     
@@ -700,14 +724,11 @@ export default function Tasks() {
                           )}
                           
                           {task.dueDate && (
-                            <div className="flex items-center justify-end space-x-2 text-sm mt-1">
-                              <CalendarDays className="w-4 h-4" />
-                              <span className={isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'}>
-                                {new Date(task.dueDate).toLocaleDateString()}
-                              </span>
-                              {isOverdue(task.dueDate) && (
-                                <AlertCircle className="w-4 h-4 text-red-600" />
-                              )}
+                            <div className="flex items-center justify-end mt-1">
+                              <Badge {...getDueDateBadgeProps(task.dueDate)} className="text-xs">
+                                <CalendarDays className="w-3 h-3 mr-1" />
+                                {format(new Date(task.dueDate), 'MMM d')}
+                              </Badge>
                             </div>
                           )}
                         </div>
