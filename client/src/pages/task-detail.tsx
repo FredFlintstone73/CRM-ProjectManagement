@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, User, CheckCircle, Circle, Edit3, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, User, CheckCircle, Circle, Edit3, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,8 +66,61 @@ export default function TaskDetail() {
     },
   });
 
+  // Get all tasks for the project to find next/previous tasks
+  const { data: projectTasks } = useQuery<Task[]>({
+    queryKey: ['/api/projects', task?.projectId?.toString(), 'tasks'],
+    enabled: !!task?.projectId,
+    queryFn: async () => {
+      const response = await fetch(`/api/projects/${task?.projectId}/tasks`);
+      if (!response.ok) throw new Error('Failed to fetch project tasks');
+      return response.json();
+    },
+  });
+
   const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
   const assignedUser = teamMembers.find(member => member.id === task?.assignedTo);
+
+  // Find the next task in the sequence
+  const findNextTask = () => {
+    if (!projectTasks || !task) return null;
+    
+    // Sort tasks chronologically: by daysFromMeeting, then dueDate, then sortOrder, then id
+    const sortedTasks = [...projectTasks].sort((a, b) => {
+      // First sort by daysFromMeeting if available
+      if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
+        if (a.daysFromMeeting !== b.daysFromMeeting) {
+          return a.daysFromMeeting - b.daysFromMeeting;
+        }
+      }
+      
+      // Then by due date if available
+      if (a.dueDate && b.dueDate) {
+        const aDate = new Date(a.dueDate).getTime();
+        const bDate = new Date(b.dueDate).getTime();
+        if (aDate !== bDate) {
+          return aDate - bDate;
+        }
+      }
+      
+      // Then by sortOrder if available
+      if (a.sortOrder !== null && b.sortOrder !== null) {
+        if (a.sortOrder !== b.sortOrder) {
+          return a.sortOrder - b.sortOrder;
+        }
+      }
+      
+      // Finally by ID as fallback
+      return a.id - b.id;
+    });
+
+    const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
+    if (currentIndex >= 0 && currentIndex < sortedTasks.length - 1) {
+      return sortedTasks[currentIndex + 1];
+    }
+    return null;
+  };
+
+  const nextTask = findNextTask();
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
@@ -112,14 +165,27 @@ export default function TaskDetail() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => window.history.back()}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="ghost"
+            onClick={() => window.history.back()}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+
+          {nextTask && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                window.location.href = `/task/${nextTask.id}`;
+              }}
+            >
+              Next Task
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          )}
+        </div>
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
