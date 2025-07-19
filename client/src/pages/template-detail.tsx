@@ -480,7 +480,8 @@ const SortableSection = ({
   templateId,
   expandedTasks,
   toggleTaskExpansion,
-  handleTaskDragEnd
+  handleTaskDragEnd,
+  taskSensors
 }: any) => {
   const {
     attributes,
@@ -606,16 +607,7 @@ const SortableSection = ({
               </div>
               <DndContext
                 id={`task-context-${milestone.id}`}
-                sensors={useSensors(
-                  useSensor(PointerSensor, {
-                    activationConstraint: {
-                      distance: 8,
-                    },
-                  }),
-                  useSensor(KeyboardSensor, {
-                    coordinateGetter: sortableKeyboardCoordinates,
-                  })
-                )}
+                sensors={taskSensors}
                 collisionDetection={closestCenter}
                 onDragEnd={(event) => handleTaskDragEnd(event, milestone.id)}
               >
@@ -1041,7 +1033,28 @@ export default function TemplateDetail() {
     }
   };
 
+  // Drag and drop sensors (consistent hook ordering)
+  const milestoneSensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
+  const taskSensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Task reordering mutation
   const reorderTasksMutation = useMutation({
@@ -1274,16 +1287,7 @@ export default function TemplateDetail() {
           <div className="space-y-4">
             <DndContext
               id="milestone-context"
-              sensors={useSensors(
-                useSensor(PointerSensor, {
-                  activationConstraint: {
-                    distance: 8,
-                  },
-                }),
-                useSensor(KeyboardSensor, {
-                  coordinateGetter: sortableKeyboardCoordinates,
-                })
-              )}
+              sensors={milestoneSensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
@@ -1338,6 +1342,7 @@ export default function TemplateDetail() {
                       expandedTasks={expandedTasks}
                       toggleTaskExpansion={toggleTaskExpansion}
                       handleTaskDragEnd={handleTaskDragEnd}
+                      taskSensors={taskSensors}
                     />
                   );
                 })}
