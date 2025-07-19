@@ -316,6 +316,20 @@ export const taskFiles = pgTable("task_files", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User-specific task priorities table
+export const userTaskPriorities = pgTable("user_task_priorities", {
+  id: serial("id").primaryKey(),
+  taskId: integer("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  contactId: integer("contact_id").references(() => contacts.id), // Links to the user's contact record
+  priority: integer("priority").default(50), // 1-50 priority scale, default 50
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("user_task_priority_idx").on(table.userId, table.taskId),
+  index("contact_task_priority_idx").on(table.contactId, table.taskId),
+]);
+
 // Project templates table - Enhanced with milestone support
 export const projectTemplates = pgTable("project_templates", {
   id: serial("id").primaryKey(),
@@ -568,6 +582,21 @@ export const contactFilesRelations = relations(contactFiles, ({ one }) => ({
   }),
 }));
 
+export const userTaskPrioritiesRelations = relations(userTaskPriorities, ({ one }) => ({
+  task: one(tasks, {
+    fields: [userTaskPriorities.taskId],
+    references: [tasks.id],
+  }),
+  user: one(users, {
+    fields: [userTaskPriorities.userId],
+    references: [users.id],
+  }),
+  contact: one(contacts, {
+    fields: [userTaskPriorities.contactId],
+    references: [contacts.id],
+  }),
+}));
+
 // Insert schemas
 export const insertContactSchema = createInsertSchema(contacts).omit({
   id: true,
@@ -793,6 +822,12 @@ export const insertTaskFileSchema = createInsertSchema(taskFiles).omit({
   uploadedBy: true,
 });
 
+export const insertUserTaskPrioritySchema = createInsertSchema(userTaskPriorities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -822,3 +857,5 @@ export type ContactNote = typeof contactNotes.$inferSelect;
 export type InsertContactNote = z.infer<typeof insertContactNoteSchema>;
 export type ContactFile = typeof contactFiles.$inferSelect;
 export type InsertContactFile = z.infer<typeof insertContactFileSchema>;
+export type UserTaskPriority = typeof userTaskPriorities.$inferSelect;
+export type InsertUserTaskPriority = z.infer<typeof insertUserTaskPrioritySchema>;

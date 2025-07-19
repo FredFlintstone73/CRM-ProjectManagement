@@ -13,6 +13,7 @@ import {
   projectComments,
   contactNotes,
   contactFiles,
+  userTaskPriorities,
   type User,
   type UpsertUser,
   type Contact,
@@ -41,6 +42,8 @@ import {
   type InsertContactNote,
   type ContactFile,
   type InsertContactFile,
+  type UserTaskPriority,
+  type InsertUserTaskPriority,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, ilike, count, isNotNull } from "drizzle-orm";
@@ -159,6 +162,11 @@ export interface IStorage {
 
   // Role-based assignment operations
   resolveRoleAssignments(projectId: number): Promise<void>;
+
+  // User task priority operations
+  getUserTaskPriority(taskId: number, userId: string): Promise<UserTaskPriority | undefined>;
+  setUserTaskPriority(taskId: number, userId: string, contactId: number | null, priority: number): Promise<UserTaskPriority>;
+  getUserTasksWithPriorities(userId: string): Promise<(Task & { userPriority: number | null })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1587,6 +1595,110 @@ export class DatabaseStorage implements IStorage {
       entityId: projectId,
       description: `Resolved role-based assignments for ${tasksWithRoles.length} tasks`,
     });
+  }
+
+  async getUserTaskPriority(taskId: number, userId: string): Promise<UserTaskPriority | undefined> {
+    const [priority] = await db
+      .select()
+      .from(userTaskPriorities)
+      .where(
+        and(
+          eq(userTaskPriorities.taskId, taskId),
+          eq(userTaskPriorities.userId, userId)
+        )
+      )
+      .limit(1);
+
+    return priority;
+  }
+
+  async setUserTaskPriority(taskId: number, userId: string, contactId: number | null, priority: number): Promise<UserTaskPriority> {
+    // Check if priority record already exists
+    const existing = await this.getUserTaskPriority(taskId, userId);
+    
+    if (existing) {
+      // Update existing priority
+      const [updated] = await db
+        .update(userTaskPriorities)
+        .set({
+          priority,
+          contactId,
+          updatedAt: new Date()
+        })
+        .where(eq(userTaskPriorities.id, existing.id))
+        .returning();
+
+      return updated;
+    } else {
+      // Create new priority record
+      const [created] = await db
+        .insert(userTaskPriorities)
+        .values({
+          taskId,
+          userId,
+          contactId,
+          priority
+        })
+        .returning();
+
+      return created;
+    }
+  }
+
+  async getUserTasksWithPriorities(userId: string): Promise<(Task & { userPriority: number | null })[]> {
+    // First get the user's contact ID
+    const userContact = await this.getUserContactId({ id: userId } as User);
+
+    // Get all tasks assigned to this user (either directly or through contact ID)
+    const tasksQuery = db
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        description: tasks.description,
+        projectId: tasks.projectId,
+        milestoneId: tasks.milestoneId,
+        parentTaskId: tasks.parentTaskId,
+        assignedTo: tasks.assignedTo,
+        assignedToRole: tasks.assignedToRole,
+        status: tasks.status,
+        priority: tasks.priority,
+        dueDate: tasks.dueDate,
+        daysFromMeeting: tasks.daysFromMeeting,
+        dependsOnTaskId: tasks.dependsOnTaskId,
+        completedAt: tasks.completedAt,
+        sortOrder: tasks.sortOrder,
+        level: tasks.level,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+        createdBy: tasks.createdBy,
+        userPriority: userTaskPriorities.priority
+      })
+      .from(tasks)
+      .leftJoin(
+        userTaskPriorities,
+        and(
+          eq(userTaskPriorities.taskId, tasks.id),
+          eq(userTaskPriorities.userId, userId)
+        )
+      );
+
+    // Filter for tasks assigned to this user
+    if (userContact) {
+      const results = await tasksQuery
+        .where(
+          and(
+            isNotNull(tasks.assignedTo),
+            sql`${userContact} = ANY(${tasks.assignedTo})`
+          )
+        );
+      
+      return results.map(task => ({
+        ...task,
+        userPriority: task.userPriority || task.priority || 50
+      }));
+    }
+
+    return [];
   }
 }
 

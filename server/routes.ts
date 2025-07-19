@@ -668,6 +668,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User task priority routes
+  app.get('/api/tasks/:id/user-priority', isAuthenticated, async (req: any, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const userPriority = await storage.getUserTaskPriority(taskId, userId);
+      res.json({ priority: userPriority?.priority || null });
+    } catch (error) {
+      console.error("Error getting user task priority:", error);
+      res.status(500).json({ message: "Failed to get user task priority" });
+    }
+  });
+
+  app.put('/api/tasks/:id/user-priority', isAuthenticated, async (req: any, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const { priority } = req.body;
+
+      // Get user's contact ID for linking
+      const userContact = await storage.getUserContactId({ id: userId } as any);
+
+      const updatedPriority = await storage.setUserTaskPriority(taskId, userId, userContact, priority);
+      res.json(updatedPriority);
+    } catch (error) {
+      console.error("Error setting user task priority:", error);
+      res.status(500).json({ message: "Failed to set user task priority" });
+    }
+  });
+
+  // Get tasks with user-specific priorities
+  app.get('/api/tasks/my-tasks-with-priorities', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const tasksWithPriorities = await storage.getUserTasksWithPriorities(userId);
+      res.json(tasksWithPriorities);
+    } catch (error) {
+      console.error("Error fetching user tasks with priorities:", error);
+      res.status(500).json({ message: "Failed to fetch user tasks with priorities" });
+    }
+  });
+
   // Project tasks route
   app.get('/api/projects/:id/tasks', isAuthenticated, async (req: any, res) => {
     try {

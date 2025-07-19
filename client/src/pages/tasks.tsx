@@ -22,6 +22,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays, CheckCircle, Circle } from "lucide-react";
 import { format } from "date-fns";
 import TaskForm from "@/components/tasks/task-form";
+import { UserPriorityInput } from "@/components/tasks/user-priority-input";
 import { getDueDateBadgeProps } from "@/lib/dueDateUtils";
 import type { Task, Project, User as UserType } from "@shared/schema";
 import { Link, useLocation } from "wouter";
@@ -52,10 +53,21 @@ export default function Tasks() {
     }
   }, [isAuthenticated, isLoading]);
 
-  const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
+  const { data: allTasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
     enabled: isAuthenticated,
   });
+
+  // Get tasks with user-specific priorities when viewing "My Tasks"
+  const { data: userTasksWithPriorities } = useQuery<(Task & { userPriority: number | null })[]>({
+    queryKey: ['/api/tasks/my-tasks-with-priorities'],
+    enabled: isAuthenticated && taskFilter === 'my_tasks',
+  });
+
+  // Use appropriate task data based on filter
+  const tasks = taskFilter === 'my_tasks' 
+    ? (userTasksWithPriorities || []) 
+    : (allTasks || []);
 
   const { data: projects } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
@@ -189,7 +201,14 @@ export default function Tasks() {
   }).sort((a, b) => {
     switch (sortBy) {
       case "priority":
-        return (a.priority || 50) - (b.priority || 50); // Sort 1-50, with null/undefined treated as 50
+        // Use userPriority if available (for My Tasks view), otherwise use default priority
+        const aPriority = (taskFilter === 'my_tasks' && 'userPriority' in a && a.userPriority !== null) 
+          ? a.userPriority 
+          : (a.priority || 50);
+        const bPriority = (taskFilter === 'my_tasks' && 'userPriority' in b && b.userPriority !== null) 
+          ? b.userPriority 
+          : (b.priority || 50);
+        return aPriority - bPriority; // Sort 1-50, with null/undefined treated as 50
       case "dueDate":
         if (!a.dueDate && !b.dueDate) return 0;
         if (!a.dueDate) return 1;
@@ -559,9 +578,18 @@ export default function Tasks() {
                             <Circle className="h-5 w-5 text-gray-400" />
                           )}
                         </Button>
-                        <Badge className={getPriorityColor(task.priority || 25)}>
-                          {task.priority || 25}
-                        </Badge>
+                        {/* Show user priority input for My Tasks, regular badge for All Tasks */}
+                        {taskFilter === 'my_tasks' ? (
+                          <UserPriorityInput 
+                            taskId={task.id} 
+                            currentPriority={('userPriority' in task && task.userPriority !== null) ? task.userPriority : null}
+                            taskFilter={taskFilter}
+                          />
+                        ) : (
+                          <Badge className={getPriorityColor(task.priority || 25)}>
+                            {task.priority || 25}
+                          </Badge>
+                        )}
                         <button 
                           onClick={() => setLocation(`/task/${task.id}`)}
                           className="flex-1 text-left"
@@ -646,9 +674,18 @@ export default function Tasks() {
                             <Circle className="h-5 w-5 text-gray-400" />
                           )}
                         </Button>
-                        <Badge className={getPriorityColor(task.priority || 25)}>
-                          {task.priority || 25}
-                        </Badge>
+                        {/* Show user priority input for My Tasks, regular badge for All Tasks */}
+                        {taskFilter === 'my_tasks' ? (
+                          <UserPriorityInput 
+                            taskId={task.id} 
+                            currentPriority={('userPriority' in task && task.userPriority !== null) ? task.userPriority : null}
+                            taskFilter={taskFilter}
+                          />
+                        ) : (
+                          <Badge className={getPriorityColor(task.priority || 25)}>
+                            {task.priority || 25}
+                          </Badge>
+                        )}
                         <button 
                           onClick={() => setLocation(`/task/${task.id}`)}
                           className="text-left"
