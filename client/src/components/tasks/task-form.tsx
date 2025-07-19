@@ -105,21 +105,21 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   ];
 
   const roleOptions: MultiSelectOption[] = [
-    { label: "Estate Planner", value: "estate_planner" },
-    { label: "Estate Attorney", value: "estate_attorney" },
-    { label: "Financial Planner", value: "financial_planner" },
-    { label: "Tax Planner", value: "tax_planner" },
-    { label: "Money Manager", value: "money_manager" },
-    { label: "Insurance P&C", value: "insurance_pc" },
-    { label: "Insurance Business", value: "insurance_business" },
-    { label: "Insurance Life/LTC/Disability", value: "insurance_life_ltc_disability" },
-    { label: "Insurance Health", value: "insurance_health" },
-    { label: "Trusted Advisor", value: "trusted_advisor" },
-    { label: "Admin Assistant", value: "admin_assistant" },
-    { label: "Deliverables Team Coordinator", value: "deliverables_team_coordinator" },
-    { label: "Human Relations", value: "human_relations" },
     { label: "Accountant", value: "accountant" },
+    { label: "Admin Assistant", value: "admin_assistant" },
     { label: "Client Service Rep", value: "client_service_rep" },
+    { label: "Deliverables Team Coordinator", value: "deliverables_team_coordinator" },
+    { label: "Estate Attorney", value: "estate_attorney" },
+    { label: "Estate Planner", value: "estate_planner" },
+    { label: "Financial Planner", value: "financial_planner" },
+    { label: "Human Relations", value: "human_relations" },
+    { label: "Insurance Business", value: "insurance_business" },
+    { label: "Insurance Health", value: "insurance_health" },
+    { label: "Insurance Life/LTC/Disability", value: "insurance_life_ltc_disability" },
+    { label: "Insurance P&C", value: "insurance_pc" },
+    { label: "Money Manager", value: "money_manager" },
+    { label: "Tax Planner", value: "tax_planner" },
+    { label: "Trusted Advisor", value: "trusted_advisor" },
     { label: "Other", value: "other" }
   ];
 
