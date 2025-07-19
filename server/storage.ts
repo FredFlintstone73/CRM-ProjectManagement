@@ -43,7 +43,7 @@ import {
   type InsertContactFile,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, or, ilike, count } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, count, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
