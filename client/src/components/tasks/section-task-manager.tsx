@@ -486,12 +486,12 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                   className="h-6 w-6 p-0 ml-2"
                   onClick={() => toggleTaskExpansion(task.id)}
                 >
-                  {task.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {expandedTasks.has(task.id) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </Button>
               )}
               {task.dueDate && (
                 <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
-                  <CalendarDays className="h-3 w-3 mr-1" />
+                  <Calendar className="h-3 w-3 mr-1" />
                   {format(new Date(task.dueDate), 'MMM d')}
                 </Badge>
               )}
@@ -532,7 +532,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           </div>
         </div>
         
-        {hasChildren && task.children && (
+        {hasChildren && task.children && expandedTasks.has(task.id) && (
           <div className="space-y-2">
             {task.children.map(child => renderTaskNode(child, level + 1))}
           </div>
