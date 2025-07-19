@@ -689,12 +689,7 @@ export default function TemplateDetail() {
     }
   }, [template]);
 
-  // Initialize open phases when milestones are loaded
-  useEffect(() => {
-    if (milestones.length > 0 && openPhases.length === 0) {
-      setOpenPhases(milestones.map(m => m.id));
-    }
-  }, [milestones, openPhases.length]);
+  // Keep milestones collapsed by default - removed auto-opening behavior
 
   // Toggle phase open/close
   const togglePhase = (milestoneId: number) => {

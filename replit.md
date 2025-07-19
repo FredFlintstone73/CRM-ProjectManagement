@@ -552,3 +552,11 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Schema Validation Update**: Updated database schema validation to include Client Service Rep and maintain alphabetical order
 - **Consistent Role Options**: Standardized role options across contact forms, task forms, and template editors
 - **Available Roles**: Accountant, Admin Assistant, Client Service Rep, Deliverables Team Coordinator, Estate Attorney, Estate Planner, Financial Planner, Human Relations, Insurance Business, Insurance Health, Insurance Life/LTC/Disability, Insurance P&C, Money Manager, Tax Planner, Trusted Advisor, Other
+
+### Default Collapsed Sections Implementation (July 18, 2025)
+- **Template Detail Pages**: Removed auto-opening behavior so all milestone sections start collapsed by default
+- **Project Detail Pages**: Added collapsible functionality with chevron controls for all project sections
+- **Enhanced User Experience**: Users must click chevron arrows to expand sections and view underlying tasks
+- **Consistent Behavior**: Both template and project detail pages now require explicit user action to view task details
+- **Improved Organization**: Cleaner initial view showing only section headers with completion progress badges
+- **Interactive Headers**: Section headers are clickable with hover effects and chevron indicators
