@@ -605,8 +605,13 @@ const SortableSection = ({
                 </Button>
               </div>
               <DndContext
+                id={`task-context-${milestone.id}`}
                 sensors={useSensors(
-                  useSensor(PointerSensor),
+                  useSensor(PointerSensor, {
+                    activationConstraint: {
+                      distance: 8,
+                    },
+                  }),
                   useSensor(KeyboardSensor, {
                     coordinateGetter: sortableKeyboardCoordinates,
                   })
@@ -1036,13 +1041,7 @@ export default function TemplateDetail() {
     }
   };
 
-  // Drag and drop
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+
 
   // Task reordering mutation
   const reorderTasksMutation = useMutation({
@@ -1274,7 +1273,17 @@ export default function TemplateDetail() {
 
           <div className="space-y-4">
             <DndContext
-              sensors={sensors}
+              id="milestone-context"
+              sensors={useSensors(
+                useSensor(PointerSensor, {
+                  activationConstraint: {
+                    distance: 8,
+                  },
+                }),
+                useSensor(KeyboardSensor, {
+                  coordinateGetter: sortableKeyboardCoordinates,
+                })
+              )}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
