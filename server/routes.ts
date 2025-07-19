@@ -846,7 +846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priority: priority,
         description: taskData.description || null,
         dueDate: taskData.dueDate || null,
-        daysFromMeeting: taskData.daysFromMeeting !== undefined ? parseInt(taskData.daysFromMeeting.toString()) : undefined,
+        daysFromMeeting: taskData.daysFromMeeting !== undefined && taskData.daysFromMeeting !== null ? parseInt(taskData.daysFromMeeting.toString()) : null,
         assignedToRole: assignedToRole,
       };
       
