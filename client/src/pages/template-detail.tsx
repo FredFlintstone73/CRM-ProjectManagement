@@ -222,8 +222,14 @@ const TaskDisplay = ({
               />
             </div>
             {/* Only show date fields for level 0 and 1 tasks (hide for level 2 sub-child tasks) 
-                Also hide date fields for child tasks under "Generate Database Reports and Documents for Preliminary Packet" */}
+                Also hide date fields for child tasks under "Generate Database Reports and Documents for Preliminary Packet"
+                AND hide date fields completely for tasks under "Actions & Service Since Last Progress Meeting" */}
             {(() => {
+              // Hide date fields completely for tasks under "Actions & Service Since Last Progress Meeting"
+              if (milestone?.title === "Actions & Service Since Last Progress Meeting") {
+                return false;
+              }
+              
               const shouldShowDateFields = level < 2 && !(level === 1 && task.parentTaskId && 
                 milestoneTasks.find((t: any) => 
                   t.id === task.parentTaskId && 
@@ -412,6 +418,11 @@ const TaskDisplay = ({
                   </div>
                 )}
 {(() => {
+                  // Hide badges completely for tasks under "Actions & Service Since Last Progress Meeting"
+                  if (milestone?.title === "Actions & Service Since Last Progress Meeting") {
+                    return null;
+                  }
+                  
                   // Hide badges for child tasks under "Generate Database Reports and Documents for Preliminary Packet"
                   const shouldShowBadge = !(level === 1 && task.parentTaskId && 
                     milestoneTasks.find((t: any) => 
