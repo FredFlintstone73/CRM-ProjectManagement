@@ -870,7 +870,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('Raw request body:', req.body);
       const taskData = insertTaskSchema.partial().parse(req.body);
+      console.log('Parsed task data:', taskData);
       
 
       
