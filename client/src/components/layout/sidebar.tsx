@@ -36,6 +36,7 @@ export default function Sidebar() {
   ];
 
   const handleLogout = () => {
+    console.log('Logout button clicked');
     window.location.href = "/api/logout";
   };
 
@@ -58,7 +59,11 @@ export default function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
           {/* Dashboard */}
-          <Link href="/" className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}>
+          <Link 
+            href="/" 
+            className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}
+            onClick={() => console.log('Navigating to Dashboard')}
+          >
             <BarChart3 size={20} />
             <span>Dashboard</span>
           </Link>
@@ -66,8 +71,14 @@ export default function Sidebar() {
           {/* Contacts with Sub-categories */}
           <div className="space-y-1">
             <button
-              onClick={() => setIsContactsExpanded(!isContactsExpanded)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Contacts button clicked, current state:', isContactsExpanded);
+                setIsContactsExpanded(!isContactsExpanded);
+              }}
               className={`sidebar-nav-item w-full ${location.startsWith('/contacts') ? 'active' : ''}`}
+              type="button"
             >
               <Users size={20} />
               <span>Contacts</span>
@@ -99,7 +110,12 @@ export default function Sidebar() {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
-              <Link key={item.name} href={item.href} className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
+              <Link 
+                key={item.name} 
+                href={item.href} 
+                className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => console.log(`Navigating to ${item.name}: ${item.href}`)}
+              >
                 <Icon size={20} />
                 <span>{item.name}</span>
               </Link>
