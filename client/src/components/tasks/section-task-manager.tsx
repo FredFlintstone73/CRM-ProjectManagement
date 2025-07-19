@@ -97,7 +97,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-' + Date.now()], // Force fresh data
+    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v2'], // Force fresh data
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
@@ -109,7 +109,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     },
     enabled: !!projectId,
     retry: 1,
-    staleTime: 0, // No cache, always fetch fresh
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Compute sections dynamically instead of using state
@@ -334,6 +334,15 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         // Find its children
         const childTasks = milestoneTasks.filter(t => t.parentTaskId === 1041);
         console.log(`Children of Submit Critical Reports (id 1041):`, childTasks.map(t => `${t.id}: ${t.title}`));
+        
+        // Also show tasks that should be children but aren't
+        const shouldBeChildren = milestoneTasks.filter(t => 
+          t.title.includes('Generate Database Reports') ||
+          t.title.includes('Paperwork Sources') ||
+          t.title.includes('Implementation Plan') ||
+          t.title.includes('Financial Road Map')
+        );
+        console.log(`Tasks that might need parent assignment:`, shouldBeChildren.map(t => `${t.id}: ${t.title} (parent: ${t.parentTaskId})`));
       }
       
       // Create a map for quick lookup
