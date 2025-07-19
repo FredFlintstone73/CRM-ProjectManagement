@@ -565,12 +565,16 @@ export class DatabaseStorage implements IStorage {
 
     // Check if this is a CSR Meeting task (P-Day reference) and due date was updated
     if (processedTask.dueDate && updatedTask.title?.includes('CSR Meeting @')) {
-      console.log(`P-Day reference task updated: ${updatedTask.title} with new due date ${processedTask.dueDate}`);
+      console.log(`P-Day reference task detected: ${updatedTask.title}`);
+      console.log(`New due date: ${processedTask.dueDate}`);
+      console.log(`Project ID: ${updatedTask.projectId}`);
       
       // Get the project ID and update all P-Day dependent tasks
       const projectId = updatedTask.projectId;
       if (projectId) {
+        console.log(`Calling updatePDayDependentTasks for project ${projectId}`);
         await this.updatePDayDependentTasks(projectId, processedTask.dueDate as Date);
+        console.log(`P-Day dependent tasks update completed`);
       }
     }
 
@@ -965,6 +969,10 @@ export class DatabaseStorage implements IStorage {
 
   // Helper method to update P-Day dependent tasks when CSR Meeting date changes
   async updatePDayDependentTasks(projectId: number, pDayDate: Date): Promise<void> {
+    console.log(`=== P-Day Dependency Update Started ===`);
+    console.log(`Project ID: ${projectId}`);
+    console.log(`P-Day reference date: ${pDayDate}`);
+    
     // Find all tasks in the project that have daysFromMeeting values (P-Day dependent)
     const pDayTasks = await db
       .select()
@@ -978,6 +986,11 @@ export class DatabaseStorage implements IStorage {
 
     console.log(`Found ${pDayTasks.length} P-Day dependent tasks for project ${projectId}`);
 
+    if (pDayTasks.length === 0) {
+      console.log(`No P-Day dependent tasks found - this may be an issue`);
+      return;
+    }
+
     // Update each P-Day dependent task's due date
     for (const task of pDayTasks) {
       if (task.daysFromMeeting !== null && task.daysFromMeeting !== undefined) {
@@ -986,7 +999,10 @@ export class DatabaseStorage implements IStorage {
         newDueDate.setHours(12, 0, 0, 0);
         newDueDate.setDate(newDueDate.getDate() + task.daysFromMeeting);
 
-        console.log(`Updating task ${task.id} "${task.title}" from ${task.daysFromMeeting} days from P-Day to ${newDueDate.toISOString().split('T')[0]}`);
+        console.log(`Updating task ${task.id} "${task.title}"`);
+        console.log(`  Days from meeting: ${task.daysFromMeeting}`);
+        console.log(`  Old due date: ${task.dueDate}`);
+        console.log(`  New due date: ${newDueDate.toISOString().split('T')[0]}`);
 
         await db
           .update(tasks)
@@ -995,8 +1011,12 @@ export class DatabaseStorage implements IStorage {
             updatedAt: new Date() 
           })
           .where(eq(tasks.id, task.id));
+          
+        console.log(`  Task ${task.id} updated successfully`);
       }
     }
+    
+    console.log(`=== P-Day Dependency Update Completed ===`);
   }
 
   // Helper method to update dependent tasks when DRPM due date changes
