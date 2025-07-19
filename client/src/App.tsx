@@ -35,9 +35,9 @@ function Router() {
         <Route path="/" component={Landing} />
       ) : (
         <>
-          <div className="bg-gray-50" style={{pointerEvents: 'auto'}}>
+          <div className="bg-gray-50">
             <Sidebar />
-            <div className="ml-64 flex flex-col" style={{pointerEvents: 'auto'}}>
+            <div className="ml-64 flex flex-col">
               <Switch>
                 <Route path="/" component={Dashboard} />
                 <Route path="/contacts" component={Contacts} />

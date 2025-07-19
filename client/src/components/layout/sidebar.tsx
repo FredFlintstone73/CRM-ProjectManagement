@@ -10,16 +10,7 @@ export default function Sidebar() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [isContactsExpanded, setIsContactsExpanded] = useState(false);
 
-  console.log('Sidebar render:', { location, user, isAuthenticated, isLoading });
 
-  // Add global click test
-  useEffect(() => {
-    const handleGlobalClick = (e) => {
-      console.log('Global click detected:', e.target.tagName, e.target.className);
-    };
-    document.addEventListener('click', handleGlobalClick);
-    return () => document.removeEventListener('click', handleGlobalClick);
-  }, []);
 
   // Auto-expand contacts when on contacts page
   useEffect(() => {
@@ -47,35 +38,12 @@ export default function Sidebar() {
   ];
 
   const handleLogout = () => {
-    console.log('Logout button clicked');
     window.location.href = "/api/logout";
-  };
-
-  // Simple test button
-  const testClick = () => {
-    console.log('TEST BUTTON CLICKED!');
-    alert('Test button works!');
   };
 
   return (
     <div className="hidden md:flex md:w-64 md:flex-col">
       <div className="sidebar-nav flex flex-col flex-grow">
-        {/* Test button at top */}
-        <button 
-          onClick={testClick}
-          style={{
-            background: 'red',
-            color: 'white',
-            padding: '10px',
-            margin: '10px',
-            border: 'none',
-            cursor: 'pointer',
-            zIndex: 99999,
-            position: 'relative'
-          }}
-        >
-          TEST CLICK
-        </button>
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -92,11 +60,7 @@ export default function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
           {/* Dashboard */}
-          <Link 
-            href="/" 
-            className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}
-            onClick={() => console.log('Navigating to Dashboard')}
-          >
+          <Link href="/" className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}>
             <BarChart3 size={20} />
             <span>Dashboard</span>
           </Link>
@@ -104,14 +68,8 @@ export default function Sidebar() {
           {/* Contacts with Sub-categories */}
           <div className="space-y-1">
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Contacts button clicked, current state:', isContactsExpanded);
-                setIsContactsExpanded(!isContactsExpanded);
-              }}
+              onClick={() => setIsContactsExpanded(!isContactsExpanded)}
               className={`sidebar-nav-item w-full ${location.startsWith('/contacts') ? 'active' : ''}`}
-              type="button"
             >
               <Users size={20} />
               <span>Contacts</span>
@@ -143,12 +101,7 @@ export default function Sidebar() {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
-              <Link 
-                key={item.name} 
-                href={item.href} 
-                className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => console.log(`Navigating to ${item.name}: ${item.href}`)}
-              >
+              <Link key={item.name} href={item.href} className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
                 <Icon size={20} />
                 <span>{item.name}</span>
               </Link>
