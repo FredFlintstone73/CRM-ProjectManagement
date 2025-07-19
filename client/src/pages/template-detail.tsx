@@ -220,11 +220,27 @@ const TaskDisplay = ({
             </div>
             {/* Only show date fields for level 0 and 1 tasks (hide for level 2 sub-child tasks) 
                 Also hide date fields for child tasks under "Generate Database Reports and Documents for Preliminary Packet" */}
-            {level < 2 && !(level === 1 && task.parentTaskId && 
-              milestone.tasks?.find((t: any) => 
-                t.id === task.parentTaskId && 
-                t.title === "Generate Database Reports and Documents for Preliminary Packet"
-              )) ? (
+            {(() => {
+              const shouldShowDateFields = level < 2 && !(level === 1 && task.parentTaskId && 
+                milestone.tasks?.find((t: any) => 
+                  t.id === task.parentTaskId && 
+                  t.title === "Generate Database Reports and Documents for Preliminary Packet"
+                ));
+              
+              // Debug logging for "Generate Database Reports" child tasks
+              if (level === 1 && task.parentTaskId) {
+                const parentTask = milestone.tasks?.find((t: any) => t.id === task.parentTaskId);
+                console.log(`Debug task ${task.title}:`, {
+                  level,
+                  parentTaskId: task.parentTaskId,
+                  parentTask: parentTask,
+                  parentTitle: parentTask?.title,
+                  shouldShow: shouldShowDateFields
+                });
+              }
+              
+              return shouldShowDateFields;
+            })() ? (
               <div className="grid grid-cols-2 gap-4">
                 {editingTaskTitle === "DRPM @ ________________ (Time)" ? (
                   <>
