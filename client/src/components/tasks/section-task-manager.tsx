@@ -513,7 +513,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           </div>
         </div>
         
-        {hasChildren && task.expanded && task.children && (
+        {hasChildren && task.children && (
           <div className="space-y-2">
             {task.children.map(child => renderTaskNode(child, level + 1))}
           </div>
