@@ -150,18 +150,10 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       }
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      toast({
-        title: task ? "Task updated successfully" : "Task created successfully",
-      });
       onSuccess?.();
     },
     onError: (error) => {
       console.error("Task mutation error:", error);
-      toast({
-        title: task ? "Failed to update task" : "Failed to create task",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
     },
   });
 

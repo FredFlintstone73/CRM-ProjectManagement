@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { insertContactSchema, type InsertContact, type Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 interface ContactFormProps {
@@ -29,7 +29,7 @@ type ContactType = "client" | "prospect" | "team_member" | "strategic_partner";
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
   const { user } = useAuth();
-  const { toast } = useToast();
+
   const queryClient = useQueryClient();
   
   const [selectedCategory, setSelectedCategory] = useState<ContactCategory>(
@@ -187,11 +187,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
         queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
       }
       
-      toast({
-        title: contact ? "Contact updated" : "Contact created",
-        description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
-      });
-      
       if (!contact) {
         form.reset();
       }
@@ -200,25 +195,11 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      
-      // Get the actual error message from the server response
-      const errorMessage = error.message || "An unknown error occurred";
-      
-      toast({
-        title: "Error",
-        description: `${contact ? "Failed to update contact" : "Failed to create contact"}: ${errorMessage}`,
-        variant: "destructive",
-      });
     },
   });
 

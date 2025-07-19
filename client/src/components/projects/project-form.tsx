@@ -63,10 +63,6 @@ export default function ProjectForm({ project, onSuccess }: ProjectFormProps) {
       return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: project ? "Project updated successfully" : "Meeting created successfully",
-      });
       if (!project) {
         form.reset();
       }
@@ -74,21 +70,11 @@ export default function ProjectForm({ project, onSuccess }: ProjectFormProps) {
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
-      toast({
-        title: "Error",
-        description: project ? "Failed to update project" : "Failed to create meeting",
-        variant: "destructive",
-      });
     },
   });
 

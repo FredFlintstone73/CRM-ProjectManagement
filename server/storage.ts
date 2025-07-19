@@ -562,6 +562,12 @@ export class DatabaseStorage implements IStorage {
       .set({ ...processedTask, updatedAt: new Date() })
       .where(eq(tasks.id, id))
       .returning();
+
+    // Handle automatic due date calculation for dependent tasks
+    if (processedTask.dueDate && updatedTask.title && updatedTask.title.includes('DRPM')) {
+      await this.updateDependentTasksFromDRPM(id, processedTask.dueDate);
+    }
+
     return updatedTask;
   }
 
@@ -944,6 +950,43 @@ export class DatabaseStorage implements IStorage {
           .where(eq(tasks.id, update.id));
       }
     });
+  }
+
+  // Helper method to update dependent tasks when DRPM due date changes
+  async updateDependentTasksFromDRPM(drpmTaskId: number, drpmDueDate: Date): Promise<void> {
+    // Find all tasks that depend on this DRPM task
+    const dependentTasks = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.dependsOnTaskId, drpmTaskId));
+
+    for (const dependentTask of dependentTasks) {
+      let newDueDate: Date;
+      
+      // Calculate due date based on task type
+      if (dependentTask.title.includes('Corrections from DRPM Notes')) {
+        // 1 day after DRPM
+        newDueDate = new Date(drpmDueDate);
+        newDueDate.setDate(newDueDate.getDate() + 1);
+      } else if (dependentTask.title.includes('Packet Sealed and Made Available')) {
+        // 3 days after DRPM
+        newDueDate = new Date(drpmDueDate);
+        newDueDate.setDate(newDueDate.getDate() + 3);
+      } else {
+        // Default: 1 day after DRPM for other dependent tasks
+        newDueDate = new Date(drpmDueDate);
+        newDueDate.setDate(newDueDate.getDate() + 1);
+      }
+
+      // Update the dependent task's due date
+      await db
+        .update(tasks)
+        .set({ 
+          dueDate: newDueDate,
+          updatedAt: new Date() 
+        })
+        .where(eq(tasks.id, dependentTask.id));
+    }
   }
 
   // Email interaction operations
