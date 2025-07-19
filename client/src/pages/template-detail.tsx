@@ -225,11 +225,6 @@ const TaskDisplay = ({
                 Also hide date fields for child tasks under "Generate Database Reports and Documents for Preliminary Packet"
                 AND hide date fields completely for tasks under "Actions & Service Since Last Progress Meeting" */}
             {(() => {
-              // Hide date fields completely for tasks under "Actions & Service Since Last Progress Meeting"
-              if (milestone?.title === "Actions & Service Since Last Progress Meeting") {
-                return false;
-              }
-              
               const shouldShowDateFields = level < 2 && !(level === 1 && task.parentTaskId && 
                 milestoneTasks.find((t: any) => 
                   t.id === task.parentTaskId && 
@@ -297,6 +292,27 @@ const TaskDisplay = ({
                     <Input
                       type="text"
                       value="DRPM @ ________________ (Time) + 3 days"
+                      disabled
+                      className="bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                </>
+              ) : milestone?.title === "Actions & Service Since Last Progress Meeting" ? (
+                <>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Due Date</label>
+                    <Input
+                      type="date"
+                      value={editingTaskDueDate}
+                      onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                      placeholder="Select due date (optional)"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Days from Meeting</label>
+                    <Input
+                      type="text"
+                      value="Not applicable for this milestone"
                       disabled
                       className="bg-gray-100 text-gray-500"
                     />
@@ -418,8 +434,18 @@ const TaskDisplay = ({
                   </div>
                 )}
 {(() => {
-                  // Hide badges completely for tasks under "Actions & Service Since Last Progress Meeting"
+                  // For tasks under "Actions & Service Since Last Progress Meeting", show due date badge instead of P-Day
                   if (milestone?.title === "Actions & Service Since Last Progress Meeting") {
+                    if (task.dueDate) {
+                      const dueDateObj = new Date(task.dueDate);
+                      const formattedDate = dueDateObj.toLocaleDateString();
+                      return (
+                        <Badge variant="secondary" className="text-xs">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {formattedDate}
+                        </Badge>
+                      );
+                    }
                     return null;
                   }
                   
