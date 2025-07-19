@@ -1686,9 +1686,21 @@ export class DatabaseStorage implements IStorage {
     if (userContact) {
       const results = await tasksQuery
         .where(
-          and(
-            isNotNull(tasks.assignedTo),
-            sql`${userContact} = ANY(${tasks.assignedTo})`
+          or(
+            // Direct assignment check
+            and(
+              isNotNull(tasks.assignedTo),
+              sql`${userContact} = ANY(${tasks.assignedTo})`
+            ),
+            // Role-based assignment check - if assignedTo is empty/null but user has matching role
+            and(
+              or(
+                eq(tasks.assignedTo, null),
+                sql`array_length(${tasks.assignedTo}, 1) IS NULL`
+              ),
+              isNotNull(tasks.assignedToRole),
+              sql`'tax_planner' = ANY(${tasks.assignedToRole})`
+            )
           )
         );
       

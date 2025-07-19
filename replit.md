@@ -141,6 +141,17 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Individual User Priority Management System (July 19, 2025)
+- **Individual Task Priority System**: Successfully implemented complete individual user priority management allowing multiple users assigned to the same task to set their own priorities independently
+- **Database Schema Enhancement**: Created user_task_priorities table with proper foreign key relationships for storing individual user priorities per task
+- **Storage Layer Implementation**: Added comprehensive storage methods for getUserTaskPriority, setUserTaskPriority, and getUserTasksWithPriorities with proper database joins
+- **API Endpoints**: Built RESTful endpoints for setting and retrieving user-specific task priorities with authentication validation
+- **UserPriorityInput Component**: Created interactive component allowing users to click and edit individual task priorities in "My Tasks" view
+- **Priority Sorting Logic**: Enhanced task sorting to prioritize user-specific priorities over global task priorities when viewing personal tasks
+- **Role Assignment Resolution**: Fixed tax_planner role assignments to properly resolve to contact IDs for "My Tasks" visibility
+- **Frontend Integration**: Updated tasks page to display editable priority inputs in both grid and row views when viewing "My Tasks"
+- **Dual Priority System**: System maintains both global task priorities (for "All Tasks" view) and individual user priorities (for "My Tasks" view)
+
 ### Task Hierarchy and Date Assignment Fixes (July 19, 2025)
 - **Professional Role Task Hierarchy Fix**: Corrected misplaced professional role tasks (Estate Attorney, Financial Planner, Insurance Planner variants) that were incorrectly assigned under "Nominations and Deliverables Checkpoints" instead of "Submit Critical Reports and Final Highest Priority Conversation Topic"
 - **Parent-Child Relationship Restoration**: Updated 6 professional role tasks to have correct parent_task_id = 1339 (Submit Critical Reports) matching the template structure
