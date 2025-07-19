@@ -527,6 +527,33 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                   {expandedTasks.has(task.id) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </Button>
               )}
+              {(task.title === "Nominations and Deliverables Checkpoints" || 
+                task.title === "Submit Critical Reports and Final Highest Priority Conversation Topic" ||
+                task.title === "Generate Database Reports and Documents for Preliminary Packet" ||
+                (task.parentTaskId && projectTasks?.find((parent: any) => 
+                  parent.id === task.parentTaskId && 
+                  (parent.title === "Nominations and Deliverables Checkpoints" ||
+                   parent.title === "Submit Critical Reports and Final Highest Priority Conversation Topic" ||
+                   parent.title === "Generate Database Reports and Documents for Preliminary Packet")
+                ))) && (() => {
+                  // Calculate progress for this specific task and its children
+                  const relevantTasks = task.children || [];
+                  const completedTasks = relevantTasks.filter((t: any) => t.status === 'completed').length;
+                  const totalTasks = relevantTasks.length;
+                  const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                  
+                  return (
+                    <div className="flex items-center gap-2 ml-2">
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${progressPercentage}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-gray-600">{completedTasks}/{totalTasks}</span>
+                    </div>
+                  );
+                })()}
               {task.dueDate && (
                 <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
                   <CalendarDays className="h-3 w-3 mr-1" />
