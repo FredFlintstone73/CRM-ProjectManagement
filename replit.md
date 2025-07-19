@@ -705,3 +705,6 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Parent Task Mapping**: Proper parent task ID mapping during project creation to maintain hierarchical structure
 - **Dependency System Integration**: Full integration with DRPM dependency system for automatic due date calculations
 - **Task Creation Validation**: Enhanced validation and error handling for empty titles and missing template data
+- **Parent-Child Relationship Repair**: Fixed missing parent_task_id assignments where P-21 professional role tasks should be children of "Submit Critical Reports..." and P-12 professional role tasks should be children of "Nominations and Deliverables Checkpoints"
+- **Sub-Child Task Due Date Removal**: Completely removed due dates and "Days from Meeting" fields from level 3 sub-child tasks (deliverables) since parent professional role tasks drive the timeline
+- **Template Editor Enhancement**: Modified template editor to hide date management fields for level 2+ tasks, preventing users from setting individual due dates on sub-deliverable tasks
