@@ -218,11 +218,13 @@ const TaskDisplay = ({
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {editingTaskTitle === "DRPM @ ________________ (Time)" ? (
-                <>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Due Date</label>
+            {/* Only show date fields for level 0 and 1 tasks (hide for level 2 sub-child tasks) */}
+            {level < 2 ? (
+              <div className="grid grid-cols-2 gap-4">
+                {editingTaskTitle === "DRPM @ ________________ (Time)" ? (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Due Date</label>
                     <Input
                       type="date"
                       value={editingTaskDueDate}
@@ -310,7 +312,8 @@ const TaskDisplay = ({
                   </div>
                 </>
               )}
-            </div>
+              </div>
+            ) : null}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-sm font-medium mb-1 block">Assign To People</label>
@@ -1250,7 +1253,7 @@ export default function TemplateDetail() {
 
   // Fetch tasks for each milestone
   const taskQueries = useQuery({
-    queryKey: ['template-tasks', id, milestones.map(m => m.id), 'v2'], // Force refresh after removing sub-child due dates
+    queryKey: ['template-tasks', id, milestones.map(m => m.id), 'v3'], // Force refresh after removing sub-child due dates
     queryFn: async () => {
       if (!milestones || milestones.length === 0) return [];
       
