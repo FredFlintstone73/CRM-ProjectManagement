@@ -298,26 +298,15 @@ const TaskDisplay = ({
                   </div>
                 </>
               ) : milestone?.title === "Actions & Service Since Last Progress Meeting" ? (
-                <>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Due Date</label>
-                    <Input
-                      type="date"
-                      value={editingTaskDueDate}
-                      onChange={(e) => setEditingTaskDueDate(e.target.value)}
-                      placeholder="Select due date (optional)"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Days from Meeting</label>
-                    <Input
-                      type="text"
-                      value="Not applicable for this milestone"
-                      disabled
-                      className="bg-gray-100 text-gray-500"
-                    />
-                  </div>
-                </>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Due Date</label>
+                  <Input
+                    type="date"
+                    value={editingTaskDueDate}
+                    onChange={(e) => setEditingTaskDueDate(e.target.value)}
+                    placeholder="Select due date (optional)"
+                  />
+                </div>
               ) : (
                 <>
                   <div>
