@@ -212,10 +212,12 @@ export default function ProjectDetail() {
   const handleEditDueDate = () => {
     setEditingDueDate(true);
     if (project?.dueDate) {
-      // Convert UTC date to local date for the date input
-      const utcDate = new Date(project.dueDate);
-      const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
-      setNewDueDate(format(localDate, 'yyyy-MM-dd'));
+      // Format the date directly without timezone conversion
+      const date = new Date(project.dueDate);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      setNewDueDate(`${year}-${month}-${day}`);
     } else {
       setNewDueDate("");
     }
@@ -225,8 +227,9 @@ export default function ProjectDetail() {
     if (project) {
       let dueDateToSave = null;
       if (newDueDate) {
-        // Convert local date to UTC for saving
-        const localDate = new Date(newDueDate + 'T00:00:00');
+        // Create date at noon in local timezone to avoid UTC conversion issues
+        const [year, month, day] = newDueDate.split('-').map(Number);
+        const localDate = new Date(year, month - 1, day, 12, 0, 0);
         dueDateToSave = localDate.toISOString();
       }
       
