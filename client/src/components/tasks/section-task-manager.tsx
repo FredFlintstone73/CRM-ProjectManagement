@@ -97,7 +97,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v12'], // Force fresh data
+    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v14'], // Force fresh data
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
@@ -168,7 +168,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     mutationFn: (taskData: TaskFormData & { id: number }) => 
       apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData),
     onSuccess: () => {
+      // Force fresh data by incrementing cache version
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] }); // Remove cached data
       setIsTaskDialogOpen(false);
       resetTaskForm();
 
@@ -398,11 +401,19 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
               return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
             }
             
-            // If only one has daysFromMeeting, prioritize that one
-            if (aDays !== null && aDays !== undefined) return -1;
-            if (bDays !== null && bDays !== undefined) return 1;
+            // If both have dueDate but no daysFromMeeting, sort by dueDate
+            if (a.dueDate && b.dueDate && (!aDays && !bDays)) {
+              const aDate = new Date(a.dueDate).getTime();
+              const bDate = new Date(b.dueDate).getTime();
+              if (aDate !== bDate) return aDate - bDate;
+              return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+            }
             
-            // If neither has daysFromMeeting (sub-child tasks), sort alphabetically by title
+            // If only one has daysFromMeeting or dueDate, prioritize tasks with dates
+            if ((aDays !== null && aDays !== undefined) || a.dueDate) return -1;
+            if ((bDays !== null && bDays !== undefined) || b.dueDate) return 1;
+            
+            // If neither has timing info (sub-child tasks), sort alphabetically by title
             return a.title.localeCompare(b.title);
           })
           .map(task => ({
