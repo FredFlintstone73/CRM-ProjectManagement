@@ -167,7 +167,7 @@ export default function TaskDetail() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => window.history.back()}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
