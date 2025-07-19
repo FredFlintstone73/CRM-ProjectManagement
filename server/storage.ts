@@ -156,6 +156,9 @@ export interface IStorage {
   createContactFile(file: InsertContactFile, userId: string): Promise<ContactFile>;
   updateContactFile(fileId: number, updates: Partial<InsertContactFile>): Promise<ContactFile>;
   deleteContactFile(fileId: number): Promise<void>;
+
+  // Role-based assignment operations
+  resolveRoleAssignments(projectId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1519,6 +1522,71 @@ export class DatabaseStorage implements IStorage {
     }, userId);
     
     return newContact;
+  }
+
+  async resolveRoleAssignments(projectId: number): Promise<void> {
+    // Get all tasks in the project that have role assignments but no contact assignments
+    const tasksWithRoles = await db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.projectId, projectId),
+          isNotNull(tasks.assignedToRole)
+        )
+      );
+
+    if (tasksWithRoles.length === 0) return;
+
+    // Get all active team members
+    const teamMembers = await db
+      .select()
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.contactType, 'team_member'),
+          eq(contacts.status, 'active')
+        )
+      );
+
+    // Process each task
+    for (const task of tasksWithRoles) {
+      if (!task.assignedToRole || task.assignedToRole.length === 0) continue;
+
+      const assignedContactIds = [];
+
+      // Resolve each role to contact IDs
+      for (const role of task.assignedToRole) {
+        const matchingContacts = teamMembers.filter(contact => contact.role === role);
+        for (const contact of matchingContacts) {
+          if (!assignedContactIds.includes(contact.id)) {
+            assignedContactIds.push(contact.id);
+          }
+        }
+      }
+
+      // Update the task with resolved contact IDs
+      if (assignedContactIds.length > 0) {
+        await db
+          .update(tasks)
+          .set({
+            assignedTo: assignedContactIds,
+            updatedAt: new Date()
+          })
+          .where(eq(tasks.id, task.id));
+
+        console.log(`Resolved task ${task.id} (${task.title}) - roles: ${task.assignedToRole} -> contacts: ${assignedContactIds}`);
+      }
+    }
+
+    // Log activity
+    await this.createActivityLog({
+      userId: 'system',
+      action: "resolved_role_assignments",
+      entityType: "project", 
+      entityId: projectId,
+      description: `Resolved role-based assignments for ${tasksWithRoles.length} tasks`,
+    });
   }
 }
 

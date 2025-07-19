@@ -656,6 +656,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Resolve role-based assignments to contact IDs
+  app.post('/api/projects/:id/resolve-roles', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      await storage.resolveRoleAssignments(projectId);
+      res.json({ message: "Role assignments resolved successfully" });
+    } catch (error) {
+      console.error("Error resolving role assignments:", error);
+      res.status(500).json({ message: "Failed to resolve role assignments" });
+    }
+  });
+
   // Project tasks route
   app.get('/api/projects/:id/tasks', isAuthenticated, async (req: any, res) => {
     try {
