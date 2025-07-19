@@ -332,7 +332,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         taskMap.set(task.id, {
           ...task,
           children: [],
-          expanded: expandedTasks.has(task.id),
+          expanded: true, // Auto-expand all tasks to show hierarchy
         });
       });
       
