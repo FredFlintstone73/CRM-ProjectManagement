@@ -480,7 +480,10 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="preferredContactMethod">Preferred Contact Method</Label>
-            <Select onValueChange={(value) => form.setValue("preferredContactMethod", value)}>
+            <Select 
+              onValueChange={(value) => form.setValue("preferredContactMethod", value)}
+              defaultValue={contact?.preferredContactMethod || undefined}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select contact method" />
               </SelectTrigger>
@@ -495,7 +498,10 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           </div>
           <div>
             <Label htmlFor="role">Role *</Label>
-            <Select onValueChange={(value) => form.setValue("role", value)}>
+            <Select 
+              onValueChange={(value) => form.setValue("role", value)}
+              defaultValue={contact?.role || undefined}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
@@ -585,7 +591,10 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
         <div>
           <Label htmlFor="status">Status</Label>
-          <Select onValueChange={(value) => form.setValue("status", value)}>
+          <Select 
+            onValueChange={(value) => form.setValue("status", value)}
+            defaultValue={contact?.status || undefined}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
