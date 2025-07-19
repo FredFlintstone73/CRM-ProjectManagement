@@ -116,17 +116,12 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Update sections when milestones and tasks are loaded
   useEffect(() => {
-    if (milestones.length > 0 && tasks.length >= 0) {
-      const sectionsFromMilestones = milestones.map(milestone => {
-        // Find tasks that belong to this milestone
-        const milestoneTasks = tasks.filter(task => task.milestoneId === milestone.id);
-        
-        return {
-          id: `milestone-${milestone.id}`,
-          title: milestone.title,
-          tasks: milestoneTasks
-        };
-      });
+    if (milestones.length > 0) {
+      const sectionsFromMilestones = milestones.map(milestone => ({
+        id: `milestone-${milestone.id}`,
+        title: milestone.title,
+        tasks: tasks.filter(task => task.milestoneId === milestone.id)
+      }));
       
       setSections(sectionsFromMilestones);
     }
@@ -339,31 +334,58 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       // Extract milestone ID from section ID (format: milestone-123)
       const milestoneId = parseInt(sectionId.replace('milestone-', ''));
       
-      // Get top-level tasks (no parent) for this milestone
-      const sectionTasks = tasks.filter(task => {
-        if (!task || task.parentTaskId) return false;
-        return task.milestoneId === milestoneId;
+      // Get all tasks for this milestone
+      const milestoneTasks = tasks.filter(task => 
+        task && task.milestoneId === milestoneId
+      );
+      
+      // Create a map for quick lookup
+      const taskMap = new Map<number, TaskNode>();
+      milestoneTasks.forEach(task => {
+        taskMap.set(task.id, {
+          ...task,
+          children: [],
+          expanded: expandedTasks.has(task.id),
+        });
       });
       
-      const buildChildren = (parentId: number): TaskNode[] => {
-        if (!parentId || !tasks) return [];
+      // Build hierarchy by connecting children to parents
+      const rootTasks: TaskNode[] = [];
+      milestoneTasks.forEach(task => {
+        const taskNode = taskMap.get(task.id)!;
         
-        const children = tasks.filter(task => 
-          task && task.parentTaskId === parentId
-        );
-        
-        return children.map(child => ({
-          ...child,
-          children: buildChildren(child.id),
-          expanded: expandedTasks.has(child.id),
-        }));
+        if (task.parentTaskId) {
+          // This is a child task
+          const parent = taskMap.get(task.parentTaskId);
+          if (parent) {
+            parent.children!.push(taskNode);
+          } else {
+            // Parent not found in this milestone, treat as root
+            rootTasks.push(taskNode);
+          }
+        } else {
+          // This is a root task
+          rootTasks.push(taskNode);
+        }
+      });
+
+      // Sort root tasks and recursively sort children
+      const sortTasks = (taskList: TaskNode[]): TaskNode[] => {
+        return taskList
+          .sort((a, b) => {
+            // Sort by daysFromMeeting first, then by sortOrder
+            const aDays = a.daysFromMeeting ?? 999;
+            const bDays = b.daysFromMeeting ?? 999;
+            if (aDays !== bDays) return aDays - bDays;
+            return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+          })
+          .map(task => ({
+            ...task,
+            children: task.children ? sortTasks(task.children) : []
+          }));
       };
 
-      return sectionTasks.map(task => ({
-        ...task,
-        children: buildChildren(task.id),
-        expanded: expandedTasks.has(task.id),
-      }));
+      return sortTasks(rootTasks);
     } catch (error) {
       console.error('Error building task hierarchy:', error);
       return [];
