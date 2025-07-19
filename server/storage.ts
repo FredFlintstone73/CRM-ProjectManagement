@@ -492,20 +492,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, task: Partial<InsertTask>): Promise<Task> {
-    // Process date field - handle timezone-safe date conversion
+    // Process date field - keep as string for proper timezone handling
     const processedTask = { ...task };
-    if (processedTask.dueDate && typeof processedTask.dueDate === 'string' && processedTask.dueDate.trim()) {
-      // For YYYY-MM-DD format, create date in local timezone to avoid UTC conversion issues
-      const dateStr = processedTask.dueDate.trim();
-      if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        // Parse as local date to avoid timezone issues
-        const [year, month, day] = dateStr.split('-').map(Number);
-        processedTask.dueDate = new Date(year, month - 1, day);
-      } else {
-        processedTask.dueDate = new Date(processedTask.dueDate);
+    if (processedTask.dueDate !== undefined) {
+      if (processedTask.dueDate === '' || processedTask.dueDate === null) {
+        processedTask.dueDate = null;
       }
-    } else if (processedTask.dueDate === '') {
-      processedTask.dueDate = null;
+      // Keep dueDate as string - don't convert to Date object to avoid timezone issues
     }
     
     // Handle assignment - convert array of team_xxx to contact IDs, or handle me_xxx for current user
