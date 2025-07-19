@@ -80,8 +80,6 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
-  const [sections, setSections] = useState<TaskSection[]>([]);
-
   // Fetch milestones for this project
   const { data: milestones = [], isLoading: isLoadingMilestones } = useQuery({
     queryKey: ['/api/milestones', projectId],
@@ -114,18 +112,12 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Update sections when milestones and tasks are loaded
-  useEffect(() => {
-    if (milestones.length > 0) {
-      const sectionsFromMilestones = milestones.map(milestone => ({
-        id: `milestone-${milestone.id}`,
-        title: milestone.title,
-        tasks: tasks.filter(task => task.milestoneId === milestone.id)
-      }));
-      
-      setSections(sectionsFromMilestones);
-    }
-  }, [milestones, tasks]);
+  // Compute sections dynamically instead of using state
+  const sections: TaskSection[] = milestones.map(milestone => ({
+    id: `milestone-${milestone.id}`,
+    title: milestone.title,
+    tasks: tasks.filter(task => task.milestoneId === milestone.id)
+  }));
 
   // Fetch team members
   const { data: contacts = [], error: contactsError } = useQuery<Contact[]>({
@@ -291,24 +283,13 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     if (sectionForm.title.trim()) {
       if (editingSection) {
         // Update existing section
-        setSections(prev => 
-          prev.map(section => 
-            section.id === editingSection.id 
-              ? { ...section, title: sectionForm.title.trim() }
-              : section
-          )
-        );
+        // Note: Section editing handled by milestone updates
+        console.log('Section editing not implemented for computed sections');
         setEditingSection(null);
 
       } else {
-        // Create new section
-        const newSection: TaskSection = {
-          id: `section-${Date.now()}`,
-          title: sectionForm.title.trim(),
-          tasks: [],
-        };
-        setSections(prev => [...prev, newSection]);
-
+        // Note: Section creation handled by milestone creation
+        console.log('Section creation not implemented for computed sections');
       }
       setIsSectionDialogOpen(false);
       setSectionForm({ title: "" });
@@ -322,8 +303,8 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   };
 
   const deleteSection = (sectionId: string) => {
-    setSections(prev => prev.filter(section => section.id !== sectionId));
-
+    // Note: Section deletion handled by milestone deletion
+    console.log('Section deletion not implemented for computed sections');
   };
 
   // Build task hierarchy for a section
@@ -338,6 +319,12 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       const milestoneTasks = tasks.filter(task => 
         task && task.milestoneId === milestoneId
       );
+      
+      // Debug logging for specific milestone
+      if (milestoneId === 115) { // Preparing for DRPM
+        console.log(`Building hierarchy for milestone ${milestoneId}, found ${milestoneTasks.length} tasks:`);
+        console.log(milestoneTasks.map(t => `${t.id}: "${t.title}" (parent: ${t.parentTaskId})`));
+      }
       
       // Create a map for quick lookup
       const taskMap = new Map<number, TaskNode>();
@@ -359,13 +346,22 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           const parent = taskMap.get(task.parentTaskId);
           if (parent) {
             parent.children!.push(taskNode);
+            if (milestoneId === 115) {
+              console.log(`Added "${task.title}" as child of "${parent.title}"`);
+            }
           } else {
             // Parent not found in this milestone, treat as root
             rootTasks.push(taskNode);
+            if (milestoneId === 115) {
+              console.log(`Parent ${task.parentTaskId} not found for "${task.title}", treating as root`);
+            }
           }
         } else {
           // This is a root task
           rootTasks.push(taskNode);
+          if (milestoneId === 115) {
+            console.log(`"${task.title}" is a root task`);
+          }
         }
       });
 
@@ -385,7 +381,13 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           }));
       };
 
-      return sortTasks(rootTasks);
+      const result = sortTasks(rootTasks);
+      
+      if (milestoneId === 115) {
+        console.log(`Final hierarchy for milestone ${milestoneId}:`, result);
+      }
+
+      return result;
     } catch (error) {
       console.error('Error building task hierarchy:', error);
       return [];
