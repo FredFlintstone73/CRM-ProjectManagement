@@ -141,6 +141,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Project Creation Date Assignment Fix (July 19, 2025)
+- **Root Cause Identification**: Fixed issue where child tasks under "Generate Database Reports and Documents for Preliminary Packet" were incorrectly receiving due dates during project creation from templates
+- **Template vs Project Analysis**: Discovered that while templates correctly had NULL due dates for these child tasks, project creation logic was automatically assigning dates based on daysFromMeeting values
+- **Server-Side Logic Fix**: Modified project creation logic in server/routes.ts to skip due date assignment for child tasks under specific parent tasks
+- **Database Cleanup**: Removed incorrect due dates from existing project child tasks using SQL UPDATE to restore proper structure
+- **Date Assignment Logic**: Enhanced createTaskFromTemplate function to check parent task titles and skip date calculation for deliverable sub-tasks
+- **User Experience**: Child tasks now display without due date information as intended, maintaining focus on task content rather than scheduling
+
 ### Template Editor Child Task Date Field Hiding System (July 19, 2025)
 - **Date Field Hiding Logic**: Successfully implemented complete date field hiding system for child tasks under "Generate Database Reports and Documents for Preliminary Packet"
 - **Badge Hiding Enhancement**: Extended hiding logic to include P-format badges (P-21, P-20, etc.) for consistent visual appearance with "Nominations and Deliverables Checkpoints" child tasks

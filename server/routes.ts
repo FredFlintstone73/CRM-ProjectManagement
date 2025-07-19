@@ -266,11 +266,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const createTaskFromTemplate = async (templateTask: any, parentTaskId?: number) => {
             let taskDueDate = null;
             
+            // Check if this is a child task under "Generate Database Reports and Documents for Preliminary Packet"
+            // or "Nominations and Deliverables Checkpoints" - these child tasks should not have due dates
+            const shouldSkipDateAssignment = templateTask.parentTaskId && (() => {
+              const parentTask = templateTasks.find(t => t.id === templateTask.parentTaskId);
+              return parentTask && (
+                parentTask.title === "Generate Database Reports and Documents for Preliminary Packet" ||
+                parentTask.title === "Nominations and Deliverables Checkpoints"
+              );
+            })();
+            
             if (templateTask.dueDate) {
               // Use custom due date if specified (for DRPM task)
               taskDueDate = new Date(templateTask.dueDate);
-            } else if (templateTask.daysFromMeeting !== null && templateTask.daysFromMeeting !== undefined) {
-              // Use days from meeting calculation
+            } else if (!shouldSkipDateAssignment && templateTask.daysFromMeeting !== null && templateTask.daysFromMeeting !== undefined) {
+              // Use days from meeting calculation (skip for specific child tasks)
               const baseDate = new Date(meetingDate);
               baseDate.setDate(baseDate.getDate() + templateTask.daysFromMeeting);
               taskDueDate = baseDate;
