@@ -293,7 +293,7 @@ const TaskDisplay = ({
                       <SelectContent className="max-h-60">
                         {Array.from({ length: 85 }, (_, i) => -80 + i).map((days) => (
                           <SelectItem key={days} value={days.toString()}>
-                            P{days > 0 ? `+${days}` : days}
+                            {days === 0 ? "P-Day" : `P${days > 0 ? `+${days}` : days}`}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -398,11 +398,13 @@ const TaskDisplay = ({
                 )}
                 <Badge variant="secondary" className="text-xs">
                   {task.title === "DRPM @ ________________ (Time)" ? (
-                    "D-0"
+                    "D-Day"
                   ) : task.title === "Corrections from DRPM Notes Made to Progress Meeting Packets" ? (
                     "D+1"
                   ) : task.title === "Packet Sealed and Made Available to TA" ? (
                     "D+3"
+                  ) : task.daysFromMeeting === 0 ? (
+                    "P-Day"
                   ) : (
                     `P${task.daysFromMeeting > 0 ? `+${task.daysFromMeeting}` : task.daysFromMeeting}`
                   )}

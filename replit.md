@@ -612,6 +612,8 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Template UI Updates**: Modified template editor to show dependency information instead of "Days from Meeting" for dependent tasks
 - **Dependency Display**: Dependent tasks show descriptive text like "DRPM @ ________________ (Time) + 1 day" in UI
 - **Server-Side Processing**: Implemented variable day offsets (1 day for Corrections, 3 days for Packet) based on task type
+- **D-Format Badge System**: Implemented special D-format badges for DRPM-related tasks (D-Day for DRPM, D+1 for Corrections, D+3 for Packet)
+- **P-Day Badge Format**: Updated P0 to display as "P-Day" in both badges and dropdown selections for meeting day tasks
 
 ### Conditional Due Date Badge Styling Implementation (July 19, 2025)
 - **Color-Coded Due Date Badges**: Implemented conditional styling for task due date badges across all task management interfaces
