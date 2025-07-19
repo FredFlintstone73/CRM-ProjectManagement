@@ -711,5 +711,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Alphabetical Sub-Child Task Sorting**: Implemented alphabetical sorting (A-Z) for sub-child deliverable tasks while maintaining chronological ordering for parent professional role tasks
 - **Dynamic Task Date Sorting**: Enhanced sorting logic to handle both daysFromMeeting and dueDate fields with automatic re-sorting when task dates are edited
 - **Milestone Order Fix**: Moved "Actions & Service Since Last Progress Meeting" milestone to first position (sort_order = 1) to appear at the top of project sections
+- **P-Day Automatic Dependency System**: Implemented automatic due date recalculation for all P-Day dependent tasks when CSR Meeting @ task date changes
+- **P-Day Reference Integration**: All tasks with daysFromMeeting values automatically update their due dates when the P-Day reference (CSR Meeting task) is modified
 - **Sub-Child Task Due Date Removal**: Completely removed due dates and "Days from Meeting" fields from level 3 sub-child tasks (deliverables) since parent professional role tasks drive the timeline
 - **Template Editor Enhancement**: Modified template editor to hide date management fields for level 2+ tasks, preventing users from setting individual due dates on sub-deliverable tasks

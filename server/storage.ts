@@ -563,6 +563,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.id, id))
       .returning();
 
+    // Check if this is a CSR Meeting task (P-Day reference) and due date was updated
+    if (processedTask.dueDate && updatedTask.title?.includes('CSR Meeting @')) {
+      console.log(`P-Day reference task updated: ${updatedTask.title} with new due date ${processedTask.dueDate}`);
+      
+      // Get the project ID and update all P-Day dependent tasks
+      const projectId = updatedTask.projectId;
+      if (projectId) {
+        await this.updatePDayDependentTasks(projectId, processedTask.dueDate as Date);
+      }
+    }
+
     // Handle automatic due date calculation for dependent tasks
     if (processedTask.dueDate && updatedTask.title && updatedTask.title.includes('DRPM')) {
       await this.updateDependentTasksFromDRPM(id, processedTask.dueDate);
@@ -950,6 +961,42 @@ export class DatabaseStorage implements IStorage {
           .where(eq(tasks.id, update.id));
       }
     });
+  }
+
+  // Helper method to update P-Day dependent tasks when CSR Meeting date changes
+  async updatePDayDependentTasks(projectId: number, pDayDate: Date): Promise<void> {
+    // Find all tasks in the project that have daysFromMeeting values (P-Day dependent)
+    const pDayTasks = await db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.projectId, projectId),
+          isNotNull(tasks.daysFromMeeting)
+        )
+      );
+
+    console.log(`Found ${pDayTasks.length} P-Day dependent tasks for project ${projectId}`);
+
+    // Update each P-Day dependent task's due date
+    for (const task of pDayTasks) {
+      if (task.daysFromMeeting !== null && task.daysFromMeeting !== undefined) {
+        const newDueDate = new Date(pDayDate);
+        // Set time to noon to avoid timezone issues
+        newDueDate.setHours(12, 0, 0, 0);
+        newDueDate.setDate(newDueDate.getDate() + task.daysFromMeeting);
+
+        console.log(`Updating task ${task.id} "${task.title}" from ${task.daysFromMeeting} days from P-Day to ${newDueDate.toISOString().split('T')[0]}`);
+
+        await db
+          .update(tasks)
+          .set({ 
+            dueDate: newDueDate,
+            updatedAt: new Date() 
+          })
+          .where(eq(tasks.id, task.id));
+      }
+    }
   }
 
   // Helper method to update dependent tasks when DRPM due date changes
