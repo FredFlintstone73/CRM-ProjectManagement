@@ -12,6 +12,15 @@ export default function Sidebar() {
 
   console.log('Sidebar render:', { location, user, isAuthenticated, isLoading });
 
+  // Add global click test
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      console.log('Global click detected:', e.target.tagName, e.target.className);
+    };
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
+
   // Auto-expand contacts when on contacts page
   useEffect(() => {
     if (location.startsWith('/contacts')) {
@@ -42,9 +51,31 @@ export default function Sidebar() {
     window.location.href = "/api/logout";
   };
 
+  // Simple test button
+  const testClick = () => {
+    console.log('TEST BUTTON CLICKED!');
+    alert('Test button works!');
+  };
+
   return (
     <div className="hidden md:flex md:w-64 md:flex-col">
       <div className="sidebar-nav flex flex-col flex-grow">
+        {/* Test button at top */}
+        <button 
+          onClick={testClick}
+          style={{
+            background: 'red',
+            color: 'white',
+            padding: '10px',
+            margin: '10px',
+            border: 'none',
+            cursor: 'pointer',
+            zIndex: 99999,
+            position: 'relative'
+          }}
+        >
+          TEST CLICK
+        </button>
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">

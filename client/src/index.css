@@ -80,11 +80,15 @@
   }
   
   .sidebar-nav {
-    @apply fixed top-0 left-0 h-screen w-64 border-r border-slate-700 bg-slate-800 text-white z-50;
+    @apply fixed top-0 left-0 h-screen w-64 border-r border-slate-700 bg-slate-800 text-white;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
   }
   
   .sidebar-nav-item {
     @apply flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg mx-2 mb-1 transition-colors text-slate-300 hover:bg-slate-700 hover:text-white;
+    pointer-events: auto !important;
+    cursor: pointer !important;
   }
   
   .sidebar-nav-item.active {
