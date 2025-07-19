@@ -416,10 +416,12 @@ const TaskDisplay = ({
                   </Button>
                   {(task.title === "Nominations and Deliverables Checkpoints" || 
                     task.title === "Submit Critical Reports and Final Highest Priority Conversation Topic" ||
+                    task.title === "Generate Database Reports and Documents for Preliminary Packet" ||
                     (task.parentTaskId && milestoneTasks.find((parent: any) => 
                       parent.id === task.parentTaskId && 
                       (parent.title === "Nominations and Deliverables Checkpoints" ||
-                       parent.title === "Submit Critical Reports and Final Highest Priority Conversation Topic")
+                       parent.title === "Submit Critical Reports and Final Highest Priority Conversation Topic" ||
+                       parent.title === "Generate Database Reports and Documents for Preliminary Packet")
                     ))) && (
                     <div className="flex items-center gap-2 ml-2">
                       {(() => {
