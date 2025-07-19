@@ -155,8 +155,7 @@ export default function Tasks() {
   const getCurrentUserContactId = () => {
     if (!user || !contacts) return null;
     const userContact = contacts.find((contact: any) => 
-      contact.personalEmail === user.email || 
-      contact.workEmail === user.email
+      contact.firstName === user.firstName && contact.lastName === user.lastName
     );
     return userContact?.id || null;
   };
@@ -175,7 +174,13 @@ export default function Tasks() {
       if (taskFilter === 'all_tasks') return true;
       if (taskFilter === 'my_tasks') {
         const currentUserContactId = getCurrentUserContactId();
-        return currentUserContactId && task.assignedTo === currentUserContactId;
+        if (!currentUserContactId) return false;
+        // Check if assignedTo is an array and contains the current user
+        if (Array.isArray(task.assignedTo)) {
+          return task.assignedTo.includes(currentUserContactId);
+        }
+        // Fallback for single assignment
+        return task.assignedTo === currentUserContactId;
       }
       return true;
     };
@@ -207,7 +212,17 @@ export default function Tasks() {
         const getAssigneeName = (taskId: number) => {
           const task = tasks?.find(t => t.id === taskId);
           if (!task?.assignedTo || !contacts) return 'Unassigned';
-          const assignee = contacts.find((c: any) => c.id === task.assignedTo);
+          
+          // Handle array assignments - get first assignee for sorting
+          let assigneeId;
+          if (Array.isArray(task.assignedTo)) {
+            assigneeId = task.assignedTo[0]; // Use first assignee for sorting
+          } else {
+            assigneeId = task.assignedTo;
+          }
+          
+          if (!assigneeId) return 'Unassigned';
+          const assignee = contacts.find((c: any) => c.id === assigneeId);
           return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unassigned';
         };
         return getAssigneeName(a.id).localeCompare(getAssigneeName(b.id));
@@ -224,7 +239,15 @@ export default function Tasks() {
     if (!currentUserContactId) return { completed: 0, total: 0, percentage: 0 };
     
     // Filter tasks by current user assignment
-    let myTasks = tasks.filter(task => task.assignedTo === currentUserContactId);
+    let myTasks = tasks.filter(task => {
+      if (!task.assignedTo) return false;
+      // Check if assignedTo is an array and contains the current user
+      if (Array.isArray(task.assignedTo)) {
+        return task.assignedTo.includes(currentUserContactId);
+      }
+      // Fallback for single assignment
+      return task.assignedTo === currentUserContactId;
+    });
     
     // Apply due date filter if not 'all'
     if (dueDateFilter !== 'all') {
