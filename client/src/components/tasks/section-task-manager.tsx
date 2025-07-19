@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,7 @@ interface EditingSectionState {
 export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   
   // Form states
   const [selectedTask, setSelectedTask] = useState<TaskNode | null>(null);
@@ -431,17 +433,17 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <button
-                className={`font-medium text-left hover:text-blue-600 transition-colors task-title ${
+              <Button
+                variant="ghost"
+                className={`font-medium text-left hover:text-blue-600 transition-colors task-title p-0 h-auto justify-start ${
                   isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
                 }`}
                 onClick={() => {
-                  // Navigate to task detail page
-                  window.location.href = `/task/${task.id}`;
+                  setLocation(`/task/${task.id}`);
                 }}
               >
                 {task.title}
-              </button>
+              </Button>
               {task.dueDate && (
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-3 w-3 mr-1" />
@@ -533,50 +535,46 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           return (
             <Card key={section.id}>
               <Collapsible open={isSectionExpanded} onOpenChange={() => toggleSection(section.id)}>
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-gray-50">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                        >
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 flex-1 p-2 rounded">
+                        <div className="h-6 w-6 flex items-center justify-center">
                           {isSectionExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </Button>
+                        </div>
                         <CardTitle className="text-lg section-title">{section.title}</CardTitle>
                         <Badge variant="outline" className="text-xs">
                           {completedTasks}/{totalTasks} completed
                         </Badge>
                       </div>
-                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => openEditSectionDialog(section)}
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => deleteSection(section.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => openTaskDialog(section.id)}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Task
-                        </Button>
-                      </div>
+                    </CollapsibleTrigger>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => openEditSectionDialog(section)}
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => deleteSection(section.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => openTaskDialog(section.id)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Task
+                      </Button>
                     </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
+                  </div>
+                </CardHeader>
                 <CollapsibleContent>
                   <CardContent>
                     {sectionTasks.length === 0 ? (
