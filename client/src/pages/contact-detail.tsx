@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
@@ -31,6 +32,7 @@ export default function ContactDetail() {
   // All hooks must be called in the same order every time
 
   const { isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
   const { id } = useParams<ContactDetailParams>();
   const [, navigate] = useLocation();
   const searchString = useSearch();
