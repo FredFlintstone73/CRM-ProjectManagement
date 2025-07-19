@@ -746,3 +746,11 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Navigation Layout**: Positioned Back and Next Task buttons in header bar for easy access and clean interface design
 - **Sequential Navigation Logic**: Smart navigation that finds next task in chronological order, hiding button when at last task
 - **Browser History Integration**: Back button uses window.history.back() to maintain exact previous page state including filters and sorting
+
+### CSR Template Structure Preservation (July 19, 2025)
+- **Template Database Verification**: Confirmed CSR Meeting Template (ID: 13) has correct parent-child relationships preserved
+- **Dual Due Date Pattern**: Template properly maintains -21 day and -12 day offset patterns for different professional role groups
+- **Hierarchical Task Structure**: Submit Critical Reports (-21 days) and Nominations and Deliverables (-12 days) sections properly organized
+- **Project Creation Logic**: Server-side template-to-project conversion maintains chronological ordering and parent-child relationships
+- **Professional Role Distribution**: Estate Attorney, Financial Planner, Insurance Planner variants correctly distributed between sections
+- **Future Project Consistency**: All new CSR projects will automatically inherit the corrected task organization and due date structure
