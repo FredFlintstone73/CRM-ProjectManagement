@@ -552,6 +552,13 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
+    console.log('Date processing debug:', {
+      originalDate: task.dueDate,
+      processedDate: processedTask.dueDate,
+      dateType: typeof processedTask.dueDate,
+      isString: typeof processedTask.dueDate === 'string',
+      regexMatch: typeof processedTask.dueDate === 'string' ? processedTask.dueDate.match(/^\d{4}-\d{2}-\d{2}$/) : null
+    });
     console.log('Final processed task for update:', processedTask);
     
     const [updatedTask] = await db
