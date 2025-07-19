@@ -97,7 +97,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v11'], // Force fresh data
+    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v12'], // Force fresh data
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
@@ -388,11 +388,22 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       const sortTasks = (taskList: TaskNode[]): TaskNode[] => {
         return taskList
           .sort((a, b) => {
-            // Sort by daysFromMeeting first, then by sortOrder
-            const aDays = a.daysFromMeeting ?? 999;
-            const bDays = b.daysFromMeeting ?? 999;
-            if (aDays !== bDays) return aDays - bDays;
-            return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+            // For tasks with daysFromMeeting, sort by that first
+            const aDays = a.daysFromMeeting;
+            const bDays = b.daysFromMeeting;
+            
+            // If both have daysFromMeeting, sort by that, then by sortOrder
+            if (aDays !== null && aDays !== undefined && bDays !== null && bDays !== undefined) {
+              if (aDays !== bDays) return aDays - bDays;
+              return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+            }
+            
+            // If only one has daysFromMeeting, prioritize that one
+            if (aDays !== null && aDays !== undefined) return -1;
+            if (bDays !== null && bDays !== undefined) return 1;
+            
+            // If neither has daysFromMeeting (sub-child tasks), sort alphabetically by title
+            return a.title.localeCompare(b.title);
           })
           .map(task => ({
             ...task,

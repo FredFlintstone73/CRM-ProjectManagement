@@ -708,5 +708,6 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Parent-Child Relationship Repair**: Fixed missing parent_task_id assignments where P-21 professional role tasks should be children of "Submit Critical Reports..." and P-12 professional role tasks should be children of "Nominations and Deliverables Checkpoints"
 - **Admin Role Task Assignment**: Fixed Admin Manager, Client Service Representative, and Deliverables Team Coordinator tasks to properly appear as children of "Nominations and Deliverables Checkpoints"
 - **Generate Database Reports Fix**: Restored missing child tasks (Financial Road Map Updated, Implementation Plan GPS Updated, Paperwork Sources Updated) to "Generate Database Reports and Documents for Preliminary Packet" parent
+- **Alphabetical Sub-Child Task Sorting**: Implemented alphabetical sorting (A-Z) for sub-child deliverable tasks while maintaining chronological ordering for parent professional role tasks
 - **Sub-Child Task Due Date Removal**: Completely removed due dates and "Days from Meeting" fields from level 3 sub-child tasks (deliverables) since parent professional role tasks drive the timeline
 - **Template Editor Enhancement**: Modified template editor to hide date management fields for level 2+ tasks, preventing users from setting individual due dates on sub-deliverable tasks
