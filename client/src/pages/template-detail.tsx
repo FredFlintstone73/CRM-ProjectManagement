@@ -392,6 +392,47 @@ const TaskDisplay = ({
   );
 };
 
+// Sortable task display component
+const SortableTaskDisplay = ({ task, templateId, level, milestone, ...props }: any) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative">
+      <div className="flex items-center gap-2">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded flex-shrink-0"
+        >
+          <GripVertical className="w-4 h-4 text-gray-400" />
+        </div>
+        <div className="flex-1">
+          <TaskDisplay 
+            task={task} 
+            templateId={templateId}
+            level={level}
+            milestone={milestone}
+            {...props}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Sortable section component
 const SortableSection = ({ 
   milestone, 
@@ -433,7 +474,8 @@ const SortableSection = ({
   createTaskMutation, 
   templateId,
   expandedTasks,
-  toggleTaskExpansion
+  toggleTaskExpansion,
+  handleTaskDragEnd
 }: any) => {
   const {
     attributes,
@@ -557,40 +599,56 @@ const SortableSection = ({
                   Add Task
                 </Button>
               </div>
-              {hierarchicalTasks.map((task: any) => (
-                <TaskDisplay 
-                  key={task.id} 
-                  task={task} 
-                  templateId={templateId}
-                  level={0}
-                  milestone={milestone}
-                  editingTask={editingTask}
-                  setEditingTask={setEditingTask}
-                  updateTaskMutation={updateTaskMutation}
-                  deleteTaskMutation={deleteTaskMutation}
-                  createTaskMutation={createTaskMutation}
-                  expandedTasks={expandedTasks}
-                  toggleTaskExpansion={toggleTaskExpansion}
-                  teamMembers={teamMembers}
-                  allTeamMembers={allTeamMembers}
-                  currentUser={currentUser}
-                  editingTaskTitle={editingTaskTitle}
-                  setEditingTaskTitle={setEditingTaskTitle}
-                  editingTaskDescription={editingTaskDescription}
-                  setEditingTaskDescription={setEditingTaskDescription}
-                  editingTaskDueDate={editingTaskDueDate}
-                  setEditingTaskDueDate={setEditingTaskDueDate}
-                  editingTaskAssignedTo={editingTaskAssignedTo}
-                  setEditingTaskAssignedTo={setEditingTaskAssignedTo}
-                  editingTaskAssignedToRole={editingTaskAssignedToRole}
-                  setEditingTaskAssignedToRole={setEditingTaskAssignedToRole}
-                  editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
-                  setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
-                  startEditingTask={startEditingTask}
-                  saveEditingTask={saveEditingTask}
-                  cancelEditingTask={cancelEditingTask}
-                />
-              ))}
+              <DndContext
+                sensors={useSensors(
+                  useSensor(PointerSensor),
+                  useSensor(KeyboardSensor, {
+                    coordinateGetter: sortableKeyboardCoordinates,
+                  })
+                )}
+                collisionDetection={closestCenter}
+                onDragEnd={(event) => handleTaskDragEnd(event, milestone.id)}
+              >
+                <SortableContext
+                  items={hierarchicalTasks.map(task => task.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {hierarchicalTasks.map((task: any) => (
+                    <SortableTaskDisplay 
+                      key={task.id} 
+                      task={task} 
+                      templateId={templateId}
+                      level={0}
+                      milestone={milestone}
+                      editingTask={editingTask}
+                      setEditingTask={setEditingTask}
+                      updateTaskMutation={updateTaskMutation}
+                      deleteTaskMutation={deleteTaskMutation}
+                      createTaskMutation={createTaskMutation}
+                      expandedTasks={expandedTasks}
+                      toggleTaskExpansion={toggleTaskExpansion}
+                      teamMembers={teamMembers}
+                      allTeamMembers={allTeamMembers}
+                      currentUser={currentUser}
+                      editingTaskTitle={editingTaskTitle}
+                      setEditingTaskTitle={setEditingTaskTitle}
+                      editingTaskDescription={editingTaskDescription}
+                      setEditingTaskDescription={setEditingTaskDescription}
+                      editingTaskDueDate={editingTaskDueDate}
+                      setEditingTaskDueDate={setEditingTaskDueDate}
+                      editingTaskAssignedTo={editingTaskAssignedTo}
+                      setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                      editingTaskAssignedToRole={editingTaskAssignedToRole}
+                      setEditingTaskAssignedToRole={setEditingTaskAssignedToRole}
+                      editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
+                      setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
+                      startEditingTask={startEditingTask}
+                      saveEditingTask={saveEditingTask}
+                      cancelEditingTask={cancelEditingTask}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
             </div>
           </CardContent>
         </CollapsibleContent>
@@ -981,6 +1039,28 @@ export default function TemplateDetail() {
     })
   );
 
+  // Task reordering mutation
+  const reorderTasksMutation = useMutation({
+    mutationFn: (taskUpdates: Array<{ id: number; sortOrder: number; parentTaskId?: number | null }>) =>
+      apiRequest(`/api/tasks/reorder`, {
+        method: 'POST',
+        body: JSON.stringify({ taskUpdates }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/milestones`, id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/templates`, id] });
+      toast({ title: "Tasks reordered successfully" });
+    },
+    onError: (error: any) => {
+      console.error('Error reordering tasks:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to reorder tasks", 
+        variant: "destructive" 
+      });
+    },
+  });
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -998,6 +1078,33 @@ export default function TemplateDetail() {
         console.log('Reordering milestones:', milestoneIds);
         reorderMilestonesMutation.mutate(milestoneIds);
       }
+    }
+  };
+
+  const handleTaskDragEnd = (event: DragEndEvent, milestoneId: number) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const milestoneData = tasksByMilestone.get(milestoneId);
+      if (!milestoneData) return;
+
+      const tasks = milestoneData.tasks;
+      const activeIndex = tasks.findIndex((task) => task.id === active.id);
+      const overIndex = tasks.findIndex((task) => task.id === over.id);
+
+      if (activeIndex === -1 || overIndex === -1) return;
+
+      const newTaskOrder = arrayMove(tasks, activeIndex, overIndex);
+
+      // Update sort orders for tasks in this milestone
+      const taskUpdates = newTaskOrder.map((task, index) => ({
+        id: task.id,
+        sortOrder: index + 1,
+        parentTaskId: task.parentTaskId
+      }));
+
+      // Update backend
+      reorderTasksMutation.mutate(taskUpdates);
     }
   };
 
@@ -1200,6 +1307,7 @@ export default function TemplateDetail() {
                       templateId={id}
                       expandedTasks={expandedTasks}
                       toggleTaskExpansion={toggleTaskExpansion}
+                      handleTaskDragEnd={handleTaskDragEnd}
                     />
                   );
                 })}

@@ -955,6 +955,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Task reordering endpoint
+  app.post('/api/tasks/reorder', isAuthenticated, async (req: any, res) => {
+    try {
+      const { taskUpdates } = req.body;
+      if (!Array.isArray(taskUpdates)) {
+        return res.status(400).json({ message: "taskUpdates must be an array" });
+      }
+      
+      await storage.reorderTasks(taskUpdates);
+      res.json({ message: "Tasks reordered successfully" });
+    } catch (error) {
+      console.error("Error reordering tasks:", error);
+      res.status(500).json({ message: "Failed to reorder tasks" });
+    }
+  });
+
   // Task hierarchy endpoints
   app.get('/api/tasks/:id/subtasks', isAuthenticated, async (req: any, res) => {
     try {

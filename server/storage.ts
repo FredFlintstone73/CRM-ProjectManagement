@@ -112,6 +112,7 @@ export interface IStorage {
   getTemplateTaskCount(templateId: number): Promise<number>;
   getTemplateTasksByTemplate(templateId: number): Promise<Task[]>;
   getProjectTemplateMilestones(templateId: number): Promise<Milestone[]>;
+  reorderTasks(taskUpdates: Array<{ id: number; sortOrder: number; parentTaskId?: number | null }>): Promise<void>;
 
   // Email interaction operations
   getEmailInteractions(): Promise<EmailInteraction[]>;
@@ -927,6 +928,22 @@ export class DatabaseStorage implements IStorage {
       .from(milestones)
       .where(eq(milestones.templateId, templateId))
       .orderBy(milestones.createdAt);
+  }
+
+  async reorderTasks(taskUpdates: Array<{ id: number; sortOrder: number; parentTaskId?: number | null }>): Promise<void> {
+    // Use a transaction to update all task orders atomically
+    await db.transaction(async (tx) => {
+      for (const update of taskUpdates) {
+        await tx
+          .update(tasks)
+          .set({ 
+            sortOrder: update.sortOrder,
+            parentTaskId: update.parentTaskId,
+            updatedAt: new Date() 
+          })
+          .where(eq(tasks.id, update.id));
+      }
+    });
   }
 
   // Email interaction operations
