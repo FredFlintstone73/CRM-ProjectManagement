@@ -590,3 +590,19 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Hierarchical Task Manager Improvement**: Updated hierarchical task manager to display chevrons after task titles
 - **Consistent Chevron Positioning**: All task management interfaces now consistently show expand/collapse chevrons on the right side for better user experience
 - **Template Detail Specific Fix**: In template detail page, chevrons now appear between task name and days badge (P-format) for optimal visual hierarchy
+
+### Conditional Due Date Badge Styling Implementation (July 19, 2025)
+- **Color-Coded Due Date Badges**: Implemented conditional styling for task due date badges across all task management interfaces
+- **Overdue Tasks**: Red background (#ea4335) with white text for tasks past their due date
+- **Today's Tasks**: Yellow background (#ffe79f) with dark text (#333) for tasks due today
+- **Future Tasks**: Default outline styling for tasks with future due dates
+- **Universal Application**: Applied styling to Tasks page (grid and row views), Section Task Manager, and Hierarchical Task Manager
+- **Utility Function**: Created centralized getDueDateBadgeProps function for consistent badge styling logic
+- **Calendar Icon Integration**: Maintained calendar icons in badges while applying conditional colors
+
+### Task Assignment Data Type Fix (July 19, 2025)
+- **Server-Side Type Safety**: Fixed PATCH route for task updates to handle assignedTo field as both string and number types
+- **Type Checking**: Added proper type checking before calling string methods like .startsWith() on assignedTo values
+- **Assignment Processing**: Enhanced assignment processing to handle numeric IDs, string prefixes ("me_", "team_"), and null values
+- **Error Resolution**: Resolved "taskData.assignedTo.startsWith is not a function" server error that was preventing task updates
+- **Backward Compatibility**: Maintained support for existing assignment formats while adding robust type handling

@@ -893,18 +893,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let assignedTo = null;
       if (taskData.assignedTo !== undefined) {
         if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
-          if (taskData.assignedTo.startsWith("me_")) {
-            // Find the current user's contact ID from the contacts table
-            const userEmail = req.user.email || req.user.claims?.email;
-            const userContacts = await storage.getContacts();
-            const userContact = userContacts.find(contact => 
-              contact.personalEmail === userEmail || 
-              contact.workEmail === userEmail
-            );
-            assignedTo = userContact ? userContact.id : null;
-          } else if (taskData.assignedTo.startsWith("team_")) {
-            assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
+          // Check if assignedTo is a string before using string methods
+          if (typeof taskData.assignedTo === 'string') {
+            if (taskData.assignedTo.startsWith("me_")) {
+              // Find the current user's contact ID from the contacts table
+              const userEmail = req.user.email || req.user.claims?.email;
+              const userContacts = await storage.getContacts();
+              const userContact = userContacts.find(contact => 
+                contact.personalEmail === userEmail || 
+                contact.workEmail === userEmail
+              );
+              assignedTo = userContact ? userContact.id : null;
+            } else if (taskData.assignedTo.startsWith("team_")) {
+              assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
+            } else {
+              assignedTo = safeParseInt(taskData.assignedTo);
+            }
           } else {
+            // If it's already a number, use it directly
             assignedTo = safeParseInt(taskData.assignedTo);
           }
         }
