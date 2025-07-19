@@ -97,7 +97,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'tasks'],
+    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-' + Date.now()], // Force fresh data
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
@@ -109,7 +109,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
     },
     enabled: !!projectId,
     retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // No cache, always fetch fresh
   });
 
   // Compute sections dynamically instead of using state
@@ -324,6 +324,16 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       if (milestoneId === 115) { // Preparing for DRPM
         console.log(`Building hierarchy for milestone ${milestoneId}, found ${milestoneTasks.length} tasks:`);
         console.log(milestoneTasks.map(t => `${t.id}: "${t.title}" (parent: ${t.parentTaskId})`));
+        
+        // Debug the specific task we're looking for
+        const submitTask = milestoneTasks.find(t => t.id === 1041);
+        if (submitTask) {
+          console.log(`Found Submit Critical Reports task:`, submitTask);
+        }
+        
+        // Find its children
+        const childTasks = milestoneTasks.filter(t => t.parentTaskId === 1041);
+        console.log(`Children of Submit Critical Reports (id 1041):`, childTasks.map(t => `${t.id}: ${t.title}`));
       }
       
       // Create a map for quick lookup
