@@ -218,8 +218,13 @@ const TaskDisplay = ({
                 rows={3}
               />
             </div>
-            {/* Only show date fields for level 0 and 1 tasks (hide for level 2 sub-child tasks) */}
-            {level < 2 ? (
+            {/* Only show date fields for level 0 and 1 tasks (hide for level 2 sub-child tasks) 
+                Also hide date fields for child tasks under "Generate Database Reports and Documents for Preliminary Packet" */}
+            {level < 2 && !(level === 1 && task.parentTaskId && 
+              milestone.tasks?.find((t: any) => 
+                t.id === task.parentTaskId && 
+                t.title === "Generate Database Reports and Documents for Preliminary Packet"
+              )) ? (
               <div className="grid grid-cols-2 gap-4">
                 {editingTaskTitle === "DRPM @ ________________ (Time)" ? (
                   <>
