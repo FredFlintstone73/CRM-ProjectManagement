@@ -239,9 +239,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Create tasks from template with calculated due dates
           const createdTasks = [];
-          for (const templateTask of templateTasks) {
+          const taskMapping = new Map(); // Map template task IDs to created task IDs
+          
+          // First pass: Create tasks without dependencies
+          const tasksWithoutDependencies = templateTasks.filter(task => !task.dependsOnTaskId);
+          const tasksWithDependencies = templateTasks.filter(task => task.dependsOnTaskId);
+          
+          // Process tasks without dependencies first
+          for (const templateTask of tasksWithoutDependencies) {
             let taskDueDate = null;
-            if (templateTask.daysFromMeeting !== null && templateTask.daysFromMeeting !== undefined) {
+            
+            if (templateTask.dueDate) {
+              // Use custom due date if specified (for DRPM task)
+              taskDueDate = new Date(templateTask.dueDate);
+            } else if (templateTask.daysFromMeeting !== null && templateTask.daysFromMeeting !== undefined) {
+              // Use days from meeting calculation
               const baseDate = new Date(meetingDate);
               baseDate.setDate(baseDate.getDate() + templateTask.daysFromMeeting);
               taskDueDate = baseDate;
@@ -280,6 +292,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
               milestoneId: milestone?.id || null,
               daysFromMeeting: templateTask.daysFromMeeting
             }, userId);
+            
+            // Store the mapping for dependency resolution
+            taskMapping.set(templateTask.id, task.id);
+            createdTasks.push(task);
+          }
+          
+          // Second pass: Process tasks with dependencies
+          for (const templateTask of tasksWithDependencies) {
+            let taskDueDate = null;
+            
+            // Find the dependent task from already created tasks
+            const dependentTaskId = taskMapping.get(templateTask.dependsOnTaskId);
+            const dependentTask = createdTasks.find(t => t.id === dependentTaskId);
+            
+            if (dependentTask && dependentTask.dueDate) {
+              // Calculate due date as 1 day after the dependent task
+              const baseDate = new Date(dependentTask.dueDate);
+              baseDate.setDate(baseDate.getDate() + 1);
+              taskDueDate = baseDate;
+            }
+            
+            // Resolve role-based assignment if assignedToRole is provided
+            let assignedToId = null;
+            if (templateTask.assignedToRole) {
+              assignedToId = await resolveRoleAssignment(templateTask.assignedToRole);
+            } else if (templateTask.assignedTo) {
+              assignedToId = templateTask.assignedTo;
+            }
+            
+            // Find the corresponding milestone
+            const milestone = createdMilestones.find(m => 
+              templateMilestones.find(tm => tm.id === templateTask.milestoneId)?.title === m.title
+            );
+            
+            // Skip tasks with empty or null titles
+            if (!templateTask.title || templateTask.title.trim() === '') {
+              console.log('Skipping template task with empty title:', templateTask);
+              continue;
+            }
+            
+            const task = await storage.createTask({
+              title: templateTask.title.trim(),
+              description: templateTask.description || '',
+              projectId: newProject.id,
+              status: 'todo',
+              priority: templateTask.priority || 25,
+              estimatedDays: 1,
+              dueDate: taskDueDate,
+              assignedTo: assignedToId,
+              assignedToRole: templateTask.assignedToRole || null,
+              parentTaskId: templateTask.parentTaskId,
+              milestoneId: milestone?.id || null,
+              daysFromMeeting: null // Dependent tasks don't use days from meeting
+            }, userId);
+            
             createdTasks.push(task);
           }
           
@@ -848,6 +915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         dueDate: taskData.dueDate || null,
         daysFromMeeting: taskData.daysFromMeeting !== undefined && taskData.daysFromMeeting !== null ? parseInt(taskData.daysFromMeeting.toString()) : null,
         assignedToRole: assignedToRole,
+        dependsOnTaskId: taskData.dependsOnTaskId || null,
       };
       
       // Remove fields that are null/undefined from the update, but keep title if provided

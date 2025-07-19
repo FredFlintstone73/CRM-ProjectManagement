@@ -285,6 +285,7 @@ export const tasks = pgTable("tasks", {
   priority: integer("priority").default(25), // 1-50 priority scale
   dueDate: timestamp("due_date"),
   daysFromMeeting: integer("days_from_meeting").default(0), // Days offset from meeting date for templates
+  dependsOnTaskId: integer("depends_on_task_id").references(() => tasks.id), // Task dependency for automatic due date calculation
   completedAt: timestamp("completed_at"),
   sortOrder: integer("sort_order").default(0),
   level: integer("level").default(0), // 0 = parent, 1 = child, 2 = grandchild

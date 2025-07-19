@@ -240,6 +240,27 @@ const TaskDisplay = ({
                     />
                   </div>
                 </>
+              ) : editingTaskTitle === "Corrections from DRPM Notes Made to Progress Meeting Packets" ? (
+                <>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Due Date</label>
+                    <Input
+                      type="text"
+                      value="1 day after DRPM task due date"
+                      disabled
+                      className="bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Dependency</label>
+                    <Input
+                      type="text"
+                      value="DRPM @ ________________ (Time) + 1 day"
+                      disabled
+                      className="bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                </>
               ) : (
                 <>
                   <div>
@@ -1000,10 +1021,23 @@ export default function TemplateDetail() {
         ? editingTaskAssignedToRole 
         : [];
       
-      // Handle DRPM task differently - use custom due date instead of days from meeting
+      // Handle special tasks differently
       const isDRPMTask = editingTaskTitle.trim() === "DRPM @ ________________ (Time)";
-      const daysFromMeeting = isDRPMTask ? null : (editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0);
-      const dueDate = isDRPMTask && editingTaskDueDate ? editingTaskDueDate : null;
+      const isCorrectionTask = editingTaskTitle.trim() === "Corrections from DRPM Notes Made to Progress Meeting Packets";
+      
+      let daysFromMeeting = null;
+      let dueDate = null;
+      
+      if (isDRPMTask) {
+        // DRPM task uses custom due date
+        dueDate = editingTaskDueDate ? editingTaskDueDate : null;
+      } else if (isCorrectionTask) {
+        // Corrections task has dependency on DRPM task - no days from meeting
+        daysFromMeeting = null;
+      } else {
+        // Regular tasks use days from meeting
+        daysFromMeeting = editingTaskDaysFromMeeting ? parseInt(editingTaskDaysFromMeeting) : 0;
+      }
       
       updateTaskMutation.mutate({ 
         taskId: editingTask, 
@@ -1013,6 +1047,7 @@ export default function TemplateDetail() {
         assignedTo: assignedTo,
         assignedToRole: assignedToRole,
         daysFromMeeting: daysFromMeeting,
+        dependsOnTaskId: isCorrectionTask ? 308 : null, // Task ID 308 is the DRPM task
       });
     }
   };
