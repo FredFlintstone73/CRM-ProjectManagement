@@ -235,7 +235,9 @@ const TaskDisplay = ({
                   parentTaskId: task.parentTaskId,
                   parentTask: parentTask,
                   parentTitle: parentTask?.title,
-                  shouldShow: shouldShowDateFields
+                  shouldShow: shouldShowDateFields,
+                  milestoneTasks: milestone.tasks?.map((t: any) => ({ id: t.id, title: t.title })),
+                  milestoneId: milestone.id
                 });
               }
               
