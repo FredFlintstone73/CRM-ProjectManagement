@@ -97,7 +97,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v17'], // Force fresh data
+    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v18'], // Force fresh data after parent task fix
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
