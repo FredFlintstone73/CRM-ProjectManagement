@@ -98,7 +98,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch milestones for this project
   const { data: milestones = [], isLoading: isLoadingMilestones } = useQuery({
-    queryKey: ['/api/milestones', projectId],
+    queryKey: ['/api/milestones', projectId, 'milestone-order-fix'],
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/milestones?projectId=${projectId}`);
@@ -639,6 +639,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
           const allSectionTasks = getAllTasks(sectionTasks);
           const totalTasks = allSectionTasks.length;
           const completedTasks = allSectionTasks.filter(task => task.status === 'completed').length;
+          const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
           
           const isSectionExpanded = expandedSections.has(section.id);
           
@@ -653,9 +654,17 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                           {isSectionExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                         </div>
                         <CardTitle className="text-lg section-title">{section.title}</CardTitle>
-                        <Badge variant="outline" className="text-xs">
-                          {completedTasks}/{totalTasks} completed
-                        </Badge>
+                        <div className="flex items-center gap-3">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                              style={{ width: `${progressPercentage}%` }}
+                            ></div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {completedTasks}/{totalTasks} ({progressPercentage}%)
+                          </Badge>
+                        </div>
                       </div>
                     </CollapsibleTrigger>
                     <div className="flex gap-2">
