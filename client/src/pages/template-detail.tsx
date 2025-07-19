@@ -414,7 +414,11 @@ const TaskDisplay = ({
                       <ChevronRight className="w-4 h-4" />
                     )}
                   </Button>
-                  {task.title === "Nominations and Deliverables Checkpoints" && (
+                  {(task.title === "Nominations and Deliverables Checkpoints" || 
+                    (task.parentTaskId && milestoneTasks.find((parent: any) => 
+                      parent.id === task.parentTaskId && 
+                      parent.title === "Nominations and Deliverables Checkpoints"
+                    ))) && (
                     <div className="flex items-center gap-2 ml-2">
                       {(() => {
                         const subtaskCount = task.subtasks?.length || 0;
