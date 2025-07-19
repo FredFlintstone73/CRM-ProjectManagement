@@ -184,6 +184,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       }
     },
     onSuccess: () => {
+      console.log('Contact form onSuccess called');
       // Invalidate and refetch contact queries
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       if (contact) {
@@ -197,6 +198,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       if (!contact) {
         form.reset();
       }
+      console.log('Calling onSuccess callback');
       onSuccess?.();
     },
     onError: (error) => {

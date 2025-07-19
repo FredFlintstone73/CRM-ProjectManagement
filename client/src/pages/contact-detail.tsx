@@ -695,6 +695,7 @@ export default function ContactDetail() {
                 <ContactForm 
                   contact={contact} 
                   onSuccess={() => {
+                    console.log('Contact detail onSuccess called - closing dialog');
                     setIsEditDialogOpen(false);
                     // Refresh the contact data after successful edit
                     queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
