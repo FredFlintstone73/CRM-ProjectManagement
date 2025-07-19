@@ -790,6 +790,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Database Milestone Ordering**: Updated sort_order values in milestones table to ensure "Actions & Service Since Last Progress Meeting" appears first in all CSR projects
 - **Multi-level Visual Feedback**: Complete visual progress system implemented across milestone, parent task, and child task levels with percentage calculations
 - **Production Configuration**: All progress tracking features and milestone ordering preserved in CSR template for future project creation consistency
+- **Server-Side Template Logic Fix**: Updated project creation from template logic to preserve milestone sortOrder from templates, ensuring all future CSR projects maintain correct milestone ordering automatically
 
 ### CSR Template Production Configuration Preservation (July 19, 2025)
 - **Complete Template Backup Created**: Documented entire CSR Meeting Template (ID: 13) configuration in csr_template_backup.md
