@@ -98,7 +98,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch milestones for this project
   const { data: milestones = [], isLoading: isLoadingMilestones } = useQuery({
-    queryKey: ['/api/milestones', projectId, 'milestone-order-fix'],
+    queryKey: ['/api/milestones', projectId, 'milestone-order-fix-v2'],
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/milestones?projectId=${projectId}`);

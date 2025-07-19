@@ -224,15 +224,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Create the project
           const newProject = await storage.createProject(projectData, userId);
           
-          // Create milestones first
+          // Create milestones first, sorted by sortOrder to preserve template ordering
           const createdMilestones = [];
-          for (const milestone of templateMilestones) {
+          const sortedMilestones = [...templateMilestones].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+          for (const milestone of sortedMilestones) {
             const createdMilestone = await storage.createMilestone({
               title: milestone.title,
               projectId: newProject.id,
               dueDate: null,
               description: milestone.description || '',
-              status: 'active'
+              status: 'active',
+              sortOrder: milestone.sortOrder || 0
             }, userId);
             createdMilestones.push(createdMilestone);
           }
