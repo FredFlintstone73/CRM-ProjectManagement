@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrentUserContact } from "@/hooks/useCurrentUserContact";
 
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
@@ -28,6 +29,7 @@ import { Link, useLocation } from "wouter";
 export default function Tasks() {
 
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { contactId: currentUserContactId, isUserAssignedToTask } = useCurrentUserContact();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,13 +154,7 @@ export default function Tasks() {
     }
   };
 
-  const getCurrentUserContactId = () => {
-    if (!user || !contacts) return null;
-    const userContact = contacts.find((contact: any) => 
-      contact.firstName === user.firstName && contact.lastName === user.lastName
-    );
-    return userContact?.id || null;
-  };
+
 
   const filteredAndSortedTasks = tasks?.filter((task) => {
     const matchesSearch = searchQuery === "" ||
@@ -173,14 +169,7 @@ export default function Tasks() {
     const matchesTaskFilter = () => {
       if (taskFilter === 'all_tasks') return true;
       if (taskFilter === 'my_tasks') {
-        const currentUserContactId = getCurrentUserContactId();
-        if (!currentUserContactId) return false;
-        // Check if assignedTo is an array and contains the current user
-        if (Array.isArray(task.assignedTo)) {
-          return task.assignedTo.includes(currentUserContactId);
-        }
-        // Fallback for single assignment
-        return task.assignedTo === currentUserContactId;
+        return isUserAssignedToTask(task);
       }
       return true;
     };
@@ -233,21 +222,10 @@ export default function Tasks() {
 
   // Calculate progress for tasks assigned to current user only, considering due date filter
   const getCurrentUserTaskProgress = () => {
-    if (!tasks || !user || !contacts) return { completed: 0, total: 0, percentage: 0 };
-    
-    const currentUserContactId = getCurrentUserContactId();
-    if (!currentUserContactId) return { completed: 0, total: 0, percentage: 0 };
+    if (!tasks || !currentUserContactId) return { completed: 0, total: 0, percentage: 0 };
     
     // Filter tasks by current user assignment
-    let myTasks = tasks.filter(task => {
-      if (!task.assignedTo) return false;
-      // Check if assignedTo is an array and contains the current user
-      if (Array.isArray(task.assignedTo)) {
-        return task.assignedTo.includes(currentUserContactId);
-      }
-      // Fallback for single assignment
-      return task.assignedTo === currentUserContactId;
-    });
+    let myTasks = tasks.filter(task => isUserAssignedToTask(task));
     
     // Apply due date filter if not 'all'
     if (dueDateFilter !== 'all') {

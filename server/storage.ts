@@ -49,6 +49,8 @@ export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  ensureUserHasContact(user: User): Promise<Contact>;
+  getUserContactId(user: User): Promise<number | null>;
 
   // Contact operations
   getContacts(): Promise<Contact[]>;
@@ -176,6 +178,63 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async ensureUserHasContact(user: User): Promise<Contact> {
+    // Check if contact already exists
+    const [existingContact] = await db
+      .select()
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.firstName, user.firstName),
+          eq(contacts.lastName, user.lastName)
+        )
+      );
+
+    if (existingContact) {
+      return existingContact;
+    }
+
+    // Create contact record for user
+    const contactData: InsertContact = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      personalEmail: user.email,
+      contactType: 'team_member',
+      status: 'active',
+      createdBy: user.id,
+    };
+
+    const [newContact] = await db
+      .insert(contacts)
+      .values(contactData)
+      .returning();
+
+    // Log activity
+    await this.createActivityLog({
+      userId: user.id,
+      action: "auto_created_contact",
+      entityType: "contact",
+      entityId: newContact.id,
+      description: `Auto-created contact record for user ${user.firstName} ${user.lastName}`,
+    });
+
+    return newContact;
+  }
+
+  async getUserContactId(user: User): Promise<number | null> {
+    const [contact] = await db
+      .select({ id: contacts.id })
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.firstName, user.firstName),
+          eq(contacts.lastName, user.lastName)
+        )
+      );
+
+    return contact?.id || null;
   }
 
   // Contact operations

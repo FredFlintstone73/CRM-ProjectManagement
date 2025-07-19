@@ -23,10 +23,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
+      
+      // Auto-create contact record if it doesn't exist
+      if (user) {
+        await storage.ensureUserHasContact(user);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Get current user's contact ID
+  app.get('/api/auth/contact-id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const contactId = await storage.getUserContactId(user);
+      res.json({ contactId });
+    } catch (error) {
+      console.error("Error fetching user contact ID:", error);
+      res.status(500).json({ message: "Failed to fetch user contact ID" });
     }
   });
 
