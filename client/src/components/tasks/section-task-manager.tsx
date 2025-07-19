@@ -696,15 +696,15 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                 </CardHeader>
                 <CollapsibleContent>
                   <CardContent>
-                    {sectionTasks.length === 0 ? (
+                    {sectionTasks.length === 0 && section.title !== "Actions & Service Since Last Progress Meeting" ? (
                       <div className="text-center py-8 text-gray-500">
                         No tasks in this section yet
                       </div>
-                    ) : (
+                    ) : sectionTasks.length > 0 ? (
                       <div className="space-y-2">
                         {sectionTasks.map(task => renderTaskNode(task))}
                       </div>
-                    )}
+                    ) : null}
                   </CardContent>
                 </CollapsibleContent>
               </Collapsible>
