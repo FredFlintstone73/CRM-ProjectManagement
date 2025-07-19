@@ -185,21 +185,39 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     },
     onSuccess: () => {
       console.log('Contact form onSuccess called');
-      // Invalidate and refetch contact queries
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-      if (contact) {
-        queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
-      }
       
-      toast({
-        title: contact ? "Contact updated" : "Contact created",
-        description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
-      });
-      if (!contact) {
-        form.reset();
+      try {
+        // Invalidate and refetch contact queries
+        console.log('Invalidating queries...');
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+        if (contact) {
+          queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
+        }
+        console.log('Queries invalidated');
+        
+        console.log('Showing toast...');
+        toast({
+          title: contact ? "Contact updated" : "Contact created",
+          description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
+        });
+        console.log('Toast shown');
+        
+        if (!contact) {
+          console.log('Resetting form...');
+          form.reset();
+          console.log('Form reset');
+        }
+        
+        console.log('About to call onSuccess callback, onSuccess exists:', !!onSuccess);
+        if (onSuccess) {
+          onSuccess();
+          console.log('onSuccess callback completed');
+        } else {
+          console.log('No onSuccess callback provided');
+        }
+      } catch (error) {
+        console.error('Error in onSuccess callback:', error);
       }
-      console.log('Calling onSuccess callback, onSuccess exists:', !!onSuccess);
-      onSuccess?.();
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
