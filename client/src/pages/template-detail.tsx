@@ -1144,8 +1144,14 @@ export default function TemplateDetail() {
           overTask: overTask.title,
           activeParentId,
           overParentId,
+          isMainTask: activeParentId === null,
           siblingCount: siblingTasks.length,
-          taskUpdates
+          taskUpdates: taskUpdates.map(t => ({
+            id: t.id,
+            sortOrder: t.sortOrder,
+            parentTaskId: t.parentTaskId,
+            title: flatTasks.find(task => task.id === t.id)?.title
+          }))
         });
         
         // Update backend
@@ -1193,15 +1199,15 @@ export default function TemplateDetail() {
       map.set(milestone.id, { milestone, tasks: [] });
     });
 
-    // Add tasks to their respective milestones and sort by daysFromMeeting
+    // Add tasks to their respective milestones and sort by sortOrder
     if (taskQueries.data) {
       taskQueries.data.forEach(({ milestoneId, tasks }) => {
         if (map.has(milestoneId)) {
-          // Sort tasks by daysFromMeeting (earliest first)
+          // Sort tasks by sortOrder (respects drag and drop reordering)
           const sortedTasks = [...tasks].sort((a, b) => {
-            const aDays = a.daysFromMeeting || 0;
-            const bDays = b.daysFromMeeting || 0;
-            return aDays - bDays;
+            const aSort = a.sortOrder || 0;
+            const bSort = b.sortOrder || 0;
+            return aSort - bSort;
           });
           map.get(milestoneId).tasks = sortedTasks;
         }
