@@ -761,3 +761,5 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Previous/Next Task Navigation**: Added Previous Task button with left arrow alongside existing Next Task button for sequential navigation
 - **Universal Navigation Update**: Applied consistent navigation handling across Section Task Manager, Hierarchical Task Manager, and Tasks page
 - **Clickable Task Titles**: Made all task titles clickable across all views for consistent navigation experience
+- **Hierarchical State Persistence**: Implemented localStorage-based persistence for expanded sections and tasks to maintain exact hierarchical view state when navigating back from task details
+- **Per-Project State Storage**: Each project maintains independent expanded/collapsed state for optimal user experience

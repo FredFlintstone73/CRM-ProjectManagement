@@ -77,8 +77,24 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
   const [editingSection, setEditingSection] = useState<EditingSectionState | null>(null);
-  const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  // Initialize expanded state from localStorage
+  const [expandedTasks, setExpandedTasks] = useState<Set<number>>(() => {
+    const stored = localStorage.getItem(`expandedTasks-${projectId}`);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  });
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
+    const stored = localStorage.getItem(`expandedSections-${projectId}`);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  });
+
+  // Save expanded state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(`expandedTasks-${projectId}`, JSON.stringify([...expandedTasks]));
+  }, [expandedTasks, projectId]);
+
+  useEffect(() => {
+    localStorage.setItem(`expandedSections-${projectId}`, JSON.stringify([...expandedSections]));
+  }, [expandedSections, projectId]);
 
   // Fetch milestones for this project
   const { data: milestones = [], isLoading: isLoadingMilestones } = useQuery({
