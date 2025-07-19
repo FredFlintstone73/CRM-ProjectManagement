@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { insertContactSchema, type InsertContact, type Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 interface ContactFormProps {
@@ -28,6 +29,7 @@ type ContactType = "client" | "prospect" | "team_member" | "strategic_partner";
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
   const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   
   const [selectedCategory, setSelectedCategory] = useState<ContactCategory>(
@@ -172,52 +174,29 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: InsertContact) => {
-      console.log('Mutation function called with data:', data);
-      console.log('Contact exists:', !!contact);
-      
       if (contact) {
-        console.log('Making PUT request to:', `/api/contacts/${contact.id}`);
         await apiRequest("PUT", `/api/contacts/${contact.id}`, data);
       } else {
-        console.log('Making POST request to:', "/api/contacts");
         await apiRequest("POST", "/api/contacts", data);
       }
     },
     onSuccess: () => {
-      console.log('Contact form onSuccess called');
-      
-      try {
-        // Invalidate and refetch contact queries
-        console.log('Invalidating queries...');
-        queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-        if (contact) {
-          queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
-        }
-        console.log('Queries invalidated');
-        
-        console.log('Showing toast...');
-        toast({
-          title: contact ? "Contact updated" : "Contact created",
-          description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
-        });
-        console.log('Toast shown');
-        
-        if (!contact) {
-          console.log('Resetting form...');
-          form.reset();
-          console.log('Form reset');
-        }
-        
-        console.log('About to call onSuccess callback, onSuccess exists:', !!onSuccess);
-        if (onSuccess) {
-          onSuccess();
-          console.log('onSuccess callback completed');
-        } else {
-          console.log('No onSuccess callback provided');
-        }
-      } catch (error) {
-        console.error('Error in onSuccess callback:', error);
+      // Invalidate and refetch contact queries
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+      if (contact) {
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
       }
+      
+      toast({
+        title: contact ? "Contact updated" : "Contact created",
+        description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
+      });
+      
+      if (!contact) {
+        form.reset();
+      }
+      
+      onSuccess?.();
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
