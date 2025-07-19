@@ -198,7 +198,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       if (!contact) {
         form.reset();
       }
-      console.log('Calling onSuccess callback');
+      console.log('Calling onSuccess callback, onSuccess exists:', !!onSuccess);
       onSuccess?.();
     },
     onError: (error) => {

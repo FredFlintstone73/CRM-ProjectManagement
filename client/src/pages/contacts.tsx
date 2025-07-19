@@ -371,6 +371,7 @@ export default function Contacts() {
   };
 
   const handleContactCreated = () => {
+    console.log('handleContactCreated called - closing contact dialog');
     setIsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
   };
