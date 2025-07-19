@@ -184,6 +184,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       }
     },
     onSuccess: () => {
+      // Invalidate and refetch contact queries
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+      if (contact) {
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id.toString()] });
+      }
+      
       toast({
         title: contact ? "Contact updated" : "Contact created",
         description: contact ? "The contact has been successfully updated." : "The contact has been successfully created.",
