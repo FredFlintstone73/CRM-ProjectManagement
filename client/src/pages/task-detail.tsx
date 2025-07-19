@@ -80,12 +80,12 @@ export default function TaskDetail() {
   const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
   const assignedUser = teamMembers.find(member => member.id === task?.assignedTo);
 
-  // Find the next task in the sequence
-  const findNextTask = () => {
-    if (!projectTasks || !task) return null;
+  // Sort tasks chronologically and find navigation tasks
+  const getSortedTasks = () => {
+    if (!projectTasks || !task) return [];
     
     // Sort tasks chronologically: by daysFromMeeting, then dueDate, then sortOrder, then id
-    const sortedTasks = [...projectTasks].sort((a, b) => {
+    return [...projectTasks].sort((a, b) => {
       // First sort by daysFromMeeting if available
       if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
         if (a.daysFromMeeting !== b.daysFromMeeting) {
@@ -112,15 +112,20 @@ export default function TaskDetail() {
       // Finally by ID as fallback
       return a.id - b.id;
     });
-
-    const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
-    if (currentIndex >= 0 && currentIndex < sortedTasks.length - 1) {
-      return sortedTasks[currentIndex + 1];
-    }
-    return null;
   };
 
-  const nextTask = findNextTask();
+  // Find the next and previous tasks in the sequence
+  const findNavigationTasks = () => {
+    const sortedTasks = getSortedTasks();
+    const currentIndex = sortedTasks.findIndex(t => t.id === task?.id);
+    
+    return {
+      previousTask: currentIndex > 0 ? sortedTasks[currentIndex - 1] : null,
+      nextTask: currentIndex >= 0 && currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null
+    };
+  };
+
+  const { previousTask, nextTask } = findNavigationTasks();
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
@@ -168,23 +173,43 @@ export default function TaskDetail() {
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="outline"
-            onClick={() => window.history.back()}
+            onClick={() => {
+              if (task?.projectId) {
+                window.location.href = `/projects/${task.projectId}`;
+              } else {
+                window.history.back();
+              }
+            }}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Project
           </Button>
 
-          {nextTask && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                window.location.href = `/task/${nextTask.id}`;
-              }}
-            >
-              Next Task
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {previousTask && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  window.location.href = `/task/${previousTask.id}`;
+                }}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous Task
+              </Button>
+            )}
+
+            {nextTask && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  window.location.href = `/task/${nextTask.id}`;
+                }}
+              >
+                Next Task
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
         </div>
         
         <div className="flex items-center justify-between">
