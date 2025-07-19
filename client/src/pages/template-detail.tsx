@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
@@ -610,6 +611,10 @@ const SortableSection = ({
   const isOpen = openPhases ? openPhases.includes(milestone?.id) : false;
   const taskCount = milestoneTasks.length;
   const isEditing = editingMilestone === milestone?.id;
+  
+  // Calculate progress: count completed tasks vs total tasks
+  const completedTasks = milestoneTasks.filter(task => task.status === 'completed' || task.completedAt).length;
+  const progressPercentage = taskCount > 0 ? Math.round((completedTasks / taskCount) * 100) : 0;
 
   return (
     <Card 
@@ -660,31 +665,43 @@ const SortableSection = ({
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="tracking-tight flex items-center gap-2 text-[16px] font-bold">{milestone?.title}</CardTitle>
-                    {milestone?.id && (
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            startEditing(milestone);
-                          }}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteSection(milestone.id, milestone.title);
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="tracking-tight flex items-center gap-2 text-[16px] font-bold">{milestone?.title}</CardTitle>
+                      {milestone?.id && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditing(milestone);
+                            }}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSection(milestone.id, milestone.title);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {taskCount > 0 && (
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="flex-1">
+                          <Progress value={progressPercentage} className="h-2" />
+                        </div>
+                        <div className="text-xs text-gray-600 min-w-fit">
+                          {completedTasks}/{taskCount} ({progressPercentage}%)
+                        </div>
                       </div>
                     )}
                   </div>
