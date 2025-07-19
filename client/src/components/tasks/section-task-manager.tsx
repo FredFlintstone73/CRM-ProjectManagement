@@ -530,7 +530,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
               {(task.title === "Nominations and Deliverables Checkpoints" || 
                 task.title === "Submit Critical Reports and Final Highest Priority Conversation Topic" ||
                 task.title === "Generate Database Reports and Documents for Preliminary Packet" ||
-                (task.parentTaskId && projectTasks?.find((parent: any) => 
+                (task.parentTaskId && tasks?.find((parent: any) => 
                   parent.id === task.parentTaskId && 
                   (parent.title === "Nominations and Deliverables Checkpoints" ||
                    parent.title === "Submit Critical Reports and Final Highest Priority Conversation Topic" ||
