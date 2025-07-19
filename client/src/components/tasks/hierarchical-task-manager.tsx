@@ -273,7 +273,12 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
 
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
+                  <h4 
+                    className={`font-medium cursor-pointer hover:text-blue-600 transition-colors ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}
+                    onClick={() => {
+                      window.location.href = `/task/${task.id}`;
+                    }}
+                  >
                     {task.title}
                   </h4>
                   {hasChildren && (

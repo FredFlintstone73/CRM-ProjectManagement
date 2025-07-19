@@ -560,11 +560,14 @@ export default function Tasks() {
                         <Badge className={getPriorityColor(task.priority || 25)}>
                           {task.priority || 25}
                         </Badge>
-                        <Link href={`/task/${task.id}`} className="flex-1">
+                        <button 
+                          onClick={() => window.location.href = `/task/${task.id}`}
+                          className="flex-1 text-left"
+                        >
                           <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors task-title">
                             {task.title}
                           </CardTitle>
-                        </Link>
+                        </button>
                       </div>
                     </div>
                     {task.description && (
@@ -644,11 +647,14 @@ export default function Tasks() {
                         <Badge className={getPriorityColor(task.priority || 25)}>
                           {task.priority || 25}
                         </Badge>
-                        <Link href={`/task/${task.id}`}>
+                        <button 
+                          onClick={() => window.location.href = `/task/${task.id}`}
+                          className="text-left"
+                        >
                           <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors task-title">
                             {task.title}
                           </span>
-                        </Link>
+                        </button>
                       </div>
                       
                       <div className="flex items-center space-x-4">

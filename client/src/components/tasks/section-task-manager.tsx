@@ -496,7 +496,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                   isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
                 }`}
                 onClick={() => {
-                  setLocation(`/task/${task.id}`);
+                  window.location.href = `/task/${task.id}`;
                 }}
               >
                 {task.title}
