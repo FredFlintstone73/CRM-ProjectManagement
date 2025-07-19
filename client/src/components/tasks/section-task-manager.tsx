@@ -491,7 +491,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
               )}
               {task.dueDate && (
                 <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
-                  <Calendar className="h-3 w-3 mr-1" />
+                  <CalendarDays className="h-3 w-3 mr-1" />
                   {format(new Date(task.dueDate), 'MMM d')}
                 </Badge>
               )}
