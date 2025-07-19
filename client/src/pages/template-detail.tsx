@@ -401,18 +401,43 @@ const TaskDisplay = ({
                 {task.name || task.title}
               </h4>
               {hasSubtasks && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleTaskExpansion(task.id)}
-                  className="p-1 h-6 w-6"
-                >
-                  {isExpanded ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4" />
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleTaskExpansion(task.id)}
+                    className="p-1 h-6 w-6"
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </Button>
+                  {task.title === "Nominations and Deliverables Checkpoints" && (
+                    <div className="flex items-center gap-2 ml-2">
+                      {(() => {
+                        const subtaskCount = task.subtasks?.length || 0;
+                        const completedSubtasks = task.subtasks?.filter((subtask: any) => subtask.status === 'completed').length || 0;
+                        const progressPercentage = subtaskCount > 0 ? Math.round((completedSubtasks / subtaskCount) * 100) : 0;
+                        
+                        return (
+                          <>
+                            <div className="w-20 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                style={{ width: `${progressPercentage}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-gray-600 font-medium">
+                              {completedSubtasks}/{subtaskCount} ({progressPercentage}%)
+                            </span>
+                          </>
+                        );
+                      })()}
+                    </div>
                   )}
-                </Button>
+                </>
               )}
             </div>
             <div className="flex items-center gap-3">
