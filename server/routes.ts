@@ -327,53 +327,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return task;
           };
           
-          // First pass: Create all tasks without dependencies (including parent tasks and their children)
+          // First pass: Create all tasks without dependencies in proper hierarchical order
           const processedTaskIds = new Set();
           
-          for (const templateTask of tasksWithoutDependencies) {
+          // Separate parent tasks (no parentTaskId) from child tasks
+          const parentTasks = tasksWithoutDependencies.filter(task => !task.parentTaskId);
+          const childTasks = tasksWithoutDependencies.filter(task => task.parentTaskId);
+          
+          // Create parent tasks first
+          for (const templateTask of parentTasks) {
             // Skip tasks with empty or null titles
             if (!templateTask.title || templateTask.title.trim() === '') {
               console.log('Skipping template task with empty title:', templateTask);
               continue;
             }
             
-            // Skip if already processed as a child task
-            if (processedTaskIds.has(templateTask.id)) {
-              continue;
-            }
-            
             await createTaskFromTemplate(templateTask);
             processedTaskIds.add(templateTask.id);
+          }
+          
+          // Then create child tasks in multiple passes to handle nested hierarchies
+          let remainingChildTasks = [...childTasks];
+          let maxPasses = 5; // Prevent infinite loop
+          
+          while (remainingChildTasks.length > 0 && maxPasses > 0) {
+            const currentPass = [...remainingChildTasks];
+            remainingChildTasks = [];
             
-            // After creating parent task, create all its children (sub-tasks, sub-sub-tasks)
-            const createChildTasks = async (parentId: number) => {
-              const childTasks = tasksWithoutDependencies.filter(task => 
-                task.parentTaskId === parentId && !processedTaskIds.has(task.id)
-              );
-              
-              // Sort children by sort order and days from meeting
-              childTasks.sort((a, b) => {
-                const aDays = a.daysFromMeeting ?? 999;
-                const bDays = b.daysFromMeeting ?? 999;
-                if (aDays !== bDays) return aDays - bDays;
-                return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
-              });
-              
-              for (const childTask of childTasks) {
-                if (!childTask.title || childTask.title.trim() === '') {
-                  continue;
-                }
-                
-                await createTaskFromTemplate(childTask);
-                processedTaskIds.add(childTask.id);
-                
-                // Recursively create sub-sub-tasks
-                await createChildTasks(childTask.id);
+            for (const templateTask of currentPass) {
+              // Skip tasks with empty or null titles
+              if (!templateTask.title || templateTask.title.trim() === '') {
+                continue;
               }
-            };
+              
+              // Check if parent task has been created
+              const parentCreated = taskMapping.has(templateTask.parentTaskId);
+              
+              if (parentCreated) {
+                await createTaskFromTemplate(templateTask);
+                processedTaskIds.add(templateTask.id);
+              } else {
+                // Parent not created yet, try in next pass
+                remainingChildTasks.push(templateTask);
+              }
+            }
             
-            // Create child tasks for this parent
-            await createChildTasks(templateTask.id);
+            maxPasses--;
+          }
+          
+          // Log any remaining unprocessed tasks
+          if (remainingChildTasks.length > 0) {
+            console.log('Warning: Some child tasks could not be processed:', remainingChildTasks.map(t => t.title));
           }
           
           // Second pass: Process tasks with dependencies
