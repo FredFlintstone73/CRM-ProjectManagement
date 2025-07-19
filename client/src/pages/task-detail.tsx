@@ -76,30 +76,11 @@ export default function TaskDetail() {
       });
     },
     onSuccess: () => {
-      // Invalidate specific task query
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
-      
-      // Invalidate project tasks with all variations of query keys used
       if (task?.projectId) {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
-        // Also invalidate the hierarchical version used in section-task-manager
-        queryClient.invalidateQueries({ 
-          predicate: (query) => 
-            query.queryKey[0] === '/api/projects' && 
-            query.queryKey[1] === task.projectId.toString() && 
-            query.queryKey[2] === 'tasks'
-        });
       }
-      
-      // Invalidate general tasks list
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      
-      // Force refetch by removing cached data
-      if (task?.projectId) {
-        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
-        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
-      }
     },
   });
 

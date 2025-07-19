@@ -97,7 +97,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
 
   // Fetch tasks and organize by sections
   const { data: tasks = [], isLoading: isLoadingTasks, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v18'], // Force fresh data after parent task fix
+    queryKey: ['/api/projects', projectId, 'tasks', 'hierarchy-fix-v17'], // Force fresh data
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', `/api/projects/${projectId}/tasks`);
@@ -201,25 +201,10 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: task.status === 'completed' ? 'todo' : 'completed',
       }),
-    onSuccess: (_, task) => {
-      // Force comprehensive cache invalidation to ensure UI synchronization
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString()] });
-      
-      // Remove cached data to force fresh fetch
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
-      
-      // Use predicate to catch any variation of project tasks query
-      queryClient.invalidateQueries({ 
-        predicate: (query) => 
-          query.queryKey[0] === '/api/projects' && 
-          (query.queryKey[1] === projectId || query.queryKey[1] === projectId.toString()) && 
-          query.queryKey[2] === 'tasks'
-      });
     },
   });
 
