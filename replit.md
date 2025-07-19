@@ -141,8 +141,10 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
-### Project Creation Date Assignment Fix (July 19, 2025)
-- **Root Cause Identification**: Fixed issue where child tasks under "Generate Database Reports and Documents for Preliminary Packet" were incorrectly receiving due dates during project creation from templates
+### Task Hierarchy and Date Assignment Fixes (July 19, 2025)
+- **Professional Role Task Hierarchy Fix**: Corrected misplaced professional role tasks (Estate Attorney, Financial Planner, Insurance Planner variants) that were incorrectly assigned under "Nominations and Deliverables Checkpoints" instead of "Submit Critical Reports and Final Highest Priority Conversation Topic"
+- **Parent-Child Relationship Restoration**: Updated 6 professional role tasks to have correct parent_task_id = 1339 (Submit Critical Reports) matching the template structure
+- **Project Creation Date Assignment Fix**: Fixed issue where child tasks under "Generate Database Reports and Documents for Preliminary Packet" were incorrectly receiving due dates during project creation from templates
 - **Template vs Project Analysis**: Discovered that while templates correctly had NULL due dates for these child tasks, project creation logic was automatically assigning dates based on daysFromMeeting values
 - **Server-Side Logic Fix**: Modified project creation logic in server/routes.ts to skip due date assignment for child tasks under specific parent tasks
 - **Database Cleanup**: Removed incorrect due dates from existing project child tasks using SQL UPDATE to restore proper structure
