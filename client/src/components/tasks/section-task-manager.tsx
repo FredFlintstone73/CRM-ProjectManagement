@@ -201,10 +201,25 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
       apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: task.status === 'completed' ? 'todo' : 'completed',
       }),
-    onSuccess: () => {
+    onSuccess: (_, task) => {
+      // Force comprehensive cache invalidation to ensure UI synchronization
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString()] });
+      
+      // Remove cached data to force fresh fetch
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
+      
+      // Use predicate to catch any variation of project tasks query
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          query.queryKey[0] === '/api/projects' && 
+          (query.queryKey[1] === projectId || query.queryKey[1] === projectId.toString()) && 
+          query.queryKey[2] === 'tasks'
+      });
     },
   });
 
