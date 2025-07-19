@@ -413,15 +413,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(task: InsertTask, userId: string): Promise<Task> {
-    // Process date field - handle timezone-safe date conversion
+    // Process date field - create local noon date to avoid timezone issues
     const processedTask = { ...task };
     if (processedTask.dueDate && typeof processedTask.dueDate === 'string' && processedTask.dueDate.trim()) {
-      // For YYYY-MM-DD format, create date in local timezone to avoid UTC conversion issues
+      // For YYYY-MM-DD format, create date in local timezone at noon to avoid UTC conversion issues
       const dateStr = processedTask.dueDate.trim();
       if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        // Parse as local date to avoid timezone issues
+        // Parse as local date at noon to avoid timezone issues
         const [year, month, day] = dateStr.split('-').map(Number);
-        processedTask.dueDate = new Date(year, month - 1, day);
+        processedTask.dueDate = new Date(year, month - 1, day, 12, 0, 0);
       } else {
         processedTask.dueDate = new Date(processedTask.dueDate);
       }
@@ -492,17 +492,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, task: Partial<InsertTask>): Promise<Task> {
-    // Process date field - convert YYYY-MM-DD to Date object in local timezone
+    // Process date field - create local midnight date to avoid timezone issues
     const processedTask = { ...task };
     if (processedTask.dueDate !== undefined) {
       if (processedTask.dueDate === '' || processedTask.dueDate === null) {
         processedTask.dueDate = null;
       } else if (typeof processedTask.dueDate === 'string') {
-        // Parse YYYY-MM-DD as local date (not UTC) to preserve the selected date
+        // Parse YYYY-MM-DD as local date and set to noon to avoid timezone edge cases
         const dateStr = processedTask.dueDate.trim();
         if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
           const [year, month, day] = dateStr.split('-').map(Number);
-          processedTask.dueDate = new Date(year, month - 1, day);
+          // Create date at noon local time to avoid timezone boundary issues
+          processedTask.dueDate = new Date(year, month - 1, day, 12, 0, 0);
         } else {
           processedTask.dueDate = new Date(processedTask.dueDate);
         }
