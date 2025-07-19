@@ -349,43 +349,48 @@ const TaskDisplay = ({
         )}
       </div>
       
-      {/* Recursively render subtasks */}
+      {/* Recursively render subtasks with drag and drop */}
       {hasSubtasks && isExpanded && (
         <div className="space-y-2">
-          {task.subtasks.map((subtask) => (
-            <TaskDisplay 
-              key={subtask.id} 
-              task={subtask} 
-              templateId={templateId}
-              level={level + 1}
-              milestone={milestone}
-              editingTask={editingTask}
-              setEditingTask={setEditingTask}
-              updateTaskMutation={updateTaskMutation}
-              deleteTaskMutation={deleteTaskMutation}
-              createTaskMutation={createTaskMutation}
-              expandedTasks={expandedTasks}
-              toggleTaskExpansion={toggleTaskExpansion}
-              teamMembers={teamMembers}
-              allTeamMembers={allTeamMembers}
-              currentUser={currentUser}
-              editingTaskTitle={editingTaskTitle}
-              setEditingTaskTitle={setEditingTaskTitle}
-              editingTaskDescription={editingTaskDescription}
-              setEditingTaskDescription={setEditingTaskDescription}
-              editingTaskDueDate={editingTaskDueDate}
-              setEditingTaskDueDate={setEditingTaskDueDate}
-              editingTaskAssignedTo={editingTaskAssignedTo}
-              setEditingTaskAssignedTo={setEditingTaskAssignedTo}
-              editingTaskAssignedToRole={editingTaskAssignedToRole}
-              setEditingTaskAssignedToRole={setEditingTaskAssignedToRole}
-              editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
-              setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
-              startEditingTask={startEditingTask}
-              saveEditingTask={saveEditingTask}
-              cancelEditingTask={cancelEditingTask}
-            />
-          ))}
+          <SortableContext
+            items={task.subtasks?.map(subtask => subtask.id) || []}
+            strategy={verticalListSortingStrategy}
+          >
+            {task.subtasks.map((subtask) => (
+              <SortableTaskDisplay 
+                key={subtask.id} 
+                task={subtask} 
+                templateId={templateId}
+                level={level + 1}
+                milestone={milestone}
+                editingTask={editingTask}
+                setEditingTask={setEditingTask}
+                updateTaskMutation={updateTaskMutation}
+                deleteTaskMutation={deleteTaskMutation}
+                createTaskMutation={createTaskMutation}
+                expandedTasks={expandedTasks}
+                toggleTaskExpansion={toggleTaskExpansion}
+                teamMembers={teamMembers}
+                allTeamMembers={allTeamMembers}
+                currentUser={currentUser}
+                editingTaskTitle={editingTaskTitle}
+                setEditingTaskTitle={setEditingTaskTitle}
+                editingTaskDescription={editingTaskDescription}
+                setEditingTaskDescription={setEditingTaskDescription}
+                editingTaskDueDate={editingTaskDueDate}
+                setEditingTaskDueDate={setEditingTaskDueDate}
+                editingTaskAssignedTo={editingTaskAssignedTo}
+                setEditingTaskAssignedTo={setEditingTaskAssignedTo}
+                editingTaskAssignedToRole={editingTaskAssignedToRole}
+                setEditingTaskAssignedToRole={setEditingTaskAssignedToRole}
+                editingTaskDaysFromMeeting={editingTaskDaysFromMeeting}
+                setEditingTaskDaysFromMeeting={setEditingTaskDaysFromMeeting}
+                startEditingTask={startEditingTask}
+                saveEditingTask={saveEditingTask}
+                cancelEditingTask={cancelEditingTask}
+              />
+            ))}
+          </SortableContext>
         </div>
       )}
     </div>
@@ -1047,8 +1052,13 @@ export default function TemplateDetail() {
         body: JSON.stringify({ taskUpdates }),
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['template-tasks', id] });
       queryClient.invalidateQueries({ queryKey: [`/api/milestones`, id] });
       queryClient.invalidateQueries({ queryKey: [`/api/templates`, id] });
+      // Invalidate all milestone task queries
+      milestones.forEach(milestone => {
+        queryClient.invalidateQueries({ queryKey: [`/api/milestones/${milestone.id}/tasks`] });
+      });
       toast({ title: "Tasks reordered successfully" });
     },
     onError: (error: any) => {
@@ -1088,23 +1098,37 @@ export default function TemplateDetail() {
       const milestoneData = tasksByMilestone.get(milestoneId);
       if (!milestoneData) return;
 
-      const tasks = milestoneData.tasks;
-      const activeIndex = tasks.findIndex((task) => task.id === active.id);
-      const overIndex = tasks.findIndex((task) => task.id === over.id);
-
-      if (activeIndex === -1 || overIndex === -1) return;
-
-      const newTaskOrder = arrayMove(tasks, activeIndex, overIndex);
-
-      // Update sort orders for tasks in this milestone
-      const taskUpdates = newTaskOrder.map((task, index) => ({
-        id: task.id,
-        sortOrder: index + 1,
-        parentTaskId: task.parentTaskId
-      }));
-
-      // Update backend
-      reorderTasksMutation.mutate(taskUpdates);
+      const flatTasks = milestoneData.tasks;
+      
+      // Find the active and over tasks
+      const activeTask = flatTasks.find(task => task.id === active.id);
+      const overTask = flatTasks.find(task => task.id === over.id);
+      
+      if (!activeTask || !overTask) return;
+      
+      // Handle reordering within the same parent level
+      if (activeTask.parentTaskId === overTask.parentTaskId) {
+        // Get all sibling tasks at the same level
+        const siblingTasks = flatTasks.filter(task => task.parentTaskId === activeTask.parentTaskId);
+        siblingTasks.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        
+        const activeIndex = siblingTasks.findIndex(task => task.id === active.id);
+        const overIndex = siblingTasks.findIndex(task => task.id === over.id);
+        
+        if (activeIndex === -1 || overIndex === -1) return;
+        
+        const reorderedSiblings = arrayMove(siblingTasks, activeIndex, overIndex);
+        
+        // Update sort orders for the reordered siblings
+        const taskUpdates = reorderedSiblings.map((task, index) => ({
+          id: task.id,
+          sortOrder: index + 1,
+          parentTaskId: task.parentTaskId
+        }));
+        
+        // Update backend
+        reorderTasksMutation.mutate(taskUpdates);
+      }
     }
   };
 
