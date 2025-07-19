@@ -716,5 +716,6 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **P-Day System Bug Fix**: Fixed missing isNotNull import that was causing 500 errors when updating CSR Meeting task dates
 - **Enhanced P-Day Logging**: Added comprehensive debug logging to track P-Day dependency updates and troubleshoot calculation issues
 - **P-Day System Verification**: Successfully tested and verified P-Day dependency system working correctly - all 47 tasks automatically recalculate when CSR Meeting date changes
+- **Project Due Date Integration**: Connected Project Information Card due date to CSR Meeting task - editing project due date automatically updates CSR Meeting task and triggers P-Day dependency cascade
 - **Sub-Child Task Due Date Removal**: Completely removed due dates and "Days from Meeting" fields from level 3 sub-child tasks (deliverables) since parent professional role tasks drive the timeline
 - **Template Editor Enhancement**: Modified template editor to hide date management fields for level 2+ tasks, preventing users from setting individual due dates on sub-deliverable tasks

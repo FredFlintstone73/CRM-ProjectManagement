@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { insertProjectSchema, type InsertProject, type Project, type Contact } from "@shared/schema";
@@ -65,6 +65,13 @@ export default function ProjectForm({ project, onSuccess }: ProjectFormProps) {
     onSuccess: () => {
       if (!project) {
         form.reset();
+      }
+      // Invalidate all related caches when project is updated
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      if (project) {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', project.id.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', project.id.toString(), 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       }
       onSuccess?.();
     },

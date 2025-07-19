@@ -379,7 +379,58 @@ export class DatabaseStorage implements IStorage {
       .set({ ...processedProject, updatedAt: new Date() })
       .where(eq(projects.id, id))
       .returning();
+
+    // If project due date was updated, sync it to the CSR Meeting task
+    if (processedProject.dueDate) {
+      console.log(`Project ${id} due date updated to: ${processedProject.dueDate}`);
+      await this.updateCSRMeetingTaskFromProject(id, processedProject.dueDate as Date);
+    }
+
     return updatedProject;
+  }
+
+  // Helper method to update CSR Meeting task when project due date changes
+  async updateCSRMeetingTaskFromProject(projectId: number, projectDueDate: Date): Promise<void> {
+    console.log(`=== CSR Meeting Task Sync Started ===`);
+    console.log(`Project ID: ${projectId}`);
+    console.log(`New project due date: ${projectDueDate}`);
+    
+    // Find the CSR Meeting task in the project
+    const csrMeetingTasks = await db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.projectId, projectId),
+          sql`${tasks.title} LIKE 'CSR Meeting @%'`
+        )
+      );
+
+    console.log(`Found ${csrMeetingTasks.length} CSR Meeting tasks`);
+
+    if (csrMeetingTasks.length > 0) {
+      const csrTask = csrMeetingTasks[0];
+      console.log(`Updating CSR Meeting task ${csrTask.id}: "${csrTask.title}"`);
+      
+      // Update the CSR Meeting task due date to match project due date
+      await db
+        .update(tasks)
+        .set({ 
+          dueDate: projectDueDate,
+          updatedAt: new Date() 
+        })
+        .where(eq(tasks.id, csrTask.id));
+      
+      console.log(`CSR Meeting task updated successfully`);
+      
+      // Now trigger P-Day dependency updates for all other tasks
+      console.log(`Triggering P-Day dependency updates...`);
+      await this.updatePDayDependentTasks(projectId, projectDueDate);
+    } else {
+      console.log(`No CSR Meeting task found in project ${projectId}`);
+    }
+    
+    console.log(`=== CSR Meeting Task Sync Completed ===`);
   }
 
   async deleteProject(id: number): Promise<void> {
