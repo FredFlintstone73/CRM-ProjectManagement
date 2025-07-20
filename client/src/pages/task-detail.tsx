@@ -134,60 +134,63 @@ export default function TaskDetail() {
     
     const tasks = [...projectTasks];
     
-    // Helper function to recursively build hierarchy
-    const buildTaskHierarchy = (parentId = null, level = 0) => {
-      const children = tasks.filter(t => t.parentTaskId === parentId);
+    // Separate parent tasks and child tasks
+    const parentTasks = tasks.filter(t => !t.parentTaskId);
+    const childTasks = tasks.filter(t => t.parentTaskId);
+    
+    // Sort parent tasks by chronological order
+    const sortedParents = parentTasks.sort((a, b) => {
+      if (a.daysFromMeeting !== null && b.daysFromMeeting !== null && a.daysFromMeeting !== b.daysFromMeeting) {
+        return a.daysFromMeeting - b.daysFromMeeting;
+      }
+      if (a.dueDate && b.dueDate) {
+        const aDate = new Date(a.dueDate).getTime();
+        const bDate = new Date(b.dueDate).getTime();
+        if (aDate !== bDate) return aDate - bDate;
+      }
+      // Use ID as secondary sort for tasks with same daysFromMeeting
+      return a.id - b.id;
+    });
+    
+    // Build hierarchical sequence: parent → all its children → next parent → all its children...
+    const hierarchicalSequence = [];
+    
+    sortedParents.forEach(parent => {
+      // Add the parent task
+      hierarchicalSequence.push(parent);
       
-      // Sort children - use sortOrder first (if exists), then other criteria
+      // Get and sort children of this parent
+      const children = childTasks.filter(child => child.parentTaskId === parent.id);
       const sortedChildren = children.sort((a, b) => {
-        // Priority 1: sortOrder (for proper sequence within parent)
-        if (a.sortOrder !== null && b.sortOrder !== null) {
-          if (a.sortOrder !== b.sortOrder) {
-            return a.sortOrder - b.sortOrder;
-          }
+        // Sort children by their sortOrder first
+        if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
+          return a.sortOrder - b.sortOrder;
         }
-        
-        // Priority 2: daysFromMeeting (for chronological tasks)
-        if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
-          if (a.daysFromMeeting !== b.daysFromMeeting) {
-            return a.daysFromMeeting - b.daysFromMeeting;
-          }
-        }
-        
-        // Priority 3: due dates
-        if (a.dueDate && b.dueDate) {
-          const aDate = new Date(a.dueDate).getTime();
-          const bDate = new Date(b.dueDate).getTime();
-          if (aDate !== bDate) {
-            return aDate - bDate;
-          }
-        }
-        
-        // Priority 4: alphabetical for deliverable tasks (when no dates)
-        if (!a.daysFromMeeting && !b.daysFromMeeting && !a.dueDate && !b.dueDate) {
-          return a.title.localeCompare(b.title);
-        }
-        
-        // Fallback: ID
+        // Then by ID as fallback
         return a.id - b.id;
       });
       
-      // Build the hierarchical sequence
-      const sequence = [];
+      // Add all children immediately after parent
       sortedChildren.forEach(child => {
-        // Add the current task
-        sequence.push(child);
+        hierarchicalSequence.push(child);
         
-        // Recursively add its children
-        const childSequence = buildTaskHierarchy(child.id, level + 1);
-        sequence.push(...childSequence);
+        // Check for sub-children (grandchildren)
+        const subChildren = childTasks.filter(subChild => subChild.parentTaskId === child.id);
+        const sortedSubChildren = subChildren.sort((a, b) => {
+          if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
+            return a.sortOrder - b.sortOrder;
+          }
+          return a.title.localeCompare(b.title); // Alphabetical for deliverable sub-tasks
+        });
+        
+        // Add sub-children
+        sortedSubChildren.forEach(subChild => {
+          hierarchicalSequence.push(subChild);
+        });
       });
-      
-      return sequence;
-    };
+    });
     
-    // Start with root tasks (no parent) and build full hierarchy
-    return buildTaskHierarchy(null, 0);
+    return hierarchicalSequence;
   };
 
   // Find the next and previous tasks in hierarchical sequence
