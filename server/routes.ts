@@ -472,6 +472,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             taskMapping.set(templateTask.id, task.id);
           }
           
+          // After all tasks are created, resolve role-based assignments
+          console.log('Resolving role-based assignments for project:', newProject.id);
+          await storage.resolveRoleAssignments(newProject.id);
+          
           return res.status(201).json({
             project: newProject,
             tasks: createdTasks,
@@ -493,17 +497,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Helper function to resolve role-based assignments
-  const resolveRoleAssignment = async (role: string) => {
-    if (!role) return null;
+  const resolveRoleAssignment = async (roles: string[] | string) => {
+    if (!roles || (Array.isArray(roles) && roles.length === 0)) return null;
+    
+    // Normalize to array
+    const roleArray = Array.isArray(roles) ? roles : [roles];
     
     // Get all active team members
     const teamMembers = await storage.getContactsByType('team_member');
     const activeTeamMembers = teamMembers.filter(member => member.status === 'active');
     
-    // Find a team member with the specified role
-    const assignedMember = activeTeamMembers.find(member => member.role === role);
+    const assignedContactIds = [];
     
-    return assignedMember ? assignedMember.id : null;
+    // Resolve each role to contact IDs
+    for (const role of roleArray) {
+      const matchingContacts = activeTeamMembers.filter(contact => contact.role === role);
+      for (const contact of matchingContacts) {
+        if (!assignedContactIds.includes(contact.id)) {
+          assignedContactIds.push(contact.id);
+        }
+      }
+    }
+    
+    console.log(`Resolved roles [${roleArray.join(', ')}] to contacts: [${assignedContactIds.join(', ')}]`);
+    
+    return assignedContactIds.length > 0 ? assignedContactIds : null;
   };
 
   // Create project from template with due date calculations
