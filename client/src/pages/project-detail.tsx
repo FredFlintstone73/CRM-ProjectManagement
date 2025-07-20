@@ -514,6 +514,7 @@ export default function ProjectDetail() {
       <div className="mt-6">
         <SectionTaskManager 
           projectId={project.id}
+          onTaskClick={handleTaskClick}
         />
       </div>
 

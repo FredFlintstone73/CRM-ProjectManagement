@@ -616,14 +616,23 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                   console.log('onTaskClick exists:', !!onTaskClick);
                   console.log('About to navigate to:', `/task/${task.id}`);
                   
+                  // Open sidebar if callback exists
                   if (onTaskClick) {
-                    console.log('Using onTaskClick callback');
+                    console.log('Opening sidebar via onTaskClick callback');
                     onTaskClick(task);
-                  } else {
-                    console.log('Using setLocation navigation');
-                    setLocation(`/task/${task.id}`);
-                    console.log('setLocation called');
                   }
+                  
+                  // Always also navigate to task detail page
+                  console.log('Also navigating to task detail page');
+                  setLocation(`/task/${task.id}`);
+                  console.log('setLocation called');
+                  
+                  console.log('=== END TASK CLICK ===');
+                  
+                  // Always also navigate to task detail page
+                  console.log('Also navigating to task detail page');
+                  setLocation(`/task/${task.id}`);
+                  console.log('setLocation called');
                   
                   console.log('=== END TASK CLICK ===');
                 }}
