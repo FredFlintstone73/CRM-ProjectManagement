@@ -239,14 +239,22 @@ export default function TaskDetail() {
 
   // Navigation logic that prioritizes children over chronological sequence
   const calculateNavigation = () => {
+    console.log('=== NAVIGATION CALCULATION START ===');
+    console.log('Current task ID:', task?.id, 'Title:', task?.title);
+    
     if (!projectTasks || !task) {
+      console.log('Missing data - projectTasks or task is null');
       return { previousTask: null, nextTask: null };
     }
 
     // Special handling for parent tasks - check for children first
     const childTasks = projectTasks.filter(t => t.parentTaskId === task.id);
+    console.log('Children found for current task:', childTasks.length);
     
     if (childTasks.length > 0) {
+      console.log('PARENT TASK DETECTED - has', childTasks.length, 'children');
+      childTasks.forEach((child, i) => console.log(`  Child ${i + 1}: ${child.title} (ID: ${child.id}, Sort: ${child.sortOrder})`));
+      
       // If current task has children, next should be the first child (sorted by sortOrder)
       const sortedChildren = childTasks.sort((a, b) => {
         if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
@@ -255,19 +263,27 @@ export default function TaskDetail() {
         return a.id - b.id; // Fallback to ID
       });
       
+      const firstChild = sortedChildren[0];
+      console.log('NAVIGATING TO FIRST CHILD:', firstChild.title, '(ID:', firstChild.id, ')');
+      
       return {
         previousTask: null, // For now, focus on next task
-        nextTask: sortedChildren[0] // First child
+        nextTask: firstChild // First child
       };
     }
     
+    console.log('NO CHILDREN - using hierarchical sequence');
     // If no children, use hierarchical sequence as before
     const hierarchicalTasks = buildHierarchicalTasks();
     const currentIndex = hierarchicalTasks.findIndex(t => t.id === task.id);
+    console.log('Current index in hierarchy:', currentIndex, '/', hierarchicalTasks.length);
     
     const next = currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 
       ? hierarchicalTasks[currentIndex + 1] 
       : null;
+    
+    console.log('Next task from hierarchy:', next ? `${next.title} (${next.id})` : 'None');
+    console.log('=== NAVIGATION CALCULATION END ===');
     
     return {
       previousTask: null,
