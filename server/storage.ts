@@ -725,12 +725,22 @@ export class DatabaseStorage implements IStorage {
       await this.updateDependentTasksFromDRPM(id, processedTask.dueDate);
     }
 
-    // Handle cascading completion: if task was completed, check if parent should auto-complete
+    // Handle downward cascading: if task was completed, complete all child tasks
+    if (processedTask.status === 'completed' && userId) {
+      await this.completeAllChildTasks(id, userId);
+    }
+    
+    // Handle downward cascading: if task was uncompleted, uncomplete all child tasks
+    if (processedTask.status === 'todo' && userId) {
+      await this.uncompleteAllChildTasks(id, userId);
+    }
+
+    // Handle upward cascading completion: if task was completed, check if parent should auto-complete
     if (processedTask.status === 'completed' && updatedTask.parentTaskId && userId) {
       await this.checkAndCompleteParentTask(updatedTask.parentTaskId, userId);
     }
     
-    // Handle reverse cascading completion: if task was uncompleted, check if parent should auto-uncomplete
+    // Handle upward cascading completion: if task was uncompleted, check if parent should auto-uncomplete
     if (processedTask.status === 'todo' && updatedTask.parentTaskId && userId) {
       await this.checkAndUncompleteparentTask(updatedTask.parentTaskId, userId);
     }
@@ -1248,6 +1258,82 @@ export class DatabaseStorage implements IStorage {
     // Recursively check if this parent's parent should also be uncompleted
     if (parentTask.parentTaskId) {
       await this.checkAndUncompleteparentTask(parentTask.parentTaskId, userId);
+    }
+  }
+
+  async completeAllChildTasks(parentTaskId: number, userId: string): Promise<void> {
+    // Get all child tasks of this parent
+    const childTasks = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.parentTaskId, parentTaskId));
+    
+    if (childTasks.length === 0) return;
+    
+    console.log(`Parent task completed. Auto-completing ${childTasks.length} child tasks.`);
+    
+    // Complete all child tasks
+    for (const childTask of childTasks) {
+      if (childTask.status !== 'completed') {
+        await db
+          .update(tasks)
+          .set({ 
+            status: 'completed',
+            completedAt: new Date(),
+            updatedAt: new Date()
+          })
+          .where(eq(tasks.id, childTask.id));
+        
+        // Log activity for auto-completion
+        await this.createActivityLog({
+          userId,
+          action: "auto_completed_task",
+          entityType: "task",
+          entityId: childTask.id,
+          metadata: { taskTitle: childTask.title, reason: "parent_task_completed" },
+        });
+        
+        // Recursively complete any sub-children of this child task
+        await this.completeAllChildTasks(childTask.id, userId);
+      }
+    }
+  }
+
+  async uncompleteAllChildTasks(parentTaskId: number, userId: string): Promise<void> {
+    // Get all child tasks of this parent
+    const childTasks = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.parentTaskId, parentTaskId));
+    
+    if (childTasks.length === 0) return;
+    
+    console.log(`Parent task uncompleted. Auto-uncompleting ${childTasks.length} child tasks.`);
+    
+    // Uncomplete all child tasks
+    for (const childTask of childTasks) {
+      if (childTask.status === 'completed') {
+        await db
+          .update(tasks)
+          .set({ 
+            status: 'todo',
+            completedAt: null,
+            updatedAt: new Date()
+          })
+          .where(eq(tasks.id, childTask.id));
+        
+        // Log activity for auto-uncompletion
+        await this.createActivityLog({
+          userId,
+          action: "auto_uncompleted_task",
+          entityType: "task",
+          entityId: childTask.id,
+          metadata: { taskTitle: childTask.title, reason: "parent_task_uncompleted" },
+        });
+        
+        // Recursively uncomplete any sub-children of this child task
+        await this.uncompleteAllChildTasks(childTask.id, userId);
+      }
     }
   }
 
