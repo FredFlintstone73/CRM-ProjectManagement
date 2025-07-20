@@ -235,10 +235,65 @@ export default function TaskDetail() {
     };
   };
 
-  // Debug: Add console log to verify function is called
-  console.log('CALLING findNavigationTasks() for task ID:', task?.id);
-  const { previousTask, nextTask } = findNavigationTasks();
-  console.log('NAVIGATION RESULT - Previous:', previousTask?.id, 'Next:', nextTask?.id);
+  // Simple approach - directly calculate navigation without complex hierarchy
+  const calculateSimpleNavigation = () => {
+    if (!projectTasks || !task) {
+      console.log('No project tasks or task data available');
+      return { previousTask: null, nextTask: null };
+    }
+    
+    console.log('=== SIMPLE NAVIGATION DEBUG ===');
+    console.log('Current task ID:', task.id, 'Title:', task.title);
+    console.log('Total project tasks:', projectTasks.length);
+    
+    // Sort all tasks chronologically
+    const sortedTasks = [...projectTasks].sort((a, b) => {
+      if (a.daysFromMeeting !== null && b.daysFromMeeting !== null && a.daysFromMeeting !== b.daysFromMeeting) {
+        return a.daysFromMeeting - b.daysFromMeeting;
+      }
+      if (a.dueDate && b.dueDate) {
+        const aDate = new Date(a.dueDate).getTime();
+        const bDate = new Date(b.dueDate).getTime();
+        if (aDate !== bDate) return aDate - bDate;
+      }
+      return a.id - b.id;
+    });
+    
+    const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
+    console.log('Current index in sorted tasks:', currentIndex);
+    
+    // Show specific debug for task 2368
+    if (task.id === 2368) {
+      console.log('=== TASK 2368 SPECIFIC DEBUG ===');
+      const children = projectTasks.filter(t => t.parentTaskId === 2368);
+      console.log('Children of task 2368:', children.length);
+      children.forEach((child, i) => {
+        console.log(`  Child ${i + 1}: ${child.title} (ID: ${child.id}, Sort: ${child.sortOrder})`);
+      });
+      
+      // Show tasks around current position
+      const start = Math.max(0, currentIndex - 3);
+      const end = Math.min(sortedTasks.length, currentIndex + 6);
+      console.log('Tasks around current position:');
+      sortedTasks.slice(start, end).forEach((t, i) => {
+        const actualIndex = start + i;
+        const marker = actualIndex === currentIndex ? '>>> CURRENT' : '   ';
+        console.log(`${marker} ${actualIndex}: ${t.title} (ID: ${t.id}, Parent: ${t.parentTaskId || 'none'})`);
+      });
+    }
+    
+    const prev = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
+    const next = currentIndex >= 0 && currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
+    
+    console.log('Navigation result:');
+    console.log('  Previous:', prev ? `${prev.title} (${prev.id})` : 'None');
+    console.log('  Next:', next ? `${next.title} (${next.id})` : 'None');
+    console.log('=== END SIMPLE DEBUG ===');
+    
+    return { previousTask: prev, nextTask: next };
+  };
+  
+  const { previousTask, nextTask } = calculateSimpleNavigation();
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
