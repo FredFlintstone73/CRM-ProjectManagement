@@ -182,19 +182,34 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
 
   // Update task mutation
   const updateTaskMutation = useMutation({
-    mutationFn: (taskData: TaskFormData & { id: number }) => 
-      apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData),
-    onSuccess: () => {
-      // Force fresh data by incrementing cache version
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] }); // Remove cached data
+    mutationFn: async (taskData: TaskFormData & { id: number }) => {
+      const response = await apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData);
+      return response;
+    },
+    onSuccess: (updatedTask) => {
+      // Optimistically update project tasks cache
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
+      
+      // Optimistically update global tasks cache
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
+
       setIsTaskDialogOpen(false);
       resetTaskForm();
-
     },
     onError: () => {
-
+      // On error, revert optimistic updates
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
     },
   });
 
@@ -202,34 +217,60 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   const deleteTaskMutation = useMutation({
     mutationFn: (taskId: number) => 
       apiRequest('DELETE', `/api/tasks/${taskId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      setDeleteTaskId(null);
+    onSuccess: (_, taskId) => {
+      // Optimistically remove from project tasks cache
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.filter(task => task.id !== taskId);
+      });
+      
+      // Optimistically remove from global tasks cache
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.filter(task => task.id !== taskId);
+      });
 
+      setDeleteTaskId(null);
     },
     onError: () => {
-
+      // On error, revert by refreshing the cache
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
     },
   });
 
   // Toggle task completion
   const toggleTaskCompletion = useMutation({
-    mutationFn: (task: Task) => 
-      apiRequest('PATCH', `/api/tasks/${task.id}`, { 
+    mutationFn: async (task: Task) => {
+      const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: task.status === 'completed' ? 'todo' : 'completed',
-      }),
-    onSuccess: () => {
-      // Remove all cached queries to force fresh data
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString()] });
-      queryClient.removeQueries({ queryKey: ['/api/milestones'] });
+      });
+      return response;
+    },
+    onSuccess: (updatedTask, originalTask) => {
+      // Optimistically update project tasks cache
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
       
-      // Then invalidate to trigger fresh fetches
+      // Optimistically update global tasks cache
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
+
+      // Only invalidate milestone and progress queries for real-time progress updates
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+    },
+    onError: () => {
+      // On error, revert optimistic updates by invalidating affected caches
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString()] });
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
     },
   });
 

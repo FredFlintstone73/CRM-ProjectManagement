@@ -167,28 +167,38 @@ export default function Tasks() {
   });
 
   const toggleTaskCompletion = useMutation({
-    mutationFn: (task: Task) => 
-      apiRequest('PATCH', `/api/tasks/${task.id}`, { 
+    mutationFn: async (task: Task) => {
+      const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: task.status === 'completed' ? 'todo' : 'completed',
-      }),
-    onSuccess: () => {
-      // Remove all cached queries to force fresh data
-      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
-      if (task?.projectId) {
-        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
-        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
-        queryClient.removeQueries({ queryKey: ['/api/milestones'] });
-      }
+      });
+      return response;
+    },
+    onSuccess: (updatedTask, originalTask) => {
+      // Optimistically update global tasks cache
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
       
-      // Then invalidate to trigger fresh fetches
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      if (task?.projectId) {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
-        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      // Optimistically update project tasks cache if task has project
+      if (originalTask?.projectId) {
+        queryClient.setQueryData(['/api/projects', originalTask.projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+          if (!oldTasks) return oldTasks;
+          return oldTasks.map(task => 
+            task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+          );
+        });
       }
+
+      // Only invalidate milestone queries for progress updates
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
     },
     onError: (error) => {
+      // On error, revert optimistic updates
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
           window.location.href = "/api/login";

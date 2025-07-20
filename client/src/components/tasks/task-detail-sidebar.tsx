@@ -287,7 +287,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     }, {
       onSuccess: () => {
         setIsEditing(false);
-        onTaskUpdate?.();
+        // Don't call onTaskUpdate to avoid page refresh - optimistic updates handle UI changes
       },
       onError: (error) => {
         console.error('Failed to update task:', error);

@@ -181,26 +181,38 @@ export default function TaskDetail() {
         status: completed ? 'completed' : 'todo' 
       });
     },
-    onSuccess: () => {
-      // Remove all cached queries to force fresh data
-      queryClient.removeQueries({ queryKey: ['/api/tasks', id] });
-      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
-      if (task?.projectId) {
-        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
-        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
-        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
-        queryClient.removeQueries({ queryKey: ['/api/milestones'] });
-      }
+    onSuccess: (updatedTask) => {
+      // Optimistically update individual task cache
+      queryClient.setQueryData(['/api/tasks', id], (oldTask: Task | undefined) => {
+        if (!oldTask) return oldTask;
+        return { ...oldTask, ...updatedTask };
+      });
       
-      // Then invalidate to trigger fresh fetches
+      // Optimistically update global tasks cache
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
+      
+      // Optimistically update project tasks cache if task has project
+      if (task?.projectId) {
+        queryClient.setQueryData(['/api/projects', task.projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+          if (!oldTasks) return oldTasks;
+          return oldTasks.map(t => 
+            t.id === updatedTask.id ? { ...t, ...updatedTask } : t
+          );
+        });
+      }
+
+      // Only invalidate milestone queries for progress updates
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+    },
+    onError: () => {
+      // On error, revert optimistic updates
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      if (task?.projectId) {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
-      }
     },
   });
 
