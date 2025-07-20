@@ -63,12 +63,22 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     enabled: !!projectId && !!selectedTask,
   });
 
+  // Sync selected task with updated project tasks data
+  useEffect(() => {
+    if (selectedTask && projectTasks) {
+      const updatedTask = projectTasks.find(t => t.id === selectedTask.id);
+      if (updatedTask && JSON.stringify(updatedTask) !== JSON.stringify(selectedTask)) {
+        setSelectedTask(updatedTask);
+      }
+    }
+  }, [projectTasks, selectedTask]);
+
   // Update task completion status
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, updates }: { taskId: number; updates: Partial<Task> }) => {
       return apiRequest('PATCH', `/api/tasks/${taskId}`, updates);
     },
-    onSuccess: (updatedTask) => {
+    onSuccess: (updatedTask: Task) => {
       // Optimistically update the cache instead of invalidating everything
       queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
         if (!oldTasks) return oldTasks;
@@ -153,14 +163,22 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     if (!selectedTask) return;
     
     const newStatus = selectedTask.status === 'completed' ? 'todo' : 'completed';
+    
+    // Immediately update the local selected task for instant UI feedback
+    const optimisticUpdate = { ...selectedTask, status: newStatus };
+    setSelectedTask(optimisticUpdate);
+    
     updateTaskMutation.mutate({
       taskId: selectedTask.id,
       updates: { status: newStatus }
     }, {
       onSuccess: () => {
-        onTaskUpdate?.();
+        // Don't call onTaskUpdate to avoid page refresh
+        // onTaskUpdate?.();
       },
       onError: (error) => {
+        // Revert optimistic update on error
+        setSelectedTask(selectedTask);
         console.error('Failed to toggle task completion:', error);
       }
     });
