@@ -48,23 +48,19 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
   // Fetch contacts for assignment dropdown
   const { data: contacts = [] } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
-    queryFn: () => apiRequest('/api/contacts')
+    enabled: !!task,
   });
 
   // Get all project tasks for navigation
   const { data: projectTasks = [] } = useQuery<Task[]>({
     queryKey: ['/api/projects', projectId, 'tasks'],
-    queryFn: () => apiRequest(`/api/projects/${projectId}/tasks`),
-    enabled: !!projectId
+    enabled: !!projectId && !!task,
   });
 
   // Update task completion status
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, updates }: { taskId: number; updates: Partial<Task> }) => {
-      return apiRequest(`/api/tasks/${taskId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(updates)
-      });
+      return apiRequest('PATCH', `/api/tasks/${taskId}`, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
