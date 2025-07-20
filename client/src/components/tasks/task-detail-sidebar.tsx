@@ -295,10 +295,56 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     });
   };
 
+  // Helper function to format role names
+  const formatRole = (role: string) => {
+    if (!role) return '';
+    return role
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/Insurance /g, 'Insurance - ')
+      .replace(/Ltc/g, 'LTC');
+  };
+
+  // Get all assigned team members from direct assignments and role assignments
+  const getAssignedTeamMembers = () => {
+    if (!selectedTask || !contacts.length) return [];
+    
+    const teamMembers = contacts.filter(contact => contact.contactType === 'team_member' && contact.status === 'active');
+    const assignedMembers = [];
+    
+    // Add directly assigned team members (by contact ID)
+    if (selectedTask.assignedTo) {
+      const assignedIds = Array.isArray(selectedTask.assignedTo) ? selectedTask.assignedTo : [selectedTask.assignedTo];
+      assignedIds.forEach(contactId => {
+        if (contactId) {
+          const member = teamMembers.find(tm => tm.id === contactId);
+          if (member) assignedMembers.push(member);
+        }
+      });
+    }
+    
+    // Add team members assigned by role
+    if (selectedTask.assignedToRole) {
+      const assignedRoles = Array.isArray(selectedTask.assignedToRole) ? selectedTask.assignedToRole : [selectedTask.assignedToRole];
+      assignedRoles.forEach(role => {
+        if (role) {
+          const roleMembers = teamMembers.filter(tm => tm.role === role);
+          roleMembers.forEach(member => {
+            // Only add if not already in the list (avoid duplicates)
+            if (!assignedMembers.find(am => am.id === member.id)) {
+              assignedMembers.push(member);
+            }
+          });
+        }
+      });
+    }
+    
+    return assignedMembers;
+  };
+
   const getAssignedUser = () => {
-    if (!selectedTask?.assignedTo || !contacts.length) return null;
-    const assignedIds = Array.isArray(selectedTask.assignedTo) ? selectedTask.assignedTo : [selectedTask.assignedTo];
-    return contacts.find(contact => assignedIds.includes(contact.id));
+    const assignedMembers = getAssignedTeamMembers();
+    return assignedMembers.length > 0 ? assignedMembers[0] : null;
   };
 
   const { prevTask, nextTask } = getTaskNavigation();
@@ -441,11 +487,25 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                   </Select>
                 ) : (
                   <div>
-                    {getAssignedUser() ? (
-                      <Badge variant="secondary">
-                        <User className="h-3 w-3 mr-1" />
-                        {getAssignedUser()?.firstName} {getAssignedUser()?.lastName}
-                      </Badge>
+                    {getAssignedTeamMembers().length > 0 ? (
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xs text-gray-500">
+                          {getAssignedTeamMembers().length} team member{getAssignedTeamMembers().length !== 1 ? 's' : ''}
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {getAssignedTeamMembers().map(member => (
+                            <Badge key={member.id} variant="secondary" className="text-xs">
+                              <User className="h-3 w-3 mr-1" />
+                              {member.firstName} {member.lastName}
+                              {member.role && (
+                                <span className="ml-1 text-gray-400 text-xs">
+                                  ({formatRole(member.role)})
+                                </span>
+                              )}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
                     ) : (
                       <span className="text-sm text-gray-500">Unassigned</span>
                     )}

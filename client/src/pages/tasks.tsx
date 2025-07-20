@@ -25,7 +25,7 @@ import TaskForm from "@/components/tasks/task-form";
 import { UserPriorityInput } from "@/components/tasks/user-priority-input";
 import { TaskDetailSidebar } from "@/components/tasks/task-detail-sidebar";
 import { getDueDateBadgeProps } from "@/lib/dueDateUtils";
-import type { Task, Project, User as UserType } from "@shared/schema";
+import type { Task, Project, Contact, User as UserType } from "@shared/schema";
 import { Link, useLocation } from "wouter";
 
 export default function Tasks() {
@@ -100,6 +100,53 @@ export default function Tasks() {
     queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
   });
+
+  // Helper function to format role names
+  const formatRole = (role: string) => {
+    if (!role) return '';
+    return role
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/Insurance /g, 'Insurance - ')
+      .replace(/Ltc/g, 'LTC');
+  };
+
+  // Get all assigned team members from direct assignments and role assignments
+  const getTaskAssignedMembers = (taskData: any): Contact[] => {
+    if (!contacts?.length) return [];
+    
+    const teamMembers = contacts.filter((contact: Contact) => contact.contactType === 'team_member' && contact.status === 'active');
+    const assignedMembers: Contact[] = [];
+    
+    // Add directly assigned team members (by contact ID)
+    if (taskData.assignedTo) {
+      const assignedIds = Array.isArray(taskData.assignedTo) ? taskData.assignedTo : [taskData.assignedTo];
+      assignedIds.forEach((contactId: any) => {
+        if (contactId) {
+          const member = teamMembers.find((tm: Contact) => tm.id === contactId);
+          if (member) assignedMembers.push(member);
+        }
+      });
+    }
+    
+    // Add team members assigned by role
+    if (taskData.assignedToRole) {
+      const assignedRoles = Array.isArray(taskData.assignedToRole) ? taskData.assignedToRole : [taskData.assignedToRole];
+      assignedRoles.forEach((role: any) => {
+        if (role) {
+          const roleMembers = teamMembers.filter((tm: Contact) => tm.role === role);
+          roleMembers.forEach((member: Contact) => {
+            // Only add if not already in the list (avoid duplicates)
+            if (!assignedMembers.find((am: Contact) => am.id === member.id)) {
+              assignedMembers.push(member);
+            }
+          });
+        }
+      });
+    }
+    
+    return assignedMembers;
+  };
 
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: number) => {
@@ -647,13 +694,20 @@ export default function Tasks() {
                       <span>{getProjectName(task.projectId)}</span>
                     </div>
                     
-                    {task.assignedTo && (
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <User className="w-4 h-4" />
-                        <span>Assigned to: {(() => {
-                          const assignee = contacts?.find((c: any) => c.id === task.assignedTo);
-                          return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown';
-                        })()}</span>
+                    {getTaskAssignedMembers(task).length > 0 && (
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <User className="w-4 h-4" />
+                          <span>Assigned to:</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1 ml-6">
+                          {getTaskAssignedMembers(task).map(member => (
+                            <Badge key={member.id} variant="secondary" className="text-xs">
+                              <User className="h-3 w-3 mr-1" />
+                              {member.firstName} {member.lastName}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
                     
@@ -740,13 +794,14 @@ export default function Tasks() {
                         </div>
                         
                         <div className="text-right">
-                          {task.assignedTo && (
-                            <div className="flex items-center justify-end space-x-2 text-sm text-gray-600">
-                              <User className="w-4 h-4" />
-                              <span>{(() => {
-                                const assignee = contacts?.find((c: any) => c.id === task.assignedTo);
-                                return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unknown';
-                              })()}</span>
+                          {getTaskAssignedMembers(task).length > 0 && (
+                            <div className="flex flex-wrap gap-1 justify-end">
+                              {getTaskAssignedMembers(task).map(member => (
+                                <Badge key={member.id} variant="secondary" className="text-xs">
+                                  <User className="h-3 w-3 mr-1" />
+                                  {member.firstName} {member.lastName}
+                                </Badge>
+                              ))}
                             </div>
                           )}
                           

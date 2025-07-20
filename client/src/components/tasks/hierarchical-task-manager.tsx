@@ -284,10 +284,57 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
     return colors[level % colors.length];
   };
 
+  // Helper function to format role names
+  const formatRole = (role: string) => {
+    if (!role) return '';
+    return role
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/Insurance /g, 'Insurance - ')
+      .replace(/Ltc/g, 'LTC');
+  };
+
+  // Get all assigned team members from direct assignments and role assignments
+  const getTaskAssignedMembers = (taskData: any): Contact[] => {
+    if (!contacts.length) return [];
+    
+    const teamMembers = contacts.filter(contact => contact.contactType === 'team_member' && contact.status === 'active');
+    const assignedMembers: Contact[] = [];
+    
+    // Add directly assigned team members (by contact ID)
+    if (taskData.assignedTo) {
+      const assignedIds = Array.isArray(taskData.assignedTo) ? taskData.assignedTo : [taskData.assignedTo];
+      assignedIds.forEach((contactId: any) => {
+        if (contactId) {
+          const member = teamMembers.find(tm => tm.id === contactId);
+          if (member) assignedMembers.push(member);
+        }
+      });
+    }
+    
+    // Add team members assigned by role
+    if (taskData.assignedToRole) {
+      const assignedRoles = Array.isArray(taskData.assignedToRole) ? taskData.assignedToRole : [taskData.assignedToRole];
+      assignedRoles.forEach((role: any) => {
+        if (role) {
+          const roleMembers = teamMembers.filter(tm => tm.role === role);
+          roleMembers.forEach(member => {
+            // Only add if not already in the list (avoid duplicates)
+            if (!assignedMembers.find(am => am.id === member.id)) {
+              assignedMembers.push(member);
+            }
+          });
+        }
+      });
+    }
+    
+    return assignedMembers;
+  };
+
   const renderTaskNode = (task: TaskNode, level: number = 0) => {
     const hasChildren = task.children && task.children.length > 0;
     const isExpanded = expandedTasks.has(task.id);
-    const assignedContact = contacts.find(c => c.id === task.assignedTo);
+    const assignedMembers = getTaskAssignedMembers(task);
     const milestone = milestones.find(m => m.id === task.milestoneId);
 
     return (
@@ -348,10 +395,14 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
                     </Badge>
                   )}
                   
-                  {assignedContact && (
-                    <div className="flex items-center gap-1">
-                      <User size={12} />
-                      {assignedContact.firstName} {assignedContact.familyName}
+                  {assignedMembers.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {assignedMembers.map(member => (
+                        <Badge key={member.id} variant="secondary" className="text-xs">
+                          <User className="h-3 w-3 mr-1" />
+                          {member.firstName} {member.lastName}
+                        </Badge>
+                      ))}
                     </div>
                   )}
                   
