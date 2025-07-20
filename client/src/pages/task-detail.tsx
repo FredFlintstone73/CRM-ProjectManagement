@@ -723,7 +723,7 @@ export default function TaskDetail() {
           </DialogHeader>
           <TaskForm 
             task={task} 
-            projectId={task?.projectId || undefined} 
+            projectId={task?.projectId as number | undefined} 
             onSuccess={() => {
               setIsEditing(false);
               queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
