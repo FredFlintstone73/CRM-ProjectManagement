@@ -298,8 +298,8 @@ export default function TaskDetail() {
   console.log('=== ABOUT TO CALL calculateNavigation ===');
   const { previousTask, nextTask } = calculateNavigation();
   console.log('=== calculateNavigation RETURNED ===');
-  console.log('previousTask:', previousTask?.title || 'null');
-  console.log('nextTask:', nextTask?.title || 'null');
+  console.log('previousTask:', (previousTask as any)?.title || 'null');
+  console.log('nextTask:', (nextTask as any)?.title || 'null');
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
@@ -388,7 +388,9 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setLocation(`/task/${previousTask.id}`);
+                  if (previousTask) {
+                    setLocation(`/task/${(previousTask as any).id}`);
+                  }
                 }}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -400,13 +402,15 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  alert(`NEXT BUTTON: From ${task?.id} (${task?.title}) to ${nextTask.id} (${nextTask.title})`);
-                  console.log('=== NEXT BUTTON CLICKED ===');
-                  console.log('Current task:', task?.id, task?.title);
-                  console.log('Next task:', nextTask.id, nextTask.title);
-                  console.log('Navigating to:', `/task/${nextTask.id}`);
-                  console.log('=== END NEXT BUTTON ===');
-                  setLocation(`/task/${nextTask.id}`);
+                  if (nextTask) {
+                    alert(`NEXT BUTTON: From ${task?.id} (${task?.title}) to ${(nextTask as any).id} (${(nextTask as any).title})`);
+                    console.log('=== NEXT BUTTON CLICKED ===');
+                    console.log('Current task:', task?.id, task?.title);
+                    console.log('Next task:', (nextTask as any).id, (nextTask as any).title);
+                    console.log('Navigating to:', `/task/${(nextTask as any).id}`);
+                    console.log('=== END NEXT BUTTON ===');
+                    setLocation(`/task/${(nextTask as any).id}`);
+                  }
                 }}
               >
                 Next Task
