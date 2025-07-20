@@ -117,7 +117,10 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     }
   };
 
-  const handleToggleComplete = () => {
+  const handleToggleComplete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!task) return;
     
     const newStatus = task.status === 'completed' ? 'active' : 'completed';
@@ -228,18 +231,18 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         {/* Task Title and Status */}
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               onClick={handleToggleComplete}
-              className="mt-1 p-0 h-6 w-6"
+              className="mt-1 p-0 h-6 w-6 bg-transparent border-none cursor-pointer hover:bg-gray-100 rounded"
+              disabled={updateTaskMutation.isPending}
             >
               {task.status === 'completed' ? (
                 <CheckCircle className="h-5 w-5 text-green-600" />
               ) : (
                 <Circle className="h-5 w-5 text-gray-400" />
               )}
-            </Button>
+            </button>
             
             <div className="flex-1">
               {isEditing ? (
