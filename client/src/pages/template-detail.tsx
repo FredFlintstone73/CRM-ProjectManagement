@@ -76,7 +76,6 @@ interface TaskTemplate {
   description: string;
   dueDate?: string;
   status?: string;
-  subtasks?: TaskTemplate[];
   completedAt?: string;
   estimatedDays: number;
   daysFromMeeting: number;
@@ -608,6 +607,7 @@ const SortableTaskDisplay = ({ task, templateId, level, milestone, milestoneTask
           />
         </div>
       </div>
+
     </div>
   );
 };
@@ -871,6 +871,7 @@ export default function TemplateDetail() {
   const [templateName, setTemplateName] = useState<string>("");
   const [templateDescription, setTemplateDescription] = useState<string>("");
   const [meetingType, setMeetingType] = useState<string>("csr");
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState<boolean>(false);
 
   // Fetch template data
   const { data: template, isLoading: isTemplateLoading } = useQuery<ProjectTemplate>({
@@ -1005,6 +1006,10 @@ export default function TemplateDetail() {
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
       setEditingMilestone(null);
       setEditingTitle("");
+      
+      // Show confirmation for 1 second
+      setShowSaveConfirmation(true);
+      setTimeout(() => setShowSaveConfirmation(false), 1000);
     },
   });
 
@@ -1041,6 +1046,10 @@ export default function TemplateDetail() {
       setEditingTaskDueDate("");
       setEditingTaskAssignedTo([]);
       setEditingTaskAssignedToRole([]);
+      
+      // Show confirmation for 1 second
+      setShowSaveConfirmation(true);
+      setTimeout(() => setShowSaveConfirmation(false), 1000);
     },
   });
 
@@ -1224,6 +1233,10 @@ export default function TemplateDetail() {
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates'] });
       queryClient.invalidateQueries({ queryKey: ['/api/project-templates', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/milestones', 'template', id] });
+      
+      // Show confirmation for 1 second
+      setShowSaveConfirmation(true);
+      setTimeout(() => setShowSaveConfirmation(false), 1000);
     } catch (error) {
       console.error('Error saving template:', error);
     }
@@ -1567,6 +1580,13 @@ export default function TemplateDetail() {
           </div>
         </div>
       </main>
+
+      {/* 1-second save confirmation */}
+      {showSaveConfirmation && (
+        <div className="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded shadow-lg animate-in fade-in duration-200">
+          ✓ Template saved successfully
+        </div>
+      )}
     </>
   );
 }
