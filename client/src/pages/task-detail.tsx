@@ -198,31 +198,34 @@ export default function TaskDetail() {
     const hierarchicalTasks = buildHierarchicalTasks();
     const currentIndex = hierarchicalTasks.findIndex(t => t.id === task?.id);
     
-    // Always show debug for now to understand the hierarchy
-    console.log('=== TASK NAVIGATION DEBUG ===');
-    console.log('Current task:', task?.title, 'ID:', task?.id, 'Parent:', task?.parentTaskId);
-    console.log('Current index in hierarchy:', currentIndex);
-    console.log('Total tasks in hierarchy:', hierarchicalTasks.length);
+    const prev = currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null;
+    const next = currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 ? hierarchicalTasks[currentIndex + 1] : null;
     
-    // Show a focused view around current task
-    const start = Math.max(0, currentIndex - 5);
-    const end = Math.min(hierarchicalTasks.length, currentIndex + 6);
-    console.log('Hierarchy sequence (focused view):');
-    hierarchicalTasks.slice(start, end).forEach((t, i) => {
-      const actualIndex = start + i;
-      const marker = actualIndex === currentIndex ? '>>> ' : '    ';
-      const level = t.parentTaskId ? '  Child' : 'Parent';
-      console.log(`${marker}${actualIndex}: ${level}: ${t.title} (ID: ${t.id}, Parent: ${t.parentTaskId || 'none'}, Sort: ${t.sortOrder || 'none'})`);
-    });
-    
-    console.log('Navigation:');
-    console.log('  Previous:', previousTask ? `${previousTask.title} (ID: ${previousTask.id})` : 'None');
-    console.log('  Next:', nextTask ? `${nextTask.title} (ID: ${nextTask.id})` : 'None');
-    console.log('=== END DEBUG ===');
+    // Debug only for specific task
+    if (task?.id === 2368) {
+      console.log('=== DEBUG: Generate Database Reports Navigation ===');
+      console.log('Current task:', task?.title, 'ID:', task?.id);
+      console.log('Current index:', currentIndex, 'of', hierarchicalTasks.length, 'total tasks');
+      console.log('Children of this task should be:', projectTasks?.filter(t => t.parentTaskId === 2368).map(t => t.title) || []);
+      
+      const start = Math.max(0, currentIndex - 2);
+      const end = Math.min(hierarchicalTasks.length, currentIndex + 15);  // Show more to see children
+      console.log('Sequence around current task:');
+      hierarchicalTasks.slice(start, end).forEach((t, i) => {
+        const actualIndex = start + i;
+        const marker = actualIndex === currentIndex ? '>>> ' : '    ';
+        const isChild = t.parentTaskId === 2368;
+        const level = isChild ? '  CHILD OF 2368' : (t.parentTaskId ? '  Other Child' : 'Parent');
+        console.log(`${marker}${actualIndex}: ${level}: ${t.title} (ID: ${t.id})`);
+      });
+      
+      console.log('Next task should be:', next ? `${next.title} (ID: ${next.id})` : 'None');
+      console.log('=== END DEBUG ===');
+    }
     
     return {
-      previousTask: currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null,
-      nextTask: currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 ? hierarchicalTasks[currentIndex + 1] : null
+      previousTask: prev,
+      nextTask: next
     };
   };
 
