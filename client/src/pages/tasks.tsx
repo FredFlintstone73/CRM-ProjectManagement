@@ -768,9 +768,16 @@ export default function Tasks() {
           ) : (
             <div className="space-y-4">
               {/* Column Headers */}
-              <div className="flex items-center bg-gray-50 p-3 rounded-lg border gap-4">
-                <div className="text-xs font-medium text-gray-600 text-center" style={{width: '40px'}}>Status</div>
-                <div className="flex-none" style={{width: '80px'}}>
+              <div className="flex items-center bg-gray-50 p-3 rounded-lg border gap-4" style={{
+                '--status-width': '40px',
+                '--priority-width': '80px', 
+                '--title-width': '50%',
+                '--assignee-width': '20%',
+                '--duedate-width': '100px',
+                '--actions-width': '100px'
+              } as React.CSSProperties}>
+                <div className="text-xs font-medium text-gray-600 text-center" style={{width: 'var(--status-width)'}}>Status</div>
+                <div className="flex-none" style={{width: 'var(--priority-width)'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -780,7 +787,7 @@ export default function Tasks() {
                     Priority {getSortIcon('priority')}
                   </Button>
                 </div>
-                <div className="flex-none" style={{width: '50%'}}>
+                <div className="flex-none" style={{width: 'var(--title-width)'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -790,7 +797,7 @@ export default function Tasks() {
                     Title {getSortIcon('title')}
                   </Button>
                 </div>
-                <div className="flex-none" style={{width: '20%'}}>
+                <div className="flex-none" style={{width: 'var(--assignee-width)'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -800,7 +807,7 @@ export default function Tasks() {
                     Assignee {getSortIcon('assignee')}
                   </Button>
                 </div>
-                <div className="flex-none" style={{width: '100px'}}>
+                <div className="flex-none" style={{width: 'var(--duedate-width)'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -810,16 +817,23 @@ export default function Tasks() {
                     Due Date {getSortIcon('dueDate')}
                   </Button>
                 </div>
-                <div className="text-xs font-medium text-gray-600 text-center" style={{width: '100px'}}>Actions</div>
+                <div className="text-xs font-medium text-gray-600 text-center" style={{width: 'var(--actions-width)'}}>Actions</div>
               </div>
               
               {/* Task Rows */}
               {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-3">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4" style={{
+                      '--status-width': '40px',
+                      '--priority-width': '80px', 
+                      '--title-width': '50%',
+                      '--assignee-width': '20%',
+                      '--duedate-width': '100px',
+                      '--actions-width': '100px'
+                    } as React.CSSProperties}>
                       {/* Status Column */}
-                      <div className="flex justify-center" style={{width: '40px'}}>
+                      <div className="flex justify-center" style={{width: 'var(--status-width)'}}>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -836,7 +850,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Priority Column */}
-                      <div className="flex justify-center" style={{width: '80px'}}>
+                      <div className="flex justify-center" style={{width: 'var(--priority-width)'}}>
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
                             taskId={task.id} 
@@ -851,7 +865,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Title Column */}
-                      <div className="flex-none" style={{width: '50%'}}>
+                      <div className="flex-none" style={{width: 'var(--title-width)'}}>
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
@@ -863,7 +877,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Assignee Column */}
-                      <div className="flex-none" style={{width: '20%'}}>
+                      <div className="flex-none" style={{width: 'var(--assignee-width)'}}>
                         {getTaskAssignedMembers(task).length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {getTaskAssignedMembers(task).map(member => (
@@ -877,7 +891,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Due Date Column */}
-                      <div className="flex-none" style={{width: '100px'}}>
+                      <div className="flex-none" style={{width: 'var(--duedate-width)'}}>
                         {task.dueDate && (
                           <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
                             <CalendarDays className="w-3 h-3 mr-1" />
@@ -887,7 +901,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Actions Column */}
-                      <div className="flex gap-1 justify-center" style={{width: '100px'}}>
+                      <div className="flex gap-1 justify-center" style={{width: 'var(--actions-width)'}}>
                         <Button
                           variant="outline"
                           size="sm"
