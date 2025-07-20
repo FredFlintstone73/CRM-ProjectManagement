@@ -216,7 +216,7 @@ export default function CreateFromTemplateDialog({ template, children }: CreateF
 
   const getRoleColor = (role: string) => {
     const colors: { [key: string]: string } = {
-      'client_service_rep': 'bg-blue-100 text-blue-800',
+      'client_service_member': 'bg-blue-100 text-blue-800',
       'financial_planner': 'bg-green-100 text-green-800',
       'estate_attorney': 'bg-purple-100 text-purple-800',
       'tax_planner': 'bg-orange-100 text-orange-800',

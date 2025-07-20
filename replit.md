@@ -629,6 +629,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Consistent Removal**: Updated all frontend components including contact forms, task forms, and template editors
 - **Database Cleanup**: Deprecated estate_planner enum value in database to prevent data loss
 
+### Complete Client Service Rep to Client Service Member Rename (July 19, 2025)
+- **Database Schema Update**: Updated contact_role enum to include 'client_service_member' and removed references to 'client_service_rep'
+- **Frontend Component Updates**: Updated all role dropdown options across contact forms, task forms, template editors, and project creation dialogs
+- **Template System Update**: Updated CSR template tasks to use 'client_service_member' instead of 'client_service_rep' for role-based assignments
+- **Import Script Updates**: Updated import_csr_template.js and import_csr_tasks.sql to use new terminology
+- **Database Migration**: Added new enum value and updated all existing team member records and task assignments
+- **Role Color Mapping**: Updated role color mappings in create-from-template dialog for consistent visual display
+- **Universal Terminology**: All references to "Client Service Rep" now consistently display as "Client Service Member" throughout the application
+
 ### UI Responsiveness Fix (July 19, 2025)
 - **Critical Navigation Issue Resolved**: Fixed complete UI unresponsiveness where no click events were registering across the application
 - **Authentication Hook Enhancement**: Updated useAuth hook to handle 401 errors gracefully with proper fallback behavior

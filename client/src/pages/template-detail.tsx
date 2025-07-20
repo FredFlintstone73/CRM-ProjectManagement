@@ -364,7 +364,7 @@ const TaskDisplay = ({
                   options={[
                     { value: "accountant", label: "Accountant" },
                     { value: "admin_assistant", label: "Admin Assistant" },
-                    { value: "client_service_rep", label: "Client Service Rep" },
+                    { value: "client_service_member", label: "Client Service Member" },
                     { value: "deliverables_team_coordinator", label: "Deliverables Team Coordinator" },
                     { value: "estate_attorney", label: "Estate Attorney" },
                     { value: "financial_planner", label: "Financial Planner" },

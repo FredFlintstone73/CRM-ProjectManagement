@@ -112,7 +112,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   const roleOptions: MultiSelectOption[] = [
     { label: "Accountant", value: "accountant" },
     { label: "Admin Assistant", value: "admin_assistant" },
-    { label: "Client Service Rep", value: "client_service_rep" },
+    { label: "Client Service Member", value: "client_service_member" },
     { label: "Deliverables Team Coordinator", value: "deliverables_team_coordinator" },
     { label: "Estate Attorney", value: "estate_attorney" },
     { label: "Financial Planner", value: "financial_planner" },

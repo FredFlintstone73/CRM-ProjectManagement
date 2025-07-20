@@ -48,7 +48,7 @@ export const contactTypeEnum = pgEnum("contact_type", [
 export const contactRoleEnum = pgEnum("contact_role", [
   "accountant",
   "admin_assistant",
-  "client_service_rep",
+  "client_service_member",
   "deliverables_team_coordinator",
   "estate_attorney",
   "financial_planner",
@@ -732,7 +732,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
     z.array(z.enum([
       "accountant",
       "admin_assistant",
-      "client_service_rep",
+      "client_service_member",
       "deliverables_team_coordinator",
       "estate_attorney",
       "financial_planner",
@@ -749,7 +749,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
     z.enum([
       "accountant",
       "admin_assistant",
-      "client_service_rep",
+      "client_service_member",
       "deliverables_team_coordinator",
       "estate_attorney",
       "financial_planner",
