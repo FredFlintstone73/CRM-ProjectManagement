@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { CalendarDays, User, Plus, Edit3, Trash2, Settings, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TaskForm from "@/components/tasks/task-form";
 import ProjectForm from "@/components/projects/project-form";
 import { SectionTaskManager } from "@/components/tasks/section-task-manager";
@@ -60,6 +60,16 @@ export default function ProjectDetail() {
   const handleTaskUpdate = () => {
     setRefreshKey(prev => prev + 1);
   };
+
+  // Update selected task when tasks data changes
+  useEffect(() => {
+    if (selectedTask && tasks) {
+      const updatedTask = tasks.find(t => t.id === selectedTask.id);
+      if (updatedTask) {
+        setSelectedTask(updatedTask);
+      }
+    }
+  }, [tasks, selectedTask]);
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id, refreshKey],

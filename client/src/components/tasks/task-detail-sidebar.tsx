@@ -63,8 +63,16 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       return apiRequest('PATCH', `/api/tasks/${taskId}`, updates);
     },
     onSuccess: () => {
+      // Remove cached queries first, then invalidate to force fresh data
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId] });
+      
+      // Invalidate to trigger fresh fetch
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId] });
+      
       onTaskUpdate?.();
     }
   });
