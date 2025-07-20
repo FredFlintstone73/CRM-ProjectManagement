@@ -771,10 +771,10 @@ export default function Tasks() {
               <div className="flex items-center bg-gray-50 p-3 rounded-lg border gap-4" style={{
                 '--status-width': '40px',
                 '--priority-width': '80px', 
-                '--title-width': '50%',
+                '--title-width': '40%',
                 '--assignee-width': '20%',
-                '--duedate-width': '100px',
-                '--actions-width': '100px'
+                '--duedate-width': '80px',
+                '--actions-width': '80px'
               } as React.CSSProperties}>
                 <div className="text-xs font-medium text-gray-600 text-center" style={{width: 'var(--status-width)'}}>Status</div>
                 <div className="flex-none" style={{width: 'var(--priority-width)'}}>
@@ -827,10 +827,10 @@ export default function Tasks() {
                     <div className="flex items-center gap-4" style={{
                       '--status-width': '40px',
                       '--priority-width': '80px', 
-                      '--title-width': '50%',
+                      '--title-width': '40%',
                       '--assignee-width': '20%',
-                      '--duedate-width': '100px',
-                      '--actions-width': '100px'
+                      '--duedate-width': '80px',
+                      '--actions-width': '80px'
                     } as React.CSSProperties}>
                       {/* Status Column */}
                       <div className="flex justify-center" style={{width: 'var(--status-width)'}}>
