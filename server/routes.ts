@@ -1123,7 +1123,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Final processed task for update:', processedTaskData);
       
-      const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
+      const userId = req.user.claims.sub;
+      const task = await storage.updateTask(parseInt(req.params.id), processedTaskData, userId);
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);
@@ -1200,7 +1201,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
 
       
-      const task = await storage.updateTask(parseInt(req.params.id), processedTaskData);
+      const userId = req.user.claims.sub;
+      const task = await storage.updateTask(parseInt(req.params.id), processedTaskData, userId);
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);

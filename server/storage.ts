@@ -634,7 +634,7 @@ export class DatabaseStorage implements IStorage {
     return newTask;
   }
 
-  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task> {
+  async updateTask(id: number, task: Partial<InsertTask>, userId?: string): Promise<Task> {
     // Process date field - create local midnight date to avoid timezone issues
     const processedTask = { ...task };
     if (processedTask.dueDate !== undefined) {
@@ -723,6 +723,11 @@ export class DatabaseStorage implements IStorage {
     // Handle automatic due date calculation for dependent tasks
     if (processedTask.dueDate && updatedTask.title && updatedTask.title.includes('DRPM')) {
       await this.updateDependentTasksFromDRPM(id, processedTask.dueDate);
+    }
+
+    // Handle cascading completion: if task was completed, check if parent should auto-complete
+    if (processedTask.status === 'completed' && updatedTask.parentTaskId && userId) {
+      await this.checkAndCompleteParentTask(updatedTask.parentTaskId, userId);
     }
 
     return updatedTask;
@@ -1157,6 +1162,53 @@ export class DatabaseStorage implements IStorage {
     }
     
     console.log(`=== P-Day Dependency Update Completed ===`);
+  }
+
+  // Cascading task completion: check if all child tasks are completed and auto-complete parent
+  async checkAndCompleteParentTask(parentTaskId: number, userId: string): Promise<void> {
+    // Get the parent task
+    const parentTask = await this.getTask(parentTaskId);
+    if (!parentTask) return;
+    
+    // Skip if parent is already completed
+    if (parentTask.status === 'completed') return;
+    
+    // Get all child tasks of this parent
+    const childTasks = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.parentTaskId, parentTaskId));
+    
+    // Check if all child tasks are completed
+    const allChildrenCompleted = childTasks.length > 0 && childTasks.every(child => child.status === 'completed');
+    
+    if (allChildrenCompleted) {
+      console.log(`All child tasks completed for parent task "${parentTask.title}" (ID: ${parentTaskId}). Auto-completing parent.`);
+      
+      // Auto-complete the parent task
+      await db
+        .update(tasks)
+        .set({ 
+          status: 'completed',
+          completedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(tasks.id, parentTaskId));
+      
+      // Log activity for auto-completion
+      await this.createActivityLog({
+        userId,
+        action: "auto_completed_task",
+        entityType: "task",
+        entityId: parentTaskId,
+        metadata: { taskTitle: parentTask.title, reason: "all_children_completed" },
+      });
+      
+      // Recursively check if this parent's parent should also be completed
+      if (parentTask.parentTaskId) {
+        await this.checkAndCompleteParentTask(parentTask.parentTaskId, userId);
+      }
+    }
   }
 
   // Helper method to update dependent tasks when DRPM due date changes
