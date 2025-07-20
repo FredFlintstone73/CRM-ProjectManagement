@@ -780,7 +780,7 @@ export default function Tasks() {
                     Priority {getSortIcon('priority')}
                   </Button>
                 </div>
-                <div className="flex-1">
+                <div className="flex-none" style={{width: '50%'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -790,7 +790,7 @@ export default function Tasks() {
                     Title {getSortIcon('title')}
                   </Button>
                 </div>
-                <div className="flex-none" style={{width: '200px'}}>
+                <div className="flex-none" style={{width: '20%'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -851,7 +851,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Title Column */}
-                      <div className="flex-1">
+                      <div className="flex-none" style={{width: '50%'}}>
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
@@ -863,7 +863,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Assignee Column */}
-                      <div className="flex-none" style={{width: '200px'}}>
+                      <div className="flex-none" style={{width: '20%'}}>
                         {getTaskAssignedMembers(task).length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {getTaskAssignedMembers(task).map(member => (
