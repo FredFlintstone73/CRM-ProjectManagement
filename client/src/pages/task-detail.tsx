@@ -128,20 +128,23 @@ export default function TaskDetail() {
   
   const assignedTeamMembers = getAssignedTeamMembers();
 
-  // Sort tasks chronologically and find navigation tasks
-  const getSortedTasks = () => {
+  // Build hierarchical task structure and find navigation tasks
+  const buildHierarchicalTasks = () => {
     if (!projectTasks || !task) return [];
     
-    // Sort tasks chronologically: by daysFromMeeting, then dueDate, then sortOrder, then id
-    return [...projectTasks].sort((a, b) => {
-      // First sort by daysFromMeeting if available
+    const tasks = [...projectTasks];
+    
+    // Separate parent tasks (no parentTaskId) and child tasks
+    const parentTasks = tasks.filter(t => !t.parentTaskId);
+    const childTasks = tasks.filter(t => t.parentTaskId);
+    
+    // Sort parent tasks chronologically
+    const sortedParents = parentTasks.sort((a, b) => {
       if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
         if (a.daysFromMeeting !== b.daysFromMeeting) {
           return a.daysFromMeeting - b.daysFromMeeting;
         }
       }
-      
-      // Then by due date if available
       if (a.dueDate && b.dueDate) {
         const aDate = new Date(a.dueDate).getTime();
         const bDate = new Date(b.dueDate).getTime();
@@ -149,27 +152,77 @@ export default function TaskDetail() {
           return aDate - bDate;
         }
       }
-      
-      // Then by sortOrder if available
       if (a.sortOrder !== null && b.sortOrder !== null) {
         if (a.sortOrder !== b.sortOrder) {
           return a.sortOrder - b.sortOrder;
         }
       }
-      
-      // Finally by ID as fallback
       return a.id - b.id;
     });
+    
+    // Build hierarchical sequence: parent → children → next parent → its children...
+    const hierarchicalSequence = [];
+    
+    sortedParents.forEach(parent => {
+      // Add the parent task
+      hierarchicalSequence.push(parent);
+      
+      // Get children of this parent and sort them
+      const children = childTasks.filter(child => child.parentTaskId === parent.id);
+      const sortedChildren = children.sort((a, b) => {
+        if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
+          if (a.daysFromMeeting !== b.daysFromMeeting) {
+            return a.daysFromMeeting - b.daysFromMeeting;
+          }
+        }
+        if (a.dueDate && b.dueDate) {
+          const aDate = new Date(a.dueDate).getTime();
+          const bDate = new Date(b.dueDate).getTime();
+          if (aDate !== bDate) {
+            return aDate - bDate;
+          }
+        }
+        if (a.sortOrder !== null && b.sortOrder !== null) {
+          if (a.sortOrder !== b.sortOrder) {
+            return a.sortOrder - b.sortOrder;
+          }
+        }
+        // For sub-children, sort alphabetically by title if they're delivery tasks
+        if (!a.daysFromMeeting && !b.daysFromMeeting && !a.dueDate && !b.dueDate) {
+          return a.title.localeCompare(b.title);
+        }
+        return a.id - b.id;
+      });
+      
+      // Add children and recursively add their sub-children
+      sortedChildren.forEach(child => {
+        hierarchicalSequence.push(child);
+        
+        // Get sub-children (grandchildren) of this child
+        const subChildren = childTasks.filter(subChild => subChild.parentTaskId === child.id);
+        const sortedSubChildren = subChildren.sort((a, b) => {
+          // Sub-children are often deliverables, sort alphabetically
+          return a.title.localeCompare(b.title);
+        });
+        
+        // Add sub-children to sequence
+        sortedSubChildren.forEach(subChild => {
+          hierarchicalSequence.push(subChild);
+        });
+      });
+    });
+    
+    return hierarchicalSequence;
   };
 
-  // Find the next and previous tasks in the sequence
+  // Find the next and previous tasks in hierarchical sequence
   const findNavigationTasks = () => {
-    const sortedTasks = getSortedTasks();
-    const currentIndex = sortedTasks.findIndex(t => t.id === task?.id);
+    const hierarchicalTasks = buildHierarchicalTasks();
+    const currentIndex = hierarchicalTasks.findIndex(t => t.id === task?.id);
     
     return {
-      previousTask: currentIndex > 0 ? sortedTasks[currentIndex - 1] : null,
-      nextTask: currentIndex >= 0 && currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null
+      previousTask: currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null,
+      nextTask: currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 ? hierarchicalTasks[currentIndex + 1] : null
     };
   };
 
