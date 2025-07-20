@@ -103,8 +103,21 @@ export default function Tasks() {
         status: task.status === 'completed' ? 'todo' : 'completed',
       }),
     onSuccess: () => {
+      // Remove all cached queries to force fresh data
+      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
+      if (task?.projectId) {
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
+        queryClient.removeQueries({ queryKey: ['/api/milestones'] });
+      }
+      
+      // Then invalidate to trigger fresh fetches
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-
+      if (task?.projectId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      }
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {

@@ -132,12 +132,25 @@ export function QuickActionSidebar({ isOpen, onClose }: QuickActionSidebarProps)
           setCelebrationTask(null);
           setShowParticles(false);
         }, 3000);
+        
+        // Remove all cached queries to force fresh data
+        queryClient.removeQueries({ queryKey: ['/api/tasks'] });
+        queryClient.removeQueries({ queryKey: ['/api/projects'] });
+        if (completedTask.projectId) {
+          queryClient.removeQueries({ queryKey: ['/api/projects', completedTask.projectId, 'tasks'] });
+          queryClient.removeQueries({ queryKey: ['/api/projects', completedTask.projectId.toString()] });
+          queryClient.removeQueries({ queryKey: ['/api/milestones'] });
+        }
+        
+        // Then invalidate to trigger fresh fetches
+        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+        if (completedTask.projectId) {
+          queryClient.invalidateQueries({ queryKey: ['/api/projects', completedTask.projectId, 'tasks'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/projects', completedTask.projectId.toString()] });
+          queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+        }
       }
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      
-
     },
     onError: () => {
     },

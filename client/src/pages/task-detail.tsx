@@ -135,11 +135,25 @@ export default function TaskDetail() {
       });
     },
     onSuccess: () => {
+      // Remove all cached queries to force fresh data
+      queryClient.removeQueries({ queryKey: ['/api/tasks', id] });
+      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
+      if (task?.projectId) {
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
+        queryClient.removeQueries({ queryKey: ['/api/milestones'] });
+      }
+      
+      // Then invalidate to trigger fresh fetches
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       if (task?.projectId) {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
       }
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
     },
   });
 
@@ -148,9 +162,22 @@ export default function TaskDetail() {
       return await apiRequest('DELETE', `/api/tasks/${id}`);
     },
     onSuccess: () => {
+      // Remove all cached queries to force fresh data
+      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
+      if (task?.projectId) {
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
+        queryClient.removeQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
+        queryClient.removeQueries({ queryKey: ['/api/milestones'] });
+      }
+      
+      // Then invalidate to trigger fresh fetches
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       if (task?.projectId) {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString(), 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
       }
       window.history.back();
     },
