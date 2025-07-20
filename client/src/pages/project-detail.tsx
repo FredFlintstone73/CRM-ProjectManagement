@@ -61,16 +61,6 @@ export default function ProjectDetail() {
     setRefreshKey(prev => prev + 1);
   };
 
-  // Update selected task when tasks data changes
-  useEffect(() => {
-    if (selectedTask && tasks) {
-      const updatedTask = tasks.find(t => t.id === selectedTask.id);
-      if (updatedTask) {
-        setSelectedTask(updatedTask);
-      }
-    }
-  }, [tasks, selectedTask]);
-
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id, refreshKey],
     queryFn: async () => {
@@ -88,6 +78,16 @@ export default function ProjectDetail() {
       return response.json();
     },
   });
+
+  // Update selected task when tasks data changes
+  useEffect(() => {
+    if (selectedTask && tasks) {
+      const updatedTask = tasks.find(t => t.id === selectedTask.id);
+      if (updatedTask) {
+        setSelectedTask(updatedTask);
+      }
+    }
+  }, [tasks, selectedTask]);
 
   const { data: contacts } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
