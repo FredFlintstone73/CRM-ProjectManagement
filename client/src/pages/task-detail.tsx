@@ -237,8 +237,12 @@ export default function TaskDetail() {
 
   // Simple approach - directly calculate navigation without complex hierarchy
   const calculateSimpleNavigation = () => {
+    console.log('=== NAVIGATION FUNCTION CALLED ===');
+    console.log('Task data available:', !!task);
+    console.log('Project tasks available:', !!projectTasks, projectTasks?.length || 0);
+    
     if (!projectTasks || !task) {
-      console.log('No project tasks or task data available');
+      console.log('EARLY EXIT: No project tasks or task data available');
       return { previousTask: null, nextTask: null };
     }
     
@@ -394,6 +398,11 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
+                  console.log('=== NEXT BUTTON CLICKED ===');
+                  console.log('Current task:', task?.id, task?.title);
+                  console.log('Next task:', nextTask.id, nextTask.title);
+                  console.log('Navigating to:', `/task/${nextTask.id}`);
+                  console.log('=== END NEXT BUTTON ===');
                   setLocation(`/task/${nextTask.id}`);
                 }}
               >
