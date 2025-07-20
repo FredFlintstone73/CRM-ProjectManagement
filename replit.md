@@ -182,6 +182,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Real-time UI Updates**: Task completion radio buttons respond instantly with immediate visual feedback and proper parent-child synchronization
 - **Production Verification**: Complete four-way cascading system tested and verified working correctly by user - clicking any parent task automatically completes all children, and vice versa
 
+### Task Detail Sidebar with Unified Parent→Child Navigation (July 20, 2025)
+- **Dual Functionality Implementation**: Successfully implemented task detail sidebar that works alongside task detail page navigation
+- **Context-Aware Task Clicks**: Task clicks on project pages open sidebar (no navigation), while clicks on other pages navigate to task detail page
+- **Navigation Logic Synchronization**: Updated TaskDetailSidebar's getTaskNavigation function to use identical parent→child priority logic as task detail page
+- **Parent Task Navigation Priority**: Parent tasks now correctly navigate to first child task (sorted by sortOrder) instead of chronological sequence in both sidebar and main page
+- **Hierarchical Sequence Fallback**: Child tasks without children use proper hierarchical sequence navigation in both interfaces
+- **Console Debug Integration**: Added comprehensive logging to track navigation decisions and verify correct parent→child behavior
+- **Universal Parent→Child Logic**: Both TaskDetailSidebar and task detail page now use identical calculateNavigation logic ensuring consistent user experience
+- **Production Verification**: User confirmed sidebar navigation working correctly - parent tasks navigate to first child task as expected
+
 ### Individual User Priority Management System (July 19, 2025)
 - **Individual Task Priority System**: Successfully implemented complete individual user priority management allowing multiple users assigned to the same task to set their own priorities independently
 - **Database Schema Enhancement**: Created user_task_priorities table with proper foreign key relationships for storing individual user priorities per task
