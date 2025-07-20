@@ -266,10 +266,36 @@ export default function TaskDetail() {
     const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
     console.log('Current index in sorted tasks:', currentIndex);
     
+    // Check if current task has children - if so, next should go to first child
+    const children = projectTasks.filter(t => t.parentTaskId === task.id);
+    console.log('Current task children:', children.length);
+    
+    let next = null;
+    let prev = null;
+    
+    if (children.length > 0) {
+      // If current task has children, next task should be the first child
+      const sortedChildren = [...children].sort((a, b) => {
+        // Sort children by sortOrder first, then by ID
+        if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
+          return a.sortOrder - b.sortOrder;
+        }
+        return a.id - b.id;
+      });
+      next = sortedChildren[0];
+      console.log('Has children - Next task will be first child:', next.title, '(ID:', next.id, ')');
+    } else {
+      // No children, use regular chronological navigation
+      next = currentIndex >= 0 && currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
+      console.log('No children - Next task from chronological order:', next ? `${next.title} (${next.id})` : 'None');
+    }
+    
+    // Previous task logic (standard chronological)
+    prev = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
+    
     // Show specific debug for task 2368
     if (task.id === 2368) {
       console.log('=== TASK 2368 SPECIFIC DEBUG ===');
-      const children = projectTasks.filter(t => t.parentTaskId === 2368);
       console.log('Children of task 2368:', children.length);
       children.forEach((child, i) => {
         console.log(`  Child ${i + 1}: ${child.title} (ID: ${child.id}, Sort: ${child.sortOrder})`);
@@ -285,9 +311,6 @@ export default function TaskDetail() {
         console.log(`${marker} ${actualIndex}: ${t.title} (ID: ${t.id}, Parent: ${t.parentTaskId || 'none'})`);
       });
     }
-    
-    const prev = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
-    const next = currentIndex >= 0 && currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
     
     console.log('Navigation result:');
     console.log('  Previous:', prev ? `${prev.title} (${prev.id})` : 'None');
