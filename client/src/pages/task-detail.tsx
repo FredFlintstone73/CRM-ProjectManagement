@@ -201,27 +201,33 @@ export default function TaskDetail() {
     const prev = currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null;
     const next = currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 ? hierarchicalTasks[currentIndex + 1] : null;
     
-    // Debug only for specific task
+    // Always debug to understand the issue
+    console.log('=== TASK DETAIL DEBUG ===');
+    console.log('Task ID:', task?.id, 'Title:', task?.title);
+    console.log('Total hierarchical tasks:', hierarchicalTasks.length);
+    console.log('Current index:', currentIndex);
+    console.log('Next task:', next ? `${next.title} (ID: ${next.id})` : 'None');
+    
+    // Special debug for task 2368
     if (task?.id === 2368) {
-      console.log('=== DEBUG: Generate Database Reports Navigation ===');
-      console.log('Current task:', task?.title, 'ID:', task?.id);
-      console.log('Current index:', currentIndex, 'of', hierarchicalTasks.length, 'total tasks');
-      console.log('Children of this task should be:', projectTasks?.filter(t => t.parentTaskId === 2368).map(t => t.title) || []);
+      console.log('=== SPECIAL DEBUG FOR 2368 ===');
+      console.log('Children should be:', projectTasks?.filter(t => t.parentTaskId === 2368)?.length || 0, 'child tasks');
+      const children = projectTasks?.filter(t => t.parentTaskId === 2368) || [];
+      children.forEach(child => console.log('Child:', child.title, 'ID:', child.id, 'Sort:', child.sortOrder));
       
-      const start = Math.max(0, currentIndex - 2);
-      const end = Math.min(hierarchicalTasks.length, currentIndex + 15);  // Show more to see children
-      console.log('Sequence around current task:');
+      // Show hierarchy around current task
+      const start = Math.max(0, currentIndex - 3);
+      const end = Math.min(hierarchicalTasks.length, currentIndex + 15);
+      console.log('Hierarchy sequence:');
       hierarchicalTasks.slice(start, end).forEach((t, i) => {
         const actualIndex = start + i;
-        const marker = actualIndex === currentIndex ? '>>> ' : '    ';
+        const marker = actualIndex === currentIndex ? '>>> CURRENT' : '   ';
         const isChild = t.parentTaskId === 2368;
-        const level = isChild ? '  CHILD OF 2368' : (t.parentTaskId ? '  Other Child' : 'Parent');
-        console.log(`${marker}${actualIndex}: ${level}: ${t.title} (ID: ${t.id})`);
+        const type = isChild ? 'CHILD_OF_2368' : (t.parentTaskId ? 'other_child' : 'PARENT');
+        console.log(`${marker} ${actualIndex}: [${type}] ${t.title} (${t.id})`);
       });
-      
-      console.log('Next task should be:', next ? `${next.title} (ID: ${next.id})` : 'None');
-      console.log('=== END DEBUG ===');
     }
+    console.log('=== END DEBUG ===');
     
     return {
       previousTask: prev,
