@@ -29,7 +29,15 @@ export default function TaskDetail() {
     queryFn: async () => {
       const response = await fetch(`/api/tasks/${id}`);
       if (!response.ok) throw new Error('Failed to fetch task');
-      return response.json();
+      const taskData = await response.json();
+      
+      // Test basic JavaScript execution
+      if (taskData.id === 2368) {
+        console.log('BASIC TEST: Task 2368 loaded successfully');
+        alert('BASIC TEST: Task 2368 loaded - JavaScript is working!');
+      }
+      
+      return taskData;
     },
   });
 
