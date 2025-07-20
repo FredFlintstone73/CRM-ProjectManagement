@@ -768,9 +768,9 @@ export default function Tasks() {
           ) : (
             <div className="space-y-4">
               {/* Column Headers */}
-              <div className="grid grid-cols-12 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
-                <div className="col-span-1 text-xs font-medium text-gray-600 text-center" style={{width: '60px'}}>Status</div>
-                <div className="col-span-2 text-center">
+              <div className="flex items-center bg-gray-50 p-3 rounded-lg border gap-4">
+                <div className="text-xs font-medium text-gray-600 text-center" style={{width: '40px'}}>Status</div>
+                <div className="flex-none" style={{width: '120px'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -780,7 +780,7 @@ export default function Tasks() {
                     Priority {getSortIcon('priority')}
                   </Button>
                 </div>
-                <div className="col-span-5">
+                <div className="flex-1">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -790,7 +790,7 @@ export default function Tasks() {
                     Title {getSortIcon('title')}
                   </Button>
                 </div>
-                <div className="col-span-3">
+                <div className="flex-none" style={{width: '200px'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -800,7 +800,7 @@ export default function Tasks() {
                     Assignee {getSortIcon('assignee')}
                   </Button>
                 </div>
-                <div className="col-span-1">
+                <div className="flex-none" style={{width: '100px'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -810,16 +810,16 @@ export default function Tasks() {
                     Due Date {getSortIcon('dueDate')}
                   </Button>
                 </div>
-                <div className="col-span-0 text-xs font-medium text-gray-600 text-center" style={{width: '60px'}}>Actions</div>
+                <div className="text-xs font-medium text-gray-600 text-center" style={{width: '100px'}}>Actions</div>
               </div>
               
               {/* Task Rows */}
               {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-3">
-                    <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="flex items-center gap-4">
                       {/* Status Column */}
-                      <div className="col-span-1 flex justify-center" style={{width: '60px'}}>
+                      <div className="flex justify-center" style={{width: '40px'}}>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -836,7 +836,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Priority Column */}
-                      <div className="col-span-2 flex justify-center">
+                      <div className="flex justify-center" style={{width: '120px'}}>
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
                             taskId={task.id} 
@@ -851,7 +851,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Title Column */}
-                      <div className="col-span-5">
+                      <div className="flex-1">
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
@@ -863,7 +863,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Assignee Column */}
-                      <div className="col-span-3">
+                      <div className="flex-none" style={{width: '200px'}}>
                         {getTaskAssignedMembers(task).length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {getTaskAssignedMembers(task).map(member => (
@@ -877,7 +877,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Due Date Column */}
-                      <div className="col-span-1">
+                      <div className="flex-none" style={{width: '100px'}}>
                         {task.dueDate && (
                           <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
                             <CalendarDays className="w-3 h-3 mr-1" />
@@ -887,7 +887,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Actions Column */}
-                      <div className="col-span-0 flex gap-1 justify-center" style={{width: '60px'}}>
+                      <div className="flex gap-1 justify-center" style={{width: '100px'}}>
                         <Button
                           variant="outline"
                           size="sm"
