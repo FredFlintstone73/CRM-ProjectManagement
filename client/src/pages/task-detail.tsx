@@ -19,18 +19,16 @@ interface TaskDetailParams {
 }
 
 export default function TaskDetail() {
-  // IMMEDIATE CONSOLE LOG - VERY FIRST THING
-  console.log('=== TaskDetail COMPONENT STARTING ===');
+  console.log('TaskDetail component starting...');
+  
+  // Test if this even runs
+  if (typeof window !== 'undefined') {
+    window.alert = window.alert || function(msg) { console.log('ALERT:', msg); };
+    alert('TaskDetail component is working!');
+  }
   
   const { id } = useParams<TaskDetailParams>();
-  console.log('=== Got ID from useParams:', id);
-  
   const [, setLocation] = useLocation();
-  console.log('=== Got setLocation from useLocation');
-
-  // ALERT AFTER HOOKS
-  alert('TaskDetail component loaded successfully!');
-  console.log('=== ALERT SHOULD HAVE APPEARED ===');
 
   const [isEditing, setIsEditing] = useState(false);
 

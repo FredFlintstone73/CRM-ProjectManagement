@@ -14,6 +14,7 @@ import ProjectDetail from "@/pages/project-detail";
 import Templates from "@/pages/templates";
 import TemplateDetail from "@/pages/template-detail";
 import TaskDetail from "@/pages/task-detail";
+import TaskDetailSimple from "@/pages/task-detail-simple";
 import Tasks from "@/pages/tasks";
 import Sidebar from "@/components/layout/sidebar";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -47,7 +48,7 @@ function Router() {
                 <Route path="/templates" component={Templates} />
                 <Route path="/templates/:id" component={TemplateDetail} />
                 <Route path="/templates/:templateId/tasks/:taskId" component={TaskDetail} />
-                <Route path="/task/:id" component={TaskDetail} />
+                <Route path="/task/:id" component={TaskDetailSimple} />
                 <Route path="/tasks" component={Tasks} />
                 <Route component={NotFound} />
               </Switch>
