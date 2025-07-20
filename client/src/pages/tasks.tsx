@@ -473,41 +473,7 @@ export default function Tasks() {
               />
             </div>
 
-            <div className="flex gap-2 flex-wrap">
-              <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Sort by:</span>
-              <Button
-                variant={sortConfig.key === 'priority' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSort('priority')}
-                className="text-xs"
-              >
-                Priority {getSortIcon('priority')}
-              </Button>
-              <Button
-                variant={sortConfig.key === 'dueDate' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSort('dueDate')}
-                className="text-xs"
-              >
-                Due Date {getSortIcon('dueDate')}
-              </Button>
-              <Button
-                variant={sortConfig.key === 'title' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSort('title')}
-                className="text-xs"
-              >
-                Title {getSortIcon('title')}
-              </Button>
-              <Button
-                variant={sortConfig.key === 'assignee' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSort('assignee')}
-                className="text-xs"
-              >
-                Assignee {getSortIcon('assignee')}
-              </Button>
-            </div>
+
 
             <div className="flex gap-2">
               <div className="flex border rounded-md">
@@ -800,12 +766,60 @@ export default function Tasks() {
               ))}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-4">
+              {/* Column Headers */}
+              <div className="grid grid-cols-12 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
+                <div className="col-span-1 text-xs font-medium text-gray-600">Status</div>
+                <div className="col-span-1 text-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSort('priority')}
+                    className={`text-xs font-medium p-1 h-auto ${sortConfig.key === 'priority' ? 'text-blue-600' : 'text-gray-600'}`}
+                  >
+                    Priority {getSortIcon('priority')}
+                  </Button>
+                </div>
+                <div className="col-span-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSort('title')}
+                    className={`text-xs font-medium p-1 h-auto ${sortConfig.key === 'title' ? 'text-blue-600' : 'text-gray-600'}`}
+                  >
+                    Title {getSortIcon('title')}
+                  </Button>
+                </div>
+                <div className="col-span-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSort('assignee')}
+                    className={`text-xs font-medium p-1 h-auto ${sortConfig.key === 'assignee' ? 'text-blue-600' : 'text-gray-600'}`}
+                  >
+                    Assignee {getSortIcon('assignee')}
+                  </Button>
+                </div>
+                <div className="col-span-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSort('dueDate')}
+                    className={`text-xs font-medium p-1 h-auto ${sortConfig.key === 'dueDate' ? 'text-blue-600' : 'text-gray-600'}`}
+                  >
+                    Due Date {getSortIcon('dueDate')}
+                  </Button>
+                </div>
+                <div className="col-span-1 text-xs font-medium text-gray-600 text-center">Actions</div>
+              </div>
+              
+              {/* Task Rows */}
               {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
+                  <CardContent className="p-3">
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      {/* Status Column */}
+                      <div className="col-span-1 flex justify-center">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -819,7 +833,10 @@ export default function Tasks() {
                             <Circle className="h-5 w-5 text-gray-400" />
                           )}
                         </Button>
-                        {/* Show user priority input for My Tasks, regular badge for All Tasks */}
+                      </div>
+                      
+                      {/* Priority Column */}
+                      <div className="col-span-1 flex justify-center">
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
                             taskId={task.id} 
@@ -831,60 +848,62 @@ export default function Tasks() {
                             {task.priority || 25}
                           </Badge>
                         )}
+                      </div>
+                      
+                      {/* Title Column */}
+                      <div className="col-span-4">
                         <button 
                           onClick={() => handleTaskClick(task)}
-                          className="text-left"
+                          className="text-left w-full"
                         >
-                          <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors task-title">
+                          <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors task-title text-xs">
                             {task.title}
                           </span>
                         </button>
                       </div>
                       
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <User className="w-4 h-4" />
-                          <span>{getProjectName(task.projectId)}</span>
-                        </div>
-                        
-                        <div className="text-right">
-                          {getTaskAssignedMembers(task).length > 0 && (
-                            <div className="flex flex-wrap gap-1 justify-end">
-                              {getTaskAssignedMembers(task).map(member => (
-                                <Badge key={member.id} variant="secondary" className="text-xs">
-                                  <User className="h-3 w-3 mr-1" />
-                                  {member.firstName} {member.lastName}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          
-                          {task.dueDate && (
-                            <div className="flex items-center justify-end mt-1">
-                              <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
-                                <CalendarDays className="w-3 h-3 mr-1" />
-                                {format(new Date(task.dueDate), 'MMM d')}
+                      {/* Assignee Column */}
+                      <div className="col-span-3">
+                        {getTaskAssignedMembers(task).length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {getTaskAssignedMembers(task).map(member => (
+                              <Badge key={member.id} variant="secondary" className="text-xs">
+                                <User className="h-3 w-3 mr-1" />
+                                {member.firstName} {member.lastName}
                               </Badge>
-                            </div>
-                          )}
-                        </div>
-                        
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Due Date Column */}
+                      <div className="col-span-2">
+                        {task.dueDate && (
+                          <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
+                            <CalendarDays className="w-3 h-3 mr-1" />
+                            {format(new Date(task.dueDate), 'MMM d')}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {/* Actions Column */}
+                      <div className="col-span-1 flex gap-1 justify-center">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setEditingTask(task)}
+                          className="h-7 w-7 p-0"
                         >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
+                          <Edit className="w-3 h-3" />
                         </Button>
                         <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => deleteTaskMutation.mutate(task.id)}
                           disabled={deleteTaskMutation.isPending}
+                          className="h-7 w-7 p-0"
                         >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete
+                          <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
                     </div>
