@@ -267,17 +267,29 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     const optimisticUpdate = { ...selectedTask, status: newStatus };
     setSelectedTask(optimisticUpdate);
     
+    // Also optimistically update the project tasks cache
+    queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+      if (!oldTasks) return oldTasks;
+      return oldTasks.map(t => t.id === selectedTask.id ? { ...t, status: newStatus } : t);
+    });
+    
     updateTaskMutation.mutate({
       taskId: selectedTask.id,
       updates: { status: newStatus }
     }, {
       onSuccess: () => {
-        // Don't call onTaskUpdate to avoid page refresh
-        // onTaskUpdate?.();
+        // The optimistic update already handled the UI, just invalidate for cascading updates
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+        }, 50);
       },
       onError: (error) => {
-        // Revert optimistic update on error
+        // Revert optimistic updates on error
         setSelectedTask(selectedTask);
+        queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+          if (!oldTasks) return oldTasks;
+          return oldTasks.map(t => t.id === selectedTask.id ? selectedTask : t);
+        });
         console.error('Failed to toggle task completion:', error);
       }
     });

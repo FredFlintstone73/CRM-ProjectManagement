@@ -90,11 +90,11 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
 
   // Save expanded state to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem(`expandedTasks-${projectId}`, JSON.stringify([...expandedTasks]));
+    localStorage.setItem(`expandedTasks-${projectId}`, JSON.stringify(Array.from(expandedTasks)));
   }, [expandedTasks, projectId]);
 
   useEffect(() => {
-    localStorage.setItem(`expandedSections-${projectId}`, JSON.stringify([...expandedSections]));
+    localStorage.setItem(`expandedSections-${projectId}`, JSON.stringify(Array.from(expandedSections)));
   }, [expandedSections, projectId]);
 
   // Fetch milestones for this project
@@ -130,7 +130,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   });
 
   // Compute sections dynamically instead of using state
-  const sections: TaskSection[] = milestones.map(milestone => ({
+  const sections: TaskSection[] = milestones.map((milestone: any) => ({
     id: `milestone-${milestone.id}`,
     title: milestone.title,
     tasks: tasks.filter(task => task.milestoneId === milestone.id)
@@ -254,22 +254,57 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   // Toggle task completion
   const toggleTaskCompletion = useMutation({
     mutationFn: async (task: Task) => {
+      const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+      
+      // Optimistically update the cache immediately for instant UI feedback
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
+      });
+      
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
+      });
+      
       const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
-        status: task.status === 'completed' ? 'todo' : 'completed',
+        status: newStatus,
       });
       const updatedTask = await response.json();
       return { updatedTask, originalTask: task };
     },
-    onSuccess: ({ updatedTask, originalTask }) => {
-      // Force immediate re-fetch for instant UI updates
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+    onSuccess: ({ updatedTask }) => {
+      // Update cache with server response for any cascading changes
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        // Find and update the specific task and any cascaded changes
+        const updatedTasks = [...oldTasks];
+        const taskIndex = updatedTasks.findIndex(t => t.id === updatedTask.id);
+        if (taskIndex >= 0) {
+          updatedTasks[taskIndex] = updatedTask;
+        }
+        return updatedTasks;
+      });
+      
+      // Only invalidate tasks query for cascading updates, not project tasks
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      
+      // Invalidate milestones only for progress bar updates (less frequent)
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      }, 100);
     },
-    onError: () => {
-      // On error, revert optimistic updates by invalidating affected caches
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+    onError: (error, task) => {
+      // Revert optimistic update on error
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(t => t.id === task.id ? task : t);
+      });
+      
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(t => t.id === task.id ? task : t);
+      });
     },
   });
 
