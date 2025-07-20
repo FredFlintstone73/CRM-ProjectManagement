@@ -241,6 +241,12 @@ export default function TaskDetail() {
     console.log('Task data available:', !!task);
     console.log('Project tasks available:', !!projectTasks, projectTasks?.length || 0);
     
+    // Force console output to be visible
+    if (typeof window !== 'undefined') {
+      window.console.log('=== FORCED DEBUG OUTPUT ===');
+      window.console.log('Current task:', task?.id, task?.title);
+    }
+    
     if (!projectTasks || !task) {
       console.log('EARLY EXIT: No project tasks or task data available');
       return { previousTask: null, nextTask: null };
@@ -269,6 +275,20 @@ export default function TaskDetail() {
     // Check if current task has children - if so, next should go to first child
     const children = projectTasks.filter(t => t.parentTaskId === task.id);
     console.log('Current task children:', children.length);
+    console.log('Current task ID for filter:', task.id);
+    console.log('Sample project tasks with parentTaskId:', projectTasks.slice(0, 5).map(t => ({ id: t.id, title: t.title, parentTaskId: t.parentTaskId })));
+    
+    if (task.id === 2368) {
+      console.log('=== DETAILED DEBUG FOR TASK 2368 ===');
+      const allParentRelations = projectTasks.map(t => ({ 
+        id: t.id, 
+        title: t.title, 
+        parentTaskId: t.parentTaskId,
+        matches2368: t.parentTaskId === 2368
+      }));
+      console.log('All tasks and their parent relationships:', allParentRelations);
+      console.log('Tasks with parentTaskId === 2368:', allParentRelations.filter(t => t.matches2368));
+    }
     
     let next = null;
     let prev = null;
