@@ -152,6 +152,8 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Error Handling Enhancement**: Added proper error handling that reverts optimistic updates if server requests fail
 - **User Experience**: Task completion now updates instantly without delays or page refreshes - verified working by user
 - **Cache Strategy**: Maintained comprehensive cache invalidation for milestone and progress queries while using optimistic updates for task status
+- **Hierarchical Task Navigation Fix**: Enhanced task detail sidebar navigation to follow exact hierarchical structure with recursive parent-child-grandchild ordering
+- **Task Reordering Database Fix**: Removed transaction wrapper from reorderTasks method to resolve Neon HTTP driver compatibility issue - drag-and-drop reordering now works correctly
 
 ### Individual User Priority Management System (July 19, 2025)
 - **Individual Task Priority System**: Successfully implemented complete individual user priority management allowing multiple users assigned to the same task to set their own priorities independently
