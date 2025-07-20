@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import TaskForm from '@/components/tasks/task-form';
 import { TaskComments } from '@/components/tasks/task-comments';
+import { OptimisticTaskToggle } from '@/components/tasks/optimistic-task-toggle';
 import type { Task, Contact, Project } from '@shared/schema';
 
 interface TaskDetailParams {
@@ -427,18 +428,12 @@ export default function TaskDetail() {
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              onClick={() => toggleTaskMutation.mutate(!isCompleted)}
-            >
-              {isCompleted ? (
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              ) : (
-                <Circle className="h-5 w-5 text-gray-400" />
-              )}
-            </Button>
+            <OptimisticTaskToggle 
+              task={task} 
+              projectId={task.projectId} 
+              size="md"
+              className="h-8 w-8"
+            />
             
             <h1 className={`text-2xl font-bold ${
               isCompleted ? 'line-through text-gray-500' : 'text-gray-900'

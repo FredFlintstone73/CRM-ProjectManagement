@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Edit3, Trash2, CheckCircle, Circle, CalendarDays, ChevronRight, ChevronDown, User } from "lucide-react";
+import { OptimisticTaskToggle } from "./optimistic-task-toggle";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 
@@ -621,22 +622,11 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
           }`}
           style={{ marginLeft: `${level * 24}px` }}
         >
-          <Button
-            variant="ghost"
+          <OptimisticTaskToggle 
+            task={task} 
+            projectId={projectId} 
             size="sm"
-            className="h-6 w-6 p-0"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              toggleTaskCompletion.mutate(task);
-            }}
-          >
-            {isCompleted ? (
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            ) : (
-              <Circle className="h-4 w-4 text-gray-400" />
-            )}
-          </Button>
+          />
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">

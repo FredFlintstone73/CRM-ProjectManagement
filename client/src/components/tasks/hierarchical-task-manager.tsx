@@ -27,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { getDueDateBadgeProps } from '@/lib/dueDateUtils';
+import { OptimisticTaskToggle } from './optimistic-task-toggle';
 import { Task, Milestone, Contact } from '@shared/schema';
 
 interface HierarchicalTaskManagerProps {
@@ -352,18 +353,11 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1">
-              <Button
-                variant="ghost"
+              <OptimisticTaskToggle 
+                task={task} 
+                projectId={projectId} 
                 size="sm"
-                onClick={() => handleStatusToggle(task)}
-                className="p-1 h-6 w-6"
-              >
-                {task.status === 'completed' ? (
-                  <CheckCircle size={16} className="text-green-600" />
-                ) : (
-                  <Circle size={16} className="text-gray-400" />
-                )}
-              </Button>
+              />
 
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
