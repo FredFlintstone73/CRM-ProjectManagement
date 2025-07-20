@@ -177,9 +177,10 @@ export default function TaskDetail() {
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
-      return await apiRequest('PATCH', `/api/tasks/${id}`, { 
+      const updatedTask = await apiRequest('PATCH', `/api/tasks/${id}`, { 
         status: completed ? 'completed' : 'todo' 
       });
+      return updatedTask;
     },
     onSuccess: (updatedTask) => {
       // Optimistically update individual task cache

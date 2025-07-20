@@ -162,29 +162,39 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
 
   // Create task mutation
   const createTaskMutation = useMutation({
-    mutationFn: (taskData: TaskFormData) => 
-      apiRequest('POST', '/api/tasks', {
+    mutationFn: async (taskData: TaskFormData) => {
+      const newTask = await apiRequest('POST', '/api/tasks', {
         ...taskData,
         projectId,
         level: taskData.parentTaskId ? 
           (tasks.find(t => t.id === taskData.parentTaskId)?.level || 0) + 1 : 1,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      });
+      return newTask;
+    },
+    onSuccess: (newTask) => {
+      // Optimistically update project tasks cache
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        return oldTasks ? [...oldTasks, newTask] : [newTask];
+      });
+      
+      // Optimistically update global tasks cache
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        return oldTasks ? [...oldTasks, newTask] : [newTask];
+      });
+      
       setIsTaskDialogOpen(false);
       resetTaskForm();
-
     },
     onError: () => {
-
+      // Handle error silently or add proper error handling
     },
   });
 
   // Update task mutation
   const updateTaskMutation = useMutation({
     mutationFn: async (taskData: TaskFormData & { id: number }) => {
-      const response = await apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData);
-      return response;
+      const updatedTask = await apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData);
+      return updatedTask;
     },
     onSuccess: (updatedTask) => {
       // Optimistically update project tasks cache
@@ -242,12 +252,15 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   // Toggle task completion
   const toggleTaskCompletion = useMutation({
     mutationFn: async (task: Task) => {
-      const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
+      console.log('Mutation started for task:', task.id, 'changing status to:', task.status === 'completed' ? 'todo' : 'completed');
+      const updatedTask = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: task.status === 'completed' ? 'todo' : 'completed',
       });
-      return response;
+      console.log('Mutation response:', updatedTask);
+      return { updatedTask, originalTask: task };
     },
-    onSuccess: (updatedTask, originalTask) => {
+    onSuccess: ({ updatedTask, originalTask }) => {
+      console.log('Mutation onSuccess called with:', updatedTask);
       // Optimistically update project tasks cache
       queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
         if (!oldTasks) return oldTasks;
@@ -267,7 +280,8 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       // Only invalidate milestone and progress queries for real-time progress updates
       queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Mutation onError called with:', error);
       // On error, revert optimistic updates by invalidating affected caches
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -591,7 +605,13 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0"
-            onClick={() => toggleTaskCompletion.mutate(task)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Radio button clicked for task:', task.id, task.title);
+              console.log('Current status:', task.status);
+              toggleTaskCompletion.mutate(task);
+            }}
           >
             {isCompleted ? (
               <CheckCircle className="h-4 w-4 text-green-600" />

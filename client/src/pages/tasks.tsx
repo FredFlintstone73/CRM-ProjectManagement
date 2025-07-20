@@ -168,12 +168,12 @@ export default function Tasks() {
 
   const toggleTaskCompletion = useMutation({
     mutationFn: async (task: Task) => {
-      const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
+      const updatedTask = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: task.status === 'completed' ? 'todo' : 'completed',
       });
-      return response;
+      return { updatedTask, originalTask: task };
     },
-    onSuccess: (updatedTask, originalTask) => {
+    onSuccess: ({ updatedTask, originalTask }) => {
       // Optimistically update global tasks cache
       queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
         if (!oldTasks) return oldTasks;
