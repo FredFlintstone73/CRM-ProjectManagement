@@ -129,106 +129,123 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     }
   };
 
-  // Get task navigation info following hierarchical structure
+  // Get task navigation info with parent→child priority (SAME LOGIC AS TASK DETAIL PAGE)
   const getTaskNavigation = () => {
     try {
-      if (!selectedTask || !projectTasks || projectTasks.length === 0 || !milestones) {
+      console.log('=== SIDEBAR NAVIGATION CALCULATION START ===');
+      console.log('Current task ID:', selectedTask?.id, 'Title:', selectedTask?.title);
+      
+      if (!selectedTask || !projectTasks || projectTasks.length === 0) {
+        console.log('Missing data - selectedTask or projectTasks is null');
         return { prevTask: null, nextTask: null };
       }
+
+      // Special handling for parent tasks - check for children first (SAME LOGIC AS TASK DETAIL PAGE)
+      const childTasks = projectTasks.filter(t => t.parentTaskId === selectedTask.id);
+      console.log('Children found for current task:', childTasks.length);
       
-      // Build hierarchical task structure organized by milestone and parent-child relationships
-      const tasksByMilestone = new Map();
-      
-      // Group tasks by milestone
-      milestones.forEach(milestone => {
-        tasksByMilestone.set(milestone.id, []);
-      });
-      
-      // Add tasks to their respective milestones and build hierarchy
-      const taskMap = new Map();
-      projectTasks.forEach(task => {
-        taskMap.set(task.id, task);
-        if (task.milestoneId && tasksByMilestone.has(task.milestoneId)) {
-          tasksByMilestone.get(task.milestoneId).push(task);
-        }
-      });
-      
-      // Create flat ordered list following hierarchical structure
-      const hierarchicalTaskList = [];
-      
-      // Sort milestones by sortOrder
-      const sortedMilestones = [...milestones].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-      
-      sortedMilestones.forEach(milestone => {
-        const milestoneTasks = tasksByMilestone.get(milestone.id) || [];
+      if (childTasks.length > 0) {
+        console.log('PARENT TASK DETECTED - has', childTasks.length, 'children');
+        childTasks.forEach((child, i) => console.log(`  Child ${i + 1}: ${child.title} (ID: ${child.id}, Sort: ${child.sortOrder})`));
         
-        // Separate tasks by hierarchy level
-        const rootTasks = milestoneTasks.filter(task => !task.parentTaskId);
-        const allChildTasks = milestoneTasks.filter(task => task.parentTaskId);
-        
-        // Sort root tasks
-        const sortedRootTasks = rootTasks.sort((a, b) => {
-          if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
-            return a.daysFromMeeting - b.daysFromMeeting;
+        // If current task has children, next should be the first child (sorted by sortOrder)
+        const sortedChildren = childTasks.sort((a, b) => {
+          if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
+            return a.sortOrder - b.sortOrder;
           }
-          if (a.sortOrder !== b.sortOrder) {
-            return (a.sortOrder || 0) - (b.sortOrder || 0);
-          }
-          return a.id - b.id;
+          return a.id - b.id; // Fallback to ID
         });
         
-        // Recursive function to add task and all its descendants
-        const addTaskWithDescendants = (task, allTasks, level = 0) => {
-          hierarchicalTaskList.push(task);
-          
-          // Find direct children of this task
-          const directChildren = allTasks.filter(child => child.parentTaskId === task.id);
-          
-          // Sort children based on parent type and level
-          const sortedChildren = directChildren.sort((a, b) => {
-            // For professional role tasks (Money Manager, Estate Attorney, etc.), sort deliverables alphabetically
-            if (level === 0 && task.title && (
-              task.title.includes('Money Manager') || 
-              task.title.includes('Estate Attorney') || 
-              task.title.includes('Financial Planner') || 
-              task.title.includes('Insurance') ||
-              task.title.includes('Tax Planner')
-            )) {
-              return a.title.localeCompare(b.title);
-            }
-            
-            // For other tasks, use standard sorting
-            if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
-              return a.daysFromMeeting - b.daysFromMeeting;
-            }
-            if (a.sortOrder !== b.sortOrder) {
-              return (a.sortOrder || 0) - (b.sortOrder || 0);
-            }
-            return a.id - b.id;
-          });
-          
-          // Recursively add each child and its descendants
-          sortedChildren.forEach(child => {
-            addTaskWithDescendants(child, allTasks, level + 1);
-          });
+        const firstChild = sortedChildren[0];
+        console.log('NAVIGATING TO FIRST CHILD:', firstChild.title, '(ID:', firstChild.id, ')');
+        
+        return {
+          prevTask: null, // For now, focus on next task
+          nextTask: firstChild // First child
         };
-        
-        // Add each root task and all its descendants
-        sortedRootTasks.forEach(rootTask => {
-          addTaskWithDescendants(rootTask, allChildTasks);
-        });
-      });
+      }
       
-      // Find current task position in hierarchical list
-      const currentIndex = hierarchicalTaskList.findIndex(t => t.id === selectedTask.id);
-      const prevTask = currentIndex > 0 ? hierarchicalTaskList[currentIndex - 1] : null;
-      const nextTask = currentIndex < hierarchicalTaskList.length - 1 ? hierarchicalTaskList[currentIndex + 1] : null;
+      console.log('NO CHILDREN - using hierarchical sequence');
+      // If no children, use hierarchical sequence as before
+      const hierarchicalTasks = buildHierarchicalTasks(projectTasks);
+      const currentIndex = hierarchicalTasks.findIndex(t => t.id === selectedTask.id);
+      console.log('Current index in hierarchy:', currentIndex, '/', hierarchicalTasks.length);
       
-      return { prevTask, nextTask };
+      const next = currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 
+        ? hierarchicalTasks[currentIndex + 1] 
+        : null;
+      
+      console.log('Next task from hierarchy:', next ? `${next.title} (${next.id})` : 'None');
+      console.log('=== SIDEBAR NAVIGATION CALCULATION END ===');
+      
+      return {
+        prevTask: null,
+        nextTask: next
+      };
     } catch (error) {
       console.error('Error in getTaskNavigation:', error);
       return { prevTask: null, nextTask: null };
     }
+  };
+
+  // Helper function to build hierarchical task sequence (SAME LOGIC AS TASK DETAIL PAGE)
+  const buildHierarchicalTasks = (projectTasks: Task[]) => {
+    const tasks = [...projectTasks];
+    
+    // Separate parent tasks and child tasks
+    const parentTasks = tasks.filter(t => !t.parentTaskId);
+    const childTasks = tasks.filter(t => t.parentTaskId);
+    
+    // Sort parent tasks by chronological order
+    const sortedParents = parentTasks.sort((a, b) => {
+      if (a.daysFromMeeting !== null && b.daysFromMeeting !== null && a.daysFromMeeting !== b.daysFromMeeting) {
+        return a.daysFromMeeting - b.daysFromMeeting;
+      }
+      if (a.dueDate && b.dueDate) {
+        const aDate = new Date(a.dueDate).getTime();
+        const bDate = new Date(b.dueDate).getTime();
+        if (aDate !== bDate) return aDate - bDate;
+      }
+      return a.id - b.id;
+    });
+    
+    // Build hierarchical sequence: parent → all its children → next parent → all its children...
+    const hierarchicalSequence: Task[] = [];
+    
+    sortedParents.forEach(parent => {
+      // Add the parent task
+      hierarchicalSequence.push(parent);
+      
+      // Get and sort children of this parent
+      const children = childTasks.filter(child => child.parentTaskId === parent.id);
+      const sortedChildren = children.sort((a, b) => {
+        if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
+          return a.sortOrder - b.sortOrder;
+        }
+        return a.id - b.id;
+      });
+      
+      // Add all children immediately after parent
+      sortedChildren.forEach(child => {
+        hierarchicalSequence.push(child);
+        
+        // Check for sub-children (grandchildren)
+        const subChildren = childTasks.filter(subChild => subChild.parentTaskId === child.id);
+        const sortedSubChildren = subChildren.sort((a, b) => {
+          if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
+            return a.sortOrder - b.sortOrder;
+          }
+          return a.title.localeCompare(b.title); // Alphabetical for deliverable sub-tasks
+        });
+        
+        // Add sub-children
+        sortedSubChildren.forEach(subChild => {
+          hierarchicalSequence.push(subChild);
+        });
+      });
+    });
+    
+    return hierarchicalSequence;
   };
 
   const handleToggleComplete = (e: React.MouseEvent) => {
