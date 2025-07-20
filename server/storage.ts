@@ -729,6 +729,11 @@ export class DatabaseStorage implements IStorage {
     if (processedTask.status === 'completed' && updatedTask.parentTaskId && userId) {
       await this.checkAndCompleteParentTask(updatedTask.parentTaskId, userId);
     }
+    
+    // Handle reverse cascading completion: if task was uncompleted, check if parent should auto-uncomplete
+    if (processedTask.status === 'todo' && updatedTask.parentTaskId && userId) {
+      await this.checkAndUncompleteparentTask(updatedTask.parentTaskId, userId);
+    }
 
     return updatedTask;
   }
@@ -1208,6 +1213,41 @@ export class DatabaseStorage implements IStorage {
       if (parentTask.parentTaskId) {
         await this.checkAndCompleteParentTask(parentTask.parentTaskId, userId);
       }
+    }
+  }
+
+  async checkAndUncompleteparentTask(parentTaskId: number, userId: string): Promise<void> {
+    // Get the parent task
+    const parentTask = await this.getTask(parentTaskId);
+    if (!parentTask) return;
+    
+    // Skip if parent is already incomplete
+    if (parentTask.status !== 'completed') return;
+    
+    console.log(`Child task unchecked for parent task "${parentTask.title}" (ID: ${parentTaskId}). Auto-uncompleting parent.`);
+    
+    // Auto-uncomplete the parent task since at least one child is now incomplete
+    await db
+      .update(tasks)
+      .set({ 
+        status: 'todo',
+        completedAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(tasks.id, parentTaskId));
+    
+    // Log activity for auto-uncompletion
+    await this.createActivityLog({
+      userId,
+      action: "auto_uncompleted_task",
+      entityType: "task",
+      entityId: parentTaskId,
+      metadata: { taskTitle: parentTask.title, reason: "child_task_uncompleted" },
+    });
+    
+    // Recursively check if this parent's parent should also be uncompleted
+    if (parentTask.parentTaskId) {
+      await this.checkAndUncompleteparentTask(parentTask.parentTaskId, userId);
     }
   }
 
