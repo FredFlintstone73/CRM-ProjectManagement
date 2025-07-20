@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Toggle } from "@/components/ui/toggle";
 
-import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays, CheckCircle, Circle } from "lucide-react";
+import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays, CheckCircle, Circle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import TaskForm from "@/components/tasks/task-form";
 import { UserPriorityInput } from "@/components/tasks/user-priority-input";
@@ -37,8 +37,10 @@ export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
-  const [sortBy, setSortBy] = useState("priority");
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortConfig, setSortConfig] = useState<{
+    key: 'priority' | 'dueDate' | 'title' | 'assignee' | null;
+    direction: 'asc' | 'desc';
+  }>({ key: 'priority', direction: 'asc' });
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('all_tasks');
   const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress'>('all');
@@ -283,9 +285,11 @@ export default function Tasks() {
     
     return matchesSearch && matchesCompletion && matchesTaskFilter() && matchesDueDate();
   }).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
     let result = 0;
     
-    switch (sortBy) {
+    switch (sortConfig.key) {
       case "priority":
         // Use userPriority if available (for My Tasks view), otherwise use default priority
         const aPriority = (taskFilter === 'my_tasks' && 'userPriority' in a && a.userPriority !== null) 
@@ -329,7 +333,7 @@ export default function Tasks() {
     }
     
     // Apply sort direction
-    return sortDirection === 'desc' ? -result : result;
+    return sortConfig.direction === 'desc' ? -result : result;
   }) || [];
 
   // Calculate progress for tasks assigned to current user only, considering due date filter
@@ -422,6 +426,23 @@ export default function Tasks() {
     queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
   };
 
+  const handleSort = (key: 'priority' | 'dueDate' | 'title' | 'assignee') => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (columnKey: 'priority' | 'dueDate' | 'title' | 'assignee') => {
+    if (sortConfig.key !== columnKey) {
+      return <ArrowUpDown className="w-3 h-3 ml-1" />;
+    }
+    return sortConfig.direction === 'asc' ? 
+      <ArrowUp className="w-3 h-3 ml-1" /> : 
+      <ArrowDown className="w-3 h-3 ml-1" />;
+  };
+
   if (isLoading || tasksLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -452,25 +473,41 @@ export default function Tasks() {
               />
             </div>
 
-            <Select value={`${sortBy}-${sortDirection}`} onValueChange={(value) => {
-              const [newSortBy, newDirection] = value.split('-');
-              setSortBy(newSortBy);
-              setSortDirection(newDirection as 'asc' | 'desc');
-            }}>
-              <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="priority-asc">Priority (Low to High)</SelectItem>
-                <SelectItem value="priority-desc">Priority (High to Low)</SelectItem>
-                <SelectItem value="dueDate-asc">Due Date (Earliest First)</SelectItem>
-                <SelectItem value="dueDate-desc">Due Date (Latest First)</SelectItem>
-                <SelectItem value="title-asc">Title (A to Z)</SelectItem>
-                <SelectItem value="title-desc">Title (Z to A)</SelectItem>
-                <SelectItem value="assignee-asc">Assignee (A to Z)</SelectItem>
-                <SelectItem value="assignee-desc">Assignee (Z to A)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2 flex-wrap">
+              <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Sort by:</span>
+              <Button
+                variant={sortConfig.key === 'priority' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSort('priority')}
+                className="text-xs"
+              >
+                Priority {getSortIcon('priority')}
+              </Button>
+              <Button
+                variant={sortConfig.key === 'dueDate' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSort('dueDate')}
+                className="text-xs"
+              >
+                Due Date {getSortIcon('dueDate')}
+              </Button>
+              <Button
+                variant={sortConfig.key === 'title' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSort('title')}
+                className="text-xs"
+              >
+                Title {getSortIcon('title')}
+              </Button>
+              <Button
+                variant={sortConfig.key === 'assignee' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSort('assignee')}
+                className="text-xs"
+              >
+                Assignee {getSortIcon('assignee')}
+              </Button>
+            </div>
 
             <div className="flex gap-2">
               <div className="flex border rounded-md">
