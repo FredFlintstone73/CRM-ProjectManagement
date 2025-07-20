@@ -823,7 +823,7 @@ export default function Tasks() {
               {/* Task Rows */}
               {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-3">
+                  <div className="p-3">
                     <div className="flex items-center gap-4" style={{
                       '--status-width': '40px',
                       '--priority-width': '80px', 
@@ -921,7 +921,7 @@ export default function Tasks() {
                         </Button>
                       </div>
                     </div>
-                  </CardContent>
+                  </div>
                 </Card>
               ))}
             </div>
