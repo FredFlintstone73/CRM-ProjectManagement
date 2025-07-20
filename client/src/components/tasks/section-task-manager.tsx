@@ -163,12 +163,13 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: TaskFormData) => {
-      const newTask = await apiRequest('POST', '/api/tasks', {
+      const response = await apiRequest('POST', '/api/tasks', {
         ...taskData,
         projectId,
         level: taskData.parentTaskId ? 
           (tasks.find(t => t.id === taskData.parentTaskId)?.level || 0) + 1 : 1,
       });
+      const newTask = await response.json();
       return newTask;
     },
     onSuccess: (newTask) => {
@@ -193,7 +194,8 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   // Update task mutation
   const updateTaskMutation = useMutation({
     mutationFn: async (taskData: TaskFormData & { id: number }) => {
-      const updatedTask = await apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData);
+      const response = await apiRequest('PATCH', `/api/tasks/${taskData.id}`, taskData);
+      const updatedTask = await response.json();
       return updatedTask;
     },
     onSuccess: (updatedTask) => {
@@ -252,15 +254,13 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   // Toggle task completion
   const toggleTaskCompletion = useMutation({
     mutationFn: async (task: Task) => {
-      console.log('Mutation started for task:', task.id, 'changing status to:', task.status === 'completed' ? 'todo' : 'completed');
-      const updatedTask = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
+      const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: task.status === 'completed' ? 'todo' : 'completed',
       });
-      console.log('Mutation response:', updatedTask);
+      const updatedTask = await response.json();
       return { updatedTask, originalTask: task };
     },
     onSuccess: ({ updatedTask, originalTask }) => {
-      console.log('Mutation onSuccess called with:', updatedTask);
       // Optimistically update project tasks cache
       queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
         if (!oldTasks) return oldTasks;
@@ -280,8 +280,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       // Only invalidate milestone and progress queries for real-time progress updates
       queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
     },
-    onError: (error) => {
-      console.error('Mutation onError called with:', error);
+    onError: () => {
       // On error, revert optimistic updates by invalidating affected caches
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -608,8 +607,6 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Radio button clicked for task:', task.id, task.title);
-              console.log('Current status:', task.status);
               toggleTaskCompletion.mutate(task);
             }}
           >
