@@ -770,7 +770,7 @@ export default function Tasks() {
               {/* Column Headers */}
               <div className="flex items-center bg-gray-50 p-3 rounded-lg border gap-4">
                 <div className="text-xs font-medium text-gray-600 text-center" style={{width: '40px'}}>Status</div>
-                <div className="flex-none" style={{width: '120px'}}>
+                <div className="flex-none" style={{width: '80px'}}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -836,7 +836,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Priority Column */}
-                      <div className="flex justify-center" style={{width: '120px'}}>
+                      <div className="flex justify-center" style={{width: '80px'}}>
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
                             taskId={task.id} 
