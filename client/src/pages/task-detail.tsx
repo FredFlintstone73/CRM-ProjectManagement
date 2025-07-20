@@ -195,21 +195,27 @@ export default function TaskDetail() {
     const hierarchicalTasks = buildHierarchicalTasks();
     const currentIndex = hierarchicalTasks.findIndex(t => t.id === task?.id);
     
-    // Debug logging for hierarchy issues
-    if (task?.title?.includes('Generate Database') || task?.parentTaskId === 2368) {
-      console.log('Debug - Task navigation hierarchy:');
-      console.log('Current task:', task?.title, 'ID:', task?.id, 'Parent:', task?.parentTaskId);
-      console.log('Current index in hierarchy:', currentIndex);
-      console.log('Total tasks in hierarchy:', hierarchicalTasks.length);
-      console.log('Full hierarchical sequence:');
-      hierarchicalTasks.forEach((t, i) => {
-        const marker = i === currentIndex ? '>>> ' : '    ';
-        const level = t.parentTaskId ? (hierarchicalTasks.find(parent => parent.id === t.parentTaskId && !parent.parentTaskId) ? '  Child: ' : '    SubChild: ') : 'Parent: ';
-        console.log(`${marker}${i}: ${level}${t.title} (ID: ${t.id}, Parent: ${t.parentTaskId}, Sort: ${t.sortOrder})`);
-      });
-      console.log('Next task would be:', nextTask ? `${nextTask.title} (ID: ${nextTask.id})` : 'None');
-      console.log('Previous task would be:', previousTask ? `${previousTask.title} (ID: ${previousTask.id})` : 'None');
-    }
+    // Always show debug for now to understand the hierarchy
+    console.log('=== TASK NAVIGATION DEBUG ===');
+    console.log('Current task:', task?.title, 'ID:', task?.id, 'Parent:', task?.parentTaskId);
+    console.log('Current index in hierarchy:', currentIndex);
+    console.log('Total tasks in hierarchy:', hierarchicalTasks.length);
+    
+    // Show a focused view around current task
+    const start = Math.max(0, currentIndex - 5);
+    const end = Math.min(hierarchicalTasks.length, currentIndex + 6);
+    console.log('Hierarchy sequence (focused view):');
+    hierarchicalTasks.slice(start, end).forEach((t, i) => {
+      const actualIndex = start + i;
+      const marker = actualIndex === currentIndex ? '>>> ' : '    ';
+      const level = t.parentTaskId ? '  Child' : 'Parent';
+      console.log(`${marker}${actualIndex}: ${level}: ${t.title} (ID: ${t.id}, Parent: ${t.parentTaskId || 'none'}, Sort: ${t.sortOrder || 'none'})`);
+    });
+    
+    console.log('Navigation:');
+    console.log('  Previous:', previousTask ? `${previousTask.title} (ID: ${previousTask.id})` : 'None');
+    console.log('  Next:', nextTask ? `${nextTask.title} (ID: ${nextTask.id})` : 'None');
+    console.log('=== END DEBUG ===');
     
     return {
       previousTask: currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null,
