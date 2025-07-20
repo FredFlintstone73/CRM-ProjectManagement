@@ -22,6 +22,9 @@ export default function TaskDetail() {
   const { id } = useParams<TaskDetailParams>();
   const [, setLocation] = useLocation();
 
+  // Simple test to see if component loads
+  console.log('TaskDetail component loaded with ID:', id);
+
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: task, isLoading: taskLoading } = useQuery<Task>({
@@ -292,7 +295,11 @@ export default function TaskDetail() {
   };
 
   // Use the navigation calculation  
+  console.log('=== ABOUT TO CALL calculateNavigation ===');
   const { previousTask, nextTask } = calculateNavigation();
+  console.log('=== calculateNavigation RETURNED ===');
+  console.log('previousTask:', previousTask?.title || 'null');
+  console.log('nextTask:', nextTask?.title || 'null');
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
