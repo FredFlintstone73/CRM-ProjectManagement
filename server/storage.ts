@@ -46,7 +46,7 @@ import {
   type InsertUserTaskPriority,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, or, ilike, count, isNotNull } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, count, isNotNull, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -507,12 +507,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProject(id: number): Promise<void> {
-    // First, delete all related records to avoid foreign key constraint issues
+    // First, get all task IDs associated with the project for comprehensive cleanup
+    const projectTasks = await db
+      .select({ id: tasks.id })
+      .from(tasks)
+      .where(eq(tasks.projectId, id));
+    
+    const taskIds = projectTasks.map(task => task.id);
+    
+    // Delete all related records to avoid foreign key constraint issues
+    
+    // Delete user task priorities for all project tasks
+    if (taskIds.length > 0) {
+      await db.delete(userTaskPriorities).where(inArray(userTaskPriorities.taskId, taskIds));
+    }
+    
+    // Delete all task comments for project tasks
+    if (taskIds.length > 0) {
+      await db.delete(taskComments).where(inArray(taskComments.taskId, taskIds));
+    }
     
     // Delete all tasks associated with the project
     await db.delete(tasks).where(eq(tasks.projectId, id));
     
-    // Delete all comments associated with the project
+    // Delete all project comments associated with the project
     await db.delete(projectComments).where(eq(projectComments.projectId, id));
     
     // Delete the project itself

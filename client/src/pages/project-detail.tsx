@@ -104,8 +104,22 @@ export default function ProjectDetail() {
       await apiRequest('DELETE', `/api/projects/${projectId}`);
     },
     onSuccess: () => {
+      // Remove all cached queries to force fresh data after project deletion
+      queryClient.removeQueries({ queryKey: ['/api/projects'] });
+      queryClient.removeQueries({ queryKey: ['/api/dashboard/projects-due'] });
+      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      queryClient.removeQueries({ queryKey: ['/api/milestones'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString()] });
+      
+      // Then invalidate to trigger fresh fetches
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
 
       setLocation('/projects');
     },
