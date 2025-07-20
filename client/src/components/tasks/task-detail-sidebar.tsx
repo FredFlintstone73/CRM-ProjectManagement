@@ -162,12 +162,12 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       sortedMilestones.forEach(milestone => {
         const milestoneTasks = tasksByMilestone.get(milestone.id) || [];
         
-        // Separate parent tasks from child tasks
-        const parentTasks = milestoneTasks.filter(task => !task.parentTaskId);
-        const childTasks = milestoneTasks.filter(task => task.parentTaskId);
+        // Separate tasks by hierarchy level
+        const rootTasks = milestoneTasks.filter(task => !task.parentTaskId);
+        const allChildTasks = milestoneTasks.filter(task => task.parentTaskId);
         
-        // Sort parent tasks
-        const sortedParentTasks = parentTasks.sort((a, b) => {
+        // Sort root tasks
+        const sortedRootTasks = rootTasks.sort((a, b) => {
           if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
             return a.daysFromMeeting - b.daysFromMeeting;
           }
@@ -177,38 +177,45 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
           return a.id - b.id;
         });
         
-        // Add each parent task followed by its children in hierarchical order
-        sortedParentTasks.forEach(parentTask => {
-          hierarchicalTaskList.push(parentTask);
+        // Recursive function to add task and all its descendants
+        const addTaskWithDescendants = (task, allTasks, level = 0) => {
+          hierarchicalTaskList.push(task);
           
-          // Find and add child tasks of this parent
-          const parentChildren = childTasks.filter(child => child.parentTaskId === parentTask.id);
-          const sortedChildren = parentChildren.sort((a, b) => {
-            // For child tasks, sort alphabetically by title for deliverables
-            if (parentTask.title && (parentTask.title.includes('Money Manager') || 
-                                   parentTask.title.includes('Estate Attorney') || 
-                                   parentTask.title.includes('Financial Planner') || 
-                                   parentTask.title.includes('Insurance') ||
-                                   parentTask.title.includes('Tax Planner'))) {
+          // Find direct children of this task
+          const directChildren = allTasks.filter(child => child.parentTaskId === task.id);
+          
+          // Sort children based on parent type and level
+          const sortedChildren = directChildren.sort((a, b) => {
+            // For professional role tasks (Money Manager, Estate Attorney, etc.), sort deliverables alphabetically
+            if (level === 0 && task.title && (
+              task.title.includes('Money Manager') || 
+              task.title.includes('Estate Attorney') || 
+              task.title.includes('Financial Planner') || 
+              task.title.includes('Insurance') ||
+              task.title.includes('Tax Planner')
+            )) {
               return a.title.localeCompare(b.title);
             }
-            // Otherwise use standard sorting
+            
+            // For other tasks, use standard sorting
+            if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
+              return a.daysFromMeeting - b.daysFromMeeting;
+            }
             if (a.sortOrder !== b.sortOrder) {
               return (a.sortOrder || 0) - (b.sortOrder || 0);
             }
             return a.id - b.id;
           });
           
+          // Recursively add each child and its descendants
           sortedChildren.forEach(child => {
-            hierarchicalTaskList.push(child);
-            
-            // Add grandchildren if they exist
-            const grandChildren = childTasks.filter(grandChild => grandChild.parentTaskId === child.id);
-            const sortedGrandChildren = grandChildren.sort((a, b) => a.title.localeCompare(b.title));
-            sortedGrandChildren.forEach(grandChild => {
-              hierarchicalTaskList.push(grandChild);
-            });
+            addTaskWithDescendants(child, allTasks, level + 1);
           });
+        };
+        
+        // Add each root task and all its descendants
+        sortedRootTasks.forEach(rootTask => {
+          addTaskWithDescendants(rootTask, allChildTasks);
         });
       });
       
