@@ -56,13 +56,13 @@ export default function ProjectDetail() {
     setSelectedTask(null);
   };
 
-  // Handler for task updates from sidebar
+  // Handler for task updates from sidebar - no longer needed with optimistic updates
   const handleTaskUpdate = () => {
-    setRefreshKey(prev => prev + 1);
+    // Cache updates are handled in the sidebar component
   };
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
-    queryKey: ['/api/projects', id, refreshKey],
+    queryKey: ['/api/projects', id],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${id}`);
       if (!response.ok) throw new Error('Failed to fetch project');
@@ -71,7 +71,7 @@ export default function ProjectDetail() {
   });
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ['/api/projects', id, 'tasks', refreshKey],
+    queryKey: ['/api/projects', id, 'tasks'],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${id}/tasks`);
       if (!response.ok) throw new Error('Failed to fetch tasks');
@@ -103,12 +103,17 @@ export default function ProjectDetail() {
       });
       if (!response.ok) throw new Error('Failed to delete task');
     },
-    onSuccess: () => {
-      setRefreshKey(prev => prev + 1);
-
-    },
-    onError: () => {
-
+    onSuccess: (_, taskId) => {
+      // Optimistically remove from cache instead of refreshing
+      queryClient.setQueryData(['/api/projects', id, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.filter(task => task.id !== taskId);
+      });
+      
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.filter(task => task.id !== taskId);
+      });
     },
   });
 
@@ -122,12 +127,21 @@ export default function ProjectDetail() {
       if (!response.ok) throw new Error('Failed to update task');
       return response.json();
     },
-    onSuccess: () => {
-      setRefreshKey(prev => prev + 1);
-
-    },
-    onError: () => {
-
+    onSuccess: (updatedTask) => {
+      // Optimistically update cache instead of refreshing
+      queryClient.setQueryData(['/api/projects', id, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
+      
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
     },
   });
 

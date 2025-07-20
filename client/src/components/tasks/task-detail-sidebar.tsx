@@ -89,7 +89,12 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         setSelectedTask(prev => prev ? { ...prev, ...updatedTask } : prev);
       }
       
-      onTaskUpdate?.();
+      // Also update any milestone/section progress queries
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId] });
+      
+      // Don't call onTaskUpdate to avoid refresh
+      // onTaskUpdate?.();
     }
   });
 
