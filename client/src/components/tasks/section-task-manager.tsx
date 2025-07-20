@@ -614,25 +614,17 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                   console.log('=== TASK CLICK DETECTED ===');
                   console.log('Task clicked:', task.id, task.title);
                   console.log('onTaskClick exists:', !!onTaskClick);
-                  console.log('About to navigate to:', `/task/${task.id}`);
                   
-                  // Open sidebar if callback exists
+                  // If callback exists (project page), open sidebar only - no navigation
                   if (onTaskClick) {
-                    console.log('Opening sidebar via onTaskClick callback');
+                    console.log('Opening sidebar via onTaskClick callback (staying on project page)');
                     onTaskClick(task);
+                  } else {
+                    // If no callback, navigate to task detail page
+                    console.log('No callback - navigating to task detail page');
+                    setLocation(`/task/${task.id}`);
+                    console.log('setLocation called');
                   }
-                  
-                  // Always also navigate to task detail page
-                  console.log('Also navigating to task detail page');
-                  setLocation(`/task/${task.id}`);
-                  console.log('setLocation called');
-                  
-                  console.log('=== END TASK CLICK ===');
-                  
-                  // Always also navigate to task detail page
-                  console.log('Also navigating to task detail page');
-                  setLocation(`/task/${task.id}`);
-                  console.log('setLocation called');
                   
                   console.log('=== END TASK CLICK ===');
                 }}
