@@ -769,12 +769,12 @@ export default function Tasks() {
             <div className="space-y-4">
               {/* Column Headers */}
               <div className="flex items-center bg-gray-50 p-3 rounded-lg border gap-4" style={{
-                '--status-width': '30px',
-                '--priority-width': '60px', 
-                '--title-width': '40%',
-                '--assignee-width': '25%',
-                '--duedate-width': '80px',
-                '--actions-width': '80px'
+                '--status-width': '40px',
+                '--priority-width': '80px', 
+                '--title-width': '50%',
+                '--assignee-width': '20%',
+                '--duedate-width': '100px',
+                '--actions-width': '100px'
               } as React.CSSProperties}>
                 <div className="text-xs font-medium text-gray-600 text-center" style={{width: 'var(--status-width)'}}>Status</div>
                 <div className="flex-none" style={{width: 'var(--priority-width)'}}>
@@ -825,12 +825,12 @@ export default function Tasks() {
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-3">
                     <div className="flex items-center gap-4" style={{
-                      '--status-width': '30px',
-                      '--priority-width': '60px', 
-                      '--title-width': '40%',
-                      '--assignee-width': '25%',
-                      '--duedate-width': '80px',
-                      '--actions-width': '80px'
+                      '--status-width': '40px',
+                      '--priority-width': '80px', 
+                      '--title-width': '50%',
+                      '--assignee-width': '20%',
+                      '--duedate-width': '100px',
+                      '--actions-width': '100px'
                     } as React.CSSProperties}>
                       {/* Status Column */}
                       <div className="flex justify-center" style={{width: 'var(--status-width)'}}>

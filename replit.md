@@ -145,7 +145,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Column Header Sorting Interface**: Implemented sorting controls positioned directly above task columns like table headers in row view
 - **Flexible Layout System**: Switched from CSS Grid to Flexbox for precise column width control with CSS variables for real-time adjustment
 - **CSS Variable System**: Implemented CSS custom properties allowing real-time column width testing via browser developer tools without code changes
-- **Optimized Column Widths**: Status 30px, Priority 60px, Title 40%, Assignee 25%, Due Date 80px, Actions 80px (user-tested optimal values)
+- **Optimized Column Widths**: Status 40px, Priority 80px, Title 50%, Assignee 20%, Due Date 100px, Actions 100px (user-tested optimal values)
 - **Interactive Column Headers**: Sorting buttons show current selection with blue highlighting and directional arrow indicators
 - **Perfect Column Alignment**: Task data rows align precisely under column headers using CSS variable-based width specifications
 - **User-Tested Layout**: Column widths optimized through real-time browser testing for optimal content visibility and space utilization
