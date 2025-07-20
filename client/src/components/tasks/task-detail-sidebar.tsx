@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { 
@@ -38,6 +38,7 @@ interface TaskDetailSidebarProps {
 export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpdate, onTaskClick }: TaskDetailSidebarProps) {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(task);
   const [editFormData, setEditFormData] = useState({
     title: '',
     description: '',
@@ -45,16 +46,21 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     assignedTo: ''
   });
 
+  // Update local selected task when prop changes
+  useEffect(() => {
+    setSelectedTask(task);
+  }, [task]);
+
   // Fetch contacts for assignment dropdown
   const { data: contacts = [] } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
-    enabled: !!task,
+    enabled: !!selectedTask,
   });
 
   // Get all project tasks for navigation
   const { data: projectTasks = [] } = useQuery<Task[]>({
     queryKey: ['/api/projects', projectId, 'tasks'],
-    enabled: !!projectId && !!task,
+    enabled: !!projectId && !!selectedTask,
   });
 
   // Update task completion status
@@ -62,16 +68,26 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     mutationFn: async ({ taskId, updates }: { taskId: number; updates: Partial<Task> }) => {
       return apiRequest('PATCH', `/api/tasks/${taskId}`, updates);
     },
-    onSuccess: () => {
-      // Remove cached queries first, then invalidate to force fresh data
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId] });
+    onSuccess: (updatedTask) => {
+      // Optimistically update the cache instead of invalidating everything
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
       
-      // Invalidate to trigger fresh fetch
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId] });
+      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => 
+          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+        );
+      });
+      
+      // Update the selected task immediately
+      if (selectedTask && updatedTask.id === selectedTask.id) {
+        setSelectedTask(prev => prev ? { ...prev, ...updatedTask } : prev);
+      }
       
       onTaskUpdate?.();
     }
@@ -95,7 +111,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
   // Get task navigation info
   const getTaskNavigation = () => {
     try {
-      if (!task || !projectTasks || projectTasks.length === 0) {
+      if (!selectedTask || !projectTasks || projectTasks.length === 0) {
         return { prevTask: null, nextTask: null };
       }
       
@@ -114,7 +130,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         return a.id - b.id;
       });
       
-      const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
+      const currentIndex = sortedTasks.findIndex(t => t.id === selectedTask.id);
       const prevTask = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
       const nextTask = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
       
@@ -129,11 +145,11 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     e.preventDefault();
     e.stopPropagation();
     
-    if (!task) return;
+    if (!selectedTask) return;
     
-    const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+    const newStatus = selectedTask.status === 'completed' ? 'todo' : 'completed';
     updateTaskMutation.mutate({
-      taskId: task.id,
+      taskId: selectedTask.id,
       updates: { status: newStatus }
     }, {
       onSuccess: () => {
@@ -146,19 +162,19 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
   };
 
   const handleEdit = () => {
-    if (!task) return;
+    if (!selectedTask) return;
     
     setEditFormData({
-      title: task.title,
-      description: task.description || '',
-      dueDate: formatDateForInput(task.dueDate),
-      assignedTo: Array.isArray(task.assignedTo) ? task.assignedTo[0]?.toString() || '' : task.assignedTo?.toString() || ''
+      title: selectedTask.title,
+      description: selectedTask.description || '',
+      dueDate: formatDateForInput(selectedTask.dueDate),
+      assignedTo: Array.isArray(selectedTask.assignedTo) ? selectedTask.assignedTo[0]?.toString() || '' : selectedTask.assignedTo?.toString() || ''
     });
     setIsEditing(true);
   };
 
   const handleSaveEdit = () => {
-    if (!task) return;
+    if (!selectedTask) return;
     
     const updates: Partial<Task> = {
       title: editFormData.title,
@@ -168,7 +184,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     };
     
     updateTaskMutation.mutate({
-      taskId: task.id,
+      taskId: selectedTask.id,
       updates
     }, {
       onSuccess: () => {
@@ -182,14 +198,14 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
   };
 
   const getAssignedUser = () => {
-    if (!task?.assignedTo || !contacts.length) return null;
-    const assignedIds = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
+    if (!selectedTask?.assignedTo || !contacts.length) return null;
+    const assignedIds = Array.isArray(selectedTask.assignedTo) ? selectedTask.assignedTo : [selectedTask.assignedTo];
     return contacts.find(contact => assignedIds.includes(contact.id));
   };
 
   const { prevTask, nextTask } = getTaskNavigation();
 
-  if (!isOpen || !task) return null;
+  if (!isOpen || !selectedTask) return null;
 
   return (
     <div className="fixed right-0 top-0 h-full w-96 bg-white border-l border-gray-200 shadow-lg z-40 overflow-y-auto">
@@ -245,7 +261,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
               className="mt-1 p-0 h-6 w-6 bg-transparent border-none cursor-pointer hover:bg-gray-100 rounded"
               disabled={updateTaskMutation.isPending}
             >
-              {task.status === 'completed' ? (
+              {selectedTask?.status === 'completed' ? (
                 <CheckCircle className="h-5 w-5 text-green-600" />
               ) : (
                 <Circle className="h-5 w-5 text-gray-400" />
@@ -260,7 +276,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                   className="text-lg font-medium"
                 />
               ) : (
-                <h3 className="text-lg font-medium leading-6">{task.title}</h3>
+                <h3 className="text-lg font-medium leading-6">{selectedTask?.title}</h3>
               )}
             </div>
             
@@ -273,7 +289,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         {/* Task Info Cards */}
         <div className="space-y-4">
           {/* Due Date */}
-          {task.dueDate && (
+          {selectedTask?.dueDate && (
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
@@ -288,9 +304,9 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                       onChange={(e) => setEditFormData(prev => ({ ...prev, dueDate: e.target.value }))}
                     />
                   ) : (
-                    <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')}>
+                    <Badge {...getDueDateBadgeProps(selectedTask.dueDate, selectedTask.status === 'completed')}>
                       <Calendar className="h-3 w-3 mr-1" />
-                      {format(new Date(task.dueDate), 'MMM d, yyyy')}
+                      {format(new Date(selectedTask.dueDate), 'MMM d, yyyy')}
                     </Badge>
                   )}
                 </div>
@@ -356,7 +372,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                 />
               ) : (
                 <p className="text-sm text-gray-600">
-                  {task.description || 'No description provided.'}
+                  {selectedTask?.description || 'No description provided.'}
                 </p>
               )}
             </CardContent>
@@ -383,7 +399,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
             <MessageSquare className="h-4 w-4 text-gray-500" />
             <span className="text-sm font-medium">Comments</span>
           </div>
-          <TaskComments taskId={task.id} taskTitle={task.title} />
+          <TaskComments taskId={selectedTask?.id || 0} taskTitle={selectedTask?.title || ''} />
         </div>
       </div>
     </div>
