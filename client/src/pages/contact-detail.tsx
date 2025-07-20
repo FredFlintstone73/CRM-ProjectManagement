@@ -183,6 +183,45 @@ export default function ContactDetail() {
     return value;
   };
 
+  const formatRole = (role: string | null | undefined) => {
+    if (!role) return "Not specified";
+    
+    switch (role) {
+      case 'client_service_member':
+        return 'Client Service Member';
+      case 'admin_assistant':
+        return 'Admin Assistant';
+      case 'deliverables_team_coordinator':
+        return 'Deliverables Team Coordinator';
+      case 'estate_attorney':
+        return 'Estate Attorney';
+      case 'financial_planner':
+        return 'Financial Planner';
+      case 'human_relations':
+        return 'Human Relations';
+      case 'insurance_business':
+        return 'Insurance Business';
+      case 'insurance_health':
+        return 'Insurance Health';
+      case 'insurance_life_ltc_disability':
+        return 'Insurance Life/LTC/Disability';
+      case 'insurance_pc':
+        return 'Insurance P&C';
+      case 'money_manager':
+        return 'Money Manager';
+      case 'tax_planner':
+        return 'Tax Planner';
+      case 'trusted_advisor':
+        return 'Trusted Advisor';
+      case 'accountant':
+        return 'Accountant';
+      case 'other':
+        return 'Other';
+      default:
+        return formatDisplayValue(role);
+    }
+  };
+
   const formatPreferredContactMethod = (method: string | null | undefined) => {
     if (!method) return "Not specified";
     
@@ -457,7 +496,7 @@ export default function ContactDetail() {
               {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && contact.role && (
                 <div>
                   <p className="text-sm font-medium text-gray-700">Role:</p>
-                  <p className="text-sm">{formatDisplayValue(contact.role)}</p>
+                  <p className="text-sm">{formatRole(contact.role)}</p>
                 </div>
               )}
               
@@ -644,7 +683,7 @@ export default function ContactDetail() {
               <div className="text-center">
                 <h2 className="text-xl font-semibold">{contact.firstName} {contact.lastName}</h2>
                 {contact.role && (
-                  <p className="text-gray-600">{formatDisplayValue(contact.role)}</p>
+                  <p className="text-gray-600">{formatRole(contact.role)}</p>
                 )}
               </div>
             </div>
@@ -747,7 +786,7 @@ export default function ContactDetail() {
                     {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && contact.role && (
                       <div className="flex justify-between">
                         <span className="font-medium">Role:</span>
-                        <span>{formatDisplayValue(contact.role)}</span>
+                        <span>{formatRole(contact.role)}</span>
                       </div>
                     )}
                     
