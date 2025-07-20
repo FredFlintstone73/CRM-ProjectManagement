@@ -769,8 +769,8 @@ export default function Tasks() {
             <div className="space-y-4">
               {/* Column Headers */}
               <div className="grid grid-cols-12 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
-                <div className="col-span-1 text-xs font-medium text-gray-600">Status</div>
-                <div className="col-span-1 text-center">
+                <div className="col-span-1 text-xs font-medium text-gray-600 text-center" style={{width: '60px'}}>Status</div>
+                <div className="col-span-2 text-center">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -780,7 +780,7 @@ export default function Tasks() {
                     Priority {getSortIcon('priority')}
                   </Button>
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-5">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -800,7 +800,7 @@ export default function Tasks() {
                     Assignee {getSortIcon('assignee')}
                   </Button>
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -810,7 +810,7 @@ export default function Tasks() {
                     Due Date {getSortIcon('dueDate')}
                   </Button>
                 </div>
-                <div className="col-span-1 text-xs font-medium text-gray-600 text-center">Actions</div>
+                <div className="col-span-0 text-xs font-medium text-gray-600 text-center" style={{width: '60px'}}>Actions</div>
               </div>
               
               {/* Task Rows */}
@@ -819,7 +819,7 @@ export default function Tasks() {
                   <CardContent className="p-3">
                     <div className="grid grid-cols-12 gap-4 items-center">
                       {/* Status Column */}
-                      <div className="col-span-1 flex justify-center">
+                      <div className="col-span-1 flex justify-center" style={{width: '60px'}}>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -836,7 +836,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Priority Column */}
-                      <div className="col-span-1 flex justify-center">
+                      <div className="col-span-2 flex justify-center">
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
                             taskId={task.id} 
@@ -851,7 +851,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Title Column */}
-                      <div className="col-span-4">
+                      <div className="col-span-5">
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
@@ -877,7 +877,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Due Date Column */}
-                      <div className="col-span-2">
+                      <div className="col-span-1">
                         {task.dueDate && (
                           <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
                             <CalendarDays className="w-3 h-3 mr-1" />
@@ -887,7 +887,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Actions Column */}
-                      <div className="col-span-1 flex gap-1 justify-center">
+                      <div className="col-span-0 flex gap-1 justify-center" style={{width: '60px'}}>
                         <Button
                           variant="outline"
                           size="sm"
