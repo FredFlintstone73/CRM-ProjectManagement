@@ -19,11 +19,16 @@ interface TaskDetailParams {
 }
 
 export default function TaskDetail() {
+  // ABSOLUTE FIRST THING - test if React is working
+  alert('TaskDetail component is loading!');
+  console.log('TaskDetail component is loading!');
+  
   const { id } = useParams<TaskDetailParams>();
   const [, setLocation] = useLocation();
 
-  // Simple test to see if component loads
+  // Simple test to see if component loads  
   console.log('TaskDetail component loaded with ID:', id);
+  alert(`TaskDetail loaded with ID: ${id}`);
 
   const [isEditing, setIsEditing] = useState(false);
 
