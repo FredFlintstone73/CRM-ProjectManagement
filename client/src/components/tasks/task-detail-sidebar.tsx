@@ -266,7 +266,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       title: selectedTask.title,
       description: selectedTask.description || '',
       dueDate: formatDateForInput(selectedTask.dueDate),
-      assignedTo: Array.isArray(selectedTask.assignedTo) ? selectedTask.assignedTo[0]?.toString() || '' : selectedTask.assignedTo?.toString() || ''
+      assignedTo: Array.isArray(selectedTask.assignedTo) ? selectedTask.assignedTo[0]?.toString() || 'unassigned' : selectedTask.assignedTo?.toString() || 'unassigned'
     });
     setIsEditing(true);
   };
@@ -278,7 +278,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       title: editFormData.title,
       description: editFormData.description,
       dueDate: editFormData.dueDate ? `${editFormData.dueDate}T12:00:00.000Z` : null,
-      assignedTo: editFormData.assignedTo ? parseInt(editFormData.assignedTo) : null
+      assignedTo: editFormData.assignedTo && editFormData.assignedTo !== 'unassigned' ? parseInt(editFormData.assignedTo) : null
     };
     
     updateTaskMutation.mutate({
@@ -475,7 +475,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                       <SelectValue placeholder="Select assignee" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
                       {contacts
                         .filter(contact => contact.contactType === 'team_member' && contact.status === 'active')
                         .map(contact => (
