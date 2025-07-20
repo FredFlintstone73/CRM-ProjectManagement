@@ -79,7 +79,54 @@ export default function TaskDetail() {
   });
 
   const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
-  const assignedUser = teamMembers.find(member => member.id === task?.assignedTo);
+  
+  // Helper function to format role names
+  const formatRole = (role: string) => {
+    if (!role) return '';
+    return role
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/Insurance /g, 'Insurance - ')
+      .replace(/Ltc/g, 'LTC');
+  };
+
+  // Get all assigned team members from direct assignments and role assignments
+  const getAssignedTeamMembers = () => {
+    if (!task || !teamMembers.length) return [];
+    
+    const assignedMembers = [];
+    
+    // Add directly assigned team members (by contact ID)
+    if (task.assignedTo) {
+      const assignedIds = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
+      assignedIds.forEach(contactId => {
+        if (contactId) {
+          const member = teamMembers.find(tm => tm.id === contactId);
+          if (member) assignedMembers.push(member);
+        }
+      });
+    }
+    
+    // Add team members assigned by role
+    if (task.assignedToRole) {
+      const assignedRoles = Array.isArray(task.assignedToRole) ? task.assignedToRole : [task.assignedToRole];
+      assignedRoles.forEach(role => {
+        if (role) {
+          const roleMembers = teamMembers.filter(tm => tm.role === role);
+          roleMembers.forEach(member => {
+            // Only add if not already in the list (avoid duplicates)
+            if (!assignedMembers.find(am => am.id === member.id)) {
+              assignedMembers.push(member);
+            }
+          });
+        }
+      });
+    }
+    
+    return assignedMembers;
+  };
+  
+  const assignedTeamMembers = getAssignedTeamMembers();
 
   // Sort tasks chronologically and find navigation tasks
   const getSortedTasks = () => {
@@ -309,7 +356,40 @@ export default function TaskDetail() {
               <CardContent>
                 <div className="space-y-2">
                   {subtasks.map(subtask => {
-                    const subtaskAssignedUser = teamMembers.find(member => member.id === subtask.assignedTo);
+                    // Get all assigned team members for subtask
+                    const getSubtaskAssignedMembers = (subtaskData) => {
+                      const assignedMembers = [];
+                      
+                      // Add directly assigned team members (handle both array and single value)
+                      if (subtaskData.assignedTo) {
+                        const assignedIds = Array.isArray(subtaskData.assignedTo) ? subtaskData.assignedTo : [subtaskData.assignedTo];
+                        assignedIds.forEach(contactId => {
+                          if (contactId) {
+                            const member = teamMembers.find(tm => tm.id === contactId);
+                            if (member) assignedMembers.push(member);
+                          }
+                        });
+                      }
+                      
+                      // Add team members assigned by role (handle both array and single value)
+                      if (subtaskData.assignedToRole) {
+                        const assignedRoles = Array.isArray(subtaskData.assignedToRole) ? subtaskData.assignedToRole : [subtaskData.assignedToRole];
+                        assignedRoles.forEach(role => {
+                          if (role) {
+                            const roleMembers = teamMembers.filter(tm => tm.role === role);
+                            roleMembers.forEach(member => {
+                              if (!assignedMembers.find(am => am.id === member.id)) {
+                                assignedMembers.push(member);
+                              }
+                            });
+                          }
+                        });
+                      }
+                      
+                      return assignedMembers;
+                    };
+                    
+                    const subtaskAssignedMembers = getSubtaskAssignedMembers(subtask);
                     const subtaskCompleted = subtask.status === 'completed';
                     
                     return (
@@ -345,11 +425,15 @@ export default function TaskDetail() {
                           {subtask.title}
                         </button>
                         
-                        {subtaskAssignedUser && (
-                          <Badge variant="secondary" className="text-xs">
-                            <User className="h-3 w-3 mr-1" />
-                            {subtaskAssignedUser.firstName} {subtaskAssignedUser.lastName}
-                          </Badge>
+                        {subtaskAssignedMembers.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {subtaskAssignedMembers.map(member => (
+                              <Badge key={member.id} variant="secondary" className="text-xs">
+                                <User className="h-3 w-3 mr-1" />
+                                {member.firstName} {member.lastName}
+                              </Badge>
+                            ))}
+                          </div>
                         )}
                       </div>
                     );
@@ -378,12 +462,27 @@ export default function TaskDetail() {
                 </div>
               )}
               
-              {assignedUser && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">
-                    Assigned to: {assignedUser.firstName} {assignedUser.lastName}
-                  </span>
+              {assignedTeamMembers.length > 0 && (
+                <div className="flex items-start gap-2">
+                  <User className="h-4 w-4 text-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 block mb-2">
+                      Assigned to ({assignedTeamMembers.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {assignedTeamMembers.map(member => (
+                        <Badge key={member.id} variant="secondary" className="text-xs">
+                          <User className="h-3 w-3 mr-1" />
+                          {member.firstName} {member.lastName}
+                          {member.role && (
+                            <span className="ml-1 text-gray-500">
+                              ({formatRole(member.role)})
+                            </span>
+                          )}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
               
