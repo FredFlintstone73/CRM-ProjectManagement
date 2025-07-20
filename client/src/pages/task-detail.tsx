@@ -247,6 +247,11 @@ export default function TaskDetail() {
       window.console.log('Current task:', task?.id, task?.title);
     }
     
+    // Add alert for absolute visibility
+    if (task?.id === 2368) {
+      alert(`DEBUG: On task 2368 - ${task.title}. ProjectTasks: ${projectTasks?.length || 0}`);
+    }
+    
     if (!projectTasks || !task) {
       console.log('EARLY EXIT: No project tasks or task data available');
       return { previousTask: null, nextTask: null };
@@ -441,6 +446,7 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
+                  alert(`NEXT BUTTON: From ${task?.id} (${task?.title}) to ${nextTask.id} (${nextTask.title})`);
                   console.log('=== NEXT BUTTON CLICKED ===');
                   console.log('Current task:', task?.id, task?.title);
                   console.log('Next task:', nextTask.id, nextTask.title);
