@@ -1649,12 +1649,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserTasksWithPriorities(userId: string): Promise<(Task & { userPriority: number | null })[]> {
-    // First get the user's contact ID
-    const userContact = await this.getUserContactId({ id: userId } as User);
-    console.log('getUserTasksWithPriorities - userContact:', userContact, 'userId:', userId);
+    // Get the full user object first
+    const user = await this.getUser(userId);
+    if (!user) {
+      console.log('No user found for userId:', userId);
+      return [];
+    }
+
+    // Then get the contact ID
+    const userContact = await this.getUserContactId(user);
+    console.log('getUserTasksWithPriorities - userContact:', userContact, 'userId:', userId, 'user:', user.firstName, user.lastName);
 
     if (!userContact) {
-      console.log('No userContact found');
+      console.log('No userContact found for user:', user.firstName, user.lastName);
       return [];
     }
 
