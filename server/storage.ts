@@ -1648,9 +1648,15 @@ export class DatabaseStorage implements IStorage {
   async getUserTasksWithPriorities(userId: string): Promise<(Task & { userPriority: number | null })[]> {
     // First get the user's contact ID
     const userContact = await this.getUserContactId({ id: userId } as User);
+    console.log('getUserTasksWithPriorities - userContact:', userContact, 'userId:', userId);
 
-    // Get all tasks assigned to this user (either directly or through contact ID)
-    const tasksQuery = db
+    if (!userContact) {
+      console.log('No userContact found');
+      return [];
+    }
+
+    // Simplified query - just get tasks assigned to this user's contact ID
+    const results = await db
       .select({
         id: tasks.id,
         title: tasks.title,
@@ -1680,37 +1686,20 @@ export class DatabaseStorage implements IStorage {
           eq(userTaskPriorities.taskId, tasks.id),
           eq(userTaskPriorities.userId, userId)
         )
+      )
+      .where(
+        and(
+          isNotNull(tasks.assignedTo),
+          sql`${userContact} = ANY(${tasks.assignedTo})`
+        )
       );
 
-    // Filter for tasks assigned to this user
-    if (userContact) {
-      const results = await tasksQuery
-        .where(
-          or(
-            // Direct assignment check
-            and(
-              isNotNull(tasks.assignedTo),
-              sql`${userContact} = ANY(${tasks.assignedTo})`
-            ),
-            // Role-based assignment check - if assignedTo is empty/null but user has matching role
-            and(
-              or(
-                eq(tasks.assignedTo, null),
-                sql`array_length(${tasks.assignedTo}, 1) IS NULL`
-              ),
-              isNotNull(tasks.assignedToRole),
-              sql`'tax_planner' = ANY(${tasks.assignedToRole})`
-            )
-          )
-        );
-      
-      return results.map(task => ({
-        ...task,
-        userPriority: task.userPriority || task.priority || 50
-      }));
-    }
-
-    return [];
+    console.log('getUserTasksWithPriorities - found', results.length, 'tasks');
+    
+    return results.map(task => ({
+      ...task,
+      userPriority: task.userPriority || task.priority || 50
+    }));
   }
 }
 

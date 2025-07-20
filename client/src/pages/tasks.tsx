@@ -181,7 +181,9 @@ export default function Tasks() {
     const matchesTaskFilter = () => {
       if (taskFilter === 'all_tasks') return true;
       if (taskFilter === 'my_tasks') {
-        return isUserAssignedToTask(task);
+        // When viewing My Tasks, we're using the userTasksWithPriorities query
+        // so all tasks in the array are already filtered for the current user
+        return true;
       }
       return true;
     };
