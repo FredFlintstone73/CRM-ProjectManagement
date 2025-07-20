@@ -235,7 +235,10 @@ export default function TaskDetail() {
     };
   };
 
+  // Debug: Add console log to verify function is called
+  console.log('CALLING findNavigationTasks() for task ID:', task?.id);
   const { previousTask, nextTask } = findNavigationTasks();
+  console.log('NAVIGATION RESULT - Previous:', previousTask?.id, 'Next:', nextTask?.id);
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
