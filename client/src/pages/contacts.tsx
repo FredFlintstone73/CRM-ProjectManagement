@@ -341,6 +341,8 @@ export default function Contacts() {
         return 'Accountant';
       case 'admin_assistant':
         return 'Admin Assistant';
+      case 'client_service_member':
+        return 'Client Service Member';
       case 'deliverables_team_coordinator':
         return 'Deliverables Team Coordinator';
       case 'estate_planner':

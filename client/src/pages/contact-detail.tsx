@@ -187,38 +187,38 @@ export default function ContactDetail() {
     if (!role) return "Not specified";
     
     switch (role) {
-      case 'client_service_member':
-        return 'Client Service Member';
+      case 'accountant':
+        return 'Accountant';
       case 'admin_assistant':
         return 'Admin Assistant';
+      case 'client_service_member':
+        return 'Client Service Member';
       case 'deliverables_team_coordinator':
         return 'Deliverables Team Coordinator';
-      case 'estate_attorney':
-        return 'Estate Attorney';
+      case 'estate_planner':
+        return 'Estate Planner';
       case 'financial_planner':
         return 'Financial Planner';
       case 'human_relations':
         return 'Human Relations';
       case 'insurance_business':
-        return 'Insurance Business';
+        return 'Insurance - Business';
       case 'insurance_health':
-        return 'Insurance Health';
+        return 'Insurance - Health';
       case 'insurance_life_ltc_disability':
-        return 'Insurance Life/LTC/Disability';
+        return 'Insurance - Life, LTC, & Disability';
       case 'insurance_pc':
-        return 'Insurance P&C';
+        return 'Insurance - P&C';
       case 'money_manager':
         return 'Money Manager';
       case 'tax_planner':
         return 'Tax Planner';
       case 'trusted_advisor':
         return 'Trusted Advisor';
-      case 'accountant':
-        return 'Accountant';
       case 'other':
         return 'Other';
       default:
-        return formatDisplayValue(role);
+        return role?.charAt(0).toUpperCase() + role?.slice(1) || '';
     }
   };
 
