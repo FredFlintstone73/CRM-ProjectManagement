@@ -611,7 +611,21 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                   isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
                 }`}
                 onClick={() => {
-                  onTaskClick ? onTaskClick(task) : setLocation(`/task/${task.id}`);
+                  console.log('=== TASK CLICK DETECTED ===');
+                  console.log('Task clicked:', task.id, task.title);
+                  console.log('onTaskClick exists:', !!onTaskClick);
+                  console.log('About to navigate to:', `/task/${task.id}`);
+                  
+                  if (onTaskClick) {
+                    console.log('Using onTaskClick callback');
+                    onTaskClick(task);
+                  } else {
+                    console.log('Using setLocation navigation');
+                    setLocation(`/task/${task.id}`);
+                    console.log('setLocation called');
+                  }
+                  
+                  console.log('=== END TASK CLICK ===');
                 }}
               >
                 {task.title}
