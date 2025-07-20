@@ -94,7 +94,7 @@ export default function TaskDetail() {
   const getAssignedTeamMembers = () => {
     if (!task || !teamMembers.length) return [];
     
-    const assignedMembers = [];
+    const assignedMembers: any[] = [];
     
     // Add directly assigned team members (by contact ID)
     if (task.assignedTo) {
@@ -153,7 +153,7 @@ export default function TaskDetail() {
     });
     
     // Build hierarchical sequence: parent → all its children → next parent → all its children...
-    const hierarchicalSequence = [];
+    const hierarchicalSequence: any[] = [];
     
     sortedParents.forEach(parent => {
       // Add the parent task
@@ -532,13 +532,13 @@ export default function TaskDetail() {
                 <div className="space-y-2">
                   {subtasks.map(subtask => {
                     // Get all assigned team members for subtask
-                    const getSubtaskAssignedMembers = (subtaskData) => {
-                      const assignedMembers = [];
+                    const getSubtaskAssignedMembers = (subtaskData: any) => {
+                      const assignedMembers: any[] = [];
                       
                       // Add directly assigned team members (handle both array and single value)
                       if (subtaskData.assignedTo) {
                         const assignedIds = Array.isArray(subtaskData.assignedTo) ? subtaskData.assignedTo : [subtaskData.assignedTo];
-                        assignedIds.forEach(contactId => {
+                        assignedIds.forEach((contactId: any) => {
                           if (contactId) {
                             const member = teamMembers.find(tm => tm.id === contactId);
                             if (member) assignedMembers.push(member);
@@ -549,7 +549,7 @@ export default function TaskDetail() {
                       // Add team members assigned by role (handle both array and single value)
                       if (subtaskData.assignedToRole) {
                         const assignedRoles = Array.isArray(subtaskData.assignedToRole) ? subtaskData.assignedToRole : [subtaskData.assignedToRole];
-                        assignedRoles.forEach(role => {
+                        assignedRoles.forEach((role: any) => {
                           if (role) {
                             const roleMembers = teamMembers.filter(tm => tm.role === role);
                             roleMembers.forEach(member => {
@@ -701,8 +701,8 @@ export default function TaskDetail() {
               <Separator />
               
               <div className="text-xs text-gray-500">
-                <div>Created: {format(new Date(task.createdAt), 'MMM d, yyyy')}</div>
-                <div>Updated: {format(new Date(task.updatedAt), 'MMM d, yyyy')}</div>
+                <div>Created: {task.createdAt ? format(new Date(task.createdAt), 'MMM d, yyyy') : 'Unknown'}</div>
+                <div>Updated: {task.updatedAt ? format(new Date(task.updatedAt), 'MMM d, yyyy') : 'Unknown'}</div>
               </div>
             </CardContent>
           </Card>
@@ -717,7 +717,7 @@ export default function TaskDetail() {
           </DialogHeader>
           <TaskForm 
             task={task} 
-            projectId={task?.projectId} 
+            projectId={task?.projectId || null} 
             onSuccess={() => {
               setIsEditing(false);
               queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
