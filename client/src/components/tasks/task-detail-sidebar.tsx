@@ -123,7 +123,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     
     if (!task) return;
     
-    const newStatus = task.status === 'completed' ? 'active' : 'completed';
+    const newStatus = task.status === 'completed' ? 'todo' : 'completed';
     updateTaskMutation.mutate({
       taskId: task.id,
       updates: { status: newStatus }
