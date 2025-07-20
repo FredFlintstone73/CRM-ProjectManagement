@@ -32,10 +32,8 @@ export default function TaskDetail() {
       const taskData = await response.json();
       
       // Test basic JavaScript execution
-      if (taskData.id === 2368) {
-        console.log('BASIC TEST: Task 2368 loaded successfully');
-        alert('BASIC TEST: Task 2368 loaded - JavaScript is working!');
-      }
+      console.log(`BASIC TEST: Task ${taskData.id} loaded successfully - ${taskData.title}`);
+      alert(`BASIC TEST: Task ${taskData.id} loaded - JavaScript is working!`);
       
       return taskData;
     },
