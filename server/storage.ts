@@ -1094,19 +1094,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async reorderTasks(taskUpdates: Array<{ id: number; sortOrder: number; parentTaskId?: number | null }>): Promise<void> {
-    // Use a transaction to update all task orders atomically
-    await db.transaction(async (tx) => {
-      for (const update of taskUpdates) {
-        await tx
-          .update(tasks)
-          .set({ 
-            sortOrder: update.sortOrder,
-            parentTaskId: update.parentTaskId,
-            updatedAt: new Date() 
-          })
-          .where(eq(tasks.id, update.id));
-      }
-    });
+    // Update all task orders individually (Neon HTTP driver doesn't support transactions)
+    for (const update of taskUpdates) {
+      await db
+        .update(tasks)
+        .set({ 
+          sortOrder: update.sortOrder,
+          parentTaskId: update.parentTaskId,
+          updatedAt: new Date() 
+        })
+        .where(eq(tasks.id, update.id));
+    }
   }
 
   // Helper method to update P-Day dependent tasks when CSR Meeting date changes
