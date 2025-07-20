@@ -61,6 +61,9 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });
       setNewComment("");
     },
+    onError: (error) => {
+      console.error('Failed to create comment:', error);
+    }
   });
 
   // Update comment mutation
@@ -73,6 +76,9 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
       setEditingCommentId(null);
       setEditingText("");
     },
+    onError: (error) => {
+      console.error('Failed to update comment:', error);
+    }
   });
 
   // Delete comment mutation
@@ -83,6 +89,9 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "comments"] });
     },
+    onError: (error) => {
+      console.error('Failed to delete comment:', error);
+    }
   });
 
   const handleSubmitComment = (e: React.FormEvent) => {

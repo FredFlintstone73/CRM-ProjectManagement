@@ -90,28 +90,35 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
 
   // Get task navigation info
   const getTaskNavigation = () => {
-    if (!task || !projectTasks.length) return { prevTask: null, nextTask: null };
-    
-    // Sort tasks chronologically
-    const sortedTasks = [...projectTasks].sort((a, b) => {
-      // Sort by daysFromMeeting, then dueDate, then sortOrder, then ID
-      if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
-        return a.daysFromMeeting - b.daysFromMeeting;
+    try {
+      if (!task || !projectTasks || projectTasks.length === 0) {
+        return { prevTask: null, nextTask: null };
       }
-      if (a.dueDate && b.dueDate) {
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      }
-      if (a.sortOrder !== b.sortOrder) {
-        return (a.sortOrder || 0) - (b.sortOrder || 0);
-      }
-      return a.id - b.id;
-    });
-    
-    const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
-    const prevTask = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
-    const nextTask = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
-    
-    return { prevTask, nextTask };
+      
+      // Sort tasks chronologically
+      const sortedTasks = [...projectTasks].sort((a, b) => {
+        // Sort by daysFromMeeting, then dueDate, then sortOrder, then ID
+        if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
+          return a.daysFromMeeting - b.daysFromMeeting;
+        }
+        if (a.dueDate && b.dueDate) {
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        }
+        if (a.sortOrder !== b.sortOrder) {
+          return (a.sortOrder || 0) - (b.sortOrder || 0);
+        }
+        return a.id - b.id;
+      });
+      
+      const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
+      const prevTask = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
+      const nextTask = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
+      
+      return { prevTask, nextTask };
+    } catch (error) {
+      console.error('Error in getTaskNavigation:', error);
+      return { prevTask: null, nextTask: null };
+    }
   };
 
   const handleToggleComplete = () => {
@@ -121,6 +128,13 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     updateTaskMutation.mutate({
       taskId: task.id,
       updates: { status: newStatus }
+    }, {
+      onSuccess: () => {
+        onTaskUpdate?.();
+      },
+      onError: (error) => {
+        console.error('Failed to toggle task completion:', error);
+      }
     });
   };
 
@@ -143,15 +157,21 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       title: editFormData.title,
       description: editFormData.description,
       dueDate: editFormData.dueDate ? `${editFormData.dueDate}T12:00:00.000Z` : null,
-      assignedTo: editFormData.assignedTo ? [parseInt(editFormData.assignedTo)] : null
+      assignedTo: editFormData.assignedTo ? parseInt(editFormData.assignedTo) : null
     };
     
     updateTaskMutation.mutate({
       taskId: task.id,
       updates
+    }, {
+      onSuccess: () => {
+        setIsEditing(false);
+        onTaskUpdate?.();
+      },
+      onError: (error) => {
+        console.error('Failed to update task:', error);
+      }
     });
-    
-    setIsEditing(false);
   };
 
   const getAssignedUser = () => {
