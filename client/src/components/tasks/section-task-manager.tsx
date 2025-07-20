@@ -218,9 +218,17 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
         status: task.status === 'completed' ? 'todo' : 'completed',
       }),
     onSuccess: () => {
+      // Remove all cached queries to force fresh data
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString()] });
+      queryClient.removeQueries({ queryKey: ['/api/milestones'] });
+      
+      // Then invalidate to trigger fresh fetches
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
     },
   });
 
