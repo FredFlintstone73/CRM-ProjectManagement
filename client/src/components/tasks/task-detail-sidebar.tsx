@@ -63,6 +63,12 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     enabled: !!projectId && !!selectedTask,
   });
 
+  // Get milestones for hierarchical navigation
+  const { data: milestones = [] } = useQuery({
+    queryKey: ['/api/milestones'],
+    enabled: !!projectId && !!selectedTask,
+  });
+
   // Sync selected task with updated project tasks data
   useEffect(() => {
     if (selectedTask && projectTasks) {
@@ -123,31 +129,93 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     }
   };
 
-  // Get task navigation info
+  // Get task navigation info following hierarchical structure
   const getTaskNavigation = () => {
     try {
-      if (!selectedTask || !projectTasks || projectTasks.length === 0) {
+      if (!selectedTask || !projectTasks || projectTasks.length === 0 || !milestones) {
         return { prevTask: null, nextTask: null };
       }
       
-      // Sort tasks chronologically
-      const sortedTasks = [...projectTasks].sort((a, b) => {
-        // Sort by daysFromMeeting, then dueDate, then sortOrder, then ID
-        if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
-          return a.daysFromMeeting - b.daysFromMeeting;
-        }
-        if (a.dueDate && b.dueDate) {
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        }
-        if (a.sortOrder !== b.sortOrder) {
-          return (a.sortOrder || 0) - (b.sortOrder || 0);
-        }
-        return a.id - b.id;
+      // Build hierarchical task structure organized by milestone and parent-child relationships
+      const tasksByMilestone = new Map();
+      
+      // Group tasks by milestone
+      milestones.forEach(milestone => {
+        tasksByMilestone.set(milestone.id, []);
       });
       
-      const currentIndex = sortedTasks.findIndex(t => t.id === selectedTask.id);
-      const prevTask = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
-      const nextTask = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
+      // Add tasks to their respective milestones and build hierarchy
+      const taskMap = new Map();
+      projectTasks.forEach(task => {
+        taskMap.set(task.id, task);
+        if (task.milestoneId && tasksByMilestone.has(task.milestoneId)) {
+          tasksByMilestone.get(task.milestoneId).push(task);
+        }
+      });
+      
+      // Create flat ordered list following hierarchical structure
+      const hierarchicalTaskList = [];
+      
+      // Sort milestones by sortOrder
+      const sortedMilestones = [...milestones].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      
+      sortedMilestones.forEach(milestone => {
+        const milestoneTasks = tasksByMilestone.get(milestone.id) || [];
+        
+        // Separate parent tasks from child tasks
+        const parentTasks = milestoneTasks.filter(task => !task.parentTaskId);
+        const childTasks = milestoneTasks.filter(task => task.parentTaskId);
+        
+        // Sort parent tasks
+        const sortedParentTasks = parentTasks.sort((a, b) => {
+          if (a.daysFromMeeting !== null && b.daysFromMeeting !== null) {
+            return a.daysFromMeeting - b.daysFromMeeting;
+          }
+          if (a.sortOrder !== b.sortOrder) {
+            return (a.sortOrder || 0) - (b.sortOrder || 0);
+          }
+          return a.id - b.id;
+        });
+        
+        // Add each parent task followed by its children in hierarchical order
+        sortedParentTasks.forEach(parentTask => {
+          hierarchicalTaskList.push(parentTask);
+          
+          // Find and add child tasks of this parent
+          const parentChildren = childTasks.filter(child => child.parentTaskId === parentTask.id);
+          const sortedChildren = parentChildren.sort((a, b) => {
+            // For child tasks, sort alphabetically by title for deliverables
+            if (parentTask.title && (parentTask.title.includes('Money Manager') || 
+                                   parentTask.title.includes('Estate Attorney') || 
+                                   parentTask.title.includes('Financial Planner') || 
+                                   parentTask.title.includes('Insurance') ||
+                                   parentTask.title.includes('Tax Planner'))) {
+              return a.title.localeCompare(b.title);
+            }
+            // Otherwise use standard sorting
+            if (a.sortOrder !== b.sortOrder) {
+              return (a.sortOrder || 0) - (b.sortOrder || 0);
+            }
+            return a.id - b.id;
+          });
+          
+          sortedChildren.forEach(child => {
+            hierarchicalTaskList.push(child);
+            
+            // Add grandchildren if they exist
+            const grandChildren = childTasks.filter(grandChild => grandChild.parentTaskId === child.id);
+            const sortedGrandChildren = grandChildren.sort((a, b) => a.title.localeCompare(b.title));
+            sortedGrandChildren.forEach(grandChild => {
+              hierarchicalTaskList.push(grandChild);
+            });
+          });
+        });
+      });
+      
+      // Find current task position in hierarchical list
+      const currentIndex = hierarchicalTaskList.findIndex(t => t.id === selectedTask.id);
+      const prevTask = currentIndex > 0 ? hierarchicalTaskList[currentIndex - 1] : null;
+      const nextTask = currentIndex < hierarchicalTaskList.length - 1 ? hierarchicalTaskList[currentIndex + 1] : null;
       
       return { prevTask, nextTask };
     } catch (error) {
