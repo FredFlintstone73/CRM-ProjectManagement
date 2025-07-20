@@ -261,23 +261,9 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       return { updatedTask, originalTask: task };
     },
     onSuccess: ({ updatedTask, originalTask }) => {
-      // Optimistically update project tasks cache
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => 
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        );
-      });
-      
-      // Optimistically update global tasks cache
-      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => 
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        );
-      });
-
-      // Only invalidate milestone and progress queries for real-time progress updates
+      // Force immediate re-fetch for instant UI updates
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
     },
     onError: () => {

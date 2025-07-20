@@ -184,31 +184,14 @@ export default function TaskDetail() {
       return updatedTask;
     },
     onSuccess: (updatedTask) => {
-      // Optimistically update individual task cache
-      queryClient.setQueryData(['/api/tasks', id], (oldTask: Task | undefined) => {
-        if (!oldTask) return oldTask;
-        return { ...oldTask, ...updatedTask };
-      });
+      // Force immediate re-fetch for instant UI updates
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       
-      // Optimistically update global tasks cache
-      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => 
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        );
-      });
-      
-      // Optimistically update project tasks cache if task has project
       if (task?.projectId) {
-        queryClient.setQueryData(['/api/projects', task.projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-          if (!oldTasks) return oldTasks;
-          return oldTasks.map(t => 
-            t.id === updatedTask.id ? { ...t, ...updatedTask } : t
-          );
-        });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
       }
 
-      // Only invalidate milestone queries for progress updates
       queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
     },
     onError: () => {
