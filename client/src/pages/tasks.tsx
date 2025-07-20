@@ -23,6 +23,7 @@ import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays
 import { format } from "date-fns";
 import TaskForm from "@/components/tasks/task-form";
 import { UserPriorityInput } from "@/components/tasks/user-priority-input";
+import { TaskDetailSidebar } from "@/components/tasks/task-detail-sidebar";
 import { getDueDateBadgeProps } from "@/lib/dueDateUtils";
 import type { Task, Project, User as UserType } from "@shared/schema";
 import { Link, useLocation } from "wouter";
@@ -43,6 +44,27 @@ export default function Tasks() {
   const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_30_days' | 'next_122_days' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
+
+  // Task sidebar state
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Handler for opening task in sidebar
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsSidebarOpen(true);
+  };
+
+  // Handler for closing sidebar
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false);
+    setSelectedTask(null);
+  };
+
+  // Handler for task updates from sidebar
+  const handleTaskUpdate = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -606,7 +628,7 @@ export default function Tasks() {
                           </Badge>
                         )}
                         <button 
-                          onClick={() => setLocation(`/task/${task.id}`)}
+                          onClick={() => handleTaskClick(task)}
                           className="flex-1 text-left"
                         >
                           <CardTitle className="text-lg hover:text-blue-600 cursor-pointer transition-colors task-title">
@@ -702,7 +724,7 @@ export default function Tasks() {
                           </Badge>
                         )}
                         <button 
-                          onClick={() => setLocation(`/task/${task.id}`)}
+                          onClick={() => handleTaskClick(task)}
                           className="text-left"
                         >
                           <span className="font-medium hover:text-blue-600 cursor-pointer transition-colors task-title">
@@ -770,6 +792,16 @@ export default function Tasks() {
           )}
         </div>
       </main>
+
+      {/* Task Detail Sidebar */}
+      <TaskDetailSidebar
+        task={selectedTask}
+        isOpen={isSidebarOpen}
+        onClose={handleCloseSidebar}
+        projectId={selectedTask?.projectId}
+        onTaskUpdate={handleTaskUpdate}
+        onTaskClick={handleTaskClick}
+      />
     </>
   );
 }

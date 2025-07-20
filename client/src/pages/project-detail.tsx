@@ -12,6 +12,7 @@ import { useState } from "react";
 import TaskForm from "@/components/tasks/task-form";
 import ProjectForm from "@/components/projects/project-form";
 import { SectionTaskManager } from "@/components/tasks/section-task-manager";
+import { TaskDetailSidebar } from "@/components/tasks/task-detail-sidebar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,27 @@ export default function ProjectDetail() {
   const [editingDueDate, setEditingDueDate] = useState(false);
   const [newDueDate, setNewDueDate] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Task sidebar state
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Handler for opening task in sidebar
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsSidebarOpen(true);
+  };
+
+  // Handler for closing sidebar
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false);
+    setSelectedTask(null);
+  };
+
+  // Handler for task updates from sidebar
+  const handleTaskUpdate = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ['/api/projects', id, refreshKey],
@@ -466,7 +488,10 @@ export default function ProjectDetail() {
 
       {/* Section Task Management */}
       <div className="mt-6">
-        <SectionTaskManager projectId={project.id} />
+        <SectionTaskManager 
+          projectId={project.id} 
+          onTaskClick={handleTaskClick}
+        />
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -505,6 +530,16 @@ export default function ProjectDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Task Detail Sidebar */}
+      <TaskDetailSidebar
+        task={selectedTask}
+        isOpen={isSidebarOpen}
+        onClose={handleCloseSidebar}
+        projectId={parseInt(id!)}
+        onTaskUpdate={handleTaskUpdate}
+        onTaskClick={handleTaskClick}
+      />
     </div>
   );
 }

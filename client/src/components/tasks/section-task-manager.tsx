@@ -22,6 +22,7 @@ import type { Task, Contact } from "@shared/schema";
 
 interface SectionTaskManagerProps {
   projectId: number;
+  onTaskClick?: (task: Task) => void;
 }
 
 interface TaskSection {
@@ -53,7 +54,7 @@ interface EditingSectionState {
   title: string;
 }
 
-export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
+export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManagerProps) {
 
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -520,7 +521,7 @@ export function SectionTaskManager({ projectId }: SectionTaskManagerProps) {
                   isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
                 }`}
                 onClick={() => {
-                  setLocation(`/task/${task.id}`);
+                  onTaskClick ? onTaskClick(task) : setLocation(`/task/${task.id}`);
                 }}
               >
                 {task.title}
