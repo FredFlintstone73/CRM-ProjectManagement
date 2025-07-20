@@ -235,6 +235,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserContactId(user: User): Promise<number | null> {
+    console.log('getUserContactId - searching for:', user.firstName, user.lastName);
+    
     const [contact] = await db
       .select({ id: contacts.id })
       .from(contacts)
@@ -245,6 +247,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
+    console.log('getUserContactId - found contact:', contact?.id);
     return contact?.id || null;
   }
 
