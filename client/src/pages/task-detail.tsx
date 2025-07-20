@@ -195,18 +195,20 @@ export default function TaskDetail() {
     const hierarchicalTasks = buildHierarchicalTasks();
     const currentIndex = hierarchicalTasks.findIndex(t => t.id === task?.id);
     
-    // Debug logging
-    if (task?.title?.includes('Generate Database')) {
-      console.log('Debug - Generate Database task navigation:');
-      console.log('Current task:', task?.title, 'ID:', task?.id);
-      console.log('Hierarchical sequence around current task:');
-      const start = Math.max(0, currentIndex - 3);
-      const end = Math.min(hierarchicalTasks.length, currentIndex + 4);
-      hierarchicalTasks.slice(start, end).forEach((t, i) => {
-        const actualIndex = start + i;
-        const marker = actualIndex === currentIndex ? '>>> ' : '    ';
-        console.log(`${marker}${actualIndex}: ${t.title} (ID: ${t.id}, Parent: ${t.parentTaskId})`);
+    // Debug logging for hierarchy issues
+    if (task?.title?.includes('Generate Database') || task?.parentTaskId === 2368) {
+      console.log('Debug - Task navigation hierarchy:');
+      console.log('Current task:', task?.title, 'ID:', task?.id, 'Parent:', task?.parentTaskId);
+      console.log('Current index in hierarchy:', currentIndex);
+      console.log('Total tasks in hierarchy:', hierarchicalTasks.length);
+      console.log('Full hierarchical sequence:');
+      hierarchicalTasks.forEach((t, i) => {
+        const marker = i === currentIndex ? '>>> ' : '    ';
+        const level = t.parentTaskId ? (hierarchicalTasks.find(parent => parent.id === t.parentTaskId && !parent.parentTaskId) ? '  Child: ' : '    SubChild: ') : 'Parent: ';
+        console.log(`${marker}${i}: ${level}${t.title} (ID: ${t.id}, Parent: ${t.parentTaskId}, Sort: ${t.sortOrder})`);
       });
+      console.log('Next task would be:', nextTask ? `${nextTask.title} (ID: ${nextTask.id})` : 'None');
+      console.log('Previous task would be:', previousTask ? `${previousTask.title} (ID: ${previousTask.id})` : 'None');
     }
     
     return {
