@@ -159,8 +159,13 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         const firstChild = sortedChildren[0];
         console.log('NAVIGATING TO FIRST CHILD:', firstChild.title, '(ID:', firstChild.id, ')');
         
+        // For parent tasks, find previous task in hierarchical sequence
+        const hierarchicalTasks = buildHierarchicalTasks(projectTasks);
+        const currentIndex = hierarchicalTasks.findIndex(t => t.id === selectedTask.id);
+        const prev = currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null;
+        
         return {
-          prevTask: null, // For now, focus on next task
+          prevTask: prev, // Previous task in sequence
           nextTask: firstChild // First child
         };
       }
@@ -171,15 +176,17 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       const currentIndex = hierarchicalTasks.findIndex(t => t.id === selectedTask.id);
       console.log('Current index in hierarchy:', currentIndex, '/', hierarchicalTasks.length);
       
+      const prev = currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null;
       const next = currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 
         ? hierarchicalTasks[currentIndex + 1] 
         : null;
       
+      console.log('Previous task from hierarchy:', prev ? `${prev.title} (${prev.id})` : 'None');
       console.log('Next task from hierarchy:', next ? `${next.title} (${next.id})` : 'None');
       console.log('=== SIDEBAR NAVIGATION CALCULATION END ===');
       
       return {
-        prevTask: null,
+        prevTask: prev,
         nextTask: next
       };
     } catch (error) {
