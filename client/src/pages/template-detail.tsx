@@ -72,7 +72,12 @@ interface TemplateDetailParams {
 interface TaskTemplate {
   id: number;
   name: string;
+  title: string;
   description: string;
+  dueDate?: string;
+  status?: string;
+  subtasks?: TaskTemplate[];
+  completedAt?: string;
   estimatedDays: number;
   daysFromMeeting: number;
   parentTaskId?: number | null;
@@ -1034,8 +1039,8 @@ export default function TemplateDetail() {
       setEditingTaskTitle("");
       setEditingTaskDescription("");
       setEditingTaskDueDate("");
-      setEditingTaskAssignedTo("");
-      setEditingTaskAssignedToRole("");
+      setEditingTaskAssignedTo([]);
+      setEditingTaskAssignedToRole([]);
     },
   });
 
@@ -1256,7 +1261,7 @@ export default function TemplateDetail() {
       queryClient.invalidateQueries({ queryKey: [`/api/milestones`, id] });
       queryClient.invalidateQueries({ queryKey: [`/api/templates`, id] });
       // Invalidate all milestone task queries
-      milestones.forEach(milestone => {
+      milestones.forEach((milestone: any) => {
         queryClient.invalidateQueries({ queryKey: [`/api/milestones/${milestone.id}/tasks`] });
       });
     },
