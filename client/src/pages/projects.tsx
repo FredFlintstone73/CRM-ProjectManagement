@@ -13,7 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Calendar, User, Grid3X3, List, MessageCircle, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search, Plus, Calendar, User, Grid3X3, List, MessageCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown } from "lucide-react";
 import ProjectForm from "@/components/projects/project-form";
 import ProjectComments from "@/components/projects/project-comments";
 import type { Project, Contact } from "@shared/schema";
@@ -30,6 +32,9 @@ export default function Projects() {
     key: 'name' | 'family' | 'date' | null;
     direction: 'asc' | 'desc';
   }>({ key: 'name', direction: 'asc' });
+  const [dateRange, setDateRange] = useState<string>('all');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
 
 
   useEffect(() => {
@@ -153,12 +158,66 @@ export default function Projects() {
     return sortConfig.direction === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
   };
 
+  const getDateRangeFilter = () => {
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    switch (dateRange) {
+      case 'today':
+        return {
+          start: startOfToday,
+          end: new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000)
+        };
+      case 'this-week':
+        const dayOfWeek = today.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const monday = new Date(startOfToday);
+        monday.setDate(today.getDate() - daysToMonday);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        return { start: monday, end: sunday };
+      case 'next-week':
+        const nextWeekStart = new Date(startOfToday);
+        nextWeekStart.setDate(today.getDate() + (7 - today.getDay() + 1));
+        const nextWeekEnd = new Date(nextWeekStart);
+        nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+        return { start: nextWeekStart, end: nextWeekEnd };
+      case 'next-30-days':
+        return {
+          start: startOfToday,
+          end: new Date(startOfToday.getTime() + 30 * 24 * 60 * 60 * 1000)
+        };
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          return {
+            start: new Date(customStartDate),
+            end: new Date(customEndDate + 'T23:59:59')
+          };
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
+
   // Filter and sort projects
-  const filteredAndSortedProjects = projects?.filter((project) =>
-    searchQuery === "" ||
-    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  ).sort((a, b) => {
+  const filteredAndSortedProjects = projects?.filter((project) => {
+    // Text search filter
+    const matchesSearch = searchQuery === "" ||
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchesSearch) return false;
+    
+    // Date range filter
+    if (dateRange === 'all') return true;
+    
+    const range = getDateRangeFilter();
+    if (!range || !project.dueDate) return dateRange === 'all';
+    
+    const projectDate = new Date(project.dueDate);
+    return projectDate >= range.start && projectDate <= range.end;
+  }).sort((a, b) => {
     if (!sortConfig.key) return 0;
     
     let aValue: string | number | Date;
@@ -193,10 +252,7 @@ export default function Projects() {
     queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
   };
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/projects/comment-counts'] });
-  };
+
 
   if (isLoading || projectsLoading) {
     return (
@@ -226,19 +282,80 @@ export default function Projects() {
                 className="pl-10"
               />
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </Button>
-              
+            <div className="flex items-center space-x-4">
+              {/* Date Range Filter */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Date Range:</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs">
+                      {dateRange === 'all' && 'All Projects'}
+                      {dateRange === 'today' && 'Today'}
+                      {dateRange === 'this-week' && 'This Week'}
+                      {dateRange === 'next-week' && 'Next Week'}
+                      {dateRange === 'next-30-days' && 'Next 30 Days'}
+                      {dateRange === 'custom' && 'Custom Range'}
+                      <ChevronDown className="w-4 h-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setDateRange('all')}>
+                      All Projects
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDateRange('today')}>
+                      Today
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDateRange('this-week')}>
+                      This Week
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDateRange('next-week')}>
+                      Next Week
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDateRange('next-30-days')}>
+                      Next 30 Days
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDateRange('custom')}>
+                      Custom Date Range
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
-              
+              {/* Custom Date Range Inputs */}
+              {dateRange === 'custom' && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Set Dates
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium">Start Date</label>
+                        <Input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">End Date</label>
+                        <Input
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {/* View Mode Toggle */}
               <div className="flex rounded-md border border-gray-200 overflow-hidden">
                 <Button
                   variant={viewMode === 'cards' ? 'default' : 'ghost'}
