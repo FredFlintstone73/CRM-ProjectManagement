@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, GripVertical } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,7 +15,11 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [isContactsExpanded, setIsContactsExpanded] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  
+  const collapsedWidth = 64;
+  const currentWidth = isCollapsed ? collapsedWidth : width;
 
 
 
@@ -46,6 +50,10 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
+  };
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -97,47 +105,60 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   return (
     <div 
       ref={sidebarRef}
-      className="relative flex flex-col bg-slate-900 border-r border-slate-700 h-full"
-      style={{ width: `${width}px`, minWidth: '200px', maxWidth: '400px' }}
+      className="relative flex flex-col bg-slate-900 border-r border-slate-700 h-full transition-all duration-300"
+      style={{ 
+        width: `${currentWidth}px`, 
+        minWidth: isCollapsed ? `${collapsedWidth}px` : '200px', 
+        maxWidth: isCollapsed ? `${collapsedWidth}px` : '400px' 
+      }}
     >
       <div className="sidebar-nav flex flex-col flex-grow overflow-hidden h-full">
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-white/10">
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="p-2 bg-primary/10 rounded-lg">
               <Building2 size={24} className="text-primary" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">ClientHub</h1>
-              <p className="text-xs text-sidebar-foreground/70">CRM Platform</p>
-            </div>
+            {!isCollapsed && (
+              <div>
+                <h1 className="text-lg font-bold text-white">ClientHub</h1>
+                <p className="text-xs text-sidebar-foreground/70">CRM Platform</p>
+              </div>
+            )}
           </div>
         </div>
         
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
           {/* Dashboard */}
-          <Link href="/" className={`sidebar-nav-item ${location === '/' ? 'active' : ''}`}>
+          <Link 
+            href="/" 
+            className={`sidebar-nav-item ${isCollapsed ? 'justify-center' : ''} ${location === '/' ? 'active' : ''}`}
+            title={isCollapsed ? "Dashboard" : ""}
+          >
             <BarChart3 size={20} />
-            <span>Dashboard</span>
+            {!isCollapsed && <span>Dashboard</span>}
           </Link>
 
           {/* Contacts with Sub-categories */}
           <div className="space-y-1">
             <button
-              onClick={() => setIsContactsExpanded(!isContactsExpanded)}
-              className={`sidebar-nav-item w-full ${location.startsWith('/contacts') ? 'active' : ''}`}
+              onClick={() => !isCollapsed && setIsContactsExpanded(!isContactsExpanded)}
+              className={`sidebar-nav-item w-full ${isCollapsed ? 'justify-center' : ''} ${location.startsWith('/contacts') ? 'active' : ''}`}
+              title={isCollapsed ? "Contacts" : ""}
             >
               <Users size={20} />
-              <span>Contacts</span>
-              {isContactsExpanded ? (
-                <ChevronDown size={16} className="ml-auto" />
-              ) : (
-                <ChevronRight size={16} className="ml-auto" />
+              {!isCollapsed && <span>Contacts</span>}
+              {!isCollapsed && (
+                isContactsExpanded ? (
+                  <ChevronDown size={16} className="ml-auto" />
+                ) : (
+                  <ChevronRight size={16} className="ml-auto" />
+                )
               )}
             </button>
             
-            {isContactsExpanded && (
+            {isContactsExpanded && !isCollapsed && (
               <div className="ml-4 space-y-1">
                 {contactSubCategories.map((subItem) => {
                   const SubIcon = subItem.icon;
@@ -158,9 +179,14 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
-              <Link key={item.name} href={item.href} className={`sidebar-nav-item ${isActive ? 'active' : ''}`}>
+              <Link 
+                key={item.name} 
+                href={item.href} 
+                className={`sidebar-nav-item ${isCollapsed ? 'justify-center' : ''} ${isActive ? 'active' : ''}`}
+                title={isCollapsed ? item.name : ""}
+              >
                 <Icon size={20} />
-                <span>{item.name}</span>
+                {!isCollapsed && <span>{item.name}</span>}
               </Link>
             );
           })}
@@ -168,43 +194,65 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
         
         {/* User Profile */}
         <div className="px-4 py-4 border-t border-white/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+            <div className={`flex items-center ${isCollapsed ? '' : 'gap-3'}`}>
               <Avatar className="w-8 h-8">
                 <AvatarImage src={user?.profileImageUrl || ''} alt={user?.firstName || ''} />
                 <AvatarFallback className="bg-primary/20 text-primary">
                   {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || ''}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-white">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
-              </div>
+              {!isCollapsed && (
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-white">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
+                </div>
+              )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="ml-2 text-sidebar-foreground/70 hover:text-white hover:bg-white/5"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
+            {!isCollapsed && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="ml-2 text-sidebar-foreground/70 hover:text-white hover:bg-white/5"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
       
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 w-4 h-full cursor-col-resize bg-blue-500 hover:bg-blue-600 transition-colors"
-        onMouseDown={handleMouseDown}
-        style={{ zIndex: 999 }}
-        title="Drag to resize sidebar"
+        className="absolute top-0 right-0 w-4 h-full cursor-pointer transition-colors"
+        style={{ 
+          backgroundColor: '#1e293b',
+          zIndex: 999 
+        }}
+        title={isCollapsed ? "Expand sidebar" : "Collapse sidebar or drag to resize"}
       >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <GripVertical size={16} className="text-white" />
+        {/* Collapse/Expand Button */}
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-1 hover:bg-slate-600 rounded transition-colors"
+          onClick={toggleCollapse}
+        >
+          {isCollapsed ? (
+            <ChevronRight size={14} className="text-slate-300" />
+          ) : (
+            <ChevronLeft size={14} className="text-slate-300" />
+          )}
         </div>
+        
+        {/* Resize Drag Area (only when not collapsed) */}
+        {!isCollapsed && (
+          <div
+            className="absolute top-0 left-0 w-full h-full cursor-col-resize hover:bg-slate-600/50 transition-colors"
+            onMouseDown={handleMouseDown}
+          />
+        )}
       </div>
     </div>
   );
