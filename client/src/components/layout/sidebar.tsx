@@ -197,7 +197,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 w-0.5 h-full cursor-col-resize bg-blue-500 hover:bg-blue-600 transition-colors"
+        className="absolute top-0 right-0 w-4 h-full cursor-col-resize bg-blue-500 hover:bg-blue-600 transition-colors"
         onMouseDown={handleMouseDown}
         style={{ zIndex: 999 }}
         title="Drag to resize sidebar"
