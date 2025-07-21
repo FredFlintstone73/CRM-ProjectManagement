@@ -345,6 +345,8 @@ export default function Contacts() {
         return 'Client Service Member';
       case 'deliverables_team_coordinator':
         return 'Deliverables Team Coordinator';
+      case 'estate_attorney':
+        return 'Estate Attorney';
       case 'estate_planner':
         return 'Estate Planner';
       case 'financial_planner':

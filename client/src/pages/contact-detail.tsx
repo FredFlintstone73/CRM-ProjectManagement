@@ -48,11 +48,11 @@ export default function ContactDetail() {
     navigate('/contacts');
   };
 
-  const { data: contact, isLoading: contactLoading } = useQuery<Contact>({
+  const { data: contact, isLoading: contactLoading } = useQuery({
     queryKey: ['/api/contacts', id],
     enabled: isAuthenticated && !!id,
     staleTime: 0, // Force fresh data
-    cacheTime: 0, // Don't cache data
+    gcTime: 0, // Don't cache data
   });
 
   // Query for projects associated with this contact
