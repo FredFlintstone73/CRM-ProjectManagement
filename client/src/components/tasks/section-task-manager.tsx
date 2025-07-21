@@ -747,12 +747,12 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div className="flex justify-between items-center">
         <h2 className="text-[16px] font-bold">Project Tasks</h2>
         <Button onClick={openSectionDialog}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Section
+          Add Milestone
         </Button>
       </div>
       <div className="space-y-1">

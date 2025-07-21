@@ -445,67 +445,69 @@ export default function ProjectDetail() {
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-gray-500" />
-              {editingDueDate ? (
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="date"
-                    value={newDueDate}
-                    onChange={(e) => setNewDueDate(e.target.value)}
-                    className="w-40 h-8"
-                  />
-                  <Button
-                    size="sm"
-                    onClick={handleSaveDueDate}
-                    disabled={updateDueDateMutation.isPending}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCancelEditDueDate}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700">
-                    Due: {project.dueDate ? format(new Date(project.dueDate), 'MMM dd, yyyy') : 'No due date set'}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleEditDueDate}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                  </Button>
-                  {project.dueDate && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-gray-500" />
+                {editingDueDate ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      value={newDueDate}
+                      onChange={(e) => setNewDueDate(e.target.value)}
+                      className="w-40 h-8"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={handleSaveDueDate}
+                      disabled={updateDueDateMutation.isPending}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEditDueDate}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-700">
+                      Due: {project.dueDate ? format(new Date(project.dueDate), 'MMM dd, yyyy') : 'No due date set'}
+                    </span>
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={handleDeleteDueDate}
-                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                      onClick={handleEditDueDate}
+                      className="h-6 w-6 p-0"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Edit3 className="w-3 h-3" />
                     </Button>
-                  )}
+                    {project.dueDate && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleDeleteDueDate}
+                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2 min-w-[120px]">
+                <span className="text-sm text-gray-600">Progress:</span>
+                <div className="flex items-center gap-2">
+                  <Progress value={currentProgress} className="h-2 w-16" />
+                  <span className="text-sm text-gray-700">{currentProgress}%</span>
                 </div>
-              )}
+              </div>
             </div>
             
 
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress</span>
-              <span>{currentProgress}%</span>
-            </div>
-            <Progress value={currentProgress} className="h-2" />
           </div>
         </CardContent>
       </Card>
