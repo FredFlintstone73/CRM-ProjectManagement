@@ -1,14 +1,21 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-export default function Sidebar() {
+interface SidebarProps {
+  width: number;
+  onWidthChange: (width: number) => void;
+}
+
+export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [isContactsExpanded, setIsContactsExpanded] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -41,9 +48,55 @@ export default function Sidebar() {
     window.location.href = "/api/logout";
   };
 
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const newWidth = e.clientX;
+    const minWidth = 200;
+    const maxWidth = 400;
+    
+    if (newWidth >= minWidth && newWidth <= maxWidth) {
+      onWidthChange(newWidth);
+    }
+  }, [isResizing, onWidthChange]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
+
   return (
-    <div className="hidden md:flex md:w-64 md:flex-col">
-      <div className="sidebar-nav flex flex-col flex-grow">
+    <div 
+      ref={sidebarRef}
+      className="relative flex flex-col bg-slate-900 border-r border-slate-700"
+      style={{ width: `${width}px`, minWidth: '200px', maxWidth: '400px' }}
+    >
+      <div className="sidebar-nav flex flex-col flex-grow overflow-hidden">
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -135,6 +188,17 @@ export default function Sidebar() {
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
+        </div>
+      </div>
+      
+      {/* Resize Handle */}
+      <div
+        className="absolute top-0 right-0 w-1 h-full cursor-col-resize bg-transparent hover:bg-blue-500/50 transition-colors"
+        onMouseDown={handleMouseDown}
+        style={{ zIndex: 10 }}
+      >
+        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-12 flex items-center justify-center">
+          <GripVertical size={12} className="text-slate-400 opacity-0 hover:opacity-100 transition-opacity" />
         </div>
       </div>
     </div>
