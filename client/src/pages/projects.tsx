@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Calendar, User, Grid3X3, List, MessageCircle, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Plus, Calendar, User, Grid3X3, List, MessageCircle, RefreshCw } from "lucide-react";
 import ProjectForm from "@/components/projects/project-form";
 import ProjectComments from "@/components/projects/project-comments";
 import type { Project, Contact } from "@shared/schema";
@@ -26,8 +26,7 @@ export default function Projects() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [commentsProject, setCommentsProject] = useState<Project | null>(null);
-  const [sortBy, setSortBy] = useState<'name' | 'family' | 'date'>('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -134,50 +133,14 @@ export default function Projects() {
     return contacts.find(c => c.id === clientId);
   };
 
-  // Filter and sort projects
-  const filteredAndSortedProjects = projects?.filter((project) =>
+  // Filter projects
+  const filteredProjects = projects?.filter((project) =>
     searchQuery === "" ||
     project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     project.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  ).sort((a, b) => {
-    let aValue: string | number | Date;
-    let bValue: string | number | Date;
-    
-    switch (sortBy) {
-      case 'name':
-        aValue = a.name.toLowerCase();
-        bValue = b.name.toLowerCase();
-        break;
-      case 'family':
-        aValue = getFamilyName(a.clientId).toLowerCase();
-        bValue = getFamilyName(b.clientId).toLowerCase();
-        break;
-      case 'date':
-        aValue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
-        bValue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
-        break;
-      default:
-        return 0;
-    }
-    
-    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-    return 0;
-  }) || [];
+  ) || [];
 
-  const handleSort = (column: 'name' | 'family' | 'date') => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
 
-  const getSortIcon = (column: 'name' | 'family' | 'date') => {
-    if (sortBy !== column) return <ArrowUpDown className="w-4 h-4" />;
-    return sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
-  };
 
   const handleProjectCreated = () => {
     setIsDialogOpen(false);
@@ -228,33 +191,7 @@ export default function Projects() {
                 Refresh
               </Button>
               
-              {/* Sort Controls */}
-              <div className="flex rounded-md border border-gray-200 overflow-hidden">
-                <Button
-                  variant={sortBy === 'name' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => handleSort('name')}
-                  className="rounded-none flex items-center gap-1"
-                >
-                  Name {getSortIcon('name')}
-                </Button>
-                <Button
-                  variant={sortBy === 'family' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => handleSort('family')}
-                  className="rounded-none flex items-center gap-1"
-                >
-                  Family {getSortIcon('family')}
-                </Button>
-                <Button
-                  variant={sortBy === 'date' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => handleSort('date')}
-                  className="rounded-none flex items-center gap-1"
-                >
-                  Date {getSortIcon('date')}
-                </Button>
-              </div>
+
               
               <div className="flex rounded-md border border-gray-200 overflow-hidden">
                 <Button
@@ -294,7 +231,7 @@ export default function Projects() {
           {/* Projects Display */}
           {viewMode === 'cards' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredAndSortedProjects.map((project) => (
+              {filteredProjects.map((project) => (
                 <Card key={project.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -316,7 +253,7 @@ export default function Projects() {
                       {getClientContact(project.clientId)?.profileImageUrl ? (
                         <img 
                           src={getClientContact(project.clientId)?.profileImageUrl} 
-                          alt={getFamilyName(project.clientId)}
+                          alt={getFamilyName(project.clientId) || ""}
                           className="w-8 h-8 rounded-full object-cover border border-gray-200"
                         />
                       ) : (
@@ -376,36 +313,15 @@ export default function Projects() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('name')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Project Name {getSortIcon('name')}
-                      </div>
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('family')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Family Name {getSortIcon('family')}
-                      </div>
-                    </TableHead>
+                    <TableHead>Project Name</TableHead>
+                    <TableHead>Family Name</TableHead>
                     <TableHead>Progress</TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('date')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Meeting Date {getSortIcon('date')}
-                      </div>
-                    </TableHead>
+                    <TableHead>Meeting Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAndSortedProjects.map((project) => (
+                  {filteredProjects.map((project) => (
                     <TableRow key={project.id}>
                       <TableCell className="font-medium">
                         <div>
@@ -427,7 +343,7 @@ export default function Projects() {
                           {getClientContact(project.clientId)?.profileImageUrl ? (
                             <img 
                               src={getClientContact(project.clientId)?.profileImageUrl} 
-                              alt={getFamilyName(project.clientId)}
+                              alt={getFamilyName(project.clientId) || ""}
                               className="w-8 h-8 rounded-full object-cover border border-gray-200"
                             />
                           ) : (
@@ -479,7 +395,7 @@ export default function Projects() {
             </div>
           )}
 
-          {filteredAndSortedProjects.length === 0 && (
+          {filteredProjects.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">No projects found matching your criteria.</p>
             </div>
