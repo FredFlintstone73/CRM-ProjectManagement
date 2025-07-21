@@ -58,6 +58,8 @@ const getDateRanges = (): Record<string, DateRange> => {
 };
 
 export default function ProjectsDueWidget({ selectedPeriod, customStartDate, customEndDate }: ProjectsDueWidgetProps) {
+  console.log('=== PROJECTS DUE WIDGET RENDER ===');
+  console.log('Props:', { selectedPeriod, customStartDate, customEndDate });
   const [, navigate] = useLocation();
   const dateRanges = getDateRanges();
   const currentRange = dateRanges[selectedPeriod] || dateRanges["next-4-months"];
@@ -74,6 +76,9 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
     ? new Date(customEndDate) 
     : currentRange.end;
 
+  console.log('=== QUERY SETUP ===');
+  console.log('Date calculation:', { actualStartDate, actualEndDate, currentRange });
+  
   const { data: projects, isLoading, error } = useQuery<(Project & { progress: number })[]>({
     queryKey: ['/api/dashboard/projects-due', selectedPeriod, customStartDate, customEndDate],
     queryFn: async () => {
@@ -104,7 +109,8 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
     },
   });
 
-
+  console.log('=== QUERY RESULT ===');
+  console.log('isLoading:', isLoading, 'error:', error, 'projects:', projects);
 
   const getStatusColor = (status: string) => {
     switch (status) {
