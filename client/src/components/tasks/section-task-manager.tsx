@@ -785,7 +785,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
           return (
             <Card key={section.id}>
               <Collapsible open={isSectionExpanded} onOpenChange={() => toggleSection(section.id)}>
-                <CardHeader>
+                <CardHeader className="pl-[0px] pr-[0px] pt-[0px] pb-[0px]">
                   <div className="flex justify-between items-center">
                     <CollapsibleTrigger asChild>
                       <div className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 flex-1 p-2 rounded">
