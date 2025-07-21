@@ -626,7 +626,9 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
             <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent text-left hover:text-blue-600 transition-colors task-title p-0 h-auto justify-start pl-[6px] pr-[6px] line-through text-gray-500 text-[12px]"
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent text-left hover:text-blue-600 transition-colors task-title p-0 h-auto justify-start pl-[6px] pr-[6px] text-[12px] ${
+                  isCompleted ? 'line-through text-green-600' : ''
+                }`}
                 onClick={() => {
                   console.log('=== TASK CLICK DETECTED ===');
                   console.log('Task clicked:', task.id, task.title);
