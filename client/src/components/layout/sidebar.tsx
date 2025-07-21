@@ -53,7 +53,6 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   };
 
   const toggleCollapse = () => {
-    console.log('Toggle collapse - current state:', isCollapsed);
     setIsCollapsed(!isCollapsed);
   };
 
@@ -241,7 +240,6 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Chevron clicked - current state:', isCollapsed);
             toggleCollapse();
           }}
           style={{ zIndex: 1000 }}

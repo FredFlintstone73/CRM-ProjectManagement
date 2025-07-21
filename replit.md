@@ -141,6 +141,20 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Collapsible Sidebar with Angle Bracket Chevron (July 21, 2025)
+- **Fully Functional Collapsible Sidebar**: Implemented complete collapse/expand functionality with chevron toggle button
+- **HTML Entity Chevron Display**: Used HTML entities `&#60;` and `&#62;` for clean angle bracket appearance instead of standard icons
+- **Resizable When Expanded**: Maintains drag-to-resize functionality (200px-400px) when sidebar is expanded
+- **Icon-Only Collapsed Mode**: When collapsed (64px width), shows only navigation icons with hover tooltips
+- **Smooth Transitions**: 300ms CSS transitions for collapse/expand animations
+- **Slate-800 Handle Color**: Handle background uses `#1e293b` color as requested
+- **Smart Click Detection**: Chevron button has higher z-index and proper event handling to prevent conflicts with resize functionality
+- **Adaptive Navigation**: All navigation items, user profile, and logo adapt properly to collapsed/expanded states
+- **Working Toggle States**: Successfully displays both `<` (expanded) and `>` (collapsed) angle bracket symbols
+- **User Verified**: Toggle functionality confirmed working with proper state changes and visual feedback
+
+## Recent Changes (July 2025)
+
 ### Dashboard Progress Calculation and Date Range Fix (July 21, 2025)
 - **Dashboard Progress Bar Implementation**: Added real-time progress calculation to dashboard projects due widget matching Projects page functionality
 - **Backend Progress Integration**: Enhanced getProjectsDueSoon method to calculate progress from task completion ratios with proper SQL aggregation
