@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft, GripVertical } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -115,30 +115,17 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       <div className="sidebar-nav flex flex-col flex-grow overflow-hidden h-full">
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-white/10">
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} flex-1`}>
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="p-2 bg-primary/10 rounded-lg">
               <Building2 size={24} className="text-primary" />
             </div>
             {!isCollapsed && (
-              <div className="flex-1">
+              <div>
                 <h1 className="text-lg font-bold text-white">ClientHub</h1>
                 <p className="text-xs text-sidebar-foreground/70">CRM Platform</p>
               </div>
             )}
           </div>
-          
-          {/* Collapse/Expand Button */}
-          <button
-            onClick={toggleCollapse}
-            className="ml-2 p-2 hover:bg-slate-700 rounded-md transition-colors"
-            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {isCollapsed ? (
-              <ChevronRight size={24} className="text-slate-300" />
-            ) : (
-              <ChevronLeft size={24} className="text-slate-300" />
-            )}
-          </button>
         </div>
         
         {/* Navigation */}
@@ -239,18 +226,34 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       </div>
       
       {/* Resize Handle */}
-      {!isCollapsed && (
-        <div
-          className="absolute top-0 right-0 w-4 h-full cursor-col-resize bg-blue-500 hover:bg-blue-600 transition-colors"
-          onMouseDown={handleMouseDown}
-          style={{ zIndex: 999 }}
-          title="Drag to resize sidebar"
+      <div
+        className="absolute top-0 right-0 w-4 h-full cursor-pointer transition-colors"
+        style={{ 
+          backgroundColor: '#1e293b',
+          zIndex: 999 
+        }}
+        title={isCollapsed ? "Expand sidebar" : "Collapse sidebar or drag to resize"}
+      >
+        {/* Collapse/Expand Button */}
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-1 hover:bg-slate-600 rounded transition-colors"
+          onClick={toggleCollapse}
         >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <GripVertical size={16} className="text-white" />
-          </div>
+          {isCollapsed ? (
+            <ChevronRight size={14} className="text-slate-300" />
+          ) : (
+            <ChevronLeft size={14} className="text-slate-300" />
+          )}
         </div>
-      )}
+        
+        {/* Resize Drag Area (only when not collapsed) */}
+        {!isCollapsed && (
+          <div
+            className="absolute top-0 left-0 w-full h-full cursor-col-resize hover:bg-slate-600/50 transition-colors"
+            onMouseDown={handleMouseDown}
+          />
+        )}
+      </div>
     </div>
   );
 }
