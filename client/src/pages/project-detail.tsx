@@ -71,7 +71,7 @@ export default function ProjectDetail() {
   });
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ['/api/projects', id, 'tasks'],
+    queryKey: ['/api/projects', id, 'tasks', refreshKey],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${id}/tasks`);
       if (!response.ok) throw new Error('Failed to fetch tasks');
