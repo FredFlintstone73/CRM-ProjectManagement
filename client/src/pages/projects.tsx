@@ -187,6 +187,11 @@ export default function Projects() {
           start: startOfToday,
           end: new Date(startOfToday.getTime() + 30 * 24 * 60 * 60 * 1000)
         };
+      case 'next-four-months':
+        return {
+          start: startOfToday,
+          end: new Date(startOfToday.getTime() + 122 * 24 * 60 * 60 * 1000)
+        };
       case 'custom':
         if (customStartDate && customEndDate) {
           return {
@@ -294,6 +299,7 @@ export default function Projects() {
                       {dateRange === 'this-week' && 'This Week'}
                       {dateRange === 'next-week' && 'Next Week'}
                       {dateRange === 'next-30-days' && 'Next 30 Days'}
+                      {dateRange === 'next-four-months' && 'Next Four Months'}
                       {dateRange === 'custom' && 'Custom Range'}
                       <ChevronDown className="w-4 h-4 ml-2" />
                     </Button>
@@ -313,6 +319,9 @@ export default function Projects() {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setDateRange('next-30-days')}>
                       Next 30 Days
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDateRange('next-four-months')}>
+                      Next Four Months
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setDateRange('custom')}>
                       Custom Date Range
