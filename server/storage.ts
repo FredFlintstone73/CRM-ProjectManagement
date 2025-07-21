@@ -46,7 +46,7 @@ import {
   type InsertUserTaskPriority,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, or, ilike, count, isNotNull, inArray } from "drizzle-orm";
+import { eq, desc, sql, and, or, not, ilike, count, isNotNull, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -1743,16 +1743,25 @@ export class DatabaseStorage implements IStorage {
 
     if (tasksWithRoles.length === 0) return;
 
-    // Get all active team members
+    // Get all active team members (excluding auto-created placeholder team members)
     const teamMembers = await db
       .select()
       .from(contacts)
       .where(
         and(
           eq(contacts.contactType, 'team_member'),
-          eq(contacts.status, 'active')
+          eq(contacts.status, 'active'),
+          // Exclude placeholder team members created by import scripts
+          not(or(
+            and(eq(contacts.firstName, 'Admin'), eq(contacts.lastName, 'Assistant')),
+            and(eq(contacts.firstName, 'Financial'), eq(contacts.lastName, 'Planner')),
+            and(eq(contacts.firstName, 'Insurance'), eq(contacts.lastName, 'Business')),
+            and(eq(contacts.firstName, 'Insurance'), eq(contacts.lastName, 'Health'))
+          ))
         )
       );
+
+    console.log(`Found ${teamMembers.length} real team members for role resolution (excluding placeholders)`);
 
     // Process each task
     for (const task of tasksWithRoles) {
@@ -1768,9 +1777,14 @@ export class DatabaseStorage implements IStorage {
             assignedContactIds.push(contact.id);
           }
         }
+        
+        // Log if no matching team member found for a role
+        if (matchingContacts.length === 0) {
+          console.log(`No team member found for role: ${role}. Task will remain unassigned.`);
+        }
       }
 
-      // Update the task with resolved contact IDs
+      // Update the task with resolved contact IDs only if we found matching team members
       if (assignedContactIds.length > 0) {
         await db
           .update(tasks)
@@ -1781,6 +1795,8 @@ export class DatabaseStorage implements IStorage {
           .where(eq(tasks.id, task.id));
 
         console.log(`Resolved task ${task.id} (${task.title}) - roles: ${task.assignedToRole} -> contacts: ${assignedContactIds}`);
+      } else {
+        console.log(`Task ${task.id} (${task.title}) - no matching team members found for roles: ${task.assignedToRole}. Task remains unassigned.`);
       }
     }
 

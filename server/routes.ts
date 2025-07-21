@@ -506,9 +506,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Normalize to array
     const roleArray = Array.isArray(roles) ? roles : [roles];
     
-    // Get all active team members
+    // Get all active team members (excluding placeholder team members)
     const teamMembers = await storage.getContactsByType('team_member');
-    const activeTeamMembers = teamMembers.filter(member => member.status === 'active');
+    const activeTeamMembers = teamMembers.filter(member => 
+      member.status === 'active' &&
+      // Exclude any placeholder team members that might exist
+      !(
+        (member.firstName === 'Admin' && member.lastName === 'Assistant') ||
+        (member.firstName === 'Financial' && member.lastName === 'Planner') ||
+        (member.firstName === 'Insurance' && member.lastName === 'Business') ||
+        (member.firstName === 'Insurance' && member.lastName === 'Health')
+      )
+    );
     
     const assignedContactIds = [];
     
@@ -519,6 +528,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!assignedContactIds.includes(contact.id)) {
           assignedContactIds.push(contact.id);
         }
+      }
+      
+      // Log if no matching team member found for a role
+      if (matchingContacts.length === 0) {
+        console.log(`No real team member found for role: ${role}. Task will remain unassigned. Add a team member with this role or assign manually.`);
       }
     }
     
