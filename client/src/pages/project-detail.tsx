@@ -368,23 +368,6 @@ export default function ProjectDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Dialog open={showProjectEdit} onOpenChange={setShowProjectEdit}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Settings className="w-4 h-4 mr-2" />
-                Edit Project
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Edit Project</DialogTitle>
-              </DialogHeader>
-              <ProjectForm 
-                project={project} 
-                onSuccess={handleProjectUpdated} 
-              />
-            </DialogContent>
-          </Dialog>
           <Button
             variant="destructive"
             onClick={handleDeleteProject}
@@ -393,26 +376,6 @@ export default function ProjectDetail() {
             <Trash2 className="w-4 h-4 mr-2" />
             Delete Project
           </Button>
-          <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setEditingTask(null)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Task
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingTask ? 'Edit Task' : 'Add New Task'}
-                </DialogTitle>
-              </DialogHeader>
-              <TaskForm
-                task={editingTask}
-                projectId={parseInt(id!)}
-                onSuccess={handleTaskCreated}
-              />
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
       {/* Project Info Card */}
@@ -497,10 +460,10 @@ export default function ProjectDetail() {
                 )}
               </div>
               
-              <div className="flex items-center gap-2 min-w-[120px]">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="text-sm text-gray-600">Progress:</span>
-                <div className="flex items-center gap-2">
-                  <Progress value={currentProgress} className="h-2 w-16" />
+                <div className="flex items-center gap-2 flex-1">
+                  <Progress value={currentProgress} className="h-2 flex-1" />
                   <span className="text-sm text-gray-700">{currentProgress}%</span>
                 </div>
               </div>
