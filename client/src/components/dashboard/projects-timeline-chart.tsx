@@ -209,7 +209,10 @@ export default function ProjectsTimelineChart({
       const weeks = eachWeekOfInterval(
         { start: now, end: thirtyDaysEnd },
         { weekStartsOn: 1 } // Monday = 1
-      );
+      ).filter(weekStart => {
+        // Only include weeks that start within our 30-day range
+        return weekStart <= thirtyDaysEnd;
+      });
       
       return weeks.map((weekStart, index) => {
         const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
