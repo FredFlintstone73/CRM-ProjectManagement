@@ -180,6 +180,8 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
                 Debug: isLoading={isLoading.toString()}, error={error?.toString() || 'null'}, projects={projects ? `${projects.length} items` : 'null'}
                 <br />Range: {actualStartDate.toISOString()} to {actualEndDate.toISOString()}
                 <br />Period: {selectedPeriod}
+                <br />Condition check: !isLoading={(!isLoading).toString()}, !error={(!error).toString()}, projects exists={!!projects}
+                <br />Final condition: {(!isLoading && !error && projects).toString()}
               </div>
             </div>
 
@@ -190,7 +192,10 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
               </div>
             ) : (
               <div className="space-y-3">
+                {/* Debug: About to render projects */}
+                <div className="text-xs text-red-500">DEBUG: Rendering {projects.length} projects</div>
                 {projects.map((project) => {
+                  console.log('Rendering project:', project);
                   const daysUntilDue = project.dueDate ? getDaysUntilDue(project.dueDate) : null;
                   
                   return (
