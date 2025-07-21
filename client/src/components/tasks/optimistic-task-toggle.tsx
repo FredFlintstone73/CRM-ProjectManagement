@@ -26,30 +26,62 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onMutate: async (newStatus) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      await queryClient.cancelQueries({ queryKey: ['/api/tasks'] });
+      await queryClient.cancelQueries({ queryKey: ['/api/dashboard/projects-due'] });
       
-      // Snapshot the previous value
-      const previousTasks = queryClient.getQueryData(['/api/projects', projectId, 'tasks']);
+      // Snapshot the previous values
+      const previousProjectTasks = queryClient.getQueryData(['/api/projects', projectId, 'tasks']);
+      const previousAllTasks = queryClient.getQueryData(['/api/tasks']);
+      const previousDashboardProjects = queryClient.getQueryData(['/api/dashboard/projects-due']);
       
       // Optimistically update to the new value
       setOptimisticStatus(newStatus);
+      
+      // Update project tasks cache immediately
       queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (old: Task[] | undefined) => {
         if (!old) return old;
         return old.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
       });
       
-      return { previousTasks };
+      // Update global tasks cache immediately
+      queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => {
+        if (!old) return old;
+        return old.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
+      });
+      
+      // Update dashboard projects cache for instant progress bar updates
+      queryClient.setQueryData(['/api/dashboard/projects-due'], (old: any[] | undefined) => {
+        if (!old) return old;
+        return old.map(project => {
+          if (project.id === projectId) {
+            const updatedProject = { ...project };
+            // Recalculate progress immediately
+            if (updatedProject.tasks) {
+              const completedTasks = updatedProject.tasks.filter((t: any) => 
+                t.id === task.id ? newStatus === 'completed' : t.status === 'completed'
+              ).length;
+              updatedProject.progress = Math.round((completedTasks / updatedProject.tasks.length) * 100);
+            }
+            return updatedProject;
+          }
+          return project;
+        });
+      });
+      
+      return { previousProjectTasks, previousAllTasks, previousDashboardProjects };
     },
     onError: (err, newStatus, context) => {
-      // Revert optimistic update on error
+      // Revert optimistic updates on error
       setOptimisticStatus(task.status);
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context?.previousTasks);
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context?.previousProjectTasks);
+      queryClient.setQueryData(['/api/tasks'], context?.previousAllTasks);
+      queryClient.setQueryData(['/api/dashboard/projects-due'], context?.previousDashboardProjects);
     },
     onSettled: () => {
-      // Always refetch after error or success to get the real server state
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      }, 100);
+      // Immediate background refresh for cascading updates - no delay for maximum responsiveness
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
     },
   });
 

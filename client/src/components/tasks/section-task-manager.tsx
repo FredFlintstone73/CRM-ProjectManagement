@@ -198,9 +198,10 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       return updatedTask;
     },
     onSuccess: (updatedTask) => {
-      // Force fresh data fetch instead of optimistic updates
+      // Immediate cache invalidation for maximum responsiveness  
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
       queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
 
       setIsTaskDialogOpen(false);
@@ -210,6 +211,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       // On error, revert optimistic updates
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
     },
   });
 

@@ -267,10 +267,34 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     const optimisticUpdate = { ...selectedTask, status: newStatus };
     setSelectedTask(optimisticUpdate);
     
-    // Also optimistically update the project tasks cache
+    // Also optimistically update all relevant caches
     queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
       if (!oldTasks) return oldTasks;
       return oldTasks.map(t => t.id === selectedTask.id ? { ...t, status: newStatus } : t);
+    });
+    
+    queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+      if (!oldTasks) return oldTasks;
+      return oldTasks.map(t => t.id === selectedTask.id ? { ...t, status: newStatus } : t);
+    });
+    
+    // Update dashboard projects cache for instant progress bar updates
+    queryClient.setQueryData(['/api/dashboard/projects-due'], (old: any[] | undefined) => {
+      if (!old) return old;
+      return old.map(project => {
+        if (project.id === projectId) {
+          const updatedProject = { ...project };
+          // Recalculate progress immediately
+          if (updatedProject.tasks) {
+            const completedTasks = updatedProject.tasks.filter((t: any) => 
+              t.id === selectedTask.id ? newStatus === 'completed' : t.status === 'completed'
+            ).length;
+            updatedProject.progress = Math.round((completedTasks / updatedProject.tasks.length) * 100);
+          }
+          return updatedProject;
+        }
+        return project;
+      });
     });
     
     updateTaskMutation.mutate({
@@ -278,10 +302,10 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       updates: { status: newStatus }
     }, {
       onSuccess: () => {
-        // The optimistic update already handled the UI, just invalidate for cascading updates
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-        }, 50);
+        // Immediate invalidation for cascading updates - no delay for maximum responsiveness
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
       },
       onError: (error) => {
         // Revert optimistic updates on error
@@ -289,6 +313,27 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
           if (!oldTasks) return oldTasks;
           return oldTasks.map(t => t.id === selectedTask.id ? selectedTask : t);
+        });
+        queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
+          if (!oldTasks) return oldTasks;
+          return oldTasks.map(t => t.id === selectedTask.id ? selectedTask : t);
+        });
+        queryClient.setQueryData(['/api/dashboard/projects-due'], (old: any[] | undefined) => {
+          if (!old) return old;
+          return old.map(project => {
+            if (project.id === projectId) {
+              const updatedProject = { ...project };
+              // Revert progress calculation
+              if (updatedProject.tasks) {
+                const completedTasks = updatedProject.tasks.filter((t: any) => 
+                  t.id === selectedTask.id ? selectedTask.status === 'completed' : t.status === 'completed'
+                ).length;
+                updatedProject.progress = Math.round((completedTasks / updatedProject.tasks.length) * 100);
+              }
+              return updatedProject;
+            }
+            return project;
+          });
         });
         console.error('Failed to toggle task completion:', error);
       }
