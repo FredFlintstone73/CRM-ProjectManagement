@@ -50,6 +50,8 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    console.log('Mouse down on resize handle');
     setIsResizing(true);
   }, []);
 
@@ -59,6 +61,8 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     const newWidth = e.clientX;
     const minWidth = 200;
     const maxWidth = 400;
+    
+    console.log('Resizing to width:', newWidth);
     
     if (newWidth >= minWidth && newWidth <= maxWidth) {
       onWidthChange(newWidth);
@@ -193,12 +197,13 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 w-1 h-full cursor-col-resize bg-transparent hover:bg-blue-500/50 transition-colors"
+        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-blue-500/20 hover:bg-blue-500/50 transition-colors border-r-2 border-blue-500/30"
         onMouseDown={handleMouseDown}
-        style={{ zIndex: 10 }}
+        style={{ zIndex: 20 }}
+        title="Drag to resize sidebar"
       >
-        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-12 flex items-center justify-center">
-          <GripVertical size={12} className="text-slate-400 opacity-0 hover:opacity-100 transition-opacity" />
+        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-4 h-16 flex items-center justify-center bg-blue-500/30 rounded-full">
+          <GripVertical size={14} className="text-blue-200" />
         </div>
       </div>
     </div>
