@@ -179,7 +179,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
                         <div>
                           <button
                             onClick={() => handleProjectClick(project.id)}
-                            className="font-medium hover:text-primary cursor-pointer transition-colors text-left bg-transparent border-none p-0 underline text-[14px]"
+                            className="font-medium hover:text-primary cursor-pointer transition-colors text-left bg-transparent border-none p-0 underline text-[16px]"
                           >
                             {project.name}
                           </button>
