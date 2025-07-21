@@ -86,7 +86,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   });
   const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
     const stored = localStorage.getItem(`expandedSections-${projectId}`);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
+    return stored ? new Set(JSON.parse(stored)) : new Set(); // Start with all sections collapsed
   });
 
   // Save expanded state to localStorage whenever it changes
@@ -628,7 +628,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
             <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="ghost"
-                className={`font-medium text-left hover:text-blue-600 transition-colors task-title p-0 h-auto justify-start ${
+                className={`text-left hover:text-blue-600 transition-colors task-title p-0 h-auto justify-start ${
                   isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
                 }`}
                 onClick={() => {
@@ -792,7 +792,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                         <div className="h-6 w-6 flex items-center justify-center">
                           {isSectionExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                         </div>
-                        <CardTitle className="text-lg section-title">{section.title}</CardTitle>
+                        <CardTitle className="section-title">{section.title}</CardTitle>
                         <div className="flex items-center gap-3">
                           <div className="w-20 bg-gray-200 rounded-full h-2">
                             <div 

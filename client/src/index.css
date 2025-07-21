@@ -139,14 +139,16 @@
     @apply bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400;
   }
   
-  /* Task font size styling */
+  /* Task font size styling - 12px medium */
   .task-title {
-    @apply text-xs;
+    font-size: 12px;
+    font-weight: 500; /* medium */
   }
   
-  /* Section font size styling */
+  /* Section font size styling - 14px semi-bold */
   .section-title {
-    @apply text-sm;
+    font-size: 14px;
+    font-weight: 600; /* semi-bold */
   }
   
   /* Compact task styling */
