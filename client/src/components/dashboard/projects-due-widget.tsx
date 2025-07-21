@@ -81,7 +81,9 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
         startDate: actualStartDate.toISOString(),
         endDate: actualEndDate.toISOString(),
       });
-      const response = await fetch(`/api/dashboard/projects-due?${params}`);
+      const response = await fetch(`/api/dashboard/projects-due?${params}`, {
+        credentials: "include",
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch projects due soon');
       }
