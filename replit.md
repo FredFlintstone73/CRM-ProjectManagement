@@ -141,6 +141,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Task Update System and Array Handling Fixes (July 21, 2025)
+- **Task Update Cache Issue Resolution**: Fixed critical cache invalidation problem where task updates appeared successful in backend but weren't visible on frontend
+- **PATCH Route Array Handling**: Corrected PATCH route to properly format assignedTo field as array for database consistency, preventing "value.map is not a function" errors
+- **Contact Deletion Array Query Fix**: Updated deleteContact method to use PostgreSQL array contains operator (@>) instead of equality for assignedTo field checks
+- **Real-time UI Updates**: Replaced optimistic cache updates with proper cache invalidation to ensure immediate visibility of task changes
+- **Database Consistency**: All task assignment operations now properly handle array format required by PostgreSQL schema
+- **User Verification**: Task editing now works correctly with immediate visual feedback and data persistence
+
 ### Complete Template Copying System Enhancement (July 21, 2025)
 - **Critical Bug Resolution**: Fixed GPO Meeting Template tasks appearing in reverse order during project creation
 - **Root Cause**: All template tasks had sort_order = 0, causing reverse chronological ordering instead of intended template sequence
