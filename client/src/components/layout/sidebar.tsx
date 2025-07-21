@@ -97,10 +97,10 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   return (
     <div 
       ref={sidebarRef}
-      className="relative flex flex-col bg-slate-900 border-r border-slate-700"
+      className="relative flex flex-col bg-slate-900 border-r border-slate-700 h-full"
       style={{ width: `${width}px`, minWidth: '200px', maxWidth: '400px' }}
     >
-      <div className="sidebar-nav flex flex-col flex-grow overflow-hidden">
+      <div className="sidebar-nav flex flex-col flex-grow overflow-hidden h-full">
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -197,13 +197,13 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-blue-500/20 hover:bg-blue-500/50 transition-colors border-r-2 border-blue-500/30"
+        className="absolute top-0 right-0 w-4 h-full cursor-col-resize bg-blue-500 hover:bg-blue-600 transition-colors"
         onMouseDown={handleMouseDown}
-        style={{ zIndex: 20 }}
+        style={{ zIndex: 999 }}
         title="Drag to resize sidebar"
       >
-        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-4 h-16 flex items-center justify-center bg-blue-500/30 rounded-full">
-          <GripVertical size={14} className="text-blue-200" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <GripVertical size={16} className="text-white" />
         </div>
       </div>
     </div>

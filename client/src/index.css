@@ -80,7 +80,7 @@
   }
   
   .sidebar-nav {
-    @apply fixed top-0 left-0 h-screen w-64 border-r border-slate-700 bg-slate-800 text-white z-50;
+    @apply relative h-full border-r border-slate-700 bg-slate-800 text-white;
   }
   
   .sidebar-nav-item {
