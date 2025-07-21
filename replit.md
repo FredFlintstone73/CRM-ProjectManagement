@@ -141,6 +141,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Dashboard Progress Calculation and Date Range Fix (July 21, 2025)
+- **Dashboard Progress Bar Implementation**: Added real-time progress calculation to dashboard projects due widget matching Projects page functionality
+- **Backend Progress Integration**: Enhanced getProjectsDueSoon method to calculate progress from task completion ratios with proper SQL aggregation
+- **Date Range Correction**: Fixed confusion about current date context - confirmed system operating correctly with July 21, 2025 as current date
+- **GPO Project Visibility**: Resolved dashboard display issues - GPO project (due Oct 10, 2025) now properly appears in "Next 4 Months" range from July 2025
+- **Real-time Progress Display**: Dashboard now shows accurate progress bars (CSR project at 93%, GPO project at 0%) matching database task completion data
+- **User Verification**: Dashboard "Upcoming Progress Meetings" card now displays both projects correctly with proper progress calculations
+
 ### Task Update System and Array Handling Fixes (July 21, 2025)
 - **Task Update Cache Issue Resolution**: Fixed critical cache invalidation problem where task updates appeared successful in backend but weren't visible on frontend
 - **PATCH Route Array Handling**: Corrected PATCH route to properly format assignedTo field as array for database consistency, preventing "value.map is not a function" errors
