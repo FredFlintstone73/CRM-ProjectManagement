@@ -81,6 +81,17 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
         startDate: actualStartDate.toISOString(),
         endDate: actualEndDate.toISOString(),
       });
+      
+      // Debug logging for "next-1-month"
+      if (selectedPeriod === "next-1-month") {
+        console.log('Next 30 Days Debug:', {
+          selectedPeriod,
+          actualStartDate: actualStartDate.toISOString(),
+          actualEndDate: actualEndDate.toISOString(),
+          currentRange: currentRange
+        });
+      }
+      
       const response = await fetch(`/api/dashboard/projects-due?${params}`, {
         credentials: "include",
       });
