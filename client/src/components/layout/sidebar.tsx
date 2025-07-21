@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -130,13 +130,13 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
           {/* Collapse/Expand Button */}
           <button
             onClick={toggleCollapse}
-            className="ml-2 p-1.5 hover:bg-slate-700 rounded-md transition-colors"
+            className="ml-2 p-2 hover:bg-slate-700 rounded-md transition-colors"
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? (
-              <ChevronRight size={18} className="text-slate-300" />
+              <ChevronRight size={24} className="text-slate-300" />
             ) : (
-              <ChevronLeft size={18} className="text-slate-300" />
+              <ChevronLeft size={24} className="text-slate-300" />
             )}
           </button>
         </div>
@@ -241,14 +241,15 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       {/* Resize Handle */}
       {!isCollapsed && (
         <div
-          className="absolute top-0 right-0 w-4 h-full cursor-col-resize transition-colors"
-          style={{ 
-            backgroundColor: '#1e293b',
-            zIndex: 999 
-          }}
+          className="absolute top-0 right-0 w-4 h-full cursor-col-resize bg-blue-500 hover:bg-blue-600 transition-colors"
           onMouseDown={handleMouseDown}
+          style={{ zIndex: 999 }}
           title="Drag to resize sidebar"
-        />
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <GripVertical size={16} className="text-white" />
+          </div>
+        </div>
       )}
     </div>
   );
