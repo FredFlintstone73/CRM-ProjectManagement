@@ -74,20 +74,24 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
     ? new Date(customEndDate) 
     : currentRange.end;
 
-  const { data: projects, isLoading, error } = useQuery<Project[]>({
+  const { data: projects, isLoading, error } = useQuery<(Project & { progress: number })[]>({
     queryKey: ['/api/dashboard/projects-due', selectedPeriod, customStartDate, customEndDate],
     queryFn: async () => {
       const params = new URLSearchParams({
         startDate: actualStartDate.toISOString(),
         endDate: actualEndDate.toISOString(),
       });
+      console.log('Dashboard API call:', `/api/dashboard/projects-due?${params}`);
       const response = await fetch(`/api/dashboard/projects-due?${params}`, {
         credentials: "include",
       });
       if (!response.ok) {
+        console.error('Dashboard API error:', response.status, response.statusText);
         throw new Error('Failed to fetch projects due soon');
       }
-      return response.json();
+      const data = await response.json();
+      console.log('Dashboard API response:', data);
+      return data;
     },
   });
 
@@ -156,6 +160,10 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
               <p className="text-muted-foreground text-[16px]">
                 <strong>{projects.length}</strong> projects due in the {currentRange.label.toLowerCase()}
               </p>
+              {/* Debug info */}
+              <div className="text-xs text-gray-500 mt-1">
+                Debug: isLoading={isLoading.toString()}, error={error?.toString() || 'null'}, projects={projects ? `${projects.length} items` : 'null'}
+              </div>
             </div>
 
             {projects.length === 0 ? (
