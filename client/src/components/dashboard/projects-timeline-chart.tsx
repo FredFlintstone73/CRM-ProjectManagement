@@ -109,6 +109,10 @@ export default function ProjectsTimelineChart({
       } else if (selectedPeriod === "next-2-weeks") {
         startDate = startOfWeek(now, { weekStartsOn: 1 });
         endDate = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+      } else if (selectedPeriod === "next-1-month") {
+        // For "Next 30 Days", use actual 30-day range from today
+        startDate = now;
+        endDate = addDays(now, 30);
       } else {
         // For other periods, use the existing month-based logic
         const months = getPeriodMonths(selectedPeriod);
