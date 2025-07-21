@@ -460,17 +460,15 @@ export default function ProjectDetail() {
                 )}
               </div>
               
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <span className="text-sm text-gray-600">Progress:</span>
-                <div className="flex items-center gap-2 flex-1">
-                  <div className="flex-1 min-w-[100px] bg-gray-300 rounded-full h-4 border border-gray-400">
-                    <div 
-                      className="h-full rounded-full transition-all duration-300 bg-[#2563eb] text-[#ef4343]"
-                      style={{ width: `${currentProgress}%` }}
-                    />
-                  </div>
-                  <span className="text-sm text-gray-700 font-medium">{currentProgress}%</span>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <span className="text-sm text-gray-600 whitespace-nowrap">Progress:</span>
+                <div className="flex-1 bg-gray-300 rounded-full h-4 border border-gray-400">
+                  <div 
+                    className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                    style={{ width: `${currentProgress}%` }}
+                  />
                 </div>
+                <span className="text-sm text-gray-700 font-medium whitespace-nowrap">{currentProgress}%</span>
               </div>
             </div>
             
