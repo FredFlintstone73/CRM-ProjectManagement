@@ -141,6 +141,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Critical Role Assignment Resolution Fix (July 21, 2025)
+- **Root Cause Identified**: Template-created tasks weren't getting assigned to team members due to missing active team members for critical roles
+- **Missing Role Analysis**: Discovered 4 essential roles had no active team members: admin_assistant (112 tasks), financial_planner (160 tasks), insurance_health (64 tasks), insurance_business (16 tasks)
+- **Team Member Creation**: Created 4 new active team members to fill missing roles: Admin Assistant (ID: 28), Financial Planner (ID: 29), Insurance Health (ID: 30), Insurance Business (ID: 31)
+- **Mass Role Resolution**: Updated 84 tasks across projects 66 and 71 with proper team member assignments
+- **Complete Resolution**: All role-based task assignments now properly populate with active team members instead of remaining unassigned
+- **User Impact**: Project task views now display actual team member names for all role-based assignments instead of empty assignment fields
+
 ### Complete Custom Date Range Title Display Enhancement (July 21, 2025)
 - **Timeline Chart Title Enhancement**: Updated chart h3 title to display custom date ranges when selected
 - **Status Card Title Enhancement**: Updated bottom card title to show custom date ranges in parentheses
