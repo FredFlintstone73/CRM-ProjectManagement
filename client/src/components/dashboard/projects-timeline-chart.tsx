@@ -476,10 +476,10 @@ export default function ProjectsTimelineChart({
               </h3>
             </div>
             
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={360}>
               <BarChart
                 data={chartData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
@@ -508,7 +508,7 @@ export default function ProjectsTimelineChart({
               </BarChart>
             </ResponsiveContainer>
 
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {Object.entries(PROJECT_TYPE_LABELS).map(([key, label]) => (
                 <div key={key} className="text-center">
                   <div 
@@ -523,7 +523,7 @@ export default function ProjectsTimelineChart({
               ))}
             </div>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg text-[18px]">
+            <div className="mt-3 p-4 bg-gray-50 rounded-lg text-[18px]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
                   <span className="font-semibold text-gray-700">Total Meetings:</span>
