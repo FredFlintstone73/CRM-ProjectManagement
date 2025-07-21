@@ -58,8 +58,6 @@ const getDateRanges = (): Record<string, DateRange> => {
 };
 
 export default function ProjectsDueWidget({ selectedPeriod, customStartDate, customEndDate }: ProjectsDueWidgetProps) {
-  console.log('=== PROJECTS DUE WIDGET RENDER ===');
-  console.log('Props:', { selectedPeriod, customStartDate, customEndDate });
   const [, navigate] = useLocation();
   const dateRanges = getDateRanges();
   const currentRange = dateRanges[selectedPeriod] || dateRanges["next-4-months"];
@@ -76,9 +74,6 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
     ? new Date(customEndDate) 
     : currentRange.end;
 
-  console.log('=== QUERY SETUP ===');
-  console.log('Date calculation:', { actualStartDate, actualEndDate, currentRange });
-  
   const { data: projects, isLoading, error } = useQuery<(Project & { progress: number })[]>({
     queryKey: ['/api/dashboard/projects-due', selectedPeriod, customStartDate, customEndDate],
     queryFn: async () => {
@@ -86,31 +81,17 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
         startDate: actualStartDate.toISOString(),
         endDate: actualEndDate.toISOString(),
       });
-      console.log('=== DASHBOARD API CALL START ===');
-      console.log('API URL:', `/api/dashboard/projects-due?${params}`);
-      console.log('Date range:', { startDate: actualStartDate.toISOString(), endDate: actualEndDate.toISOString() });
-      
       const response = await fetch(`/api/dashboard/projects-due?${params}`, {
         credentials: "include",
       });
       
-      console.log('Response status:', response.status, response.statusText);
-      
       if (!response.ok) {
-        console.error('Dashboard API error:', response.status, response.statusText);
         throw new Error('Failed to fetch projects due soon');
       }
       
-      const data = await response.json();
-      console.log('Dashboard API response data:', data);
-      console.log('Projects count:', data.length);
-      console.log('=== DASHBOARD API CALL END ===');
-      return data;
+      return response.json();
     },
   });
-
-  console.log('=== QUERY RESULT ===');
-  console.log('isLoading:', isLoading, 'error:', error, 'projects:', projects);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -175,14 +156,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
               <p className="text-muted-foreground text-[16px]">
                 <strong>{projects.length}</strong> projects due in the {currentRange.label.toLowerCase()}
               </p>
-              {/* Debug info */}
-              <div className="text-xs text-gray-500 mt-1">
-                Debug: isLoading={isLoading.toString()}, error={error?.message || 'null'}, projects={projects ? `${projects.length} items` : 'null'}
-                <br />Range: {actualStartDate.toISOString()} to {actualEndDate.toISOString()}
-                <br />Period: {selectedPeriod}
-                <br />Condition check: !isLoading={(!isLoading).toString()}, !error={(!error).toString()}, projects exists={!!projects}
-                <br />Final condition: {(!isLoading && !error && projects).toString()}
-              </div>
+
             </div>
 
             {projects.length === 0 ? (
@@ -192,14 +166,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
               </div>
             ) : (
               <div className="space-y-3">
-                {/* Debug: About to render projects */}
-                <div className="text-lg text-red-600 mb-4 p-4 bg-red-100 border-2 border-red-400 rounded font-bold">
-                  🚨 DEBUG: Rendering {projects.length} projects 🚨<br/>
-                  CSR: {projects[0]?.name} (Progress: {projects[0]?.progress}%)<br/>
-                  GPO: {projects[1]?.name} (Progress: {projects[1]?.progress}%)
-                </div>
                 {projects.map((project) => {
-                  console.log('Rendering project:', project);
                   const daysUntilDue = project.dueDate ? getDaysUntilDue(new Date(project.dueDate).toISOString()) : null;
                   
                   return (

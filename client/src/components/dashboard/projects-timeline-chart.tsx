@@ -132,16 +132,6 @@ export default function ProjectsTimelineChart({
   const getChartData = (): TimelineData[] => {
     const now = new Date();
     
-    // Debug: Log projects and their detected types
-    console.log('=== TIMELINE CHART DEBUG ===');
-    console.log('Projects:', projects);
-    if (projects) {
-      projects.forEach(p => {
-        console.log(`Project: "${p.name}" -> Type: ${getProjectTypeFromName(p.name)}`);
-      });
-    }
-    console.log('Selected Period:', selectedPeriod);
-    
     // For "This Week", show Monday through Friday
     if (selectedPeriod === "next-1-week") {
       const weekStart = startOfWeek(now, { weekStartsOn: 1 });

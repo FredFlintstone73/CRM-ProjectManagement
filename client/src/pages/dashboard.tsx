@@ -8,8 +8,6 @@ import ProjectsTimelineChart from "@/components/dashboard/projects-timeline-char
 import ActionCard from "@/components/dashboard/action-card";
 
 export default function Dashboard() {
-  console.log('=== DASHBOARD PAGE LOADING ===');
-
   const { isAuthenticated, isLoading } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
   const [customStartDate, setCustomStartDate] = useState<string>("");
@@ -30,7 +28,6 @@ export default function Dashboard() {
   }, [isAuthenticated, isLoading]);
 
   if (isLoading) {
-    console.log('Dashboard: Still loading auth...');
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -39,11 +36,8 @@ export default function Dashboard() {
   }
 
   if (!isAuthenticated) {
-    console.log('Dashboard: Not authenticated, redirecting...');
     return null;
   }
-
-  console.log('Dashboard: Authenticated, rendering content...');
 
   return (
     <>
