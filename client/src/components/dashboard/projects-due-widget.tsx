@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, FolderOpen } from "lucide-react";
-import { addDays, addWeeks, addMonths, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
+import { addDays, addWeeks, addMonths, startOfDay, endOfDay, startOfWeek, endOfWeek, format } from "date-fns";
 import { useLocation } from "wouter";
 import type { Project } from "@shared/schema";
 
@@ -128,7 +128,13 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
       <CardHeader>
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" />
-          <CardTitle>Status - Upcoming Progress Meetings ({currentRange.label})</CardTitle>
+          <CardTitle>
+            Status - Upcoming Progress Meetings ({
+              selectedPeriod === "custom-range" && customStartDate && customEndDate
+                ? `${format(new Date(customStartDate), 'MMM d, yyyy')} to ${format(new Date(customEndDate), 'MMM d, yyyy')}`
+                : currentRange.label
+            })
+          </CardTitle>
         </div>
       </CardHeader>
       <CardContent>
