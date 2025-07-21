@@ -360,7 +360,7 @@ export default function Projects() {
                 <TableHeader>
                   <TableRow>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50 select-none"
+                      className="cursor-pointer hover:bg-gray-50 select-none text-xs"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center gap-2">
@@ -368,28 +368,28 @@ export default function Projects() {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50 select-none"
+                      className="cursor-pointer hover:bg-gray-50 select-none text-xs"
                       onClick={() => handleSort('family')}
                     >
                       <div className="flex items-center gap-2">
                         Family Name {getSortIcon('family')}
                       </div>
                     </TableHead>
-                    <TableHead>Progress</TableHead>
+                    <TableHead className="text-xs">Progress</TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50 select-none"
+                      className="cursor-pointer hover:bg-gray-50 select-none text-xs"
                       onClick={() => handleSort('date')}
                     >
                       <div className="flex items-center gap-2">
                         Meeting Date {getSortIcon('date')}
                       </div>
                     </TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-xs">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedProjects.map((project) => (
-                    <TableRow key={project.id}>
+                    <TableRow key={project.id} className="text-xs">
                       <TableCell className="font-medium">
                         <div>
                           <div className="font-semibold">
@@ -401,7 +401,7 @@ export default function Projects() {
                             </Link>
                           </div>
                           {project.description && (
-                            <div className="text-sm text-gray-600 mt-1">{project.description}</div>
+                            <div className="text-gray-600 mt-1">{project.description}</div>
                           )}
                         </div>
                       </TableCell>
@@ -433,7 +433,7 @@ export default function Projects() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2 w-20" />
-                          <span className="text-sm">{projectTaskData[project.id]?.progress || 0}%</span>
+                          <span>{projectTaskData[project.id]?.progress || 0}%</span>
                         </div>
                       </TableCell>
                       <TableCell>
