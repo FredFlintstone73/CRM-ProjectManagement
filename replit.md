@@ -141,6 +141,17 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Template Task Ordering Fix (July 21, 2025)
+- **Critical Bug Resolution**: Fixed GPO Meeting Template tasks appearing in reverse order during project creation
+- **Root Cause**: All template tasks had sort_order = 0, causing reverse chronological ordering instead of intended template sequence
+- **Solution Implementation**: Modified project creation logic to assign proper sort orders based on task position in template
+- **Enhanced Task Sorting**: Changed from chronological (daysFromMeeting) to template-based sorting to preserve intended sequence
+- **Universal Fix**: Applied proper sort order assignment to all task creation paths (parent tasks, child tasks, dependent tasks)
+- **Sequential Ordering**: Tasks now receive sort_order values based on their position in the sorted template task array
+- **Template Preservation**: Maintains original template structure and hierarchy while ensuring correct display order
+- **User Verified**: Template task ordering now works correctly - tasks appear in proper sequence instead of reverse order
+- **Projects Page Enhancement**: Added "Next Four Months" option to date range filter showing projects due within 122 days
+
 ### Ultra-Responsive Task Completion System Implementation (July 20, 2025)
 - **OptimisticTaskToggle Component**: Created specialized component for instant task completion radio button responses
 - **True Optimistic Updates**: Implemented immediate UI updates before server calls for ultra-responsive user experience
