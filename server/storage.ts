@@ -340,7 +340,7 @@ export class DatabaseStorage implements IStorage {
       const assignedTasks = await db
         .select()
         .from(tasks)
-        .where(sql`${tasks.assignedTo} @> ${JSON.stringify([id])}`);
+        .where(sql`${id} = ANY(${tasks.assignedTo})`);
       
       if (assignedTasks.length > 0) {
         throw new Error(`Cannot delete contact. This contact is assigned to ${assignedTasks.length} task(s). Please reassign or delete these tasks first.`);
