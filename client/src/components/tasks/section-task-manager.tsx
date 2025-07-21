@@ -200,21 +200,10 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       return updatedTask;
     },
     onSuccess: (updatedTask) => {
-      // Optimistically update project tasks cache
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => 
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        );
-      });
-      
-      // Optimistically update global tasks cache
-      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => 
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        );
-      });
+      // Force fresh data fetch instead of optimistic updates
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
 
       setIsTaskDialogOpen(false);
       resetTaskForm();
