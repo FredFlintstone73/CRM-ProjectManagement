@@ -399,7 +399,12 @@ export default function ProjectsTimelineChart({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
-            <CardTitle>Upcoming Progress Meetings</CardTitle>
+            <CardTitle>
+              {selectedPeriod === "custom-range" && customStartDate && customEndDate
+                ? `Meeting Types for ${format(new Date(customStartDate), 'MMM d, yyyy')} to ${format(new Date(customEndDate), 'MMM d, yyyy')}`
+                : "Upcoming Progress Meetings"
+              }
+            </CardTitle>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-muted-foreground" />
