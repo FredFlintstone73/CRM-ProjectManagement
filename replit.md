@@ -141,6 +141,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Complete Custom Date Range Title Display Enhancement (July 21, 2025)
+- **Timeline Chart Title Enhancement**: Updated chart h3 title to display custom date ranges when selected
+- **Status Card Title Enhancement**: Updated bottom card title to show custom date ranges in parentheses
+- **Dynamic Title Display**: Both titles now show "Aug 7, 2025 to Oct 11, 2025" format for custom ranges instead of generic labels
+- **Consistent Date Formatting**: Applied MMM d, yyyy format across both chart and card titles for readable date display
+- **Conditional Logic**: Titles only show custom dates when custom-range is selected and both start/end dates are provided
+- **User Verified**: Custom date range selection now properly updates both chart and status card titles as requested
+
 ### Critical "Next 30 Days" Date Filter Bug Fix (July 21, 2025)
 - **Root Cause Resolution**: Fixed critical date calculation conflict between ProjectsTimelineChart and ProjectsDueWidget components
 - **Timeline Chart Bug**: ProjectsTimelineChart was using `startOfMonth(now)` (July 1st) instead of today's date for "Next 30 Days" filtering
