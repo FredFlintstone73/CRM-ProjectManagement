@@ -236,14 +236,12 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       >
         {/* Collapse/Expand Button */}
         <div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-1 hover:bg-slate-600 rounded transition-colors"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-1 hover:bg-slate-600 rounded transition-colors cursor-pointer"
           onClick={toggleCollapse}
         >
-          {isCollapsed ? (
-            <ChevronRight size={14} className="text-slate-300" />
-          ) : (
-            <ChevronLeft size={14} className="text-slate-300" />
-          )}
+          <span className="text-slate-300 text-sm font-mono select-none">
+            {isCollapsed ? '>' : '<'}
+          </span>
         </div>
         
         {/* Resize Drag Area (only when not collapsed) */}
