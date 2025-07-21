@@ -363,7 +363,7 @@ export default function ProjectDetail() {
             Back to Projects
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+            <h1 className="font-bold text-gray-900 text-[20px]">{project.name}</h1>
             <p className="text-gray-600">Project Details & Task Management</p>
           </div>
         </div>
@@ -415,7 +415,6 @@ export default function ProjectDetail() {
           </Dialog>
         </div>
       </div>
-
       {/* Project Info Card */}
       <Card>
         <CardHeader>
@@ -511,7 +510,6 @@ export default function ProjectDetail() {
           </div>
         </CardContent>
       </Card>
-
       {/* Section Task Management */}
       <div className="mt-6">
         <SectionTaskManager 
@@ -519,7 +517,6 @@ export default function ProjectDetail() {
           onTaskClick={handleTaskClick}
         />
       </div>
-
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -556,7 +553,6 @@ export default function ProjectDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
       {/* Task Detail Sidebar */}
       <TaskDetailSidebar
         task={selectedTask}
