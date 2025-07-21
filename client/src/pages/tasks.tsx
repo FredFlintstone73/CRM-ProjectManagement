@@ -36,7 +36,7 @@ export default function Tasks() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'row'>('row');
   const [sortConfig, setSortConfig] = useState<{
     key: 'priority' | 'dueDate' | 'title' | 'assignee' | null;
     direction: 'asc' | 'desc';

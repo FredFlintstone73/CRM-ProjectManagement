@@ -24,7 +24,7 @@ export default function Projects() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [commentsProject, setCommentsProject] = useState<Project | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'family' | 'date'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
