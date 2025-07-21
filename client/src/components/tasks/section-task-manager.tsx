@@ -613,9 +613,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
     return (
       <div key={task.id} className="space-y-2">
         <div 
-          className={`flex items-center gap-2 task-compact rounded-lg border ${
-            isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
-          }`}
+          className="flex items-center gap-2 task-compact rounded-lg border bg-white border-gray-200 pt-[0px] pb-[0px]"
           style={{ marginLeft: `${level * 24}px` }}
         >
           <OptimisticTaskToggle 
