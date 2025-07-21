@@ -147,7 +147,8 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Team Member Creation**: Created 4 new active team members to fill missing roles: Admin Assistant (ID: 28), Financial Planner (ID: 29), Insurance Health (ID: 30), Insurance Business (ID: 31)
 - **Mass Role Resolution**: Updated 84 tasks across projects 66 and 71 with proper team member assignments
 - **Complete Resolution**: All role-based task assignments now properly populate with active team members instead of remaining unassigned
-- **User Impact**: Project task views now display actual team member names for all role-based assignments instead of empty assignment fields
+- **Role Display Formatting Fix**: Standardized formatRole functions across all 6 task management components to consistently display "Estate Attorney" instead of "estate_attorney"
+- **User Impact**: Project task views now display actual team member names for all role-based assignments with proper role formatting (e.g., "Estate Attorney", "Financial Planner")
 
 ### Complete Custom Date Range Title Display Enhancement (July 21, 2025)
 - **Timeline Chart Title Enhancement**: Updated chart h3 title to display custom date ranges when selected
