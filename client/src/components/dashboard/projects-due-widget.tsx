@@ -177,7 +177,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
               </p>
               {/* Debug info */}
               <div className="text-xs text-gray-500 mt-1">
-                Debug: isLoading={isLoading.toString()}, error={error?.toString() || 'null'}, projects={projects ? `${projects.length} items` : 'null'}
+                Debug: isLoading={isLoading.toString()}, error={error?.message || 'null'}, projects={projects ? `${projects.length} items` : 'null'}
                 <br />Range: {actualStartDate.toISOString()} to {actualEndDate.toISOString()}
                 <br />Period: {selectedPeriod}
                 <br />Condition check: !isLoading={(!isLoading).toString()}, !error={(!error).toString()}, projects exists={!!projects}
@@ -193,10 +193,14 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
             ) : (
               <div className="space-y-3">
                 {/* Debug: About to render projects */}
-                <div className="text-xs text-red-500">DEBUG: Rendering {projects.length} projects</div>
+                <div className="text-lg text-red-600 mb-4 p-4 bg-red-100 border-2 border-red-400 rounded font-bold">
+                  🚨 DEBUG: Rendering {projects.length} projects 🚨<br/>
+                  CSR: {projects[0]?.name} (Progress: {projects[0]?.progress}%)<br/>
+                  GPO: {projects[1]?.name} (Progress: {projects[1]?.progress}%)
+                </div>
                 {projects.map((project) => {
                   console.log('Rendering project:', project);
-                  const daysUntilDue = project.dueDate ? getDaysUntilDue(project.dueDate) : null;
+                  const daysUntilDue = project.dueDate ? getDaysUntilDue(new Date(project.dueDate).toISOString()) : null;
                   
                   return (
                     <div
