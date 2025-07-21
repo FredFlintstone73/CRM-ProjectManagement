@@ -479,7 +479,7 @@ export default function ProjectsTimelineChart({
             <ResponsiveContainer width="100%" height={360}>
               <BarChart
                 data={chartData}
-                margin={{ top: 20, right: 30, left: 40, bottom: 40 }}
+                margin={{ top: 20, right: 30, left: 60, bottom: 40 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
@@ -500,7 +500,7 @@ export default function ProjectsTimelineChart({
                     value: 'Number of Meetings', 
                     angle: -90, 
                     position: 'insideLeft',
-                    offset: -10,
+                    offset: -15,
                     textAnchor: 'middle'
                   }}
                 />
