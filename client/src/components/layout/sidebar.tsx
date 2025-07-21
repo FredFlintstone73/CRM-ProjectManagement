@@ -228,7 +228,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 w-4 h-full cursor-pointer transition-colors"
+        className="absolute top-0 right-0 w-6 h-full transition-colors"
         style={{ 
           backgroundColor: '#1e293b',
           zIndex: 999 
@@ -237,10 +237,15 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       >
         {/* Collapse/Expand Button */}
         <div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-1 hover:bg-slate-600 rounded transition-colors cursor-pointer"
-          onClick={toggleCollapse}
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-8 flex items-center justify-center hover:bg-slate-600 rounded transition-colors cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Chevron clicked - current state:', isCollapsed);
+            toggleCollapse();
+          }}
         >
-          <span className="text-slate-300 text-sm font-mono select-none">
+          <span className="text-slate-300 text-base font-mono select-none">
             {console.log('Chevron - isCollapsed:', isCollapsed, 'showing:', isCollapsed ? '>' : '<')}
             {isCollapsed ? '>' : '<'}
           </span>
@@ -251,6 +256,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
           <div
             className="absolute top-0 left-0 w-full h-full cursor-col-resize hover:bg-slate-600/50 transition-colors"
             onMouseDown={handleMouseDown}
+            style={{ zIndex: 998 }}
           />
         )}
       </div>
