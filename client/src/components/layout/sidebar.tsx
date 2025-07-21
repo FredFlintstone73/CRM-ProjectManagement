@@ -53,6 +53,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   };
 
   const toggleCollapse = () => {
+    console.log('Toggle collapse - current state:', isCollapsed);
     setIsCollapsed(!isCollapsed);
   };
 
@@ -240,6 +241,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
           onClick={toggleCollapse}
         >
           <span className="text-slate-300 text-sm font-mono select-none">
+            {console.log('Chevron - isCollapsed:', isCollapsed, 'showing:', isCollapsed ? '>' : '<')}
             {isCollapsed ? '>' : '<'}
           </span>
         </div>
