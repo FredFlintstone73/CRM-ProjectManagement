@@ -156,9 +156,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   const teamMembers = contacts.filter(contact => 
     contact && 
     contact.contactType === 'team_member' && 
-    contact.status === 'active' &&
-    contact.personalEmail !== user?.email &&
-    contact.workEmail !== user?.email
+    contact.status === 'active'
   );
 
   // Create task mutation
@@ -564,7 +562,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
 
   // Get all assigned team members from direct assignments and role assignments
   const getTaskAssignedMembers = (taskData: any): Contact[] => {
-    if (!teamMembers.length) return [];
+    if (!contacts.length) return [];
     
     const assignedMembers: Contact[] = [];
     
@@ -573,7 +571,12 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       const assignedIds = Array.isArray(taskData.assignedTo) ? taskData.assignedTo : [taskData.assignedTo];
       assignedIds.forEach((contactId: any) => {
         if (contactId) {
-          const member = teamMembers.find(tm => tm.id === contactId);
+          // Look in all active team members, including current user
+          const member = contacts.find(c => 
+            c.id === contactId && 
+            c.contactType === 'team_member' && 
+            c.status === 'active'
+          );
           if (member) assignedMembers.push(member);
         }
       });
@@ -584,7 +587,11 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       const assignedRoles = Array.isArray(taskData.assignedToRole) ? taskData.assignedToRole : [taskData.assignedToRole];
       assignedRoles.forEach((role: any) => {
         if (role) {
-          const roleMembers = teamMembers.filter(tm => tm.role === role && tm.status === 'active');
+          const roleMembers = contacts.filter(c => 
+            c.contactType === 'team_member' && 
+            c.role === role && 
+            c.status === 'active'
+          );
           roleMembers.forEach(member => {
             // Only add if not already in the list (avoid duplicates)
             if (!assignedMembers.find(am => am.id === member.id)) {
@@ -901,15 +908,21 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                       Assign to Me ({user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})
                     </SelectItem>
                   )}
-                  {teamMembers.length > 0 ? (
-                    teamMembers.map(member => (
+                  {teamMembers.filter(member => 
+                    member.personalEmail !== user?.email && 
+                    member.workEmail !== user?.email
+                  ).length > 0 ? (
+                    teamMembers.filter(member => 
+                      member.personalEmail !== user?.email && 
+                      member.workEmail !== user?.email
+                    ).map(member => (
                       <SelectItem key={member.id} value={`team_${member.id}`}>
                         {member.firstName} {member.lastName || ''}
                       </SelectItem>
                     ))
                   ) : (
                     <SelectItem value="none" disabled>
-                      No team members available
+                      No other team members available
                     </SelectItem>
                   )}
                 </SelectContent>
