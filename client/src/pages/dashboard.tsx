@@ -45,9 +45,8 @@ export default function Dashboard() {
         title="Dashboard" 
         subtitle="Welcome back! Here's what's happening today."
       />
-      
       <main className="flex-1 bg-gray-50">
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 pl-[10px] pr-[10px] pt-[8px] pb-[8px]">
           <div className="grid grid-cols-1 gap-6">
             <ProjectsTimelineChart 
               selectedPeriod={selectedPeriod} 
