@@ -494,6 +494,8 @@ export default function ProjectsTimelineChart({
                 <YAxis 
                   domain={[0, maxCount + 1]}
                   fontSize={12}
+                  allowDecimals={false}
+                  tickCount={Math.max(5, maxCount + 1)}
                   label={{ value: 'Number of Meetings', angle: -90, position: 'insideLeft' }}
                 />
                 <Tooltip content={<CustomTooltip />} />
