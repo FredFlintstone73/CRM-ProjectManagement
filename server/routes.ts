@@ -1192,7 +1192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const processedTaskData = {
         ...taskData,
-        ...(taskData.assignedTo !== undefined && { assignedTo }),
+        ...(taskData.assignedTo !== undefined && { assignedTo: assignedTo ? [assignedTo] : null }),
         ...(taskData.priority !== undefined && { priority }),
         ...(taskData.milestoneId !== undefined && {
           milestoneId: safeParseInt(taskData.milestoneId)
