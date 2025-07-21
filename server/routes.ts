@@ -1733,6 +1733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: milestone.title,
           description: milestone.description,
           templateId: newTemplate.id,
+          sortOrder: milestone.sortOrder,
         }, userId);
         
         // Get tasks for this milestone
@@ -1741,17 +1742,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Copy tasks with their hierarchy
         const taskIdMap = new Map<number, number>();
         
-        // First pass: create all tasks
+        // First pass: create all tasks with ALL original template data
         for (const task of originalTasks) {
           const newTask = await storage.createTask({
             title: task.title,
             description: task.description,
             milestoneId: newMilestone.id,
             assignedTo: task.assignedTo,
+            assignedToRole: task.assignedToRole, // Copy role assignments
             priority: task.priority,
-            dueDate: task.dueDate,
-            completed: false, // Reset completion status for copied tasks
+            dueDate: null, // Reset due dates for template
+            status: 'todo', // Reset status for copied tasks
             parentTaskId: null, // Will be set in second pass
+            level: task.level, // Copy hierarchy level
+            sortOrder: task.sortOrder, // Copy sort order
+            daysFromMeeting: task.daysFromMeeting, // Copy days from meeting calculation
+            dependsOnTaskId: null, // Will be set in third pass for dependencies
           }, userId);
           
           taskIdMap.set(task.id, newTask.id);
@@ -1766,6 +1772,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (newTaskId && newParentTaskId) {
               await storage.updateTask(newTaskId, {
                 parentTaskId: newParentTaskId,
+              });
+            }
+          }
+        }
+        
+        // Third pass: set task dependencies
+        for (const task of originalTasks) {
+          if (task.dependsOnTaskId) {
+            const newTaskId = taskIdMap.get(task.id);
+            const newDependentTaskId = taskIdMap.get(task.dependsOnTaskId);
+            
+            if (newTaskId && newDependentTaskId) {
+              await storage.updateTask(newTaskId, {
+                dependsOnTaskId: newDependentTaskId,
               });
             }
           }
