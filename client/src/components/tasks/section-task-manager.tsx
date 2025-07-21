@@ -756,7 +756,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
         </Button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-1">
         {sections.map(section => {
           const sectionTasks = buildTaskHierarchy(section.id);
           
