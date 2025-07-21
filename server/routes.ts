@@ -267,21 +267,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const createdTasks = [];
           const taskMapping = new Map(); // Map template task IDs to created task IDs
           
-          // Sort template tasks chronologically by daysFromMeeting (earliest first)
-          // Then separate by dependencies and hierarchical structure
+          // Sort template tasks to preserve original template order
+          // First by milestone order, then by template task ID to preserve creation order
           const sortedTasks = [...templateTasks].sort((a, b) => {
-            // First sort by daysFromMeeting (null values go to end)
-            const aDays = a.daysFromMeeting ?? 999;
-            const bDays = b.daysFromMeeting ?? 999;
-            if (aDays !== bDays) return aDays - bDays;
-            
-            // Then by milestone order
+            // First sort by milestone order
             const aMilestoneSort = templateMilestones.find(m => m.id === a.milestoneId)?.sortOrder ?? 999;
             const bMilestoneSort = templateMilestones.find(m => m.id === b.milestoneId)?.sortOrder ?? 999;
             if (aMilestoneSort !== bMilestoneSort) return aMilestoneSort - bMilestoneSort;
             
-            // Finally by sort order within milestone
-            return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+            // Then by task ID to preserve original template ordering
+            return a.id - b.id;
           });
           
           // Separate tasks by dependencies and parent relationships
@@ -289,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const tasksWithDependencies = sortedTasks.filter(task => task.dependsOnTaskId);
           
           // Helper function to create a task with parent mapping
-          const createTaskFromTemplate = async (templateTask: any, parentTaskId?: number) => {
+          const createTaskFromTemplate = async (templateTask: any, parentTaskId?: number, taskIndex?: number) => {
             let taskDueDate = null;
             
             // Check if this is a child task under "Generate Database Reports and Documents for Preliminary Packet"
@@ -342,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               parentTaskId: mappedParentTaskId,
               milestoneId: milestone?.id || null,
               level: templateTask.level || 0,
-              sortOrder: templateTask.sortOrder || 0,
+              sortOrder: taskIndex !== undefined ? taskIndex : (templateTask.sortOrder || 0),
               daysFromMeeting: templateTask.daysFromMeeting
             }, userId);
             
@@ -360,15 +355,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const parentTasks = tasksWithoutDependencies.filter(task => !task.parentTaskId);
           const childTasks = tasksWithoutDependencies.filter(task => task.parentTaskId);
           
-          // Create parent tasks first
-          for (const templateTask of parentTasks) {
+          // Create parent tasks first with proper sort order
+          for (let i = 0; i < parentTasks.length; i++) {
+            const templateTask = parentTasks[i];
             // Skip tasks with empty or null titles
             if (!templateTask.title || templateTask.title.trim() === '') {
               console.log('Skipping template task with empty title:', templateTask);
               continue;
             }
             
-            await createTaskFromTemplate(templateTask);
+            await createTaskFromTemplate(templateTask, undefined, i);
             processedTaskIds.add(templateTask.id);
           }
           
@@ -380,7 +376,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const currentPass = [...remainingChildTasks];
             remainingChildTasks = [];
             
-            for (const templateTask of currentPass) {
+            for (let i = 0; i < currentPass.length; i++) {
+              const templateTask = currentPass[i];
               // Skip tasks with empty or null titles
               if (!templateTask.title || templateTask.title.trim() === '') {
                 continue;
@@ -390,7 +387,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const parentCreated = taskMapping.has(templateTask.parentTaskId);
               
               if (parentCreated) {
-                await createTaskFromTemplate(templateTask);
+                // Use original position in sorted tasks for sort order
+                const originalIndex = sortedTasks.findIndex(t => t.id === templateTask.id);
+                await createTaskFromTemplate(templateTask, undefined, originalIndex);
                 processedTaskIds.add(templateTask.id);
               } else {
                 // Parent not created yet, try in next pass
@@ -407,7 +406,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Second pass: Process tasks with dependencies
-          for (const templateTask of tasksWithDependencies) {
+          for (let i = 0; i < tasksWithDependencies.length; i++) {
+            const templateTask = tasksWithDependencies[i];
             let taskDueDate = null;
             
             // Find the dependent task from already created tasks
@@ -450,6 +450,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const mappedParentTaskId = templateTask.parentTaskId ? 
               taskMapping.get(templateTask.parentTaskId) : null;
             
+            // Get original index in sorted tasks for sort order
+            const originalIndex = sortedTasks.findIndex(t => t.id === templateTask.id);
+            
             const task = await storage.createTask({
               title: templateTask.title.trim(),
               description: templateTask.description || '',
@@ -463,7 +466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               parentTaskId: mappedParentTaskId,
               milestoneId: milestone?.id || null,
               level: templateTask.level || 0,
-              sortOrder: templateTask.sortOrder || 0,
+              sortOrder: originalIndex >= 0 ? originalIndex : (templateTask.sortOrder || 0),
               dependsOnTaskId: dependentTaskId, // Use mapped created task ID
               daysFromMeeting: null // Dependent tasks don't use days from meeting
             }, userId);
