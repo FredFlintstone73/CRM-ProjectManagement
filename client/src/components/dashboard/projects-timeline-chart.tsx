@@ -206,13 +206,24 @@ export default function ProjectsTimelineChart({
     if (selectedPeriod === "next-1-month") {
       const thirtyDaysEnd = addDays(now, 30);
       
-      const weeks = eachWeekOfInterval(
+      // Debug: let's see what weeks we're generating
+      console.log('Timeline Chart Debug - Next 30 Days:', {
+        now: now.toISOString(),
+        thirtyDaysEnd: thirtyDaysEnd.toISOString(),
+        startForWeeks: now.toISOString(),
+        endForWeeks: thirtyDaysEnd.toISOString()
+      });
+      
+      // Get all weeks and limit to exactly 5 weeks max for 30-day period
+      const allWeeks = eachWeekOfInterval(
         { start: now, end: thirtyDaysEnd },
         { weekStartsOn: 1 } // Monday = 1
-      ).filter(weekStart => {
-        // Only include weeks that start within our 30-day range
-        return weekStart <= thirtyDaysEnd;
-      });
+      );
+      
+      console.log('All weeks generated:', allWeeks.map(w => w.toISOString()));
+      
+      // For 30 days from July 21, we should only have 5 weeks max
+      const weeks = allWeeks.slice(0, 5);
       
       return weeks.map((weekStart, index) => {
         const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
