@@ -400,10 +400,13 @@ export default function ProjectsTimelineChart({
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
             <CardTitle>
-              {selectedPeriod === "custom-range" && customStartDate && customEndDate
-                ? `Meeting Types for ${format(new Date(customStartDate), 'MMM d, yyyy')} to ${format(new Date(customEndDate), 'MMM d, yyyy')}`
-                : "Upcoming Progress Meetings"
-              }
+              {(() => {
+                console.log('Title Debug:', { selectedPeriod, customStartDate, customEndDate });
+                if (selectedPeriod === "custom-range" && customStartDate && customEndDate) {
+                  return `Meeting Types for ${format(new Date(customStartDate), 'MMM d, yyyy')} to ${format(new Date(customEndDate), 'MMM d, yyyy')}`;
+                }
+                return "Upcoming Progress Meetings";
+              })()}
             </CardTitle>
           </div>
           <div className="flex items-center gap-2">
