@@ -244,18 +244,34 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
             console.log('Chevron clicked - current state:', isCollapsed);
             toggleCollapse();
           }}
+          style={{ zIndex: 1000 }}
         >
-          <span className="text-slate-300 text-base font-mono select-none">
-            {console.log('Chevron - isCollapsed:', isCollapsed, 'showing:', isCollapsed ? '>' : '<')}
-            {isCollapsed ? '>' : '<'}
-          </span>
+          <span 
+            className="text-slate-300 text-base font-mono select-none"
+            dangerouslySetInnerHTML={{
+              __html: isCollapsed ? '&#62;' : '&#60;'
+            }}
+          />
         </div>
         
         {/* Resize Drag Area (only when not collapsed) */}
         {!isCollapsed && (
           <div
             className="absolute top-0 left-0 w-full h-full cursor-col-resize hover:bg-slate-600/50 transition-colors"
-            onMouseDown={handleMouseDown}
+            onMouseDown={(e) => {
+              // Only trigger resize if not clicking on the chevron
+              const rect = e.currentTarget.getBoundingClientRect();
+              const centerX = rect.left + rect.width / 2;
+              const centerY = rect.top + rect.height / 2;
+              const clickDistance = Math.sqrt(
+                Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2)
+              );
+              
+              // If click is far from center, allow resize
+              if (clickDistance > 20) {
+                handleMouseDown(e);
+              }
+            }}
             style={{ zIndex: 998 }}
           />
         )}
