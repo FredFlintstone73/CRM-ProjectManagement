@@ -749,13 +749,12 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Project Tasks</h2>
+        <h2 className="text-[16px] font-bold">Project Tasks</h2>
         <Button onClick={openSectionDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Add Section
         </Button>
       </div>
-
       <div className="space-y-1">
         {sections.map(section => {
           const sectionTasks = buildTaskHierarchy(section.id);
@@ -849,7 +848,6 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
           );
         })}
       </div>
-
       {/* Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
         <DialogContent className="max-w-md" aria-describedby="task-dialog-description">
@@ -946,7 +944,6 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
           </div>
         </DialogContent>
       </Dialog>
-
       {/* Section Dialog */}
       <Dialog open={isSectionDialogOpen} onOpenChange={setIsSectionDialogOpen}>
         <DialogContent className="max-w-md" aria-describedby="section-dialog-description">
@@ -985,7 +982,6 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
           </div>
         </DialogContent>
       </Dialog>
-
       {/* Delete Confirmation */}
       <AlertDialog open={deleteTaskId !== null} onOpenChange={() => setDeleteTaskId(null)}>
         <AlertDialogContent>
