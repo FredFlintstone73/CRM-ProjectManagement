@@ -821,7 +821,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                         variant="outline" 
                         size="sm"
                         onClick={() => openTaskDialog(section.id)}
-                        className="pl-[6px] pr-[6px] ml-[-16px]"
+                        className="pl-[6px] pr-[6px] ml-[5px] mr-[5px]"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Task
