@@ -115,17 +115,30 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
       <div className="sidebar-nav flex flex-col flex-grow overflow-hidden h-full">
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-white/10">
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} flex-1`}>
             <div className="p-2 bg-primary/10 rounded-lg">
               <Building2 size={24} className="text-primary" />
             </div>
             {!isCollapsed && (
-              <div>
+              <div className="flex-1">
                 <h1 className="text-lg font-bold text-white">ClientHub</h1>
                 <p className="text-xs text-sidebar-foreground/70">CRM Platform</p>
               </div>
             )}
           </div>
+          
+          {/* Collapse/Expand Button */}
+          <button
+            onClick={toggleCollapse}
+            className="ml-2 p-1.5 hover:bg-slate-700 rounded-md transition-colors"
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? (
+              <ChevronRight size={18} className="text-slate-300" />
+            ) : (
+              <ChevronLeft size={18} className="text-slate-300" />
+            )}
+          </button>
         </div>
         
         {/* Navigation */}
@@ -225,36 +238,18 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
         </div>
       </div>
       
-      {/* Resize Handle with Collapse Button */}
-      <div
-        className="absolute top-0 right-0 w-6 h-full transition-colors"
-        style={{ 
-          backgroundColor: '#1e293b',
-          zIndex: 999 
-        }}
-      >
-        {/* Collapse/Expand Button - Always Visible */}
-        <div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 rounded-full cursor-pointer transition-colors border border-slate-500"
-          onClick={toggleCollapse}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {isCollapsed ? (
-            <ChevronRight size={16} className="text-white" />
-          ) : (
-            <ChevronLeft size={16} className="text-white" />
-          )}
-        </div>
-        
-        {/* Resize Drag Area (only when not collapsed) */}
-        {!isCollapsed && (
-          <div
-            className="absolute top-0 left-0 w-full h-full cursor-col-resize hover:bg-slate-600/30 transition-colors"
-            onMouseDown={handleMouseDown}
-            style={{ zIndex: -1 }}
-          />
-        )}
-      </div>
+      {/* Resize Handle */}
+      {!isCollapsed && (
+        <div
+          className="absolute top-0 right-0 w-4 h-full cursor-col-resize transition-colors"
+          style={{ 
+            backgroundColor: '#1e293b',
+            zIndex: 999 
+          }}
+          onMouseDown={handleMouseDown}
+          title="Drag to resize sidebar"
+        />
+      )}
     </div>
   );
 }
