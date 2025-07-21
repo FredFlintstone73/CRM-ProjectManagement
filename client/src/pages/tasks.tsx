@@ -766,18 +766,11 @@ export default function Tasks() {
               ))}
             </div>
           ) : (
-            <div className="space-y-0" style={{
-              '--status-width': '40px',
-              '--priority-width': '80px', 
-              '--title-width': '50%',
-              '--assignee-width': '20%',
-              '--duedate-width': '100px',
-              '--actions-width': '100px'
-            } as React.CSSProperties}>
+            <div className="space-y-4">
               {/* Column Headers */}
-              <div className="flex items-center bg-gray-50 p-3 rounded-t-lg border gap-4">
-                <div className="text-xs font-medium text-gray-600 text-center" style={{width: 'var(--status-width)'}}>Status</div>
-                <div className="flex-none" style={{width: 'var(--priority-width)'}}>
+              <div className="grid grid-cols-12 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
+                <div className="col-span-1 text-xs font-medium text-gray-600">Status</div>
+                <div className="col-span-1 text-center">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -787,7 +780,7 @@ export default function Tasks() {
                     Priority {getSortIcon('priority')}
                   </Button>
                 </div>
-                <div className="flex-none" style={{width: 'var(--title-width)'}}>
+                <div className="col-span-4">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -797,7 +790,7 @@ export default function Tasks() {
                     Title {getSortIcon('title')}
                   </Button>
                 </div>
-                <div className="flex-none" style={{width: 'var(--assignee-width)'}}>
+                <div className="col-span-3">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -807,7 +800,7 @@ export default function Tasks() {
                     Assignee {getSortIcon('assignee')}
                   </Button>
                 </div>
-                <div className="flex-none" style={{width: 'var(--duedate-width)'}}>
+                <div className="col-span-2">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -817,14 +810,16 @@ export default function Tasks() {
                     Due Date {getSortIcon('dueDate')}
                   </Button>
                 </div>
-                <div className="text-xs font-medium text-gray-600 text-center" style={{width: 'var(--actions-width)'}}>Actions</div>
+                <div className="col-span-1 text-xs font-medium text-gray-600 text-center">Actions</div>
               </div>
               
               {/* Task Rows */}
-              {filteredAndSortedTasks.map((task, index) => (
-                <div key={task.id} className={`flex items-center p-3 border-l border-r border-b gap-4 hover:bg-gray-50 transition-colors ${index === filteredAndSortedTasks.length - 1 ? 'rounded-b-lg' : ''}`}>
+              {filteredAndSortedTasks.map((task) => (
+                <Card key={task.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-3">
+                    <div className="grid grid-cols-12 gap-4 items-center">
                       {/* Status Column */}
-                      <div className="flex justify-center" style={{width: 'var(--status-width)'}}>
+                      <div className="col-span-1 flex justify-center">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -841,7 +836,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Priority Column */}
-                      <div className="flex justify-center" style={{width: 'var(--priority-width)'}}>
+                      <div className="col-span-1 flex justify-center">
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
                             taskId={task.id} 
@@ -856,7 +851,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Title Column */}
-                      <div className="flex-none" style={{width: 'var(--title-width)'}}>
+                      <div className="col-span-4">
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
@@ -868,7 +863,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Assignee Column */}
-                      <div className="flex-none" style={{width: 'var(--assignee-width)'}}>
+                      <div className="col-span-3">
                         {getTaskAssignedMembers(task).length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {getTaskAssignedMembers(task).map(member => (
@@ -882,7 +877,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Due Date Column */}
-                      <div className="flex-none" style={{width: 'var(--duedate-width)'}}>
+                      <div className="col-span-2">
                         {task.dueDate && (
                           <Badge {...getDueDateBadgeProps(task.dueDate, task.status === 'completed')} className="text-xs">
                             <CalendarDays className="w-3 h-3 mr-1" />
@@ -892,7 +887,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Actions Column */}
-                      <div className="flex gap-1 justify-center" style={{width: 'var(--actions-width)'}}>
+                      <div className="col-span-1 flex gap-1 justify-center">
                         <Button
                           variant="outline"
                           size="sm"
@@ -911,7 +906,9 @@ export default function Tasks() {
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
-                </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
