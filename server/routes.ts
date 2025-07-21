@@ -86,17 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const start = new Date(startDate as string);
       const end = new Date(endDate as string);
       
-      // Debug logging
-      console.log('Projects Due API Debug:', {
-        rawStartDate: startDate,
-        rawEndDate: endDate,
-        parsedStart: start.toISOString(),
-        parsedEnd: end.toISOString()
-      });
-      
       const projects = await storage.getProjectsDueSoon(start, end);
-      
-      console.log('Projects found:', projects.length);
       
       res.json(projects);
     } catch (error) {

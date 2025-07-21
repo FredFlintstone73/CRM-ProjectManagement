@@ -86,6 +86,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
       if (selectedPeriod === "next-1-month") {
         console.log('Next 30 Days Debug:', {
           selectedPeriod,
+          today: new Date().toISOString(),
           actualStartDate: actualStartDate.toISOString(),
           actualEndDate: actualEndDate.toISOString(),
           currentRange: currentRange
