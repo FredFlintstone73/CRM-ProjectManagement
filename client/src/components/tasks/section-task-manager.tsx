@@ -628,7 +628,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
             <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="ghost"
-                className={`text-left hover:text-blue-600 transition-colors task-title p-0 h-auto justify-start ${
+                className={`text-left hover:text-blue-600 transition-colors task-title p-0 h-auto justify-start pl-[6px] pr-[6px] ${
                   isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
                 }`}
                 onClick={() => {
