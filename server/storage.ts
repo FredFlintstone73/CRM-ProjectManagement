@@ -142,7 +142,7 @@ export interface IStorage {
   }>;
 
   // Project due date operations
-  getProjectsDueSoon(startDate: Date, endDate: Date): Promise<Project[]>;
+  getProjectsDueSoon(startDate: Date, endDate: Date): Promise<(Project & { progress: number })[]>;
 
   // Project comment operations
   getProjectComments(projectId: number): Promise<ProjectComment[]>;
@@ -1464,10 +1464,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Project due date operations
-  async getProjectsDueSoon(startDate: Date, endDate: Date): Promise<Project[]> {
-    return await db
-      .select()
+  async getProjectsDueSoon(startDate: Date, endDate: Date): Promise<(Project & { progress: number })[]> {
+    const projectsWithTasks = await db
+      .select({
+        id: projects.id,
+        name: projects.name,
+        description: projects.description,
+        status: projects.status,
+        dueDate: projects.dueDate,
+        clientId: projects.clientId,
+        createdAt: projects.createdAt,
+        updatedAt: projects.updatedAt,
+        totalTasks: sql<number>`COUNT(${tasks.id})`,
+        completedTasks: sql<number>`COUNT(CASE WHEN ${tasks.status} = 'completed' THEN 1 END)`,
+      })
       .from(projects)
+      .leftJoin(tasks, eq(tasks.projectId, projects.id))
       .where(
         and(
           sql`${projects.dueDate} BETWEEN ${startDate} AND ${endDate}`,
@@ -1477,7 +1489,15 @@ export class DatabaseStorage implements IStorage {
           )
         )
       )
+      .groupBy(projects.id)
       .orderBy(projects.dueDate);
+
+    return projectsWithTasks.map(project => ({
+      ...project,
+      progress: project.totalTasks > 0 
+        ? Math.round((project.completedTasks / project.totalTasks) * 100)
+        : 0
+    }));
   }
 
   // Project comment operations
