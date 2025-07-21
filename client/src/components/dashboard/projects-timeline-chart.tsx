@@ -233,7 +233,7 @@ export default function ProjectsTimelineChart({
         };
         
         return {
-          period: `Week ${index + 1}`,
+          period: format(weekStart, 'M/d'), // Show the Monday date (e.g., "7/21", "7/28")
           ...projectCounts,
           total: weekProjects.length,
           projects: weekProjects,
