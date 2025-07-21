@@ -41,6 +41,18 @@ const PROJECT_TYPE_LABELS = {
   tar: 'TAR'
 };
 
+// Helper function to detect project type from project name
+const getProjectTypeFromName = (projectName: string): string => {
+  const name = projectName.toLowerCase();
+  if (name.startsWith('frm')) return 'frm';
+  if (name.startsWith('im')) return 'im';
+  if (name.startsWith('ipu')) return 'ipu';
+  if (name.startsWith('csr')) return 'csr';
+  if (name.startsWith('gpo')) return 'gpo';
+  if (name.startsWith('tar')) return 'tar';
+  return 'unknown';
+};
+
 interface ProjectsTimelineChartProps {
   selectedPeriod: string;
   onPeriodChange: (period: string) => void;
@@ -120,6 +132,16 @@ export default function ProjectsTimelineChart({
   const getChartData = (): TimelineData[] => {
     const now = new Date();
     
+    // Debug: Log projects and their detected types
+    console.log('=== TIMELINE CHART DEBUG ===');
+    console.log('Projects:', projects);
+    if (projects) {
+      projects.forEach(p => {
+        console.log(`Project: "${p.name}" -> Type: ${getProjectTypeFromName(p.name)}`);
+      });
+    }
+    console.log('Selected Period:', selectedPeriod);
+    
     // For "This Week", show Monday through Friday
     if (selectedPeriod === "next-1-week") {
       const weekStart = startOfWeek(now, { weekStartsOn: 1 });
@@ -134,12 +156,12 @@ export default function ProjectsTimelineChart({
         ) || [];
         
         const projectCounts = {
-          frm: dayProjects.filter(p => p.projectType === 'frm').length,
-          im: dayProjects.filter(p => p.projectType === 'im').length,
-          ipu: dayProjects.filter(p => p.projectType === 'ipu').length,
-          csr: dayProjects.filter(p => p.projectType === 'csr').length,
-          gpo: dayProjects.filter(p => p.projectType === 'gpo').length,
-          tar: dayProjects.filter(p => p.projectType === 'tar').length,
+          frm: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'frm').length,
+          im: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'im').length,
+          ipu: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'ipu').length,
+          csr: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'csr').length,
+          gpo: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'gpo').length,
+          tar: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'tar').length,
         };
         
         return {
@@ -169,12 +191,12 @@ export default function ProjectsTimelineChart({
         ) || [];
         
         const projectCounts = {
-          frm: dayProjects.filter(p => p.projectType === 'frm').length,
-          im: dayProjects.filter(p => p.projectType === 'im').length,
-          ipu: dayProjects.filter(p => p.projectType === 'ipu').length,
-          csr: dayProjects.filter(p => p.projectType === 'csr').length,
-          gpo: dayProjects.filter(p => p.projectType === 'gpo').length,
-          tar: dayProjects.filter(p => p.projectType === 'tar').length,
+          frm: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'frm').length,
+          im: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'im').length,
+          ipu: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'ipu').length,
+          csr: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'csr').length,
+          gpo: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'gpo').length,
+          tar: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'tar').length,
         };
         
         return {
@@ -204,12 +226,12 @@ export default function ProjectsTimelineChart({
         }) || [];
         
         const projectCounts = {
-          frm: weekProjects.filter(p => p.projectType === 'frm').length,
-          im: weekProjects.filter(p => p.projectType === 'im').length,
-          ipu: weekProjects.filter(p => p.projectType === 'ipu').length,
-          csr: weekProjects.filter(p => p.projectType === 'csr').length,
-          gpo: weekProjects.filter(p => p.projectType === 'gpo').length,
-          tar: weekProjects.filter(p => p.projectType === 'tar').length,
+          frm: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'frm').length,
+          im: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'im').length,
+          ipu: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'ipu').length,
+          csr: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'csr').length,
+          gpo: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'gpo').length,
+          tar: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'tar').length,
         };
         
         return {
@@ -237,12 +259,12 @@ export default function ProjectsTimelineChart({
           ) || [];
           
           const projectCounts = {
-            frm: dayProjects.filter(p => p.projectType === 'frm').length,
-            im: dayProjects.filter(p => p.projectType === 'im').length,
-            ipu: dayProjects.filter(p => p.projectType === 'ipu').length,
-            csr: dayProjects.filter(p => p.projectType === 'csr').length,
-            gpo: dayProjects.filter(p => p.projectType === 'gpo').length,
-            tar: dayProjects.filter(p => p.projectType === 'tar').length,
+            frm: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'frm').length,
+            im: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'im').length,
+            ipu: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'ipu').length,
+            csr: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'csr').length,
+            gpo: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'gpo').length,
+            tar: dayProjects.filter(p => getProjectTypeFromName(p.name) === 'tar').length,
           };
           
           return {
@@ -270,12 +292,12 @@ export default function ProjectsTimelineChart({
           }) || [];
           
           const projectCounts = {
-            frm: weekProjects.filter(p => p.projectType === 'frm').length,
-            im: weekProjects.filter(p => p.projectType === 'im').length,
-            ipu: weekProjects.filter(p => p.projectType === 'ipu').length,
-            csr: weekProjects.filter(p => p.projectType === 'csr').length,
-            gpo: weekProjects.filter(p => p.projectType === 'gpo').length,
-            tar: weekProjects.filter(p => p.projectType === 'tar').length,
+            frm: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'frm').length,
+            im: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'im').length,
+            ipu: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'ipu').length,
+            csr: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'csr').length,
+            gpo: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'gpo').length,
+            tar: weekProjects.filter(p => getProjectTypeFromName(p.name) === 'tar').length,
           };
           
           return {
@@ -295,12 +317,12 @@ export default function ProjectsTimelineChart({
         ) || [];
         
         const projectCounts = {
-          frm: monthProjects.filter(p => p.projectType === 'frm').length,
-          im: monthProjects.filter(p => p.projectType === 'im').length,
-          ipu: monthProjects.filter(p => p.projectType === 'ipu').length,
-          csr: monthProjects.filter(p => p.projectType === 'csr').length,
-          gpo: monthProjects.filter(p => p.projectType === 'gpo').length,
-          tar: monthProjects.filter(p => p.projectType === 'tar').length,
+          frm: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'frm').length,
+          im: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'im').length,
+          ipu: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'ipu').length,
+          csr: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'csr').length,
+          gpo: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'gpo').length,
+          tar: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'tar').length,
         };
         
         return {
@@ -320,12 +342,12 @@ export default function ProjectsTimelineChart({
       ) || [];
       
       const projectCounts = {
-        frm: monthProjects.filter(p => p.projectType === 'frm').length,
-        im: monthProjects.filter(p => p.projectType === 'im').length,
-        ipu: monthProjects.filter(p => p.projectType === 'ipu').length,
-        csr: monthProjects.filter(p => p.projectType === 'csr').length,
-        gpo: monthProjects.filter(p => p.projectType === 'gpo').length,
-        tar: monthProjects.filter(p => p.projectType === 'tar').length,
+        frm: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'frm').length,
+        im: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'im').length,
+        ipu: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'ipu').length,
+        csr: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'csr').length,
+        gpo: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'gpo').length,
+        tar: monthProjects.filter(p => getProjectTypeFromName(p.name) === 'tar').length,
       };
       
       return {
