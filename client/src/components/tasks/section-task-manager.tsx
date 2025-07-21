@@ -792,7 +792,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                         <div className="h-6 w-6 flex items-center justify-center">
                           {isSectionExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                         </div>
-                        <CardTitle className="section-title">{section.title}</CardTitle>
+                        <CardTitle className="font-semibold tracking-tight section-title text-[14px]">{section.title}</CardTitle>
                         <div className="flex items-center gap-3">
                           <div className="w-20 bg-gray-200 rounded-full h-2">
                             <div 
