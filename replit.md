@@ -146,8 +146,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Timeline Chart Bug**: ProjectsTimelineChart was using `startOfMonth(now)` (July 1st) instead of today's date for "Next 30 Days" filtering
 - **Shared Query Cache Issue**: Both components shared the same query cache key but used conflicting date logic, causing incorrect API calls
 - **Date Logic Synchronization**: Updated timeline chart to use actual 30-day range from current date (today + 30 days) instead of month-based calculation
+- **Week Display Issue**: Fixed chart showing 6 weeks instead of 5 by limiting `eachWeekOfInterval` results to maximum 5 weeks for 30-day period
 - **Database Verification**: Confirmed TAR project (due August 8, 2025) properly appears in "Next 30 Days" filter as expected
-- **User Verification**: "Next 30 Days" filter now correctly displays projects due within the next 30 days from today's date
+- **User Verification**: "Next 30 Days" filter now correctly displays projects due within the next 30 days from today's date with proper 5-week timeline display
 - **Performance Impact**: Eliminated incorrect API calls and ensured consistent date filtering across dashboard components
 
 ### Ultra-Fast Task Completion Progress Calculations (July 21, 2025)
