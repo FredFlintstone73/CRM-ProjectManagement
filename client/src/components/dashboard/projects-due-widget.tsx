@@ -81,16 +81,25 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
         startDate: actualStartDate.toISOString(),
         endDate: actualEndDate.toISOString(),
       });
-      console.log('Dashboard API call:', `/api/dashboard/projects-due?${params}`);
+      console.log('=== DASHBOARD API CALL START ===');
+      console.log('API URL:', `/api/dashboard/projects-due?${params}`);
+      console.log('Date range:', { startDate: actualStartDate.toISOString(), endDate: actualEndDate.toISOString() });
+      
       const response = await fetch(`/api/dashboard/projects-due?${params}`, {
         credentials: "include",
       });
+      
+      console.log('Response status:', response.status, response.statusText);
+      
       if (!response.ok) {
         console.error('Dashboard API error:', response.status, response.statusText);
         throw new Error('Failed to fetch projects due soon');
       }
+      
       const data = await response.json();
-      console.log('Dashboard API response:', data);
+      console.log('Dashboard API response data:', data);
+      console.log('Projects count:', data.length);
+      console.log('=== DASHBOARD API CALL END ===');
       return data;
     },
   });
@@ -163,6 +172,8 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
               {/* Debug info */}
               <div className="text-xs text-gray-500 mt-1">
                 Debug: isLoading={isLoading.toString()}, error={error?.toString() || 'null'}, projects={projects ? `${projects.length} items` : 'null'}
+                <br />Range: {actualStartDate.toISOString()} to {actualEndDate.toISOString()}
+                <br />Period: {selectedPeriod}
               </div>
             </div>
 
