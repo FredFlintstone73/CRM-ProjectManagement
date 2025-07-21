@@ -141,6 +141,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Critical "Next 30 Days" Date Filter Bug Fix (July 21, 2025)
+- **Root Cause Resolution**: Fixed critical date calculation conflict between ProjectsTimelineChart and ProjectsDueWidget components
+- **Timeline Chart Bug**: ProjectsTimelineChart was using `startOfMonth(now)` (July 1st) instead of today's date for "Next 30 Days" filtering
+- **Shared Query Cache Issue**: Both components shared the same query cache key but used conflicting date logic, causing incorrect API calls
+- **Date Logic Synchronization**: Updated timeline chart to use actual 30-day range from current date (today + 30 days) instead of month-based calculation
+- **Database Verification**: Confirmed TAR project (due August 8, 2025) properly appears in "Next 30 Days" filter as expected
+- **User Verification**: "Next 30 Days" filter now correctly displays projects due within the next 30 days from today's date
+- **Performance Impact**: Eliminated incorrect API calls and ensured consistent date filtering across dashboard components
+
 ### Ultra-Fast Task Completion Progress Calculations (July 21, 2025)
 - **Instant Progress Updates**: Optimized OptimisticTaskToggle component for immediate progress bar responsiveness
 - **Zero Delay Cache Invalidation**: Removed 100ms timeout delay, now using immediate background cache updates for maximum speed
