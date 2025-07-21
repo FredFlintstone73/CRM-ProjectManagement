@@ -368,10 +368,7 @@ export default function ProjectsTimelineChart({
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="font-semibold">{label}</p>
           <p className="text-sm text-gray-600">
-            {selectedPeriod === "custom-range" && customStartDate && customEndDate
-              ? `Meeting Types for ${format(new Date(customStartDate), 'MMM d, yyyy')} to ${format(new Date(customEndDate), 'MMM d, yyyy')}`
-              : `${data.total} meeting${data.total !== 1 ? 's' : ''} scheduled`
-            }
+            {data.total} meeting{data.total !== 1 ? 's' : ''} scheduled
           </p>
           <div className="mt-2 space-y-1">
             {Object.entries(PROJECT_TYPE_LABELS).map(([key, label]) => {
@@ -483,7 +480,10 @@ export default function ProjectsTimelineChart({
           <div>
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-center">
-                Meeting Types for {selectedPeriod.replace('-', ' ').replace('next', 'next')}
+                {selectedPeriod === "custom-range" && customStartDate && customEndDate
+                  ? `Meeting Types for ${format(new Date(customStartDate), 'MMM d, yyyy')} to ${format(new Date(customEndDate), 'MMM d, yyyy')}`
+                  : `Meeting Types for ${selectedPeriod.replace('-', ' ').replace('next', 'next')}`
+                }
               </h3>
             </div>
             
