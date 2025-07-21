@@ -225,32 +225,33 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
         </div>
       </div>
       
-      {/* Resize Handle */}
+      {/* Resize Handle with Collapse Button */}
       <div
-        className="absolute top-0 right-0 w-4 h-full cursor-pointer transition-colors"
+        className="absolute top-0 right-0 w-6 h-full transition-colors"
         style={{ 
           backgroundColor: '#1e293b',
           zIndex: 999 
         }}
-        title={isCollapsed ? "Expand sidebar" : "Collapse sidebar or drag to resize"}
       >
-        {/* Collapse/Expand Button */}
+        {/* Collapse/Expand Button - Always Visible */}
         <div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-1 hover:bg-slate-600 rounded transition-colors"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 rounded-full cursor-pointer transition-colors border border-slate-500"
           onClick={toggleCollapse}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <ChevronRight size={14} className="text-slate-300" />
+            <ChevronRight size={16} className="text-white" />
           ) : (
-            <ChevronLeft size={14} className="text-slate-300" />
+            <ChevronLeft size={16} className="text-white" />
           )}
         </div>
         
         {/* Resize Drag Area (only when not collapsed) */}
         {!isCollapsed && (
           <div
-            className="absolute top-0 left-0 w-full h-full cursor-col-resize hover:bg-slate-600/50 transition-colors"
+            className="absolute top-0 left-0 w-full h-full cursor-col-resize hover:bg-slate-600/30 transition-colors"
             onMouseDown={handleMouseDown}
+            style={{ zIndex: -1 }}
           />
         )}
       </div>
