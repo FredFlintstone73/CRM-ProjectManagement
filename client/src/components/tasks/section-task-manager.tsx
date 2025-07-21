@@ -737,7 +737,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
         </div>
         
         {hasChildren && task.children && expandedTasks.has(task.id) && (
-          <div className="space-y-2">
+          <div className="space-y-0.5">
             {task.children.map(child => renderTaskNode(child, level + 1))}
           </div>
         )}
@@ -826,6 +826,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                         variant="outline" 
                         size="sm"
                         onClick={() => openTaskDialog(section.id)}
+                        className="pl-[6px] pr-[6px]"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Task
@@ -840,7 +841,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                         No tasks in this section yet
                       </div>
                     ) : sectionTasks.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-0.5">
                         {sectionTasks.map(task => renderTaskNode(task))}
                       </div>
                     ) : null}
