@@ -194,7 +194,7 @@ export default function ProjectsDueWidget({ selectedPeriod, customStartDate, cus
                              daysUntilDue > 0 ? `${daysUntilDue} days left` :
                              `${Math.abs(daysUntilDue)} days overdue`}
                           </div>
-                          <div className="space-y-1 mt-2 w-72">
+                          <div className="space-y-1 mt-2 w-48">
                             <div className="flex justify-between text-xs">
                               <span className="text-[14px]">Progress</span>
                               <span className="text-[14px]">{project.progress}%</span>
