@@ -159,6 +159,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Conditional Logic**: Titles only show custom dates when custom-range is selected and both start/end dates are provided
 - **User Verified**: Custom date range selection now properly updates both chart and status card titles as requested
 
+### Automatic Task Reassignment on Team Member Changes (July 22, 2025)
+- **Smart Task Reassignment**: Enhanced updateContact and deleteContact methods to automatically handle task reassignments when team members are deactivated or deleted
+- **Status Change Handling**: When a team member's status changes from active to inactive/archived, all their assigned tasks automatically convert back to role assignments
+- **Deletion Protection**: Team member deletion now automatically reassigns their tasks to role assignments instead of blocking deletion
+- **Role Preservation**: System preserves the team member's role information by converting direct assignments back to role-based assignments
+- **Activity Logging**: All automatic reassignments are logged with detailed descriptions for audit trail
+- **Frontend Compatibility**: Works seamlessly with the role fallback display system showing unassigned roles with light red styling
+- **Zero Data Loss**: No task assignments are lost - they convert to role assignments that can be manually assigned to other team members
+- **User Experience**: Team member management is now friction-free while maintaining task assignment integrity
+
 ### Critical "Next 30 Days" Date Filter Bug Fix (July 21, 2025)
 - **Root Cause Resolution**: Fixed critical date calculation conflict between ProjectsTimelineChart and ProjectsDueWidget components
 - **Timeline Chart Bug**: ProjectsTimelineChart was using `startOfMonth(now)` (July 1st) instead of today's date for "Next 30 Days" filtering

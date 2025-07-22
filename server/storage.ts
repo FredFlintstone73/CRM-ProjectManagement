@@ -302,6 +302,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateContact(id: number, contact: Partial<InsertContact>): Promise<Contact> {
+    // Get the original contact for comparison
+    const originalContact = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.id, id))
+      .limit(1);
+    
+    const original = originalContact[0];
+    
     // Process date fields - convert string dates to Date objects
     const processedContact = { ...contact };
     const dateFields = [
@@ -331,18 +340,108 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contacts.id, id))
       .returning();
     
+    // Check if this is a team member status change that affects task assignments
+    if (original && original.contactType === 'team_member' && 
+        (contact.status === 'inactive' || contact.status === 'archived') && 
+        original.status === 'active') {
+      
+      console.log(`Team member ${original.firstName} ${original.lastName} (ID: ${id}) changed from active to ${contact.status}. Processing task reassignments...`);
+      
+      // Find all tasks assigned to this team member
+      const assignedTasks = await db
+        .select()
+        .from(tasks)
+        .where(sql`${id} = ANY(${tasks.assignedTo})`);
+      
+      // Convert these assignments back to role assignments if the team member had a role
+      if (original.role && assignedTasks.length > 0) {
+        for (const task of assignedTasks) {
+          // Remove this contact from assignedTo array
+          const updatedAssignedTo = Array.isArray(task.assignedTo) 
+            ? task.assignedTo.filter(contactId => contactId !== id)
+            : task.assignedTo === id ? null : task.assignedTo;
+          
+          // Add their role to assignedToRole array if not already present
+          const currentRoles = Array.isArray(task.assignedToRole) ? task.assignedToRole : (task.assignedToRole ? [task.assignedToRole] : []);
+          const updatedRoles = currentRoles.includes(original.role) ? currentRoles : [...currentRoles, original.role];
+          
+          await db
+            .update(tasks)
+            .set({
+              assignedTo: updatedAssignedTo && Array.isArray(updatedAssignedTo) && updatedAssignedTo.length > 0 ? updatedAssignedTo : null,
+              assignedToRole: updatedRoles.length > 0 ? updatedRoles : null,
+              updatedAt: new Date()
+            })
+            .where(eq(tasks.id, task.id));
+          
+          console.log(`Task ${task.id} (${task.title}) - reassigned from contact ${id} to role ${original.role}`);
+        }
+        
+        // Log activity
+        await this.createActivityLog({
+          userId: 'system',
+          action: "reassigned_tasks_to_role",
+          entityType: "contact", 
+          entityId: id,
+          description: `Reassigned ${assignedTasks.length} tasks from ${original.firstName} ${original.lastName} to role ${original.role} due to status change`,
+        });
+      }
+    }
+    
     return updatedContact;
   }
 
   async deleteContact(id: number): Promise<void> {
     try {
+      // Get the contact to be deleted for role information
+      const [contactToDelete] = await db
+        .select()
+        .from(contacts)
+        .where(eq(contacts.id, id))
+        .limit(1);
+      
       // Check if contact has assigned tasks
       const assignedTasks = await db
         .select()
         .from(tasks)
         .where(sql`${id} = ANY(${tasks.assignedTo})`);
       
-      if (assignedTasks.length > 0) {
+      // For team members with a role, automatically reassign tasks to role instead of blocking deletion
+      if (assignedTasks.length > 0 && contactToDelete?.contactType === 'team_member' && contactToDelete.role) {
+        console.log(`Reassigning ${assignedTasks.length} tasks from deleted team member ${contactToDelete.firstName} ${contactToDelete.lastName} (ID: ${id}) to role ${contactToDelete.role}`);
+        
+        for (const task of assignedTasks) {
+          // Remove this contact from assignedTo array
+          const updatedAssignedTo = Array.isArray(task.assignedTo) 
+            ? task.assignedTo.filter(contactId => contactId !== id)
+            : task.assignedTo === id ? null : task.assignedTo;
+          
+          // Add their role to assignedToRole array if not already present
+          const currentRoles = Array.isArray(task.assignedToRole) ? task.assignedToRole : (task.assignedToRole ? [task.assignedToRole] : []);
+          const updatedRoles = currentRoles.includes(contactToDelete.role) ? currentRoles : [...currentRoles, contactToDelete.role];
+          
+          await db
+            .update(tasks)
+            .set({
+              assignedTo: updatedAssignedTo && Array.isArray(updatedAssignedTo) && updatedAssignedTo.length > 0 ? updatedAssignedTo : null,
+              assignedToRole: updatedRoles.length > 0 ? updatedRoles : null,
+              updatedAt: new Date()
+            })
+            .where(eq(tasks.id, task.id));
+          
+          console.log(`Task ${task.id} (${task.title}) - reassigned from deleted contact ${id} to role ${contactToDelete.role}`);
+        }
+        
+        // Log activity
+        await this.createActivityLog({
+          userId: 'system',
+          action: "reassigned_tasks_on_deletion",
+          entityType: "contact", 
+          entityId: id,
+          description: `Reassigned ${assignedTasks.length} tasks from deleted ${contactToDelete.firstName} ${contactToDelete.lastName} to role ${contactToDelete.role}`,
+        });
+      } else if (assignedTasks.length > 0) {
+        // For non-team members or team members without roles, still block deletion
         throw new Error(`Cannot delete contact. This contact is assigned to ${assignedTasks.length} task(s). Please reassign or delete these tasks first.`);
       }
       
