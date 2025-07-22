@@ -148,13 +148,35 @@ export default function Tasks() {
 
   // Function to get family name from task's project
   const getTaskFamilyName = (task: Task): string => {
+    // No project assigned - likely a template task or standalone task
     if (!task.projectId || !projects) return '';
     
     const project = projects.find(p => p.id === task.projectId);
+    
+    // Project found but no client assigned
     if (!project?.clientId || !contacts) return '';
     
     const client = contacts.find((c: any) => c.id === project.clientId);
-    return client?.familyName || '';
+    
+    // Client not found
+    if (!client) return '';
+    
+    // If client has family name, use it
+    if (client.familyName) {
+      return client.familyName;
+    }
+    
+    // If no family name but has last name, use last name
+    if (client.lastName) {
+      return client.lastName;
+    }
+    
+    // If no last name but has first name, use first name
+    if (client.firstName) {
+      return client.firstName;
+    }
+    
+    return '';
   };
 
   // Get all assigned team members from direct assignments and role assignments
@@ -910,9 +932,15 @@ export default function Tasks() {
                       
                       {/* Family Name Column */}
                       <div className="col-span-2">
-                        <span className="text-xs text-gray-600">
-                          {getTaskFamilyName(task) || 'No Family'}
-                        </span>
+                        {getTaskFamilyName(task) ? (
+                          <span className="text-xs text-gray-900 font-medium">
+                            {getTaskFamilyName(task)}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">
+                            {task.projectId ? 'No Client' : 'Template'}
+                          </span>
+                        )}
                       </div>
                       
                       {/* Title Column */}
