@@ -270,16 +270,21 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
 
   const handleStatusToggle = (task: Task) => {
     const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+    const completedAt = newStatus === 'completed' ? new Date() : null;
     
-    // Optimistically update cache for instant feedback
-    queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-      if (!oldTasks) return oldTasks;
-      return oldTasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
-    });
+    // ULTRA-FAST optimistic updates - no unnecessary array scans
+    queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (old: Task[] | undefined) => 
+      old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
+    );
     
+    queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => 
+      old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
+    );
+    
+    // Background mutation - fire and forget
     updateTaskMutation.mutate({ 
       id: task.id, 
-      data: { status: newStatus, completedAt: newStatus === 'completed' ? new Date() : null }
+      data: { status: newStatus, completedAt }
     });
   };
 

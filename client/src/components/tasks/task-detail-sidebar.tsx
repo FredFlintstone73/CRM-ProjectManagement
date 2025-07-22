@@ -82,35 +82,47 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
   // Update task completion status
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, updates }: { taskId: number; updates: Partial<Task> }) => {
-      return apiRequest('PATCH', `/api/tasks/${taskId}`, updates);
+      const response = await apiRequest('PATCH', `/api/tasks/${taskId}`, updates);
+      return response.json();
     },
-    onSuccess: (updatedTask: Task) => {
-      // Optimistically update the cache instead of invalidating everything
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => 
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        );
-      });
+    onMutate: ({ taskId, updates }) => {
+      // Instant optimistic updates
+      const snapshot = {
+        projectTasks: queryClient.getQueryData(['/api/projects', projectId, 'tasks']),
+        allTasks: queryClient.getQueryData(['/api/tasks']),
+        selectedTask: selectedTask
+      };
       
-      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => 
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        );
-      });
+      // Update all caches immediately
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (old: Task[] | undefined) => 
+        old?.map(task => task.id === taskId ? { ...task, ...updates } : task) || old
+      );
       
-      // Update the selected task immediately
-      if (selectedTask && updatedTask.id === selectedTask.id) {
-        setSelectedTask(prev => prev ? { ...prev, ...updatedTask } : prev);
+      queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => 
+        old?.map(task => task.id === taskId ? { ...task, ...updates } : task) || old
+      );
+      
+      // Update selected task state instantly
+      if (selectedTask && taskId === selectedTask.id) {
+        setSelectedTask(prev => prev ? { ...prev, ...updates } : prev);
       }
       
-      // Also update any milestone/section progress queries
-      queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId] });
-      
-      // Don't call onTaskUpdate to avoid refresh
-      // onTaskUpdate?.();
+      return snapshot;
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context) {
+        queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context.projectTasks);
+        queryClient.setQueryData(['/api/tasks'], context.allTasks);
+        setSelectedTask(context.selectedTask);
+      }
+    },
+    onSettled: () => {
+      // Deferred background refresh
+      requestIdleCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId] });
+      });
     }
   });
 

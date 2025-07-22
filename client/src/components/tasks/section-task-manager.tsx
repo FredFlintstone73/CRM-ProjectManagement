@@ -241,61 +241,64 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
     },
   });
 
-  // Toggle task completion
+  // ULTRA-FAST task completion toggle
   const toggleTaskCompletion = useMutation({
     mutationFn: async (task: Task) => {
       const newStatus = task.status === 'completed' ? 'todo' : 'completed';
-      
-      // Optimistically update the cache immediately for instant UI feedback
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
-      });
-      
-      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t);
-      });
+      const completedAt = newStatus === 'completed' ? new Date() : null;
       
       const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: newStatus,
+        completedAt
       });
-      const updatedTask = await response.json();
-      return { updatedTask, originalTask: task };
+      return response.json();
     },
-    onSuccess: ({ updatedTask }) => {
-      // Update cache with server response for any cascading changes
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        // Find and update the specific task and any cascaded changes
-        const updatedTasks = [...oldTasks];
-        const taskIndex = updatedTasks.findIndex(t => t.id === updatedTask.id);
-        if (taskIndex >= 0) {
-          updatedTasks[taskIndex] = updatedTask;
-        }
-        return updatedTasks;
-      });
+    onMutate: (task) => {
+      const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+      const completedAt = newStatus === 'completed' ? new Date() : null;
       
-      // Only invalidate tasks query for cascading updates, not project tasks
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      // Snapshot for rollback
+      const snapshot = {
+        projectTasks: queryClient.getQueryData(['/api/projects', projectId, 'tasks']),
+        allTasks: queryClient.getQueryData(['/api/tasks']),
+        dashboardProjects: queryClient.getQueryData(['/api/dashboard/projects-due'])
+      };
       
-      // Invalidate milestones only for progress bar updates (less frequent)
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
-      }, 100);
+      // INSTANT cache updates - no waiting for server response
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (old: Task[] | undefined) => 
+        old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
+      );
+      
+      queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => 
+        old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
+      );
+      
+      // Instant progress update for maximum responsiveness
+      queryClient.setQueryData(['/api/dashboard/projects-due'], (old: any[] | undefined) => 
+        old?.map(project => project.id === projectId && project.tasks ? {
+          ...project,
+          progress: Math.round((project.tasks.filter((t: any) => 
+            t.id === task.id ? newStatus === 'completed' : t.status === 'completed'
+          ).length / project.tasks.length) * 100)
+        } : project) || old
+      );
+      
+      return snapshot;
     },
-    onError: (error, task) => {
-      // Revert optimistic update on error
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(t => t.id === task.id ? task : t);
-      });
-      
-      queryClient.setQueryData(['/api/tasks'], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(t => t.id === task.id ? task : t);
-      });
+    onError: (err, task, context) => {
+      // Instant rollback
+      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context?.projectTasks);
+      queryClient.setQueryData(['/api/tasks'], context?.allTasks);
+      queryClient.setQueryData(['/api/dashboard/projects-due'], context?.dashboardProjects);
     },
+    onSettled: () => {
+      // Background refresh for cascading updates using idle time
+      requestIdleCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
+      });
+    }
   });
 
   const resetTaskForm = () => {
