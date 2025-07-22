@@ -808,7 +808,7 @@ export default function Tasks() {
           ) : (
             <div className="space-y-4">
               {/* Column Headers */}
-              <div className="grid grid-cols-13 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
+              <div className="grid grid-cols-12 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
                 <div className="col-span-1 text-xs font-medium text-gray-600">Status</div>
                 <div className="col-span-1 text-center">
                   <Button
@@ -823,7 +823,7 @@ export default function Tasks() {
                 <div className="col-span-1 text-xs font-medium text-gray-600">
                   Second Client
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-3">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -860,7 +860,7 @@ export default function Tasks() {
               {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-3">
-                    <div className="grid grid-cols-13 gap-4 items-center">
+                    <div className="grid grid-cols-12 gap-4 items-center">
                       {/* Status Column */}
                       <div className="col-span-1 flex justify-center">
                         <Button
@@ -901,7 +901,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Title Column */}
-                      <div className="col-span-4">
+                      <div className="col-span-3">
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
