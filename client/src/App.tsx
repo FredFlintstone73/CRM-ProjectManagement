@@ -18,7 +18,7 @@ import TaskDetail from "@/pages/task-detail";
 import TaskDetailSimple from "@/pages/task-detail-simple";
 import Tasks from "@/pages/tasks";
 import Sidebar from "@/components/layout/sidebar";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
+
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -58,7 +58,7 @@ function Router() {
                 <Route component={NotFound} />
               </Switch>
             </div>
-            <FloatingActionButton />
+
           </div>
         </>
       )}
