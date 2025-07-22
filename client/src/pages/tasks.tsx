@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Toggle } from "@/components/ui/toggle";
 
-import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays, CheckCircle, Circle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Plus, User, AlertCircle, Grid, List, Edit, Trash2, CalendarDays, CheckCircle, Circle, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 import TaskForm from "@/components/tasks/task-form";
 import { UserPriorityInput } from "@/components/tasks/user-priority-input";
@@ -51,6 +51,7 @@ export default function Tasks() {
   // Task sidebar state
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [expandedAssignments, setExpandedAssignments] = useState<Set<number>>(new Set());
 
   // Handler for opening task in sidebar
   const handleTaskClick = (task: Task) => {
@@ -67,6 +68,19 @@ export default function Tasks() {
   // Handler for task updates from sidebar
   const handleTaskUpdate = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+  };
+
+  // Toggle assignment expansion for specific task
+  const toggleAssignmentExpansion = (taskId: number) => {
+    setExpandedAssignments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
   };
 
   useEffect(() => {
@@ -810,18 +824,30 @@ export default function Tasks() {
                     
                     {getTaskAssignedMembers(task).length > 0 && (
                       <div className="flex flex-col space-y-2">
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <User className="w-4 h-4" />
-                          <span>Assigned to:</span>
+                        <div 
+                          className="flex items-center justify-between cursor-pointer text-sm text-gray-600"
+                          onClick={() => toggleAssignmentExpansion(task.id)}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <User className="w-4 h-4" />
+                            <span>Assigned to ({getTaskAssignedMembers(task).length}):</span>
+                          </div>
+                          {expandedAssignments.has(task.id) ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
                         </div>
-                        <div className="flex flex-wrap gap-1 ml-6">
-                          {getTaskAssignedMembers(task).map(member => (
-                            <Badge key={member.id} variant="secondary" className="text-xs">
-                              <User className="h-3 w-3 mr-1" />
-                              {member.firstName} {member.lastName}
-                            </Badge>
-                          ))}
-                        </div>
+                        {expandedAssignments.has(task.id) && (
+                          <div className="flex flex-wrap gap-1 ml-6">
+                            {getTaskAssignedMembers(task).map(member => (
+                              <Badge key={member.id} variant="secondary" className="text-xs">
+                                <User className="h-3 w-3 mr-1" />
+                                {member.firstName} {member.lastName}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     
@@ -982,13 +1008,28 @@ export default function Tasks() {
                       {/* Assignee Column */}
                       <div className="col-span-2">
                         {getTaskAssignedMembers(task).length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {getTaskAssignedMembers(task).map(member => (
-                              <Badge key={member.id} variant="secondary" className="text-xs">
-                                <User className="h-3 w-3 mr-1" />
-                                {member.firstName} {member.lastName}
-                              </Badge>
-                            ))}
+                          <div className="flex flex-col">
+                            <div 
+                              className="flex items-center gap-1 cursor-pointer text-xs text-gray-600"
+                              onClick={() => toggleAssignmentExpansion(task.id)}
+                            >
+                              <span>Assigned ({getTaskAssignedMembers(task).length})</span>
+                              {expandedAssignments.has(task.id) ? (
+                                <ChevronUp className="h-3 w-3" />
+                              ) : (
+                                <ChevronDown className="h-3 w-3" />
+                              )}
+                            </div>
+                            {expandedAssignments.has(task.id) && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {getTaskAssignedMembers(task).map(member => (
+                                  <Badge key={member.id} variant="secondary" className="text-xs">
+                                    <User className="h-3 w-3 mr-1" />
+                                    {member.firstName} {member.lastName}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

@@ -11,7 +11,9 @@ import {
   MessageSquare,
   ArrowLeft,
   ArrowRight,
-  Paperclip
+  Paperclip,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,6 +49,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     assignedTo: ''
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isAssignmentExpanded, setIsAssignmentExpanded] = useState(true);
 
   // Update local selected task when prop changes
   useEffect(() => {
@@ -631,69 +634,81 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
             {/* Assigned To */}
             <Card>
               <CardContent className="p-3">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span className="text-xs font-medium">Assigned To</span>
+                <div 
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => setIsAssignmentExpanded(!isAssignmentExpanded)}
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <span className="text-xs font-medium">Assigned To</span>
+                  </div>
+                  {isAssignmentExpanded ? (
+                    <ChevronUp className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  )}
                 </div>
-                <div className="mt-1">
-                  {isEditing ? (
-                    <Select
-                      value={editFormData.assignedTo}
-                      onValueChange={(value) => setEditFormData(prev => ({ ...prev, assignedTo: value }))}
-                    >
-                      <SelectTrigger className="text-xs">
-                        <SelectValue placeholder="Select assignee" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {contacts
-                          .filter(contact => contact.contactType === 'team_member' && contact.status === 'active')
-                          .map(contact => (
-                            <SelectItem key={contact.id} value={contact.id.toString()}>
-                              {contact.firstName} {contact.lastName}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                ) : (
-                  <div>
-                    {(() => {
-                      const { assignedMembers, unassignedRoles } = getTaskAssignments();
-                      const totalAssignments = assignedMembers.length + unassignedRoles.length;
-                      
-                      return totalAssignments > 0 ? (
-                        <div className="flex flex-col gap-2">
-                          <span className="text-xs text-gray-500">
-                            {totalAssignments} assignment{totalAssignments !== 1 ? 's' : ''}
-                          </span>
-                          <div className="flex flex-wrap gap-1">
-                            {assignedMembers.map(member => (
-                              <Badge key={member.id} variant="secondary" className="text-xs">
-                                <User className="h-3 w-3 mr-1" />
-                                {member.firstName} {member.lastName}
-                                {member.role && (
-                                  <span className="ml-1 text-gray-400 text-xs">
-                                    ({formatRole(member.role)})
-                                  </span>
-                                )}
-                              </Badge>
+                {isAssignmentExpanded && (
+                  <div className="mt-2">
+                    {isEditing ? (
+                      <Select
+                        value={editFormData.assignedTo}
+                        onValueChange={(value) => setEditFormData(prev => ({ ...prev, assignedTo: value }))}
+                      >
+                        <SelectTrigger className="text-xs">
+                          <SelectValue placeholder="Select assignee" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unassigned">Unassigned</SelectItem>
+                          {contacts
+                            .filter(contact => contact.contactType === 'team_member' && contact.status === 'active')
+                            .map(contact => (
+                              <SelectItem key={contact.id} value={contact.id.toString()}>
+                                {contact.firstName} {contact.lastName}
+                              </SelectItem>
                             ))}
-                            {unassignedRoles.map(role => (
-                              <Badge key={role} className="text-xs bg-red-100 text-red-800 border-red-200">
-                                <User className="h-3 w-3 mr-1" />
-                                {formatRole(role)}
-                              </Badge>
-                            ))}
+                        </SelectContent>
+                      </Select>
+                  ) : (
+                    <div>
+                      {(() => {
+                        const { assignedMembers, unassignedRoles } = getTaskAssignments();
+                        const totalAssignments = assignedMembers.length + unassignedRoles.length;
+                        
+                        return totalAssignments > 0 ? (
+                          <div className="flex flex-col gap-2">
+                            <span className="text-xs text-gray-500">
+                              {totalAssignments} assignment{totalAssignments !== 1 ? 's' : ''}
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {assignedMembers.map(member => (
+                                <Badge key={member.id} variant="secondary" className="text-xs">
+                                  <User className="h-3 w-3 mr-1" />
+                                  {member.firstName} {member.lastName}
+                                  {member.role && (
+                                    <span className="ml-1 text-gray-400 text-xs">
+                                      ({formatRole(member.role)})
+                                    </span>
+                                  )}
+                                </Badge>
+                              ))}
+                              {unassignedRoles.map(role => (
+                                <Badge key={role} className="text-xs bg-red-100 text-red-800 border-red-200">
+                                  <User className="h-3 w-3 mr-1" />
+                                  {formatRole(role)}
+                                </Badge>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-500">Unassigned</span>
-                      );
-                    })()}
+                        ) : (
+                          <span className="text-xs text-gray-500">Unassigned</span>
+                        );
+                      })()}
+                    </div>
+                  )}
                   </div>
                 )}
-              </div>
-            </CardContent>
+              </CardContent>
             </Card>
           </div>
 
