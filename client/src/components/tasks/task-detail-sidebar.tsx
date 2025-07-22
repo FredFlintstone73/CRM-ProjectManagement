@@ -532,7 +532,6 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
           </Button>
         </div>
       </div>
-
       {/* Content */}
       <div className="p-4 space-y-6">
         {/* Task Title and Status */}
@@ -559,7 +558,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                   className="text-lg font-medium"
                 />
               ) : (
-                <h3 className="text-lg font-medium leading-6">{selectedTask?.title}</h3>
+                <h3 className="font-medium text-[14px]">{selectedTask?.title}</h3>
               )}
             </div>
             
