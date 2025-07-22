@@ -635,79 +635,127 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
             <Card>
               <CardContent className="p-3">
                 <div 
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => setIsAssignmentExpanded(!isAssignmentExpanded)}
+                  className={`flex items-center justify-between ${(() => {
+                    const { assignedMembers, unassignedRoles } = getTaskAssignments();
+                    const totalAssignments = assignedMembers.length + unassignedRoles.length;
+                    return totalAssignments > 1 ? 'cursor-pointer' : '';
+                  })()}`}
+                  onClick={() => {
+                    const { assignedMembers, unassignedRoles } = getTaskAssignments();
+                    const totalAssignments = assignedMembers.length + unassignedRoles.length;
+                    if (totalAssignments > 1) {
+                      setIsAssignmentExpanded(!isAssignmentExpanded);
+                    }
+                  }}
                 >
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-gray-500" />
                     <span className="text-xs font-medium">Assigned To</span>
                   </div>
-                  {isAssignmentExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  )}
+                  {(() => {
+                    const { assignedMembers, unassignedRoles } = getTaskAssignments();
+                    const totalAssignments = assignedMembers.length + unassignedRoles.length;
+                    if (totalAssignments > 1) {
+                      return isAssignmentExpanded ? (
+                        <ChevronUp className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-gray-500" />
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
-                {isAssignmentExpanded && (
-                  <div className="mt-2">
-                    {isEditing ? (
-                      <Select
-                        value={editFormData.assignedTo}
-                        onValueChange={(value) => setEditFormData(prev => ({ ...prev, assignedTo: value }))}
-                      >
-                        <SelectTrigger className="text-xs">
-                          <SelectValue placeholder="Select assignee" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="unassigned">Unassigned</SelectItem>
-                          {contacts
-                            .filter(contact => contact.contactType === 'team_member' && contact.status === 'active')
-                            .map(contact => (
-                              <SelectItem key={contact.id} value={contact.id.toString()}>
-                                {contact.firstName} {contact.lastName}
-                              </SelectItem>
+                <div className="mt-2">
+                  {isEditing ? (
+                    <Select
+                      value={editFormData.assignedTo}
+                      onValueChange={(value) => setEditFormData(prev => ({ ...prev, assignedTo: value }))}
+                    >
+                      <SelectTrigger className="text-xs">
+                        <SelectValue placeholder="Select assignee" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {contacts
+                          .filter(contact => contact.contactType === 'team_member' && contact.status === 'active')
+                          .map(contact => (
+                            <SelectItem key={contact.id} value={contact.id.toString()}>
+                              {contact.firstName} {contact.lastName}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                ) : (
+                  <div>
+                    {(() => {
+                      const { assignedMembers, unassignedRoles } = getTaskAssignments();
+                      const totalAssignments = assignedMembers.length + unassignedRoles.length;
+                      
+                      if (totalAssignments === 0) {
+                        return <span className="text-xs text-gray-500">Unassigned</span>;
+                      }
+                      
+                      if (totalAssignments === 1) {
+                        // Single assignment - show directly without collapsible
+                        if (assignedMembers.length === 1) {
+                          const member = assignedMembers[0];
+                          return (
+                            <Badge variant="secondary" className="text-xs">
+                              <User className="h-3 w-3 mr-1" />
+                              {member.firstName} {member.lastName}
+                              {member.role && (
+                                <span className="ml-1 text-gray-400 text-xs">
+                                  ({formatRole(member.role)})
+                                </span>
+                              )}
+                            </Badge>
+                          );
+                        } else {
+                          const role = unassignedRoles[0];
+                          return (
+                            <Badge className="text-xs bg-red-100 text-red-800 border-red-200">
+                              <User className="h-3 w-3 mr-1" />
+                              {formatRole(role)}
+                            </Badge>
+                          );
+                        }
+                      }
+                      
+                      // Multiple assignments - show with collapsible behavior
+                      return isAssignmentExpanded ? (
+                        <div className="flex flex-col gap-2">
+                          <span className="text-xs text-gray-500">
+                            {totalAssignments} assignments
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {assignedMembers.map(member => (
+                              <Badge key={member.id} variant="secondary" className="text-xs">
+                                <User className="h-3 w-3 mr-1" />
+                                {member.firstName} {member.lastName}
+                                {member.role && (
+                                  <span className="ml-1 text-gray-400 text-xs">
+                                    ({formatRole(member.role)})
+                                  </span>
+                                )}
+                              </Badge>
                             ))}
-                        </SelectContent>
-                      </Select>
-                  ) : (
-                    <div>
-                      {(() => {
-                        const { assignedMembers, unassignedRoles } = getTaskAssignments();
-                        const totalAssignments = assignedMembers.length + unassignedRoles.length;
-                        
-                        return totalAssignments > 0 ? (
-                          <div className="flex flex-col gap-2">
-                            <span className="text-xs text-gray-500">
-                              {totalAssignments} assignment{totalAssignments !== 1 ? 's' : ''}
-                            </span>
-                            <div className="flex flex-wrap gap-1">
-                              {assignedMembers.map(member => (
-                                <Badge key={member.id} variant="secondary" className="text-xs">
-                                  <User className="h-3 w-3 mr-1" />
-                                  {member.firstName} {member.lastName}
-                                  {member.role && (
-                                    <span className="ml-1 text-gray-400 text-xs">
-                                      ({formatRole(member.role)})
-                                    </span>
-                                  )}
-                                </Badge>
-                              ))}
-                              {unassignedRoles.map(role => (
-                                <Badge key={role} className="text-xs bg-red-100 text-red-800 border-red-200">
-                                  <User className="h-3 w-3 mr-1" />
-                                  {formatRole(role)}
-                                </Badge>
-                              ))}
-                            </div>
+                            {unassignedRoles.map(role => (
+                              <Badge key={role} className="text-xs bg-red-100 text-red-800 border-red-200">
+                                <User className="h-3 w-3 mr-1" />
+                                {formatRole(role)}
+                              </Badge>
+                            ))}
                           </div>
-                        ) : (
-                          <span className="text-xs text-gray-500">Unassigned</span>
-                        );
-                      })()}
-                    </div>
-                  )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-500">
+                          {totalAssignments} assignments (click to expand)
+                        </span>
+                      );
+                    })()}
                   </div>
                 )}
+                </div>
               </CardContent>
             </Card>
           </div>

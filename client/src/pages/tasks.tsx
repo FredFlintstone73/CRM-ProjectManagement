@@ -824,29 +824,44 @@ export default function Tasks() {
                     
                     {getTaskAssignedMembers(task).length > 0 && (
                       <div className="flex flex-col space-y-2">
-                        <div 
-                          className="flex items-center justify-between cursor-pointer text-sm text-gray-600"
-                          onClick={() => toggleAssignmentExpansion(task.id)}
-                        >
-                          <div className="flex items-center space-x-2">
+                        {getTaskAssignedMembers(task).length === 1 ? (
+                          // Single assignment - show directly
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
                             <User className="w-4 h-4" />
-                            <span>Assigned to ({getTaskAssignedMembers(task).length}):</span>
+                            <span>Assigned to:</span>
+                            <Badge variant="secondary" className="text-xs">
+                              <User className="h-3 w-3 mr-1" />
+                              {getTaskAssignedMembers(task)[0].firstName} {getTaskAssignedMembers(task)[0].lastName}
+                            </Badge>
                           </div>
-                          {expandedAssignments.has(task.id) ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </div>
-                        {expandedAssignments.has(task.id) && (
-                          <div className="flex flex-wrap gap-1 ml-6">
-                            {getTaskAssignedMembers(task).map(member => (
-                              <Badge key={member.id} variant="secondary" className="text-xs">
-                                <User className="h-3 w-3 mr-1" />
-                                {member.firstName} {member.lastName}
-                              </Badge>
-                            ))}
-                          </div>
+                        ) : (
+                          // Multiple assignments - collapsible
+                          <>
+                            <div 
+                              className="flex items-center justify-between cursor-pointer text-sm text-gray-600"
+                              onClick={() => toggleAssignmentExpansion(task.id)}
+                            >
+                              <div className="flex items-center space-x-2">
+                                <User className="w-4 h-4" />
+                                <span>Assigned to ({getTaskAssignedMembers(task).length}):</span>
+                              </div>
+                              {expandedAssignments.has(task.id) ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </div>
+                            {expandedAssignments.has(task.id) && (
+                              <div className="flex flex-wrap gap-1 ml-6">
+                                {getTaskAssignedMembers(task).map(member => (
+                                  <Badge key={member.id} variant="secondary" className="text-xs">
+                                    <User className="h-3 w-3 mr-1" />
+                                    {member.firstName} {member.lastName}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     )}
@@ -1009,26 +1024,37 @@ export default function Tasks() {
                       <div className="col-span-2">
                         {getTaskAssignedMembers(task).length > 0 && (
                           <div className="flex flex-col">
-                            <div 
-                              className="flex items-center gap-1 cursor-pointer text-xs text-gray-600"
-                              onClick={() => toggleAssignmentExpansion(task.id)}
-                            >
-                              <span>Assigned ({getTaskAssignedMembers(task).length})</span>
-                              {expandedAssignments.has(task.id) ? (
-                                <ChevronUp className="h-3 w-3" />
-                              ) : (
-                                <ChevronDown className="h-3 w-3" />
-                              )}
-                            </div>
-                            {expandedAssignments.has(task.id) && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {getTaskAssignedMembers(task).map(member => (
-                                  <Badge key={member.id} variant="secondary" className="text-xs">
-                                    <User className="h-3 w-3 mr-1" />
-                                    {member.firstName} {member.lastName}
-                                  </Badge>
-                                ))}
-                              </div>
+                            {getTaskAssignedMembers(task).length === 1 ? (
+                              // Single assignment - show directly
+                              <Badge variant="secondary" className="text-xs">
+                                <User className="h-3 w-3 mr-1" />
+                                {getTaskAssignedMembers(task)[0].firstName} {getTaskAssignedMembers(task)[0].lastName}
+                              </Badge>
+                            ) : (
+                              // Multiple assignments - collapsible
+                              <>
+                                <div 
+                                  className="flex items-center gap-1 cursor-pointer text-xs text-gray-600"
+                                  onClick={() => toggleAssignmentExpansion(task.id)}
+                                >
+                                  <span>Assigned ({getTaskAssignedMembers(task).length})</span>
+                                  {expandedAssignments.has(task.id) ? (
+                                    <ChevronUp className="h-3 w-3" />
+                                  ) : (
+                                    <ChevronDown className="h-3 w-3" />
+                                  )}
+                                </div>
+                                {expandedAssignments.has(task.id) && (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {getTaskAssignedMembers(task).map(member => (
+                                      <Badge key={member.id} variant="secondary" className="text-xs">
+                                        <User className="h-3 w-3 mr-1" />
+                                        {member.firstName} {member.lastName}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         )}
