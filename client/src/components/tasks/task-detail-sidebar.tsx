@@ -10,7 +10,8 @@ import {
   Circle, 
   MessageSquare,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  Paperclip
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     dueDate: '',
     assignedTo: ''
   });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   // Update local selected task when prop changes
   useEffect(() => {
@@ -276,7 +278,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     const newStatus = selectedTask.status === 'completed' ? 'todo' : 'completed';
     
     // Immediately update the local selected task for instant UI feedback
-    const optimisticUpdate = { ...selectedTask, status: newStatus };
+    const optimisticUpdate = { ...selectedTask, status: newStatus as 'completed' | 'todo' };
     setSelectedTask(optimisticUpdate);
     
     // Also optimistically update all relevant caches
@@ -359,7 +361,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       title: selectedTask.title,
       description: selectedTask.description || '',
       dueDate: formatDateForInput(selectedTask.dueDate),
-      assignedTo: Array.isArray(selectedTask.assignedTo) ? selectedTask.assignedTo[0]?.toString() || 'unassigned' : selectedTask.assignedTo?.toString() || 'unassigned'
+      assignedTo: Array.isArray(selectedTask.assignedTo) ? (selectedTask.assignedTo[0] ? selectedTask.assignedTo[0].toString() : 'unassigned') : (selectedTask.assignedTo ? selectedTask.assignedTo.toString() : 'unassigned')
     });
     setIsEditing(true);
   };
@@ -370,7 +372,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     const updates: Partial<Task> = {
       title: editFormData.title,
       description: editFormData.description,
-      dueDate: editFormData.dueDate ? `${editFormData.dueDate}T12:00:00.000Z` : null,
+      dueDate: editFormData.dueDate ? new Date(`${editFormData.dueDate}T12:00:00.000Z`) : null,
       assignedTo: editFormData.assignedTo && editFormData.assignedTo !== 'unassigned' ? [parseInt(editFormData.assignedTo)] : null
     };
     
@@ -517,6 +519,30 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
             Previous
           </Button>
           
+          {/* File Upload */}
+          <div className="relative">
+            <input
+              type="file"
+              id="file-upload"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setUploadedFile(file);
+                  // TODO: Implement file upload to task/project
+                  console.log('File uploaded:', file.name);
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="relative"
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
+          </div>
+          
           <Button
             variant="outline"
             size="sm"
@@ -558,7 +584,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                   className="text-lg font-medium"
                 />
               ) : (
-                <h3 className="font-medium text-[14px]">{selectedTask?.title}</h3>
+                <h3 className="font-medium text-xs">{selectedTask?.title}</h3>
               )}
             </div>
             
@@ -568,61 +594,63 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
           </div>
         </div>
 
-        {/* Task Info Cards */}
+        {/* Task Info Cards - Due Date and Assigned To on Same Row */}
         <div className="space-y-4">
-          {/* Due Date */}
-          {selectedTask?.dueDate && (
+          <div className="grid grid-cols-2 gap-3">
+            {/* Due Date */}
+            {selectedTask?.dueDate && (
+              <Card>
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    <span className="text-xs font-medium">Due Date</span>
+                  </div>
+                  <div className="mt-1">
+                    {isEditing ? (
+                      <Input
+                        type="date"
+                        value={editFormData.dueDate}
+                        onChange={(e) => setEditFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                        className="text-xs"
+                      />
+                    ) : (
+                      <Badge {...getDueDateBadgeProps(selectedTask.dueDate, selectedTask.status === 'completed')} className="text-xs">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {format(new Date(selectedTask.dueDate), 'MMM d, yyyy')}
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Assigned To */}
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium">Due Date</span>
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span className="text-xs font-medium">Assigned To</span>
                 </div>
                 <div className="mt-1">
                   {isEditing ? (
-                    <Input
-                      type="date"
-                      value={editFormData.dueDate}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, dueDate: e.target.value }))}
-                    />
-                  ) : (
-                    <Badge {...getDueDateBadgeProps(selectedTask.dueDate, selectedTask.status === 'completed')}>
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {format(selectedTask.dueDate, 'MMM d, yyyy')}
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Assigned To */}
-          <Card>
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium">Assigned To</span>
-              </div>
-              <div className="mt-1">
-                {isEditing ? (
-                  <Select
-                    value={editFormData.assignedTo}
-                    onValueChange={(value) => setEditFormData(prev => ({ ...prev, assignedTo: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select assignee" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {contacts
-                        .filter(contact => contact.contactType === 'team_member' && contact.status === 'active')
-                        .map(contact => (
-                          <SelectItem key={contact.id} value={contact.id.toString()}>
-                            {contact.firstName} {contact.lastName}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={editFormData.assignedTo}
+                      onValueChange={(value) => setEditFormData(prev => ({ ...prev, assignedTo: value }))}
+                    >
+                      <SelectTrigger className="text-xs">
+                        <SelectValue placeholder="Select assignee" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {contacts
+                          .filter(contact => contact.contactType === 'team_member' && contact.status === 'active')
+                          .map(contact => (
+                            <SelectItem key={contact.id} value={contact.id.toString()}>
+                              {contact.firstName} {contact.lastName}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
                 ) : (
                   <div>
                     {(() => {
@@ -655,20 +683,21 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                           </div>
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-500">Unassigned</span>
+                        <span className="text-xs text-gray-500">Unassigned</span>
                       );
                     })()}
                   </div>
                 )}
               </div>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
 
           {/* Description */}
           <Card>
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium">Description</span>
+                <span className="text-xs font-medium">Description</span>
               </div>
               {isEditing ? (
                 <Textarea
@@ -678,7 +707,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                   rows={3}
                 />
               ) : (
-                <p className="text-sm text-gray-600">
+                <p className="text-xs text-gray-600">
                   {selectedTask?.description || 'No description provided.'}
                 </p>
               )}
@@ -704,7 +733,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         <div>
           <div className="flex items-center gap-2 mb-3">
             <MessageSquare className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium">Comments</span>
+            <span className="text-xs font-medium">Comments</span>
           </div>
           <TaskComments taskId={selectedTask?.id || 0} taskTitle={selectedTask?.title || ''} />
         </div>
