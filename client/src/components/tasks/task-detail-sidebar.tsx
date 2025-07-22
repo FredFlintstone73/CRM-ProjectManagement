@@ -524,20 +524,24 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
             <input
               type="file"
               id="file-upload"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              className="hidden"
+              multiple
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setUploadedFile(file);
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  setUploadedFile(files[0]);
                   // TODO: Implement file upload to task/project
-                  console.log('File uploaded:', file.name);
+                  console.log('Files uploaded:', Array.from(files).map(f => f.name));
                 }
               }}
             />
             <Button
               variant="outline"
               size="sm"
-              className="relative"
+              onClick={() => {
+                const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+                fileInput?.click();
+              }}
             >
               <Paperclip className="h-4 w-4" />
             </Button>

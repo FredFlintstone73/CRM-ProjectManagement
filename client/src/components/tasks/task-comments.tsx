@@ -149,7 +149,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="font-semibold tracking-tight flex items-center gap-2 text-[12px]">
             <MessageCircle className="h-5 w-5" />
             Comments
           </CardTitle>
@@ -176,7 +176,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
         {/* Comments List */}
         <div className="space-y-4 max-h-96 overflow-y-auto">
           {comments.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8 text-[12px]">
+            <p className="text-muted-foreground text-center py-8 text-xs">
               No comments yet. Start the conversation!
             </p>
           ) : (
@@ -190,7 +190,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm">
+                    <span className="font-medium text-xs">
                       {comment.user?.firstName} {comment.user?.lastName}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -224,7 +224,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-sm whitespace-pre-wrap">
+                      <p className="text-xs whitespace-pre-wrap">
                         {renderCommentText(comment.comment)}
                       </p>
                       {currentUser?.id === comment.userId && (
