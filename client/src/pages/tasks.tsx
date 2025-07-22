@@ -348,23 +348,28 @@ export default function Tasks() {
       return taskDueDate >= dateRange.start && taskDueDate <= dateRange.end;
     };
 
-    // Filter out template tasks - only show project tasks or standalone tasks with assignments
+    // Filter out template tasks - only show project tasks or assigned standalone tasks
     const isNotTemplateTask = () => {
-      // If task has a project, it's a real project task
+      // If task has a project, it's a real project task (regardless of assignments)
       if (task.projectId) return true;
       
-      // If task has no project but has assignees, it's a standalone task
-      if (task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : task.assignedTo)) {
-        return true;
+      // For tasks without projects, only show if they have assignments (standalone tasks)
+      if (!task.projectId) {
+        // Check for direct assignments
+        if (task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : task.assignedTo)) {
+          return true;
+        }
+        
+        // Check for role assignments
+        if (task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : task.assignedToRole)) {
+          return true;
+        }
+        
+        // No project and no assignments = template task
+        return false;
       }
       
-      // If task has role assignments, it's a standalone task
-      if (task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : task.assignedToRole)) {
-        return true;
-      }
-      
-      // Otherwise, it's likely a template task - filter it out
-      return false;
+      return true;
     };
     
     return matchesSearch && matchesCompletion && matchesTaskFilter() && matchesDueDate() && isNotTemplateTask();
