@@ -38,7 +38,7 @@ export default function Tasks() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('row');
   const [sortConfig, setSortConfig] = useState<{
-    key: 'priority' | 'dueDate' | 'title' | 'assignee' | null;
+    key: 'priority' | 'dueDate' | 'title' | 'assignee' | 'familyName' | null;
     direction: 'asc' | 'desc';
   }>({ key: 'priority', direction: 'asc' });
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -144,6 +144,17 @@ export default function Tasks() {
       default:
         return role?.charAt(0).toUpperCase() + role?.slice(1) || '';
     }
+  };
+
+  // Function to get family name from task's project
+  const getTaskFamilyName = (task: Task): string => {
+    if (!task.projectId || !projects) return '';
+    
+    const project = projects.find(p => p.id === task.projectId);
+    if (!project?.clientId || !contacts) return '';
+    
+    const client = contacts.find((c: any) => c.id === project.clientId);
+    return client?.familyName || '';
   };
 
   // Get all assigned team members from direct assignments and role assignments
@@ -360,6 +371,11 @@ export default function Tasks() {
         };
         result = getAssigneeName(a.id).localeCompare(getAssigneeName(b.id));
         break;
+      case "familyName":
+        const aFamilyName = getTaskFamilyName(a);
+        const bFamilyName = getTaskFamilyName(b);
+        result = aFamilyName.localeCompare(bFamilyName);
+        break;
       default:
         result = 0;
     }
@@ -458,7 +474,7 @@ export default function Tasks() {
     queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
   };
 
-  const handleSort = (key: 'priority' | 'dueDate' | 'title' | 'assignee') => {
+  const handleSort = (key: 'priority' | 'dueDate' | 'title' | 'assignee' | 'familyName') => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
@@ -466,7 +482,7 @@ export default function Tasks() {
     setSortConfig({ key, direction });
   };
 
-  const getSortIcon = (columnKey: 'priority' | 'dueDate' | 'title' | 'assignee') => {
+  const getSortIcon = (columnKey: 'priority' | 'dueDate' | 'title' | 'assignee' | 'familyName') => {
     if (sortConfig.key !== columnKey) {
       return <ArrowUpDown className="w-3 h-3 ml-1" />;
     }
@@ -812,7 +828,17 @@ export default function Tasks() {
                     Priority {getSortIcon('priority')}
                   </Button>
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSort('familyName')}
+                    className={`text-xs font-medium p-1 h-auto ${sortConfig.key === 'familyName' ? 'text-blue-600' : 'text-gray-600'}`}
+                  >
+                    Family Name {getSortIcon('familyName')}
+                  </Button>
+                </div>
+                <div className="col-span-3">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -822,7 +848,7 @@ export default function Tasks() {
                     Title {getSortIcon('title')}
                   </Button>
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-2">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -882,8 +908,15 @@ export default function Tasks() {
                         )}
                       </div>
                       
+                      {/* Family Name Column */}
+                      <div className="col-span-2">
+                        <span className="text-xs text-gray-600">
+                          {getTaskFamilyName(task) || 'No Family'}
+                        </span>
+                      </div>
+                      
                       {/* Title Column */}
-                      <div className="col-span-4">
+                      <div className="col-span-3">
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
@@ -895,7 +928,7 @@ export default function Tasks() {
                       </div>
                       
                       {/* Assignee Column */}
-                      <div className="col-span-3">
+                      <div className="col-span-2">
                         {getTaskAssignedMembers(task).length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {getTaskAssignedMembers(task).map(member => (
