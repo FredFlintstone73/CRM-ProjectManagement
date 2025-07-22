@@ -246,7 +246,6 @@ export const projects = pgTable("projects", {
   name: varchar("name").notNull(),
   description: text("description"),
   clientId: integer("client_id").references(() => contacts.id),
-  secondClientId: integer("second_client_id").references(() => contacts.id),
   status: projectStatusEnum("status").default("planning"),
   projectType: projectTypeEnum("project_type").notNull(),
   startDate: timestamp("start_date"),
@@ -415,10 +414,6 @@ export const contactsRelations = relations(contacts, ({ one, many }) => ({
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   client: one(contacts, {
     fields: [projects.clientId],
-    references: [contacts.id],
-  }),
-  secondClient: one(contacts, {
-    fields: [projects.secondClientId],
     references: [contacts.id],
   }),
   createdBy: one(users, {

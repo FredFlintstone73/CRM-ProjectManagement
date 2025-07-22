@@ -446,14 +446,6 @@ export default function Tasks() {
     return project ? project.name : 'Unknown project';
   };
 
-  const getSecondClientLastName = (projectId: number | null) => {
-    if (!projectId || !projects || !contacts) return '';
-    const project = projects.find(p => p.id === projectId);
-    if (!project || !project.secondClientId) return '';
-    const secondClient = contacts.find(c => c.id === project.secondClientId);
-    return secondClient ? secondClient.lastName : '';
-  };
-
   const isOverdue = (dueDate: string | null) => {
     if (!dueDate) return false;
     return new Date(dueDate) < new Date();
@@ -820,10 +812,7 @@ export default function Tasks() {
                     Priority {getSortIcon('priority')}
                   </Button>
                 </div>
-                <div className="col-span-1 text-xs font-medium text-gray-600">
-                  Family
-                </div>
-                <div className="col-span-3">
+                <div className="col-span-4">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -893,15 +882,8 @@ export default function Tasks() {
                         )}
                       </div>
                       
-                      {/* Second Client Column */}
-                      <div className="col-span-1">
-                        <span className="text-sm text-gray-600">
-                          {getSecondClientLastName(task.projectId)}
-                        </span>
-                      </div>
-                      
                       {/* Title Column */}
-                      <div className="col-span-3">
+                      <div className="col-span-4">
                         <button 
                           onClick={() => handleTaskClick(task)}
                           className="text-left w-full"
