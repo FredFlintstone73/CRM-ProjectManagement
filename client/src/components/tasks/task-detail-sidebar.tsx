@@ -359,7 +359,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       title: editFormData.title,
       description: editFormData.description,
       dueDate: editFormData.dueDate ? `${editFormData.dueDate}T12:00:00.000Z` : null,
-      assignedTo: editFormData.assignedTo && editFormData.assignedTo !== 'unassigned' ? parseInt(editFormData.assignedTo) : null
+      assignedTo: editFormData.assignedTo && editFormData.assignedTo !== 'unassigned' ? [parseInt(editFormData.assignedTo)] : null
     };
     
     updateTaskMutation.mutate({
@@ -418,12 +418,13 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
     }
   };
 
-  // Get all assigned team members from direct assignments and role assignments
-  const getAssignedTeamMembers = () => {
-    if (!selectedTask || !contacts.length) return [];
+  // Get all assigned team members and unassigned roles
+  const getTaskAssignments = (): { assignedMembers: Contact[], unassignedRoles: string[] } => {
+    if (!selectedTask || !contacts.length) return { assignedMembers: [], unassignedRoles: [] };
     
     const teamMembers = contacts.filter(contact => contact.contactType === 'team_member' && contact.status === 'active');
-    const assignedMembers = [];
+    const assignedMembers: Contact[] = [];
+    const unassignedRoles: string[] = [];
     
     // Add directly assigned team members (by contact ID)
     if (selectedTask.assignedTo) {
@@ -436,23 +437,36 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
       });
     }
     
-    // Add team members assigned by role
+    // Handle role assignments - these are now roles without active team members
     if (selectedTask.assignedToRole) {
       const assignedRoles = Array.isArray(selectedTask.assignedToRole) ? selectedTask.assignedToRole : [selectedTask.assignedToRole];
       assignedRoles.forEach(role => {
         if (role) {
+          // Check if there are active team members for this role
           const roleMembers = teamMembers.filter(tm => tm.role === role);
-          roleMembers.forEach(member => {
-            // Only add if not already in the list (avoid duplicates)
-            if (!assignedMembers.find(am => am.id === member.id)) {
-              assignedMembers.push(member);
-            }
-          });
+          
+          if (roleMembers.length > 0) {
+            // Found active team members for this role
+            roleMembers.forEach(member => {
+              // Only add if not already in the list (avoid duplicates)
+              if (!assignedMembers.find(am => am.id === member.id)) {
+                assignedMembers.push(member);
+              }
+            });
+          } else {
+            // No active team members for this role, add to unassigned roles
+            unassignedRoles.push(role);
+          }
         }
       });
     }
     
-    return assignedMembers;
+    return { assignedMembers, unassignedRoles };
+  };
+
+  // Legacy function for backward compatibility
+  const getAssignedTeamMembers = (): Contact[] => {
+    return getTaskAssignments().assignedMembers;
   };
 
   const getAssignedUser = () => {
@@ -563,7 +577,7 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                   ) : (
                     <Badge {...getDueDateBadgeProps(selectedTask.dueDate, selectedTask.status === 'completed')}>
                       <Calendar className="h-3 w-3 mr-1" />
-                      {format(new Date(selectedTask.dueDate), 'MMM d, yyyy')}
+                      {format(selectedTask.dueDate, 'MMM d, yyyy')}
                     </Badge>
                   )}
                 </div>
@@ -600,28 +614,39 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
                   </Select>
                 ) : (
                   <div>
-                    {getAssignedTeamMembers().length > 0 ? (
-                      <div className="flex flex-col gap-2">
-                        <span className="text-xs text-gray-500">
-                          {getAssignedTeamMembers().length} team member{getAssignedTeamMembers().length !== 1 ? 's' : ''}
-                        </span>
-                        <div className="flex flex-wrap gap-1">
-                          {getAssignedTeamMembers().map(member => (
-                            <Badge key={member.id} variant="secondary" className="text-xs">
-                              <User className="h-3 w-3 mr-1" />
-                              {member.firstName} {member.lastName}
-                              {member.role && (
-                                <span className="ml-1 text-gray-400 text-xs">
-                                  ({formatRole(member.role)})
-                                </span>
-                              )}
-                            </Badge>
-                          ))}
+                    {(() => {
+                      const { assignedMembers, unassignedRoles } = getTaskAssignments();
+                      const totalAssignments = assignedMembers.length + unassignedRoles.length;
+                      
+                      return totalAssignments > 0 ? (
+                        <div className="flex flex-col gap-2">
+                          <span className="text-xs text-gray-500">
+                            {totalAssignments} assignment{totalAssignments !== 1 ? 's' : ''}
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {assignedMembers.map(member => (
+                              <Badge key={member.id} variant="secondary" className="text-xs">
+                                <User className="h-3 w-3 mr-1" />
+                                {member.firstName} {member.lastName}
+                                {member.role && (
+                                  <span className="ml-1 text-gray-400 text-xs">
+                                    ({formatRole(member.role)})
+                                  </span>
+                                )}
+                              </Badge>
+                            ))}
+                            {unassignedRoles.map(role => (
+                              <Badge key={role} className="text-xs bg-red-100 text-red-800 border-red-200">
+                                <User className="h-3 w-3 mr-1" />
+                                {formatRole(role)}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-gray-500">Unassigned</span>
-                    )}
+                      ) : (
+                        <span className="text-sm text-gray-500">Unassigned</span>
+                      );
+                    })()}
                   </div>
                 )}
               </div>

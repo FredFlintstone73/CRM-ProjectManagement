@@ -310,8 +310,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Resolve role-based assignment if assignedToRole is provided
             let assignedToId = null;
+            let roleAssignment = null;
             if (templateTask.assignedToRole) {
-              assignedToId = await resolveRoleAssignment(templateTask.assignedToRole);
+              const resolution = await resolveRoleAssignment(templateTask.assignedToRole);
+              assignedToId = resolution.contactIds;
+              roleAssignment = resolution.unassignedRoles.length > 0 ? resolution.unassignedRoles : null;
             } else if (templateTask.assignedTo) {
               assignedToId = templateTask.assignedTo;
             }
@@ -334,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               estimatedDays: 1,
               dueDate: taskDueDate,
               assignedTo: assignedToId,
-              assignedToRole: templateTask.assignedToRole || null,
+              assignedToRole: roleAssignment || templateTask.assignedToRole || null,
               parentTaskId: mappedParentTaskId,
               milestoneId: milestone?.id || null,
               level: templateTask.level || 0,
@@ -430,8 +433,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Resolve role-based assignment if assignedToRole is provided
             let assignedToId = null;
+            let roleAssignment = null;
             if (templateTask.assignedToRole) {
-              assignedToId = await resolveRoleAssignment(templateTask.assignedToRole);
+              const resolution = await resolveRoleAssignment(templateTask.assignedToRole);
+              assignedToId = resolution.contactIds;
+              roleAssignment = resolution.unassignedRoles.length > 0 ? resolution.unassignedRoles : null;
             } else if (templateTask.assignedTo) {
               assignedToId = templateTask.assignedTo;
             }
@@ -463,7 +469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               estimatedDays: 1,
               dueDate: taskDueDate,
               assignedTo: assignedToId,
-              assignedToRole: templateTask.assignedToRole || null,
+              assignedToRole: roleAssignment || templateTask.assignedToRole || null,
               parentTaskId: mappedParentTaskId,
               milestoneId: milestone?.id || null,
               level: templateTask.level || 0,
@@ -502,7 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to resolve role-based assignments
   const resolveRoleAssignment = async (roles: string[] | string) => {
-    if (!roles || (Array.isArray(roles) && roles.length === 0)) return null;
+    if (!roles || (Array.isArray(roles) && roles.length === 0)) return { contactIds: null, unassignedRoles: [] };
     
     // Normalize to array
     const roleArray = Array.isArray(roles) ? roles : [roles];
@@ -521,25 +527,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     );
     
     const assignedContactIds = [];
+    const unassignedRoles = [];
     
     // Resolve each role to contact IDs
     for (const role of roleArray) {
       const matchingContacts = activeTeamMembers.filter(contact => contact.role === role);
-      for (const contact of matchingContacts) {
-        if (!assignedContactIds.includes(contact.id)) {
-          assignedContactIds.push(contact.id);
-        }
-      }
       
-      // Log if no matching team member found for a role
-      if (matchingContacts.length === 0) {
-        console.log(`No real team member found for role: ${role}. Task will remain unassigned. Add a team member with this role or assign manually.`);
+      if (matchingContacts.length > 0) {
+        // Found active team members for this role
+        for (const contact of matchingContacts) {
+          if (!assignedContactIds.includes(contact.id)) {
+            assignedContactIds.push(contact.id);
+          }
+        }
+      } else {
+        // No active team member found for this role, keep as role assignment
+        unassignedRoles.push(role);
+        console.log(`No active team member found for role: ${role}. Keeping as role assignment for manual assignment.`);
       }
     }
     
-    console.log(`Resolved roles [${roleArray.join(', ')}] to contacts: [${assignedContactIds.join(', ')}]`);
+    console.log(`Resolved roles [${roleArray.join(', ')}] to contacts: [${assignedContactIds.join(', ')}], unassigned roles: [${unassignedRoles.join(', ')}]`);
     
-    return assignedContactIds.length > 0 ? assignedContactIds : null;
+    return { 
+      contactIds: assignedContactIds.length > 0 ? assignedContactIds : null,
+      unassignedRoles 
+    };
   };
 
   // Create project from template with due date calculations
@@ -568,7 +581,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Resolve role-based assignment if assignedToRole is provided
         let assignedToId = null;
         if (taskData.assignedToRole) {
-          assignedToId = await resolveRoleAssignment(taskData.assignedToRole);
+          const resolution = await resolveRoleAssignment(taskData.assignedToRole);
+          assignedToId = resolution.contactIds;
+          taskData.assignedToRole = resolution.unassignedRoles.length > 0 ? resolution.unassignedRoles : null;
         } else if (taskData.assignedTo) {
           assignedToId = parseInt(taskData.assignedTo);
         }

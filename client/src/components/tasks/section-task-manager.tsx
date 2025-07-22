@@ -594,11 +594,12 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
     }
   };
 
-  // Get all assigned team members from direct assignments and role assignments
-  const getTaskAssignedMembers = (taskData: any): Contact[] => {
-    if (!contacts.length) return [];
+  // Get all assigned team members and unassigned roles
+  const getTaskAssignments = (taskData: any): { assignedMembers: Contact[], unassignedRoles: string[] } => {
+    if (!contacts.length) return { assignedMembers: [], unassignedRoles: [] };
     
     const assignedMembers: Contact[] = [];
+    const unassignedRoles: string[] = [];
     
     // Add directly assigned team members (by contact ID)
     if (taskData.assignedTo) {
@@ -616,32 +617,45 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
       });
     }
     
-    // Add team members assigned by role
+    // Handle role assignments - these are now roles without active team members
     if (taskData.assignedToRole) {
       const assignedRoles = Array.isArray(taskData.assignedToRole) ? taskData.assignedToRole : [taskData.assignedToRole];
       assignedRoles.forEach((role: any) => {
         if (role) {
+          // Check if there are active team members for this role
           const roleMembers = contacts.filter(c => 
             c.contactType === 'team_member' && 
             c.role === role && 
             c.status === 'active'
           );
-          roleMembers.forEach(member => {
-            // Only add if not already in the list (avoid duplicates)
-            if (!assignedMembers.find(am => am.id === member.id)) {
-              assignedMembers.push(member);
-            }
-          });
+          
+          if (roleMembers.length > 0) {
+            // Found active team members for this role
+            roleMembers.forEach(member => {
+              // Only add if not already in the list (avoid duplicates)
+              if (!assignedMembers.find(am => am.id === member.id)) {
+                assignedMembers.push(member);
+              }
+            });
+          } else {
+            // No active team members for this role, add to unassigned roles
+            unassignedRoles.push(role);
+          }
         }
       });
     }
     
-    return assignedMembers;
+    return { assignedMembers, unassignedRoles };
+  };
+
+  // Legacy function for backward compatibility
+  const getTaskAssignedMembers = (taskData: any): Contact[] => {
+    return getTaskAssignments(taskData).assignedMembers;
   };
 
   const renderTaskNode = (task: TaskNode, level: number = 0) => {
     const hasChildren = task.children && task.children.length > 0;
-    const assignedMembers = getTaskAssignedMembers(task);
+    const { assignedMembers, unassignedRoles } = getTaskAssignments(task);
     const isCompleted = task.status === 'completed';
     
     return (
@@ -733,6 +747,16 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
                     <Badge key={member.id} variant="secondary" className="text-xs">
                       <User className="h-3 w-3 mr-1" />
                       {member.firstName} {member.lastName}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              {unassignedRoles.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {unassignedRoles.map(role => (
+                    <Badge key={role} className="text-xs bg-red-100 text-red-800 border-red-200">
+                      <User className="h-3 w-3 mr-1" />
+                      {formatRole(role)}
                     </Badge>
                   ))}
                 </div>

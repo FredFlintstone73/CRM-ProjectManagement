@@ -1788,35 +1788,41 @@ export class DatabaseStorage implements IStorage {
       if (!task.assignedToRole || task.assignedToRole.length === 0) continue;
 
       const assignedContactIds = [];
+      const unassignedRoles = [];
 
       // Resolve each role to contact IDs
       for (const role of task.assignedToRole) {
         const matchingContacts = teamMembers.filter(contact => contact.role === role);
-        for (const contact of matchingContacts) {
-          if (!assignedContactIds.includes(contact.id)) {
-            assignedContactIds.push(contact.id);
-          }
-        }
         
-        // Log if no matching team member found for a role
-        if (matchingContacts.length === 0) {
-          console.log(`No team member found for role: ${role}. Task will remain unassigned.`);
+        if (matchingContacts.length > 0) {
+          // Found active team members for this role
+          for (const contact of matchingContacts) {
+            if (!assignedContactIds.includes(contact.id)) {
+              assignedContactIds.push(contact.id);
+            }
+          }
+        } else {
+          // No active team member found for this role, keep as role assignment
+          unassignedRoles.push(role);
+          console.log(`No team member found for role: ${role}. Keeping as role assignment for manual assignment.`);
         }
       }
 
-      // Update the task with resolved contact IDs only if we found matching team members
-      if (assignedContactIds.length > 0) {
-        await db
-          .update(tasks)
-          .set({
-            assignedTo: assignedContactIds,
-            updatedAt: new Date()
-          })
-          .where(eq(tasks.id, task.id));
+      // Update the task - assign resolved contacts and keep unassigned roles for manual assignment
+      await db
+        .update(tasks)
+        .set({
+          assignedTo: assignedContactIds.length > 0 ? assignedContactIds : null,
+          assignedToRole: unassignedRoles.length > 0 ? unassignedRoles : null,
+          updatedAt: new Date()
+        })
+        .where(eq(tasks.id, task.id));
 
-        console.log(`Resolved task ${task.id} (${task.title}) - roles: ${task.assignedToRole} -> contacts: ${assignedContactIds}`);
-      } else {
-        console.log(`Task ${task.id} (${task.title}) - no matching team members found for roles: ${task.assignedToRole}. Task remains unassigned.`);
+      if (assignedContactIds.length > 0) {
+        console.log(`Resolved task ${task.id} (${task.title}) - roles resolved to contacts: ${assignedContactIds}`);
+      }
+      if (unassignedRoles.length > 0) {
+        console.log(`Task ${task.id} (${task.title}) - roles require manual assignment: ${unassignedRoles}`);
       }
     }
 
