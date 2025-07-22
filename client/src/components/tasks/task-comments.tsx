@@ -167,7 +167,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="font-semibold tracking-tight flex items-center gap-2 text-[12px]">
           <MessageCircle className="h-5 w-5" />
           Comments ({comments.length})
         </CardTitle>
