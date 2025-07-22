@@ -347,8 +347,27 @@ export default function Tasks() {
       const taskDueDate = new Date(task.dueDate);
       return taskDueDate >= dateRange.start && taskDueDate <= dateRange.end;
     };
+
+    // Filter out template tasks - only show project tasks or standalone tasks with assignments
+    const isNotTemplateTask = () => {
+      // If task has a project, it's a real project task
+      if (task.projectId) return true;
+      
+      // If task has no project but has assignees, it's a standalone task
+      if (task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : task.assignedTo)) {
+        return true;
+      }
+      
+      // If task has role assignments, it's a standalone task
+      if (task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : task.assignedToRole)) {
+        return true;
+      }
+      
+      // Otherwise, it's likely a template task - filter it out
+      return false;
+    };
     
-    return matchesSearch && matchesCompletion && matchesTaskFilter() && matchesDueDate();
+    return matchesSearch && matchesCompletion && matchesTaskFilter() && matchesDueDate() && isNotTemplateTask();
   }).sort((a, b) => {
     if (!sortConfig.key) return 0;
     
@@ -938,7 +957,7 @@ export default function Tasks() {
                           </span>
                         ) : (
                           <span className="text-xs text-gray-400 italic">
-                            {task.projectId ? 'No Client' : 'Template'}
+                            No Client
                           </span>
                         )}
                       </div>
