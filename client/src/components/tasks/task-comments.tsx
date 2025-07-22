@@ -176,7 +176,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
         {/* Comments List */}
         <div className="space-y-4 max-h-96 overflow-y-auto">
           {comments.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
+            <p className="text-muted-foreground text-center py-8 text-[12px]">
               No comments yet. Start the conversation!
             </p>
           ) : (
