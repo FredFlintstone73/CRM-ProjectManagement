@@ -446,6 +446,14 @@ export default function Tasks() {
     return project ? project.name : 'Unknown project';
   };
 
+  const getSecondClientLastName = (projectId: number | null) => {
+    if (!projectId || !projects || !contacts) return '';
+    const project = projects.find(p => p.id === projectId);
+    if (!project || !project.secondClientId) return '';
+    const secondClient = contacts.find(c => c.id === project.secondClientId);
+    return secondClient ? secondClient.lastName : '';
+  };
+
   const isOverdue = (dueDate: string | null) => {
     if (!dueDate) return false;
     return new Date(dueDate) < new Date();
@@ -800,7 +808,7 @@ export default function Tasks() {
           ) : (
             <div className="space-y-4">
               {/* Column Headers */}
-              <div className="grid grid-cols-12 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
+              <div className="grid grid-cols-13 gap-4 items-center bg-gray-50 p-3 rounded-lg border">
                 <div className="col-span-1 text-xs font-medium text-gray-600">Status</div>
                 <div className="col-span-1 text-center">
                   <Button
@@ -811,6 +819,9 @@ export default function Tasks() {
                   >
                     Priority {getSortIcon('priority')}
                   </Button>
+                </div>
+                <div className="col-span-1 text-xs font-medium text-gray-600">
+                  Second Client
                 </div>
                 <div className="col-span-4">
                   <Button
@@ -849,7 +860,7 @@ export default function Tasks() {
               {filteredAndSortedTasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-3">
-                    <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="grid grid-cols-13 gap-4 items-center">
                       {/* Status Column */}
                       <div className="col-span-1 flex justify-center">
                         <Button
@@ -880,6 +891,13 @@ export default function Tasks() {
                             {task.priority || 25}
                           </Badge>
                         )}
+                      </div>
+                      
+                      {/* Second Client Column */}
+                      <div className="col-span-1">
+                        <span className="text-sm text-gray-600">
+                          {getSecondClientLastName(task.projectId)}
+                        </span>
                       </div>
                       
                       {/* Title Column */}
