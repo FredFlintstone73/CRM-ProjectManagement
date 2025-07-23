@@ -59,7 +59,7 @@ export interface IStorage {
   getUserContactId(user: User): Promise<number | null>;
   
   // User invitation operations
-  createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation>;
+  createUserInvitation(invitation: InsertUserInvitation & { invitedBy: string, expiresAt?: Date }): Promise<UserInvitation>;
   getUserInvitation(invitationCode: string): Promise<UserInvitation | undefined>;
   getUserInvitations(invitedBy?: string): Promise<UserInvitation[]>;
   acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation>;
@@ -2154,13 +2154,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   // User invitation methods
-  async createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation> {
+  async createUserInvitation(invitation: InsertUserInvitation & { invitedBy: string, expiresAt?: Date }): Promise<UserInvitation> {
     // Generate a unique invitation code
     const invitationCode = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
-    // Set expiration to 7 days from now
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    // Set expiration to 7 days from now if not provided
+    const expiresAt = invitation.expiresAt || (() => {
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      return date;
+    })();
 
     const [created] = await db
       .insert(userInvitations)

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import { useToast } from "@/hooks/use-toast";
 import UserInvitationDialog from "@/components/admin/UserInvitationDialog";
-import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import EmailConfigurationStatus from "@/components/admin/EmailConfigurationStatus";
+import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy } from "lucide-react";
 
 interface UserInvitation {
   id: number;
@@ -26,7 +27,7 @@ export default function UserManagement() {
   const { isAdministrator, isLoading: accessLoading } = useAccessControl();
   const { toast } = useToast();
 
-  const { data: invitations, isLoading } = useQuery({
+  const { data: invitations, isLoading } = useQuery<UserInvitation[]>({
     queryKey: ['/api/user-invitations'],
     enabled: isAdministrator,
   });
@@ -96,6 +97,22 @@ export default function UserManagement() {
     }
   };
 
+  const copyInvitationCode = async (invitationCode: string) => {
+    try {
+      await navigator.clipboard.writeText(invitationCode);
+      toast({
+        title: "Copied!",
+        description: "Invitation code copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Copy failed",
+        description: "Please manually copy the invitation code",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -109,6 +126,9 @@ export default function UserManagement() {
       </div>
 
       <div className="grid gap-6">
+        {/* Email Configuration Status */}
+        <EmailConfigurationStatus />
+        
         {/* Invitations Overview */}
         <Card>
           <CardHeader>
@@ -163,6 +183,13 @@ export default function UserManagement() {
                           </span>
                         )}
                       </div>
+                      
+                      {invitation.status === "pending" && invitation.invitationCode && (
+                        <div className="mt-2 p-2 bg-muted/50 rounded border">
+                          <div className="text-xs text-muted-foreground mb-1">Invitation Code:</div>
+                          <code className="text-sm font-mono">{invitation.invitationCode}</code>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex items-center gap-3">
@@ -174,9 +201,14 @@ export default function UserManagement() {
                         {invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
                       </Badge>
                       
-                      {invitation.status === "pending" && (
-                        <Button variant="outline" size="sm">
-                          Copy Link
+                      {invitation.status === "pending" && invitation.invitationCode && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => copyInvitationCode(invitation.invitationCode)}
+                        >
+                          <Copy className="mr-1 h-3 w-3" />
+                          Copy Code
                         </Button>
                       )}
                     </div>

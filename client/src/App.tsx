@@ -18,6 +18,7 @@ import TaskDetail from "@/pages/task-detail";
 import TaskDetailSimple from "@/pages/task-detail-simple";
 import Tasks from "@/pages/tasks";
 import UserManagement from "@/pages/user-management";
+import AcceptInvitation from "@/pages/accept-invitation";
 import Sidebar from "@/components/layout/sidebar";
 
 
@@ -35,6 +36,7 @@ function Router() {
 
   return (
     <Switch>
+      <Route path="/accept-invitation" component={AcceptInvitation} />
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (

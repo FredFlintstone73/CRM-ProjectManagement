@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { emailService } from "./emailService";
 import { 
   insertContactSchema, 
   insertProjectSchema, 
@@ -1948,10 +1949,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invitedBy: userId,
       });
       
-      res.json(invitation);
+      // Try to send email invitation
+      const emailResult = await emailService.sendInvitationEmail({
+        email: invitation.email,
+        firstName: invitation.firstName,
+        lastName: invitation.lastName,
+        invitationCode: invitation.invitationCode,
+        accessLevel: invitation.accessLevel,
+        invitedBy: userId,
+      });
+
+      res.json({
+        ...invitation,
+        emailSent: emailResult.sent,
+        emailMessage: emailResult.message,
+        emailConfigured: emailService.isEmailConfigured(),
+      });
     } catch (error) {
       console.error("Error creating user invitation:", error);
       res.status(500).json({ message: "Failed to create user invitation" });
+    }
+  });
+
+  // Email configuration status endpoint
+  app.get('/api/email-status', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      res.json({
+        configured: emailService.isEmailConfigured(),
+      });
+    } catch (error) {
+      console.error("Error checking email status:", error);
+      res.status(500).json({ message: "Failed to check email status" });
     }
   });
 

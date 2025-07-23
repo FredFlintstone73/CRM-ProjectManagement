@@ -888,6 +888,8 @@ export const insertUserInvitationSchema = createInsertSchema(userInvitations).om
   status: true,
   invitedAt: true,
   acceptedAt: true,
+  invitedBy: true,
+  expiresAt: true,
 });
 
 // Types
