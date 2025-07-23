@@ -58,6 +58,8 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
   const [createdInvitation, setCreatedInvitation] = useState<InvitationResponse | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  console.log("UserInvitationDialog render, open:", open);
 
   const form = useForm<InvitationForm>({
     resolver: zodResolver(invitationFormSchema),
@@ -139,16 +141,20 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
   };
 
   const handleDialogClose = () => {
+    console.log("Dialog closing");
     setOpen(false);
     setCreatedInvitation(null);
     form.reset();
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogClose}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button>
+          <Button onClick={() => {
+            console.log("Invite User button clicked");
+            setOpen(true);
+          }}>
             <UserPlus className="mr-2 h-4 w-4" />
             Invite User
           </Button>
