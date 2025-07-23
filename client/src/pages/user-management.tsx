@@ -8,6 +8,7 @@ import { useAccessControl } from "@/hooks/useAccessControl";
 import { useToast } from "@/hooks/use-toast";
 import UserInvitationDialog from "@/components/admin/UserInvitationDialog";
 import EmailConfigurationStatus from "@/components/admin/EmailConfigurationStatus";
+import TeamMemberManagement from "@/components/admin/TeamMemberManagement";
 import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy } from "lucide-react";
 
 interface UserInvitation {
@@ -129,6 +130,9 @@ export default function UserManagement() {
         {/* Email Configuration Status */}
         <EmailConfigurationStatus />
         
+        {/* Team Members Management */}
+        <TeamMemberManagement />
+
         {/* Invitations Overview */}
         <Card>
           <CardHeader>

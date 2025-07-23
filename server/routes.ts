@@ -2056,6 +2056,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all team members (Administrator only)
+  app.get('/api/users', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Update user status (activate/deactivate) (Administrator only)
+  app.put('/api/users/:id/status', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const { isActive } = req.body;
+      const user = await storage.updateUserStatus(req.params.id, isActive);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      res.status(500).json({ message: "Failed to update user status" });
+    }
+  });
+
   // Current user's access level (accessible to all authenticated users)
   app.get('/api/auth/access-level', isAuthenticated, async (req: any, res) => {
     try {

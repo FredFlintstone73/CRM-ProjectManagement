@@ -68,6 +68,8 @@ export interface IStorage {
   // User access control operations  
   getUserAccessLevel(userId: string): Promise<string | undefined>;
   updateUserAccessLevel(userId: string, accessLevel: string): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  updateUserStatus(userId: string, isActive: boolean): Promise<User>;
 
   // Contact operations
   getContacts(): Promise<Contact[]>;
@@ -349,6 +351,26 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         accessLevel: accessLevel as any,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedUser;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt));
+  }
+
+  async updateUserStatus(userId: string, isActive: boolean): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        isActive,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
