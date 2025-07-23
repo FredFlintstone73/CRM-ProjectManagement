@@ -16,9 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Mail, Phone, Building, Grid, List, MoreHorizontal, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Camera } from "lucide-react";
+import { Search, Plus, Mail, Phone, Building, Grid, List, MoreHorizontal, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import ContactForm from "@/components/contacts/contact-form";
-import PhotoCropper from "@/components/contacts/PhotoCropper";
 import { useToast } from "@/hooks/use-toast";
 import type { Contact } from "@shared/schema";
 
@@ -45,10 +44,7 @@ export default function Contacts() {
     direction: 'asc' | 'desc';
   }>({ key: null, direction: 'asc' });
   
-  // Photo upload states
-  const [photoUploadContact, setPhotoUploadContact] = useState<Contact | null>(null);
-  const [isCropperOpen, setIsCropperOpen] = useState(false);
-  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+
 
   const searchString = useSearch();
 
@@ -419,94 +415,7 @@ export default function Contacts() {
     setSortConfig({ key, direction });
   };
 
-  // Photo upload functions
-  const handlePhotoUpload = (contact: Contact) => {
-    setPhotoUploadContact(contact);
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toast({
-            title: "File too large",
-            description: "Please select an image smaller than 5MB",
-            variant: "destructive",
-          });
-          return;
-        }
 
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-          toast({
-            title: "Invalid file type",
-            description: "Please select an image file",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        // Convert to base64 and open cropper
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target?.result as string;
-          setTempImageUrl(imageUrl);
-          setIsCropperOpen(true);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    fileInput.click();
-  };
-
-  const uploadPhotoMutation = useMutation({
-    mutationFn: async (data: { contactId: number; imageUrl: string; cropSettings?: any }) => {
-      await apiRequest('POST', `/api/contacts/${data.contactId}/photo`, {
-        imageUrl: data.imageUrl,
-        cropSettings: data.cropSettings
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-      toast({
-        title: "Photo updated",
-        description: "Profile photo has been successfully updated",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload photo. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handlePhotoCrop = (croppedImageUrl: string, cropSettings?: any) => {
-    if (photoUploadContact) {
-      uploadPhotoMutation.mutate({ 
-        contactId: photoUploadContact.id,
-        imageUrl: croppedImageUrl,
-        cropSettings 
-      });
-    }
-    setIsCropperOpen(false);
-    setTempImageUrl(null);
-    setPhotoUploadContact(null);
-  };
 
   const getSortIcon = (columnKey: keyof Contact) => {
     if (sortConfig.key !== columnKey) {
@@ -617,27 +526,12 @@ export default function Contacts() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="relative">
-                          <Avatar>
-                            <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
-                            <AvatarFallback>
-                              {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full p-0"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handlePhotoUpload(contact);
-                            }}
-                          >
-                            <Camera className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        <Avatar>
+                          <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
+                          <AvatarFallback>
+                            {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <CardTitle className="text-lg">
                             <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer">
@@ -802,27 +696,12 @@ export default function Contacts() {
                     <TableRow key={contact.id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
-                          <div className="relative">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
-                              <AvatarFallback className="text-xs">
-                                {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full p-0"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handlePhotoUpload(contact);
-                              }}
-                            >
-                              <Camera className="h-2 w-2" />
-                            </Button>
-                          </div>
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={contact.profileImageUrl || ""} alt={`${contact.firstName} ${contact.lastName}`} />
+                            <AvatarFallback className="text-xs">
+                              {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
                           <div>
                             <Link href={`/contacts/${contact.id}`} className="hover:text-blue-600 hover:underline cursor-pointer font-medium">
                               {contact.familyName || `${contact.firstName} ${contact.lastName}`}
@@ -979,18 +858,7 @@ export default function Contacts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
-      {/* Photo Cropper Dialog */}
-      <PhotoCropper
-        isOpen={isCropperOpen}
-        onClose={() => {
-          setIsCropperOpen(false);
-          setTempImageUrl(null);
-          setPhotoUploadContact(null);
-        }}
-        imageUrl={tempImageUrl || ""}
-        onCrop={handlePhotoCrop}
-      />
+
     </>
   );
 }
