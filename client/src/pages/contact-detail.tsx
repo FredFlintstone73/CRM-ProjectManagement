@@ -22,6 +22,7 @@ import ContactForm from "@/components/contacts/contact-form";
 import ContactNotes from "@/components/contacts/contact-notes";
 import NotesDisplay from "@/components/contacts/notes-display";
 import ContactFiles from "@/components/contacts/contact-files";
+import PhotoCropper from "@/components/contacts/PhotoCropper";
 import type { Contact, Project } from "@shared/schema";
 
 interface ContactDetailParams {
@@ -40,6 +41,8 @@ export default function ContactDetail() {
   const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -265,38 +268,83 @@ export default function ContactDetail() {
     if (file) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
         return;
       }
 
-      // Convert to base64 and upload
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert to base64 and open cropper
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
-        setProfileImageUrl(imageUrl);
-        uploadPhotoMutation.mutate(imageUrl);
+        setTempImageUrl(imageUrl);
+        setIsCropperOpen(true);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const uploadPhotoMutation = useMutation({
-    mutationFn: async (imageUrl: string) => {
-      await apiRequest('POST', `/api/contacts/${id}/photo`, { imageUrl });
+    mutationFn: async (data: { imageUrl: string; cropSettings?: any }) => {
+      await apiRequest('POST', `/api/contacts/${id}/photo`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-
+      toast({
+        title: "Photo updated",
+        description: "Profile photo has been successfully updated",
+      });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload photo. Please try again.",
+        variant: "destructive",
+      });
     },
   });
+
+  const handlePhotoCrop = (croppedImageUrl: string, cropSettings?: any) => {
+    setProfileImageUrl(croppedImageUrl);
+    uploadPhotoMutation.mutate({ 
+      imageUrl: croppedImageUrl,
+      cropSettings 
+    });
+    setIsCropperOpen(false);
+    setTempImageUrl(null);
+  };
+
+  const handleEditPhoto = () => {
+    if (contact?.profileImageUrl) {
+      setTempImageUrl(contact.profileImageUrl);
+      setIsCropperOpen(true);
+    }
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -436,6 +484,16 @@ export default function ContactDetail() {
               >
                 <Camera className="h-4 w-4" />
               </Button>
+              {contact?.profileImageUrl && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="absolute -bottom-2 left-2 h-8 w-8 rounded-full p-0"
+                  onClick={handleEditPhoto}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             <Input
               ref={fileInputRef}
@@ -1245,6 +1303,20 @@ export default function ContactDetail() {
         isOpen={isNotesDialogOpen}
         onClose={() => setIsNotesDialogOpen(false)}
       />
+
+      {/* Photo Cropper Dialog */}
+      {tempImageUrl && (
+        <PhotoCropper
+          isOpen={isCropperOpen}
+          onClose={() => {
+            setIsCropperOpen(false);
+            setTempImageUrl(null);
+          }}
+          imageUrl={tempImageUrl}
+          onCrop={handlePhotoCrop}
+          existingCrop={contact?.photoCropSettings}
+        />
+      )}
     </div>
   );
 }

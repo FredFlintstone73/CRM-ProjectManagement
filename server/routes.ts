@@ -170,13 +170,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/contacts/:id/photo', isAuthenticated, async (req: any, res) => {
     try {
-      const { imageUrl } = req.body;
+      const { imageUrl, cropSettings } = req.body;
       if (!imageUrl) {
         return res.status(400).json({ message: "Image URL is required" });
       }
       
       const contactId = parseInt(req.params.id);
-      const contact = await storage.updateContact(contactId, { profileImageUrl: imageUrl });
+      const updateData: any = { profileImageUrl: imageUrl };
+      if (cropSettings) {
+        updateData.photoCropSettings = cropSettings;
+      }
+      
+      const contact = await storage.updateContact(contactId, updateData);
       res.json(contact);
     } catch (error) {
       console.error("Error uploading photo:", error);

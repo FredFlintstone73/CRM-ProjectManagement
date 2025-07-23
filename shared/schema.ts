@@ -253,6 +253,12 @@ export const contacts = pgTable("contacts", {
   notes: text("notes"),
   applicationComplete: varchar("application_complete"),
   profileImageUrl: varchar("profile_image_url"),
+  photoCropSettings: jsonb("photo_crop_settings").$type<{
+    x: number;
+    y: number;
+    scale: number;
+    rotation: number;
+  }>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   createdBy: varchar("created_by").references(() => users.id),
