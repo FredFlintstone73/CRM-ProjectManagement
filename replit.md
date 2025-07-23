@@ -519,9 +519,10 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Removed Oversized Camera Buttons**: Eliminated large camera upload buttons from contacts page avatars that were obscuring profile pictures
 - **Streamlined Photo Editing Access**: Photo cropping functionality now exclusively available through contact detail pages with proper edit icons
 - **Fixed JavaScript Errors**: Resolved "Camera is not defined" error by removing all photo upload references from main contacts page
-- **Strategic Partners and Team Members Photo Editing**: Confirmed photo editing functionality working correctly on Strategic Partners and Team Members detail pages
+- **Strategic Partners and Team Members Photo Editing**: Added missing edit buttons to Strategic Partners and Team Members detail pages in sidebar
 - **Complete Photo System Working**: Edit icon with camera button functional on all contact detail pages (Clients, Strategic Partners, Team Members)
 - **Clean UI Experience**: Main contacts page now displays clean avatars without upload interference, with photo editing properly accessible through detail pages
+- **Photo Cropper Enhancement**: Fixed photo cropping calculations to prevent image cutoff during crop/reposition operations with improved canvas rendering and drag positioning logic
 
 ### Complete File Management System Implementation (July 14, 2025)
 - **Database Schema**: Created contactFiles table with comprehensive file metadata and base64 content storage

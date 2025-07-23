@@ -59,8 +59,8 @@ export default function PhotoCropper({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size to avatar size (128x128 for high quality)
-    const size = 128;
+    // Set canvas size to avatar size (256x256 for high quality)
+    const size = 256;
     canvas.width = size;
     canvas.height = size;
 
@@ -75,27 +75,35 @@ export default function PhotoCropper({
     ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
     ctx.clip();
 
-    // Calculate image dimensions and positioning
+    // Center transformations
+    ctx.translate(size / 2, size / 2);
+    
+    // Apply rotation
+    ctx.rotate((crop.rotation * Math.PI) / 180);
+    
+    // Apply scaling and position
+    ctx.scale(crop.scale, crop.scale);
+    ctx.translate(crop.x / crop.scale, crop.y / crop.scale);
+
+    // Calculate image dimensions to fill the canvas
     const imageAspect = image.naturalWidth / image.naturalHeight;
-    let drawWidth = size * crop.scale;
-    let drawHeight = size * crop.scale;
+    let drawWidth = size;
+    let drawHeight = size;
     
     if (imageAspect > 1) {
-      drawHeight = drawHeight / imageAspect;
+      drawHeight = size / imageAspect;
     } else {
-      drawWidth = drawWidth * imageAspect;
+      drawWidth = size * imageAspect;
     }
 
-    // Apply transformations
-    ctx.translate(size / 2, size / 2);
-    ctx.rotate((crop.rotation * Math.PI) / 180);
-    ctx.translate(-size / 2, -size / 2);
-
-    // Draw image with crop position
-    const drawX = (size - drawWidth) / 2 + crop.x;
-    const drawY = (size - drawHeight) / 2 + crop.y;
-    
-    ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    // Draw image centered
+    ctx.drawImage(
+      image, 
+      -drawWidth / 2, 
+      -drawHeight / 2, 
+      drawWidth, 
+      drawHeight
+    );
 
     // Restore context
     ctx.restore();
@@ -111,17 +119,31 @@ export default function PhotoCropper({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
-    setDragStart({ x: e.clientX - crop.x, y: e.clientY - crop.y });
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragStart({ 
+        x: e.clientX - rect.left - crop.x, 
+        y: e.clientY - rect.top - crop.y 
+      });
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
     
-    setCrop(prev => ({
-      ...prev,
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
-    }));
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const newX = e.clientX - rect.left - dragStart.x;
+      const newY = e.clientY - rect.top - dragStart.y;
+      
+      // Limit movement within reasonable bounds
+      const maxOffset = 100;
+      setCrop(prev => ({
+        ...prev,
+        x: Math.max(-maxOffset, Math.min(maxOffset, newX)),
+        y: Math.max(-maxOffset, Math.min(maxOffset, newY))
+      }));
+    }
   };
 
   const handleMouseUp = () => {
@@ -172,7 +194,7 @@ export default function PhotoCropper({
                 alt="Crop preview"
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  transform: `translate(${crop.x}px, ${crop.y}px) scale(${crop.scale}) rotate(${crop.rotation}deg)`,
+                  transform: `translate(calc(50% + ${crop.x}px), calc(50% + ${crop.y}px)) scale(${crop.scale}) rotate(${crop.rotation}deg)`,
                   transformOrigin: 'center'
                 }}
                 onLoad={handleImageLoad}
