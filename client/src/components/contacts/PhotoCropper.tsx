@@ -30,10 +30,10 @@ export default function PhotoCropper({
   const containerRef = useRef<HTMLDivElement>(null);
   
   const [crop, setCrop] = useState({
-    x: existingCrop?.x ?? 0,
-    y: existingCrop?.y ?? 0,
-    scale: existingCrop?.scale ?? 1,
-    rotation: existingCrop?.rotation ?? 0
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotation: 0
   });
   
   const [isDragging, setIsDragging] = useState(false);
@@ -43,57 +43,71 @@ export default function PhotoCropper({
   useEffect(() => {
     if (existingCrop) {
       setCrop({
-        x: existingCrop.x,
-        y: existingCrop.y,
-        scale: existingCrop.scale,
-        rotation: existingCrop.rotation
+        x: existingCrop.x ?? 0,
+        y: existingCrop.y ?? 0,
+        scale: existingCrop.scale ?? 1,
+        rotation: existingCrop.rotation ?? 0
+      });
+    } else {
+      // Reset to default when no existing crop
+      setCrop({
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotation: 0
       });
     }
-  }, [existingCrop]);
+  }, [existingCrop, imageUrl]);
 
   const drawImageOnCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const image = imageRef.current;
-    if (!canvas || !image || !imageLoaded) return;
+    const container = containerRef.current;
+    if (!canvas || !image || !imageLoaded || !container) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // Set canvas size to avatar size (256x256 for high quality)
-    const size = 256;
-    canvas.width = size;
-    canvas.height = size;
+    const outputSize = 256;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+
+    // Get the preview container dimensions (256px = 64 * 4 for the w-64 class)
+    const previewSize = 256;
 
     // Clear canvas
-    ctx.clearRect(0, 0, size, size);
+    ctx.clearRect(0, 0, outputSize, outputSize);
 
     // Save context
     ctx.save();
 
     // Create circular clipping path
     ctx.beginPath();
-    ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
+    ctx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, 2 * Math.PI);
     ctx.clip();
 
-    // Center transformations
-    ctx.translate(size / 2, size / 2);
-    
-    // Apply rotation
-    ctx.rotate((crop.rotation * Math.PI) / 180);
-    
-    // Apply scaling and position
-    ctx.scale(crop.scale, crop.scale);
-    ctx.translate(crop.x / crop.scale, crop.y / crop.scale);
+    // Calculate the scale factor from preview to output
+    const scaleFactor = outputSize / previewSize;
 
-    // Calculate image dimensions to fill the canvas
+    // Apply transformations in the same order as the preview
+    ctx.translate(outputSize / 2, outputSize / 2);
+    ctx.rotate((crop.rotation * Math.PI) / 180);
+    ctx.scale(crop.scale, crop.scale);
+    ctx.translate((crop.x * scaleFactor) / crop.scale, (crop.y * scaleFactor) / crop.scale);
+
+    // Calculate image dimensions that match the preview
     const imageAspect = image.naturalWidth / image.naturalHeight;
-    let drawWidth = size;
-    let drawHeight = size;
+    let drawWidth = outputSize;
+    let drawHeight = outputSize;
     
+    // Make the image cover the entire circular area
     if (imageAspect > 1) {
-      drawHeight = size / imageAspect;
+      drawWidth = outputSize;
+      drawHeight = outputSize / imageAspect;
     } else {
-      drawWidth = size * imageAspect;
+      drawWidth = outputSize * imageAspect;
+      drawHeight = outputSize;
     }
 
     // Draw image centered
@@ -219,7 +233,7 @@ export default function PhotoCropper({
                 alt="Crop preview"
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  transform: `translate(calc(50% + ${crop.x}px), calc(50% + ${crop.y}px)) scale(${crop.scale}) rotate(${crop.rotation}deg)`,
+                  transform: `translate(${crop.x}px, ${crop.y}px) scale(${crop.scale}) rotate(${crop.rotation}deg)`,
                   transformOrigin: 'center'
                 }}
                 onLoad={handleImageLoad}
