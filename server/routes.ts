@@ -11,7 +11,8 @@ import {
   insertCallTranscriptSchema,
   insertProjectCommentSchema,
   insertContactNoteSchema,
-  insertTaskCommentSchema
+  insertTaskCommentSchema,
+  insertUserInvitationSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1900,6 +1901,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating call transcript:", error);
       res.status(500).json({ message: "Failed to create call transcript" });
+    }
+  });
+
+  // Access control middleware
+  const requireAdministrator = async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.user.claims.sub;
+      const accessLevel = await storage.getUserAccessLevel(userId);
+      
+      if (accessLevel !== 'administrator') {
+        return res.status(403).json({ message: "Administrator access required" });
+      }
+      
+      next();
+    } catch (error) {
+      console.error("Error checking administrator access:", error);
+      res.status(500).json({ message: "Failed to verify access level" });
+    }
+  };
+
+  const requireManagerOrAbove = async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.user.claims.sub;
+      const accessLevel = await storage.getUserAccessLevel(userId);
+      
+      if (!['administrator', 'manager'].includes(accessLevel || '')) {
+        return res.status(403).json({ message: "Manager or Administrator access required" });
+      }
+      
+      next();
+    } catch (error) {
+      console.error("Error checking manager access:", error);
+      res.status(500).json({ message: "Failed to verify access level" });
+    }
+  };
+
+  // User invitation routes (Administrator only)
+  app.post('/api/user-invitations', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const invitationData = insertUserInvitationSchema.parse(req.body);
+      const userId = req.user.claims.sub;
+      
+      const invitation = await storage.createUserInvitation({
+        ...invitationData,
+        invitedBy: userId,
+      });
+      
+      res.json(invitation);
+    } catch (error) {
+      console.error("Error creating user invitation:", error);
+      res.status(500).json({ message: "Failed to create user invitation" });
+    }
+  });
+
+  app.get('/api/user-invitations', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const invitations = await storage.getUserInvitations(userId);
+      res.json(invitations);
+    } catch (error) {
+      console.error("Error fetching user invitations:", error);
+      res.status(500).json({ message: "Failed to fetch user invitations" });
+    }
+  });
+
+  app.get('/api/user-invitations/:code', async (req: any, res) => {
+    try {
+      const invitation = await storage.getUserInvitation(req.params.code);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      
+      // Check if invitation is expired
+      if (new Date() > new Date(invitation.expiresAt)) {
+        await storage.expireInvitation(req.params.code);
+        return res.status(410).json({ message: "Invitation has expired" });
+      }
+      
+      if (invitation.status !== 'pending') {
+        return res.status(400).json({ message: "Invitation is no longer valid" });
+      }
+      
+      res.json(invitation);
+    } catch (error) {
+      console.error("Error fetching invitation:", error);
+      res.status(500).json({ message: "Failed to fetch invitation" });
+    }
+  });
+
+  app.post('/api/user-invitations/:code/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const invitation = await storage.acceptUserInvitation(req.params.code, userId);
+      
+      // Update user's access level based on invitation
+      await storage.updateUserAccessLevel(userId, invitation.accessLevel);
+      
+      res.json({ message: "Invitation accepted successfully" });
+    } catch (error) {
+      console.error("Error accepting invitation:", error);
+      res.status(500).json({ message: "Failed to accept invitation" });
+    }
+  });
+
+  // User access level routes (Administrator only)
+  app.get('/api/users/:id/access-level', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const accessLevel = await storage.getUserAccessLevel(req.params.id);
+      res.json({ accessLevel });
+    } catch (error) {
+      console.error("Error fetching user access level:", error);
+      res.status(500).json({ message: "Failed to fetch user access level" });
+    }
+  });
+
+  app.put('/api/users/:id/access-level', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const { accessLevel } = req.body;
+      const user = await storage.updateUserAccessLevel(req.params.id, accessLevel);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user access level:", error);
+      res.status(500).json({ message: "Failed to update user access level" });
+    }
+  });
+
+  // Current user's access level (accessible to all authenticated users)
+  app.get('/api/auth/access-level', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const accessLevel = await storage.getUserAccessLevel(userId);
+      res.json({ accessLevel });
+    } catch (error) {
+      console.error("Error fetching current user access level:", error);
+      res.status(500).json({ message: "Failed to fetch access level" });
     }
   });
 

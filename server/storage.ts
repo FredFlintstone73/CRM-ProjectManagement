@@ -14,6 +14,7 @@ import {
   contactNotes,
   contactFiles,
   userTaskPriorities,
+  userInvitations,
   type User,
   type UpsertUser,
   type Contact,
@@ -44,6 +45,8 @@ import {
   type InsertContactFile,
   type UserTaskPriority,
   type InsertUserTaskPriority,
+  type UserInvitation,
+  type InsertUserInvitation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, not, ilike, count, isNotNull, inArray } from "drizzle-orm";
@@ -54,6 +57,17 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   ensureUserHasContact(user: User): Promise<Contact>;
   getUserContactId(user: User): Promise<number | null>;
+  
+  // User invitation operations
+  createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation>;
+  getUserInvitation(invitationCode: string): Promise<UserInvitation | undefined>;
+  getUserInvitations(invitedBy?: string): Promise<UserInvitation[]>;
+  acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation>;
+  expireInvitation(invitationCode: string): Promise<void>;
+  
+  // User access control operations  
+  getUserAccessLevel(userId: string): Promise<string | undefined>;
+  updateUserAccessLevel(userId: string, accessLevel: string): Promise<User>;
 
   // Contact operations
   getContacts(): Promise<Contact[]>;
@@ -249,6 +263,98 @@ export class DatabaseStorage implements IStorage {
 
     console.log('getUserContactId - found contact:', contact?.id);
     return contact?.id || null;
+  }
+
+  // User invitation operations
+  async createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation> {
+    // Generate unique invitation code
+    const invitationCode = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    // Set expiration date (7 days from now)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const [newInvitation] = await db
+      .insert(userInvitations)
+      .values({
+        ...invitation,
+        invitationCode,
+        expiresAt,
+      })
+      .returning();
+
+    return newInvitation;
+  }
+
+  async getUserInvitation(invitationCode: string): Promise<UserInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(userInvitations)
+      .where(eq(userInvitations.invitationCode, invitationCode));
+    
+    return invitation;
+  }
+
+  async getUserInvitations(invitedBy?: string): Promise<UserInvitation[]> {
+    if (invitedBy) {
+      return await db
+        .select()
+        .from(userInvitations)
+        .where(eq(userInvitations.invitedBy, invitedBy))
+        .orderBy(desc(userInvitations.createdAt));
+    }
+    
+    return await db
+      .select()
+      .from(userInvitations)
+      .orderBy(desc(userInvitations.createdAt));
+  }
+
+  async acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation> {
+    const [updatedInvitation] = await db
+      .update(userInvitations)
+      .set({
+        status: 'accepted',
+        acceptedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(userInvitations.invitationCode, invitationCode))
+      .returning();
+
+    return updatedInvitation;
+  }
+
+  async expireInvitation(invitationCode: string): Promise<void> {
+    await db
+      .update(userInvitations)
+      .set({
+        status: 'expired',
+        updatedAt: new Date(),
+      })
+      .where(eq(userInvitations.invitationCode, invitationCode));
+  }
+
+  // User access control operations
+  async getUserAccessLevel(userId: string): Promise<string | undefined> {
+    const [user] = await db
+      .select({ accessLevel: users.accessLevel })
+      .from(users)
+      .where(eq(users.id, userId));
+    
+    return user?.accessLevel || undefined;
+  }
+
+  async updateUserAccessLevel(userId: string, accessLevel: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        accessLevel: accessLevel as any,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedUser;
   }
 
   // Contact operations
@@ -2045,6 +2151,88 @@ export class DatabaseStorage implements IStorage {
       ...task,
       userPriority: task.userPriority || task.priority || 50
     }));
+  }
+
+  // User invitation methods
+  async createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation> {
+    // Generate a unique invitation code
+    const invitationCode = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    // Set expiration to 7 days from now
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const [created] = await db
+      .insert(userInvitations)
+      .values({
+        ...invitation,
+        invitationCode,
+        expiresAt,
+      })
+      .returning();
+
+    return created;
+  }
+
+  async getUserInvitation(invitationCode: string): Promise<UserInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(userInvitations)
+      .where(eq(userInvitations.invitationCode, invitationCode));
+
+    return invitation;
+  }
+
+  async getUserInvitations(invitedBy?: string): Promise<UserInvitation[]> {
+    let query = db
+      .select()
+      .from(userInvitations)
+      .orderBy(desc(userInvitations.createdAt));
+
+    if (invitedBy) {
+      query = query.where(eq(userInvitations.invitedBy, invitedBy));
+    }
+
+    return await query;
+  }
+
+  async acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation> {
+    const [updated] = await db
+      .update(userInvitations)
+      .set({ 
+        status: 'accepted',
+        acceptedAt: new Date(),
+      })
+      .where(eq(userInvitations.invitationCode, invitationCode))
+      .returning();
+
+    return updated;
+  }
+
+  async expireInvitation(invitationCode: string): Promise<void> {
+    await db
+      .update(userInvitations)
+      .set({ status: 'expired' })
+      .where(eq(userInvitations.invitationCode, invitationCode));
+  }
+
+  // User access control methods
+  async getUserAccessLevel(userId: string): Promise<string | undefined> {
+    const user = await this.getUser(userId);
+    return user?.accessLevel;
+  }
+
+  async updateUserAccessLevel(userId: string, accessLevel: string): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({ 
+        accessLevel: accessLevel as any,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updated;
   }
 }
 

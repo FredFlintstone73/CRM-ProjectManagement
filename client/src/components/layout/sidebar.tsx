@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useAccessControl } from "@/hooks/useAccessControl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -13,6 +14,7 @@ interface SidebarProps {
 export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAdministrator } = useAccessControl();
   const [isContactsExpanded, setIsContactsExpanded] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -38,6 +40,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     { name: 'Analytics', href: '/analytics', icon: TrendingUp },
     { name: 'Calendar', href: '/calendar', icon: Calendar },
     { name: 'Messages', href: '/messages', icon: MessageSquare },
+    ...(isAdministrator ? [{ name: 'User Management', href: '/user-management', icon: Users }] : []),
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 

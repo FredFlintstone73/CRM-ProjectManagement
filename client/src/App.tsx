@@ -17,6 +17,7 @@ import TemplateDetail from "@/pages/template-detail";
 import TaskDetail from "@/pages/task-detail";
 import TaskDetailSimple from "@/pages/task-detail-simple";
 import Tasks from "@/pages/tasks";
+import UserManagement from "@/pages/user-management";
 import Sidebar from "@/components/layout/sidebar";
 
 
@@ -55,6 +56,7 @@ function Router() {
                 <Route path="/templates/:templateId/tasks/:taskId" component={TaskDetail} />
                 <Route path="/task/:id" component={TaskDetail} />
                 <Route path="/tasks" component={Tasks} />
+                <Route path="/user-management" component={UserManagement} />
                 <Route component={NotFound} />
               </Switch>
             </div>

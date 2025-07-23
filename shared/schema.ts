@@ -14,27 +14,19 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table (required for Replit Auth)
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
+// User access level enum
+export const accessLevelEnum = pgEnum("access_level", [
+  "team_member",
+  "manager", 
+  "administrator"
+]);
 
-// User storage table (required for Replit Auth)
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// Invitation status enum
+export const invitationStatusEnum = pgEnum("invitation_status", [
+  "pending",
+  "accepted",
+  "expired"
+]);
 
 // Contact types enum
 export const contactTypeEnum = pgEnum("contact_type", [
@@ -105,6 +97,32 @@ export const taskPriorityEnum = pgEnum("task_priority", [
   "high",
   "urgent"
 ]);
+
+// Session storage table (required for Replit Auth)
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table (required for Replit Auth)
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  accessLevel: accessLevelEnum("access_level").default("team_member"),
+  isActive: boolean("is_active").default(true),
+  invitedBy: varchar("invited_by").references(() => users.id),
+  invitedAt: timestamp("invited_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 // Contacts table
 export const contacts = pgTable("contacts", {
@@ -828,6 +846,50 @@ export const insertUserTaskPrioritySchema = createInsertSchema(userTaskPrioritie
   updatedAt: true,
 });
 
+// User invitations table
+export const userInvitations = pgTable("user_invitations", {
+  id: serial("id").primaryKey(),
+  email: varchar("email").notNull(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  accessLevel: accessLevelEnum("access_level").notNull(),
+  invitationCode: varchar("invitation_code").notNull().unique(),
+  status: invitationStatusEnum("status").default("pending"),
+  invitedBy: varchar("invited_by").notNull().references(() => users.id),
+  invitedAt: timestamp("invited_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations
+export const userRelations = relations(users, ({ many, one }) => ({
+  invitations: many(userInvitations, { relationName: "userInvitations" }),
+  invitedBy: one(users, { 
+    fields: [users.invitedBy], 
+    references: [users.id],
+    relationName: "invitedUsers"
+  })
+}));
+
+export const userInvitationsRelations = relations(userInvitations, ({ one }) => ({
+  invitedBy: one(users, { 
+    fields: [userInvitations.invitedBy], 
+    references: [users.id] 
+  })
+}));
+
+export const insertUserInvitationSchema = createInsertSchema(userInvitations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  invitationCode: true,
+  status: true,
+  invitedAt: true,
+  acceptedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -859,3 +921,5 @@ export type ContactFile = typeof contactFiles.$inferSelect;
 export type InsertContactFile = z.infer<typeof insertContactFileSchema>;
 export type UserTaskPriority = typeof userTaskPriorities.$inferSelect;
 export type InsertUserTaskPriority = z.infer<typeof insertUserTaskPrioritySchema>;
+export type UserInvitation = typeof userInvitations.$inferSelect;
+export type InsertUserInvitation = z.infer<typeof insertUserInvitationSchema>;
