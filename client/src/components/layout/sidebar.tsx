@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import type { User } from "@shared/schema";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -13,7 +14,7 @@ interface SidebarProps {
 
 export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   const [location] = useLocation();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth() as { user: User | null; isAuthenticated: boolean; isLoading: boolean };
   const { isAdministrator } = useAccessControl();
   const [isContactsExpanded, setIsContactsExpanded] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
