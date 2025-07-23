@@ -2022,10 +2022,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/user-invitations/:code/accept', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const invitation = await storage.acceptUserInvitation(req.params.code, userId);
+      const userEmail = req.user.claims.email;
+      const firstName = req.user.claims.first_name;
+      const lastName = req.user.claims.last_name;
       
-      // Update user's access level based on invitation
-      await storage.updateUserAccessLevel(userId, invitation.accessLevel);
+      // Get the invitation details first
+      const invitation = await storage.getUserInvitation(req.params.code);
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      
+      // Accept the invitation
+      await storage.acceptUserInvitation(req.params.code, userId);
+      
+      // Ensure user exists in the users table with invitation details
+      await storage.upsertUser({
+        id: userId,
+        email: userEmail || invitation.email,
+        firstName: firstName || invitation.firstName,
+        lastName: lastName || invitation.lastName,
+        accessLevel: invitation.accessLevel as any,
+        isActive: true,
+        invitedBy: invitation.invitedBy,
+        invitedAt: new Date(invitation.invitedAt),
+      });
       
       res.json({ message: "Invitation accepted successfully" });
     } catch (error) {
