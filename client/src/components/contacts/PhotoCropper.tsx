@@ -37,7 +37,7 @@ export default function PhotoCropper({
   });
   
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, cropX: 0, cropY: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -113,37 +113,62 @@ export default function PhotoCropper({
     drawImageOnCanvas();
   }, [drawImageOnCanvas]);
 
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) {
-      setDragStart({ 
-        x: e.clientX - rect.left - crop.x, 
-        y: e.clientY - rect.top - crop.y 
-      });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) {
-      const newX = e.clientX - rect.left - dragStart.x;
-      const newY = e.clientY - rect.top - dragStart.y;
+  // Add global mouse event listeners for better dragging
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
       
-      // Limit movement within reasonable bounds
-      const maxOffset = 100;
+      e.preventDefault();
+      const deltaX = e.clientX - dragStart.x;
+      const deltaY = e.clientY - dragStart.y;
+      
+      // Apply sensitivity factor and limits
+      const sensitivity = 0.5;
+      const maxOffset = 150;
+      
+      const newX = dragStart.cropX + (deltaX * sensitivity);
+      const newY = dragStart.cropY + (deltaY * sensitivity);
+      
       setCrop(prev => ({
         ...prev,
         x: Math.max(-maxOffset, Math.min(maxOffset, newX)),
         y: Math.max(-maxOffset, Math.min(maxOffset, newY))
       }));
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
     }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, dragStart]);
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ 
+      x: e.clientX, 
+      y: e.clientY,
+      cropX: crop.x,
+      cropY: crop.y
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    // This is now handled by the global event listener for better performance
+    e.preventDefault();
   };
 
   const handleMouseUp = () => {
