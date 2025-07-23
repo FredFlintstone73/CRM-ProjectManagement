@@ -96,12 +96,11 @@ export default function PhotoCropper({
     ctx.scale(crop.scale, crop.scale);
     ctx.translate((crop.x * scaleFactor) / crop.scale, (crop.y * scaleFactor) / crop.scale);
 
-    // Calculate image dimensions that match the preview
+    // Calculate image dimensions to contain within the preview (not cover)
     const imageAspect = image.naturalWidth / image.naturalHeight;
-    let drawWidth = outputSize;
-    let drawHeight = outputSize;
+    let drawWidth, drawHeight;
     
-    // Make the image cover the entire circular area
+    // Use object-contain logic - fit the image within bounds
     if (imageAspect > 1) {
       drawWidth = outputSize;
       drawHeight = outputSize / imageAspect;
@@ -137,8 +136,8 @@ export default function PhotoCropper({
       const deltaY = e.clientY - dragStart.y;
       
       // Apply sensitivity factor and limits
-      const sensitivity = 0.5;
-      const maxOffset = 150;
+      const sensitivity = 0.8;
+      const maxOffset = 300;
       
       const newX = dragStart.cropX + (deltaX * sensitivity);
       const newY = dragStart.cropY + (deltaY * sensitivity);
@@ -214,6 +213,9 @@ export default function PhotoCropper({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Position Your Photo</DialogTitle>
+          <p className="text-sm text-gray-600 mt-2">
+            Drag to reposition, use zoom to scale, and rotation to adjust. The image now shows in full without automatic cropping.
+          </p>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -231,7 +233,7 @@ export default function PhotoCropper({
                 ref={imageRef}
                 src={imageUrl}
                 alt="Crop preview"
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-contain"
                 style={{
                   transform: `translate(${crop.x}px, ${crop.y}px) scale(${crop.scale}) rotate(${crop.rotation}deg)`,
                   transformOrigin: 'center'
@@ -267,8 +269,8 @@ export default function PhotoCropper({
               <Slider
                 value={[crop.scale]}
                 onValueChange={handleScaleChange}
-                min={0.5}
-                max={3}
+                min={0.1}
+                max={5}
                 step={0.1}
                 className="w-full"
               />
