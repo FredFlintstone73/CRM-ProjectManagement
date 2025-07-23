@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, Edit } from "lucide-react";
+import PhotoCropper from "@/components/contacts/PhotoCropper";
+import { useToast } from "@/hooks/use-toast";
 
 import { insertContactSchema, type InsertContact, type Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
@@ -29,6 +33,7 @@ type ContactType = "client" | "prospect" | "team_member" | "strategic_partner";
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const queryClient = useQueryClient();
   
@@ -36,6 +41,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     contact ? (contact.contactType === "client" || contact.contactType === "prospect" ? "client_prospect" : "team_strategic") : null
   );
   const [selectedType, setSelectedType] = useState<ContactType | null>(contact?.contactType || null);
+  
+  // Photo cropping states
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(contact?.profileImageUrl || null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [sameAsMailingAddress, setSameAsMailingAddress] = useState(
     contact ? contact.sameAsMailingAddress === "yes" : false
@@ -227,6 +238,102 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     mutation.mutate(cleanedData);
   };
 
+  // Photo upload functions
+  const handlePhotoUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert to base64 and open cropper
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        setTempImageUrl(imageUrl);
+        setIsCropperOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async (data: { imageUrl: string; cropSettings?: any }) => {
+      const contactId = contact?.id;
+      if (contactId) {
+        await apiRequest('POST', `/api/contacts/${contactId}/photo`, data);
+      } else {
+        // For new contacts, temporarily store the image
+        setProfileImageUrl(data.imageUrl);
+      }
+    },
+    onSuccess: () => {
+      if (contact?.id) {
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts', contact.id] });
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+        toast({
+          title: "Photo updated",
+          description: "Profile photo has been successfully updated",
+        });
+      }
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload photo. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePhotoCrop = (croppedImageUrl: string, cropSettings?: any) => {
+    setProfileImageUrl(croppedImageUrl);
+    uploadPhotoMutation.mutate({ 
+      imageUrl: croppedImageUrl,
+      cropSettings 
+    });
+    setIsCropperOpen(false);
+    setTempImageUrl(null);
+  };
+
+  const handleEditPhoto = () => {
+    if (profileImageUrl) {
+      setTempImageUrl(profileImageUrl);
+      setIsCropperOpen(true);
+    }
+  };
+
   const handleSameAsMailingAddress = (value: string) => {
     const isSame = value === "yes";
     setSameAsMailingAddress(isSame);
@@ -403,6 +510,45 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           )}
         </div>
         
+        {/* Profile Photo Section */}
+        <div className="flex justify-center mb-6">
+          <div className="w-32 h-32 relative">
+            <Avatar className="w-full h-full border-2 border-dashed border-gray-300">
+              <AvatarImage src={profileImageUrl || ""} alt="Profile Photo" className="object-cover" />
+              <AvatarFallback className="text-2xl bg-gray-100">
+                {form.watch("firstName")?.charAt(0) || ""}{form.watch("lastName")?.charAt(0) || ""}
+              </AvatarFallback>
+            </Avatar>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+              onClick={handlePhotoUpload}
+            >
+              <Camera className="h-4 w-4" />
+            </Button>
+            {profileImageUrl && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="absolute -bottom-2 left-2 h-8 w-8 rounded-full p-0"
+                onClick={handleEditPhoto}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
+
         {/* Simplified form for team members and strategic partners */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -599,6 +745,17 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             Reset Form
           </Button>
         </div>
+        
+        {/* Photo Cropper Dialog */}
+        <PhotoCropper
+          isOpen={isCropperOpen}
+          onClose={() => {
+            setIsCropperOpen(false);
+            setTempImageUrl(null);
+          }}
+          imageUrl={tempImageUrl || ""}
+          onCrop={handlePhotoCrop}
+        />
       </form>
     );
   }
@@ -636,6 +793,45 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
               <CardDescription>Essential client and family information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Profile Photo Section */}
+              <div className="flex justify-center mb-6">
+                <div className="w-32 h-32 relative">
+                  <Avatar className="w-full h-full border-2 border-dashed border-gray-300">
+                    <AvatarImage src={profileImageUrl || ""} alt="Profile Photo" className="object-cover" />
+                    <AvatarFallback className="text-2xl bg-gray-100">
+                      {form.watch("firstName")?.charAt(0) || ""}{form.watch("lastName")?.charAt(0) || ""}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+                    onClick={handlePhotoUpload}
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                  {profileImageUrl && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="absolute -bottom-2 left-2 h-8 w-8 rounded-full p-0"
+                      onClick={handleEditPhoto}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
+              
               <div>
                 <Label htmlFor="familyName">Family Name</Label>
                 <Input
@@ -1356,6 +1552,17 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           }
         </Button>
       </div>
+      
+      {/* Photo Cropper Dialog */}
+      <PhotoCropper
+        isOpen={isCropperOpen}
+        onClose={() => {
+          setIsCropperOpen(false);
+          setTempImageUrl(null);
+        }}
+        imageUrl={tempImageUrl || ""}
+        onCrop={handlePhotoCrop}
+      />
     </form>
   );
 }
