@@ -598,10 +598,6 @@ export default function Contacts() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handlePhotoUpload(contact)}>
-                            <Camera className="h-4 w-4 mr-2" />
-                            Upload Photo
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleEditClick(contact)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
@@ -772,10 +768,6 @@ export default function Contacts() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handlePhotoUpload(contact)}>
-                              <Camera className="h-4 w-4 mr-2" />
-                              Upload Photo
-                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEditClick(contact)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
