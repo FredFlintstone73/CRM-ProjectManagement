@@ -24,7 +24,7 @@ export function useAccessControl() {
     retry: false,
   });
 
-  const accessLevel: AccessLevel = accessLevelData?.accessLevel || "team_member";
+  const accessLevel: AccessLevel = (accessLevelData as any)?.accessLevel || "team_member";
 
   const permissions: AccessPermissions = {
     // Administrator permissions (full access)
