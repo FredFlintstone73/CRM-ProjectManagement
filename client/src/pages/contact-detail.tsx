@@ -686,6 +686,16 @@ export default function ContactDetail() {
                 >
                   <Camera className="h-4 w-4" />
                 </Button>
+                {contact?.profileImageUrl && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="absolute -bottom-2 left-2 h-8 w-8 rounded-full p-0"
+                    onClick={handleEditPhoto}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
               <div className="text-center">
                 <h2 className="text-xl font-semibold">{contact.firstName} {contact.lastName}</h2>
