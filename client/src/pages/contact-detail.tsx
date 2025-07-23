@@ -346,60 +346,7 @@ export default function ContactDetail() {
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        return;
-      }
 
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        return;
-      }
-
-      // Create a preview URL and save it
-      const previewUrl = URL.createObjectURL(file);
-      setProfileImageUrl(previewUrl);
-
-      // Compress and convert file to base64
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        // Set max dimensions (reduce file size)
-        const maxWidth = 400;
-        const maxHeight = 400;
-        let { width, height } = img;
-
-        // Calculate new dimensions
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
-        }
-
-        // Set canvas size and draw compressed image
-        canvas.width = width;
-        canvas.height = height;
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        // Convert to base64 with compression (0.8 quality)
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-        uploadPhotoMutation.mutate(compressedBase64);
-      };
-      
-      img.src = previewUrl;
-    }
-  };
 
   // Set initial profile image if contact has one
   useEffect(() => {
@@ -499,7 +446,7 @@ export default function ContactDetail() {
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleFileChange}
+              onChange={handleFileSelect}
               className="hidden"
             />
           </div>
