@@ -524,6 +524,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Clean UI Experience**: Main contacts page now displays clean avatars without upload interference, with photo editing properly accessible through detail pages
 - **Photo Cropper Enhancement**: Fixed photo cropping calculations to prevent image cutoff during crop/reposition operations with improved canvas rendering and drag positioning logic
 - **Enhanced Photo Upload Constraints**: Increased file size limit to 10MB, changed from object-cover to object-contain to show full images without automatic cropping, expanded zoom range (0.1x to 5x), increased movement bounds for better positioning control, and added helpful user instructions in cropper dialog
+- **Original Image Preservation System**: Implemented separate storage of original uploaded images and crop settings, so photo editing always uses the original high-quality image instead of degrading cropped versions - added originalImageUrl field to contacts schema and updated all photo handling logic
 
 ### Complete File Management System Implementation (July 14, 2025)
 - **Database Schema**: Created contactFiles table with comprehensive file metadata and base64 content storage

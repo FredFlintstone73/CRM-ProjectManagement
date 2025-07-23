@@ -298,7 +298,7 @@ export default function ContactDetail() {
   };
 
   const uploadPhotoMutation = useMutation({
-    mutationFn: async (data: { imageUrl: string; cropSettings?: any }) => {
+    mutationFn: async (data: { imageUrl: string; originalImageUrl?: string; cropSettings?: any }) => {
       await apiRequest('POST', `/api/contacts/${id}/photo`, data);
     },
     onSuccess: () => {
@@ -330,18 +330,20 @@ export default function ContactDetail() {
   });
 
   const handlePhotoCrop = (croppedImageUrl: string, cropSettings?: any) => {
-    setProfileImageUrl(croppedImageUrl);
     uploadPhotoMutation.mutate({ 
       imageUrl: croppedImageUrl,
+      originalImageUrl: tempImageUrl, // Store the original image
       cropSettings 
     });
     setIsCropperOpen(false);
-    setTempImageUrl(null);
+    setTempImageUrl('');
   };
 
   const handleEditPhoto = () => {
     if (contact?.profileImageUrl) {
-      setTempImageUrl(contact.profileImageUrl);
+      // Use original image if available, otherwise use the cropped version
+      const imageToEdit = contact.originalImageUrl || contact.profileImageUrl;
+      setTempImageUrl(imageToEdit);
       setIsCropperOpen(true);
     }
   };

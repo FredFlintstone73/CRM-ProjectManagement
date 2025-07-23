@@ -278,7 +278,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   };
 
   const uploadPhotoMutation = useMutation({
-    mutationFn: async (data: { imageUrl: string; cropSettings?: any }) => {
+    mutationFn: async (data: { imageUrl: string; originalImageUrl?: string; cropSettings?: any }) => {
       const contactId = contact?.id;
       if (contactId) {
         await apiRequest('POST', `/api/contacts/${contactId}/photo`, data);
@@ -321,6 +321,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
     setProfileImageUrl(croppedImageUrl);
     uploadPhotoMutation.mutate({ 
       imageUrl: croppedImageUrl,
+      originalImageUrl: tempImageUrl, // Store the original image
       cropSettings 
     });
     setIsCropperOpen(false);
@@ -329,7 +330,9 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
   const handleEditPhoto = () => {
     if (profileImageUrl) {
-      setTempImageUrl(profileImageUrl);
+      // Use original image if available, otherwise use the cropped version
+      const imageToEdit = contact?.originalImageUrl || profileImageUrl;
+      setTempImageUrl(imageToEdit);
       setIsCropperOpen(true);
     }
   };

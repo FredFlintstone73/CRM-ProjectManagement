@@ -253,6 +253,7 @@ export const contacts = pgTable("contacts", {
   notes: text("notes"),
   applicationComplete: varchar("application_complete"),
   profileImageUrl: varchar("profile_image_url"),
+  originalImageUrl: varchar("original_image_url"), // Store original uploaded image
   photoCropSettings: jsonb("photo_crop_settings").$type<{
     x: number;
     y: number;
