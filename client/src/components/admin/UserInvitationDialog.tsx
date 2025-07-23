@@ -81,7 +81,9 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error("Invitation error:", response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       return await response.json();
