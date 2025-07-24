@@ -169,7 +169,7 @@ Summarize what was found in 1-2 sentences.`
 
 // Export a default instance with the provided API key and deployment token
 export const abacusAI = new AbacusAIProvider({
-  apiKey: "s2_c688f51a70a74263a674a81f01d30127",
+  apiKey: process.env.ABACUS_API_KEY,
   baseUrl: "https://abacus.ai/api/v0",
   deploymentToken: process.env.ABACUS_DEPLOYMENT_TOKEN
 });
