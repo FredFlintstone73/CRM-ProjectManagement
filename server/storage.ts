@@ -433,11 +433,15 @@ export class DatabaseStorage implements IStorage {
 
     // If there's a corresponding contact, handle task reassignments
     if (userContact && userContact.contactType === 'team_member') {
-      // Find all tasks assigned to this team member
-      const assignedTasks = await db
-        .select()
-        .from(tasks)
-        .where(sql`${userContact.id} = ANY(${tasks.assignedTo})`);
+      // Find all tasks assigned to this team member using a safer approach
+      const allTasks = await db.select().from(tasks);
+      const assignedTasks = allTasks.filter(task => {
+        if (!task.assignedTo) return false;
+        if (Array.isArray(task.assignedTo)) {
+          return task.assignedTo.includes(userContact.id);
+        }
+        return task.assignedTo === userContact.id;
+      });
 
       // Convert these assignments back to role assignments if the team member had a role
       if (userContact.role && assignedTasks.length > 0) {
@@ -454,7 +458,7 @@ export class DatabaseStorage implements IStorage {
           await db
             .update(tasks)
             .set({
-              assignedTo: updatedAssignedTo,
+              assignedTo: updatedAssignedTo.length > 0 ? updatedAssignedTo : null,
               assignedToRole: updatedRoles
             })
             .where(eq(tasks.id, task.id));
