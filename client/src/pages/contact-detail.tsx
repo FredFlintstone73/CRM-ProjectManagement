@@ -806,14 +806,15 @@ export default function ContactDetail() {
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
-            <TabsList className={`grid w-full ${contact.contactType === 'team_member' || contact.contactType === 'strategic_partner' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+            <TabsList className={`grid w-full ${contact.contactType === 'team_member' || contact.contactType === 'strategic_partner' || contact.contactType === 'trusted_professional' ? 'grid-cols-5' : 'grid-cols-6'}`}>
               <TabsTrigger value="client">
                 {contact.contactType === 'prospect' ? 'Prospect' : 
                  contact.contactType === 'strategic_partner' ? 'Partner' : 
-                 contact.contactType === 'team_member' ? 'Member' : 'Client'}
+                 contact.contactType === 'team_member' ? 'Member' :
+                 contact.contactType === 'trusted_professional' ? 'Professional' : 'Client'}
               </TabsTrigger>
               <TabsTrigger value="interaction">Interaction</TabsTrigger>
-              {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
+              {(contact.contactType === 'client' || contact.contactType === 'prospect' || contact.contactType === 'strategic_partner' || contact.contactType === 'team_member' || contact.contactType === 'trusted_professional') && (
                 <TabsTrigger value="business">Business</TabsTrigger>
               )}
               <TabsTrigger value="projects">Projects</TabsTrigger>
@@ -1217,7 +1218,7 @@ export default function ContactDetail() {
             </Card>
           </TabsContent>
 
-          {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
+          {(contact.contactType === 'client' || contact.contactType === 'prospect' || contact.contactType === 'strategic_partner' || contact.contactType === 'team_member' || contact.contactType === 'trusted_professional') && (
             <TabsContent value="business" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Business Information Card */}
