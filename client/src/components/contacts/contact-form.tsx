@@ -1256,6 +1256,20 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
               <CardDescription>Mailing, home and vacation addresses</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Business Name for Strategic Partners and Team Members */}
+              {(contactType === 'strategic_partner' || contactType === 'team_member') && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="businessName">Business Name</Label>
+                    <Input
+                      id="businessName"
+                      {...form.register("businessName")}
+                      placeholder="Enter business name (optional)"
+                    />
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-4">
                 <h4 className="font-semibold">Mailing Address</h4>
                 <div>
