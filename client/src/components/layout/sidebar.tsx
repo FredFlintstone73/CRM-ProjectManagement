@@ -6,6 +6,7 @@ import type { User } from "@shared/schema";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect, useRef, useCallback } from "react";
+import SearchTrigger from "@/components/search/search-trigger";
 
 interface SidebarProps {
   width: number;
@@ -136,6 +137,13 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
           </div>
         </div>
         
+        {/* Search Bar */}
+        {!isCollapsed && (
+          <div className="px-4 py-3">
+            <SearchTrigger />
+          </div>
+        )}
+
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
           {/* Dashboard */}

@@ -210,6 +210,12 @@ export interface IStorage {
   enableTwoFactorAuth(userId: string, secret: string, backupCodes: string[]): Promise<User>;
   disableTwoFactorAuth(userId: string): Promise<User>;
   updateUserBackupCodes(userId: string, backupCodes: string[]): Promise<User>;
+
+  // Search operations
+  searchContacts(query: string): Promise<Contact[]>;
+  searchProjects(query: string): Promise<Project[]>;
+  searchTasks(query: string): Promise<Task[]>;
+  searchContactNotes(query: string): Promise<(ContactNote & { authorName?: string })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2513,6 +2519,79 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return updated;
+  }
+
+  // Search operations
+  async searchContacts(query: string): Promise<Contact[]> {
+    const queryLower = query.toLowerCase();
+    
+    return await db
+      .select()
+      .from(contacts)
+      .where(
+        or(
+          sql`LOWER(${contacts.firstName}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${contacts.lastName}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${contacts.familyName}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${contacts.businessName}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${contacts.personalEmail}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${contacts.workEmail}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${contacts.cellPhone}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${contacts.workPhone}) LIKE ${`%${queryLower}%`}`
+        )
+      )
+      .limit(10);
+  }
+
+  async searchProjects(query: string): Promise<Project[]> {
+    const queryLower = query.toLowerCase();
+    
+    return await db
+      .select()
+      .from(projects)
+      .where(
+        or(
+          sql`LOWER(${projects.name}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${projects.description}) LIKE ${`%${queryLower}%`}`
+        )
+      )
+      .limit(10);
+  }
+
+  async searchTasks(query: string): Promise<Task[]> {
+    const queryLower = query.toLowerCase();
+    
+    return await db
+      .select()
+      .from(tasks)
+      .where(
+        or(
+          sql`LOWER(${tasks.title}) LIKE ${`%${queryLower}%`}`,
+          sql`LOWER(${tasks.description}) LIKE ${`%${queryLower}%`}`
+        )
+      )
+      .limit(10);
+  }
+
+  async searchContactNotes(query: string): Promise<(ContactNote & { authorName?: string })[]> {
+    const queryLower = query.toLowerCase();
+    
+    const notesWithAuthors = await db
+      .select({
+        id: contactNotes.id,
+        contactId: contactNotes.contactId,
+        content: contactNotes.content,
+        createdAt: contactNotes.createdAt,
+        updatedAt: contactNotes.updatedAt,
+        userId: contactNotes.userId,
+        authorName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('authorName')
+      })
+      .from(contactNotes)
+      .leftJoin(users, eq(contactNotes.userId, users.id))
+      .where(sql`LOWER(${contactNotes.content}) LIKE ${`%${queryLower}%`}`)
+      .limit(10);
+
+    return notesWithAuthors;
   }
 }
 

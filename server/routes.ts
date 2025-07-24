@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { emailService } from "./emailService";
 import { twoFactorAuthService } from "./twoFactorAuth";
+import { aiSearchService } from "./aiSearchService";
 import { 
   insertContactSchema, 
   insertProjectSchema, 
@@ -2309,6 +2310,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking 2FA status:", error);
       res.status(500).json({ message: "Failed to check 2FA status" });
+    }
+  });
+
+  // AI Search endpoint
+  app.get('/api/search', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const query = req.query.q as string;
+
+      if (!query || query.length < 3) {
+        return res.json([]);
+      }
+
+      const results = await aiSearchService.search(query, userId);
+      res.json(results);
+    } catch (error) {
+      console.error("Error performing AI search:", error);
+      res.status(500).json({ message: "Search temporarily unavailable" });
     }
   });
 
