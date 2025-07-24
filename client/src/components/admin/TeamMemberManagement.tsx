@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Settings, UserCheck, UserX, User } from "lucide-react";
+import { Users, Settings, UserCheck, UserX, User, Trash2 } from "lucide-react";
 
 interface TeamMember {
   id: string;
@@ -27,6 +27,7 @@ export default function TeamMemberManagement() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [showChangeAccessDialog, setShowChangeAccessDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [newAccessLevel, setNewAccessLevel] = useState<string>("");
   const [newStatus, setNewStatus] = useState<boolean>(true);
 
@@ -104,6 +105,38 @@ export default function TeamMemberManagement() {
     },
   });
 
+  const deleteTeamMemberMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete team member: ${errorText}`);
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({
+        title: "Team member deleted",
+        description: "Team member has been removed from the system successfully.",
+      });
+      setShowDeleteDialog(false);
+      setSelectedMember(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete team member",
+        description: error.message || "There was an error deleting the team member",
+        variant: "destructive",
+      });
+    },
+  });
+
   const getAccessLevelBadge = (accessLevel: string) => {
     switch (accessLevel) {
       case "administrator":
@@ -143,6 +176,11 @@ export default function TeamMemberManagement() {
     setShowStatusDialog(true);
   };
 
+  const handleDeleteTeamMember = (member: TeamMember) => {
+    setSelectedMember(member);
+    setShowDeleteDialog(true);
+  };
+
   const confirmAccessLevelChange = () => {
     if (selectedMember && newAccessLevel) {
       changeAccessLevelMutation.mutate({
@@ -158,6 +196,12 @@ export default function TeamMemberManagement() {
         userId: selectedMember.id,
         isActive: newStatus,
       });
+    }
+  };
+
+  const confirmDeleteTeamMember = () => {
+    if (selectedMember) {
+      deleteTeamMemberMutation.mutate(selectedMember.id);
     }
   };
 
@@ -223,6 +267,19 @@ export default function TeamMemberManagement() {
                       <Settings className="mr-1 h-3 w-3" />
                       Change Access
                     </Button>
+                    
+                    {!member.isActive && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteTeamMember(member)}
+                        disabled={deleteTeamMemberMutation.isPending}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="mr-1 h-3 w-3" />
+                        Delete
+                      </Button>
+                    )}
                     
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
@@ -307,6 +364,35 @@ export default function TeamMemberManagement() {
               variant={newStatus ? "default" : "destructive"}
             >
               {changeStatusMutation.isPending ? "Updating..." : (newStatus ? "Activate" : "Deactivate")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Team Member Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Team Member</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to permanently delete {selectedMember?.firstName} {selectedMember?.lastName}?
+              This action cannot be undone. All their assigned tasks will be reassigned to role-based assignments.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={confirmDeleteTeamMember}
+              disabled={deleteTeamMemberMutation.isPending}
+              variant="destructive"
+            >
+              {deleteTeamMemberMutation.isPending ? "Deleting..." : "Delete Team Member"}
             </Button>
           </DialogFooter>
         </DialogContent>

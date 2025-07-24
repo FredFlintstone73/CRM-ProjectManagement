@@ -77,6 +77,7 @@ export interface IStorage {
   updateUserAccessLevel(userId: string, accessLevel: string): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUserStatus(userId: string, isActive: boolean): Promise<User>;
+  deleteUser(userId: string): Promise<void>;
 
   // Contact operations
   getContacts(): Promise<Contact[]>;
@@ -411,6 +412,79 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return updatedUser;
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    // First get the user to check if they exist and get their contact info
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get the corresponding contact for this user if it exists
+    const [userContact] = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.email, user.email));
+
+    // If there's a corresponding contact, handle task reassignments
+    if (userContact && userContact.contactType === 'team_member') {
+      // Find all tasks assigned to this team member
+      const assignedTasks = await db
+        .select()
+        .from(tasks)
+        .where(sql`${userContact.id} = ANY(${tasks.assignedTo})`);
+
+      // Convert these assignments back to role assignments if the team member had a role
+      if (userContact.role && assignedTasks.length > 0) {
+        for (const task of assignedTasks) {
+          // Remove this contact from assignedTo array
+          const updatedAssignedTo = Array.isArray(task.assignedTo) 
+            ? task.assignedTo.filter(contactId => contactId !== userContact.id)
+            : task.assignedTo === userContact.id ? null : task.assignedTo;
+
+          // Add their role to assignedToRole array if not already present
+          const currentRoles = Array.isArray(task.assignedToRole) ? task.assignedToRole : (task.assignedToRole ? [task.assignedToRole] : []);
+          const updatedRoles = currentRoles.includes(userContact.role) ? currentRoles : [...currentRoles, userContact.role];
+
+          await db
+            .update(tasks)
+            .set({
+              assignedTo: updatedAssignedTo,
+              assignedToRole: updatedRoles
+            })
+            .where(eq(tasks.id, task.id));
+
+          // Log the automatic reassignment
+          await this.createActivityLog({
+            userId: userId,
+            action: 'task_reassignment',
+            entityType: 'task',
+            entityId: task.id,
+            description: `Task automatically reassigned from deleted team member ${userContact.firstName} ${userContact.lastName} to role: ${userContact.role}`,
+            metadata: {
+              originalAssignee: userContact.id,
+              newRole: userContact.role,
+              reason: 'team_member_deletion'
+            }
+          });
+        }
+      }
+
+      // Delete the corresponding contact record
+      await db.delete(contacts).where(eq(contacts.id, userContact.id));
+    }
+
+    // Delete related user records
+    await db.delete(userTaskPriorities).where(eq(userTaskPriorities.userId, userId));
+    await db.delete(userActivities).where(eq(userActivities.userId, userId));
+
+    // Finally delete the user
+    await db.delete(users).where(eq(users.id, userId));
   }
 
   // Contact operations
