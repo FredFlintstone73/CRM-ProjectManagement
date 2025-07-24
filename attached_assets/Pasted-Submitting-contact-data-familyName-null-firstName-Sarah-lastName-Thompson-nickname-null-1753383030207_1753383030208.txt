@@ -1,0 +1,63 @@
+Submitting contact data: {familyName: null, firstName: 'Sarah', lastName: 'Thompson', nickname: null, gender: null, …}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+queryClient.ts:15  PUT https://98248bec-b608-42e5-bcf8-06faf6c78c36-00-mkyqvgvbtcb7.spock.replit.dev/api/contacts/27 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:15
+mutationFn @ contact-form.tsx:197
+fn @ @tanstack_react-query.js?v=1d91e945:1189
+run @ @tanstack_react-query.js?v=1d91e945:494
+start @ @tanstack_react-query.js?v=1d91e945:536
+execute @ @tanstack_react-query.js?v=1d91e945:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=1d91e945:2630
+(anonymous) @ @tanstack_react-query.js?v=1d91e945:3295
+onSubmit @ contact-form.tsx:259
+(anonymous) @ chunk-4BFJKWC4.js?v=1d91e945:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=1d91e945:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=1d91e945:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=1d91e945:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=1d91e945:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=1d91e945:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=1d91e945:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=1d91e945:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=1d91e945:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=1d91e945:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=1d91e945:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=1d91e945:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=1d91e945:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=1d91e945:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=1d91e945:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=1d91e945:5449Understand this error
+Console.js:61 Contact update error: Error: 500: {"message":"Failed to update contact","error":"invalid input value for enum contact_type: \"trusted_professional\""}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async Object.mutationFn (contact-form.tsx:197:9)
+Mt.forEach.n.<computed> @ Console.js:61
+onError @ contact-form.tsx:216
+execute @ @tanstack_react-query.js?v=1d91e945:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=1d91e945:2630
+(anonymous) @ @tanstack_react-query.js?v=1d91e945:3295
+onSubmit @ contact-form.tsx:259
+(anonymous) @ chunk-4BFJKWC4.js?v=1d91e945:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=1d91e945:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=1d91e945:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=1d91e945:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=1d91e945:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=1d91e945:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=1d91e945:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=1d91e945:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=1d91e945:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=1d91e945:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=1d91e945:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=1d91e945:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=1d91e945:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=1d91e945:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=1d91e945:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=1d91e945:5449Understand this error
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
