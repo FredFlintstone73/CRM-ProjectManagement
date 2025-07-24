@@ -1257,7 +1257,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Business Name for Strategic Partners and Team Members */}
-              {(contactType === 'strategic_partner' || contactType === 'team_member') && (
+              {(selectedType === 'strategic_partner' || selectedType === 'team_member') && (
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="businessName">Business Name</Label>
