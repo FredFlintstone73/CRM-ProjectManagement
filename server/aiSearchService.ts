@@ -17,8 +17,6 @@ export interface SearchResult {
 }
 
 export class AISearchService {
-  // For now, we'll implement a comprehensive database search
-  // This can be enhanced with AI later when you provide the service details
   async search(query: string, userId: string): Promise<SearchResult[]> {
     const results: SearchResult[] = [];
     
@@ -46,7 +44,8 @@ export class AISearchService {
 
       // Enhance with AI if available
       if (abacusAI.isConfigured()) {
-        return await abacusAI.enhanceSearch(query, sortedResults);
+        const enhancedResults = await abacusAI.enhanceSearch(query, sortedResults);
+        return enhancedResults;
       }
 
       return sortedResults;
@@ -193,3 +192,8 @@ export class AISearchService {
 }
 
 export const aiSearchService = new AISearchService();
+
+// Add generateSearchSummary method to the service
+aiSearchService.generateSearchSummary = async function(query: string, results: SearchResult[]): Promise<string> {
+  return await abacusAI.generateSearchSummary(query, results);
+};

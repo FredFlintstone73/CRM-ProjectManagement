@@ -2320,11 +2320,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const query = req.query.q as string;
 
       if (!query || query.length < 3) {
-        return res.json([]);
+        return res.json({ results: [], summary: "" });
       }
 
       const results = await aiSearchService.search(query, userId);
-      res.json(results);
+      
+      // Generate AI summary if available
+      let summary = "";
+      if (results.length > 0) {
+        summary = await aiSearchService.generateSearchSummary(query, results);
+      }
+
+      res.json({ results, summary });
     } catch (error) {
       console.error("Error performing AI search:", error);
       res.status(500).json({ message: "Search temporarily unavailable" });

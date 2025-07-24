@@ -80,10 +80,10 @@ export default function AISearch({ isOpen, onClose }: AISearchProps) {
     };
   }, [isOpen, onClose]);
 
-  const { data: searchResults, isLoading, error } = useQuery({
-    queryKey: ['/api/search'],
+  const { data: searchData, isLoading, error } = useQuery({
+    queryKey: ['/api/search', debouncedQuery],
     queryFn: async () => {
-      if (!debouncedQuery || debouncedQuery.length < 3) return [];
+      if (!debouncedQuery || debouncedQuery.length < 3) return { results: [], summary: "" };
       const response = await apiRequest(`/api/search?q=${encodeURIComponent(debouncedQuery)}`);
       return response.json();
     },
@@ -96,6 +96,9 @@ export default function AISearch({ isOpen, onClose }: AISearchProps) {
       return failureCount < 2;
     },
   });
+
+  const searchResults = searchData?.results || [];
+  const aiSummary = searchData?.summary || "";
 
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
@@ -204,6 +207,12 @@ export default function AISearch({ isOpen, onClose }: AISearchProps) {
 
           {searchResults && searchResults.length > 0 && (
             <div className="p-4">
+              {aiSummary && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800 font-medium mb-1">AI Insights:</p>
+                  <p className="text-sm text-blue-700">{aiSummary}</p>
+                </div>
+              )}
               <p className="text-sm text-muted-foreground mb-4">
                 Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
               </p>
