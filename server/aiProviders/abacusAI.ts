@@ -58,6 +58,7 @@ ${contextualPrompt}`
 
       if (response.ok) {
         const aiResponse = await response.json();
+        console.log('Abacus.ai API response:', aiResponse);
         const enhancedContent = aiResponse.response;
         
         if (enhancedContent) {
@@ -66,6 +67,10 @@ ${contextualPrompt}`
             summary: enhancedContent
           };
         }
+      } else {
+        console.log('Abacus.ai API error:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.log('Error details:', errorText);
       }
       
       return {
