@@ -62,7 +62,9 @@ export class AISearchService {
   }
 
   private async searchContacts(query: string): Promise<SearchResult[]> {
+    console.log(`Searching contacts with query: "${query}"`);
     const contacts = await storage.searchContacts(query);
+    console.log(`Storage returned ${contacts.length} contacts:`, contacts.map(c => `${c.firstName} ${c.lastName}`));
     
     return contacts.map(contact => ({
       id: contact.id.toString(),
