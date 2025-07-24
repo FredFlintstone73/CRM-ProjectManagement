@@ -50,6 +50,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     { name: 'Prospects', href: '/contacts?type=prospect', icon: UserPlus },
     { name: 'Strategic Partners', href: '/contacts?type=strategic_partner', icon: Handshake },
     { name: 'Team Members', href: '/contacts?type=team_member', icon: UserCog },
+    { name: 'Trusted Professionals', href: '/contacts?type=trusted_professional', icon: UserCheck },
   ];
 
   const handleLogout = () => {
