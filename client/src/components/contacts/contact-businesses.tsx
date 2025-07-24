@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -54,16 +54,30 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
   const { data: businesses = [], isLoading } = useQuery<ContactBusiness[]>({
     queryKey: [`/api/contacts/${contactId}/businesses`],
     enabled: isAuthenticated,
-    staleTime: 30000,
-    gcTime: 300000,
+    staleTime: 60000, // 1 minute
+    gcTime: 300000, // 5 minutes
   });
+
+  // Memoize sorted businesses for performance
+  const sortedBusinesses = useMemo(() => {
+    return businesses.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }, [businesses]);
 
   const createBusinessMutation = useMutation({
     mutationFn: async (data: ContactBusinessFormData) => {
       return await apiRequest('POST', `/api/contacts/${contactId}/businesses`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+      // Use requestIdleCallback for better performance
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(() => {
+          queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+        });
+      } else {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+        }, 100);
+      }
       setIsDialogOpen(false);
       setEditingBusiness(null);
       form.reset();
@@ -97,7 +111,16 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
       return await apiRequest('PUT', `/api/contacts/${contactId}/businesses/${data.id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+      // Use requestIdleCallback for better performance
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(() => {
+          queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+        });
+      } else {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+        }, 100);
+      }
       setIsDialogOpen(false);
       setEditingBusiness(null);
       form.reset();
@@ -131,7 +154,16 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
       await apiRequest('DELETE', `/api/contacts/${contactId}/businesses/${businessId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+      // Use requestIdleCallback for better performance
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(() => {
+          queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+        });
+      } else {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: [`/api/contacts/${contactId}/businesses`] });
+        }, 100);
+      }
       setDeleteDialogOpen(false);
       setBusinessToDelete(null);
       toast({
@@ -160,7 +192,7 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
   });
 
   const handleAddBusiness = () => {
-    if (businesses.length >= 6) {
+    if (sortedBusinesses.length >= 6) {
       toast({
         title: "Limit Reached",
         description: "You can only add up to 6 businesses per contact.",
@@ -181,7 +213,7 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
       officeManagerName: "",
       businessEin: "",
       partnershipDetails: "",
-      sortOrder: businesses.length + 1,
+      sortOrder: sortedBusinesses.length + 1,
     });
     setEditingBusiness(null);
     setIsDialogOpen(true);
@@ -227,8 +259,8 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -239,9 +271,9 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
         <h3 className="text-lg font-medium">Business Information</h3>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddBusiness} disabled={businesses.length >= 6}>
+            <Button onClick={handleAddBusiness} disabled={sortedBusinesses.length >= 6}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Business {businesses.length < 6 && `(${businesses.length}/6)`}
+              Add Business {sortedBusinesses.length < 6 && `(${sortedBusinesses.length}/6)`}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
@@ -426,7 +458,7 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
         </Dialog>
       </div>
 
-      {businesses.length === 0 ? (
+      {sortedBusinesses.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8">
             <Building2 className="w-12 h-12 text-gray-400 mb-4" />
@@ -439,9 +471,7 @@ export default function ContactBusinesses({ contactId }: ContactBusinessesProps)
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {businesses
-            .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-            .map((business, index) => (
+          {sortedBusinesses.map((business, index) => (
               <Card key={business.id}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
