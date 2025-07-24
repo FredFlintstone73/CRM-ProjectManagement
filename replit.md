@@ -141,6 +141,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Business Name Field Addition for Strategic Partners and Team Members (July 24, 2025)
+- **Business Information Section**: Added Business Name field to Strategic Partner and Team Member contact forms
+- **Correct Form Structure**: Implemented field in simplified form structure (not tabbed) used by Strategic Partners and Team Members
+- **Strategic Positioning**: Business Name field positioned above Mailing Address section as requested
+- **Optional Field**: Business Name is optional with helpful placeholder text for user guidance
+- **Form Integration**: Works in both New Contact and Edit Contact dialogs for Strategic Partners and Team Members
+- **Data Display**: Business Name displays in contact detail pages for Strategic Partners and Team Members in address cards
+- **User Verified**: Successfully tested and confirmed working by user - Business Name field appears correctly in Strategic Partner and Team Member forms
+
 ### Critical Role Assignment Resolution Fix (July 21, 2025)
 - **Root Cause Identified**: Template-created tasks weren't getting assigned to team members due to missing active team members for critical roles
 - **Missing Role Analysis**: Discovered 4 essential roles had no active team members: admin_assistant (112 tasks), financial_planner (160 tasks), insurance_health (64 tasks), insurance_business (16 tasks)
