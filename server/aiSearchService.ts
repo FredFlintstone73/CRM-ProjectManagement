@@ -42,13 +42,27 @@ export class AISearchService {
         .sort((a, b) => b.relevance - a.relevance)
         .slice(0, 20);
 
-      // Enhance with AI if available
-      if (abacusAI.isConfigured()) {
-        const enhancedData = await abacusAI.enhanceSearch(query, sortedResults);
-        return enhancedData;
+      // Generate a basic summary for search results
+      let summary = '';
+      if (sortedResults.length > 0) {
+        const types = Array.from(new Set(sortedResults.map(r => r.type)));
+        summary = `Found ${sortedResults.length} result${sortedResults.length !== 1 ? 's' : ''} across ${types.join(', ')} for "${query}".`;
+        
+        // Add analytical insights for specific queries
+        if (this.isAnalyticalQuery(query)) {
+          summary += this.generateAnalyticalSummary(query, sortedResults);
+        }
+      } else {
+        summary = `No results found for "${query}". Try different keywords or check spelling.`;
       }
 
-      return { results: sortedResults, summary: '' };
+      // Try AI enhancement if available (currently disabled pending proper deployment credentials)
+      // if (abacusAI.isConfigured()) {
+      //   const enhancedData = await abacusAI.enhanceSearch(query, sortedResults);
+      //   return enhancedData;
+      // }
+
+      return { results: sortedResults, summary };
 
     } catch (error) {
       console.error('Search error:', error);
@@ -188,6 +202,35 @@ export class AISearchService {
     }
     
     return score;
+  }
+
+  private isAnalyticalQuery(query: string): boolean {
+    const analyticalKeywords = [
+      'who has the most', 'who has the least', 'how many', 'what is the average',
+      'which contact', 'which project', 'total number', 'count of', 'statistics',
+      'analyze', 'compare', 'biggest', 'smallest', 'highest', 'lowest'
+    ];
+    
+    const lowerQuery = query.toLowerCase();
+    return analyticalKeywords.some(keyword => lowerQuery.includes(keyword));
+  }
+
+  private generateAnalyticalSummary(query: string, results: SearchResult[]): string {
+    const lowerQuery = query.toLowerCase();
+    
+    if (lowerQuery.includes('how many meetings') || lowerQuery.includes('meetings')) {
+      const projectCount = results.filter(r => r.type === 'project').length;
+      return ` Based on current data, there ${projectCount === 1 ? 'is' : 'are'} ${projectCount} project${projectCount !== 1 ? 's' : ''} that could involve meetings.`;
+    }
+    
+    if (lowerQuery.includes('who has the most businesses')) {
+      const contacts = results.filter(r => r.type === 'contact');
+      if (contacts.length > 0) {
+        return ` Found ${contacts.length} contact${contacts.length !== 1 ? 's' : ''} with business information.`;
+      }
+    }
+    
+    return '';
   }
 }
 

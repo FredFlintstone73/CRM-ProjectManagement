@@ -17,6 +17,7 @@ export class AbacusAIProvider {
   async enhanceSearch(query: string, searchResults: any[]): Promise<{ results: any[], summary: string }> {
     try {
       console.log(`Enhancing search for query: "${query}" with ${searchResults.length} results using Abacus.ai`);
+      console.log(`Deployment token configured: ${this.config.deploymentToken ? 'Yes' : 'No'}`);
       
       // Create a context string from search results for AI processing
       const context = searchResults.length > 0 
