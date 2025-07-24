@@ -84,7 +84,15 @@ export default function AISearch({ isOpen, onClose }: AISearchProps) {
     queryKey: ['/api/search', debouncedQuery],
     queryFn: async () => {
       if (!debouncedQuery || debouncedQuery.length < 3) return { results: [], summary: "" };
-      const response = await apiRequest(`/api/search?q=${encodeURIComponent(debouncedQuery)}`);
+      const response = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`, {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
       return response.json();
     },
     enabled: isAuthenticated && debouncedQuery.length > 2,
