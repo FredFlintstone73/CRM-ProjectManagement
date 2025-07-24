@@ -514,7 +514,7 @@ export default function ContactDetail() {
                 {(contact.contactType === "client" || contact.contactType === "prospect") ? (
                   <div>
                     <p className="text-sm font-medium text-gray-700">Phone:</p>
-                    <p className="text-sm">{contact.cellPhone || contact.workPhone || "Not specified"}</p>
+                    <p className="text-sm">{contact.cellPhone || contact.businessPhone || contact.workPhone || "Not specified"}</p>
                   </div>
                 ) : (
                   <>
@@ -524,7 +524,7 @@ export default function ContactDetail() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-700">Business Phone:</p>
-                      <p className="text-sm">{contact.workPhone || "Not specified"}</p>
+                      <p className="text-sm">{contact.businessPhone || contact.workPhone || "Not specified"}</p>
                     </div>
                   </>
                 )}
@@ -1181,7 +1181,7 @@ export default function ContactDetail() {
             <TabsContent value="business" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Business Information Card */}
-              {(contact.businessName || contact.workPhone || contact.workEmail) && (
+              {(contact.businessName || contact.businessPhone || contact.workPhone || contact.workEmail) && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1196,10 +1196,10 @@ export default function ContactDetail() {
                         <span>{contact.businessName}</span>
                       </div>
                     )}
-                    {(contact.workPhone) && (
+                    {(contact.businessPhone || contact.workPhone) && (
                       <div className="flex justify-between">
                         <span className="font-medium">Business Phone:</span>
-                        <span>{contact.workPhone}</span>
+                        <span>{contact.businessPhone || contact.workPhone}</span>
                       </div>
                     )}
                     {contact.workEmail && (

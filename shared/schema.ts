@@ -146,6 +146,7 @@ export const contacts = pgTable("contacts", {
   personalEmail: varchar("personal_email"),
   workPhone: varchar("work_phone"),
   workEmail: varchar("work_email"),
+  businessPhone: varchar("business_phone"),
   preferredContactMethod: varchar("preferred_contact_method"),
   
   // Spouse Information
