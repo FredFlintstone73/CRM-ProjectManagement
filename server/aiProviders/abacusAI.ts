@@ -39,7 +39,7 @@ export class AbacusAIProvider {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          deploymentToken: this.config.deploymentToken,
+          deploymentId: this.config.deploymentToken,
           messages: [
             {
               role: "user",
@@ -133,7 +133,7 @@ ${contextualPrompt}`
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          deploymentToken: this.config.deploymentToken,
+          deploymentId: this.config.deploymentToken,
           messages: [
             {
               role: "user",
