@@ -505,8 +505,12 @@ export default function ContactDetail() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">
-                {contact.contactType === "team_member" || contact.contactType === "strategic_partner" || contact.contactType === "trusted_professional"
-                  ? "Contact Information" 
+                {contact.contactType === "team_member" 
+                  ? "Team Member Details" 
+                  : contact.contactType === "strategic_partner" 
+                  ? "Strategic Partner Details"
+                  : contact.contactType === "trusted_professional"
+                  ? "Trusted Professional Details"
                   : "Client 1"}
               </CardTitle>
             </CardHeader>
@@ -823,8 +827,12 @@ export default function ContactDetail() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
-                    {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
-                      ? "Contact Information" 
+                    {contact.contactType === "team_member" 
+                      ? "Team Member Details" 
+                      : contact.contactType === "strategic_partner" 
+                      ? "Strategic Partner Details"
+                      : contact.contactType === "trusted_professional"
+                      ? "Trusted Professional Details"
                       : "Contact 1"}
                   </CardTitle>
                 </CardHeader>
