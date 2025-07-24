@@ -108,6 +108,12 @@ export default function AISearch({ isOpen, onClose }: AISearchProps) {
   const searchResults = searchData?.results || [];
   const aiSummary = searchData?.summary || "";
 
+  // Debug logging
+  console.log('Search query:', debouncedQuery);
+  console.log('Search data:', searchData);
+  console.log('Search results:', searchResults);
+  console.log('AI summary:', aiSummary);
+
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
       case 'contact':
