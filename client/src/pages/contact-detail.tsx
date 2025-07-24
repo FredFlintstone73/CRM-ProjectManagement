@@ -1181,7 +1181,7 @@ export default function ContactDetail() {
             <TabsContent value="business" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Business Information Card */}
-              {(contact.businessName || contact.businessPhone || contact.workPhone || contact.workEmail) && (
+              {(contact.businessName || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone || contact.workEmail) && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1196,10 +1196,10 @@ export default function ContactDetail() {
                         <span>{contact.businessName}</span>
                       </div>
                     )}
-                    {(contact.businessPhone || contact.workPhone) && (
+                    {(contact.businessPhone || contact.spouseWorkPhone || contact.workPhone) && (
                       <div className="flex justify-between">
                         <span className="font-medium">Business Phone:</span>
-                        <span>{contact.businessPhone || contact.workPhone}</span>
+                        <span>{contact.businessPhone || contact.spouseWorkPhone || contact.workPhone}</span>
                       </div>
                     )}
                     {contact.workEmail && (
@@ -1302,7 +1302,7 @@ export default function ContactDetail() {
             </div>
 
             {/* Empty state when no business information */}
-            {!contact.businessName && !contact.workPhone && !contact.workEmail && !(contact.businessAddressStreet1 || contact.businessAddressCity || contact.businessAddressState) && !(contact.mailingAddressStreet1 || contact.mailingAddressCity || contact.mailingAddressState) && (
+            {!contact.businessName && !contact.businessPhone && !contact.spouseWorkPhone && !contact.workPhone && !contact.workEmail && !(contact.businessAddressStreet1 || contact.businessAddressCity || contact.businessAddressState) && !(contact.mailingAddressStreet1 || contact.mailingAddressCity || contact.mailingAddressState) && (
               <Card>
                 <CardContent className="text-center py-8 text-gray-500">
                   <Building className="w-12 h-12 mx-auto mb-3 opacity-50" />

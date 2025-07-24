@@ -157,6 +157,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Contact 1 Work Phone Field Restoration**: Restored Work Phone field to Contact 1 section in main contact form (Contact Information tab) - was accidentally removed during business phone implementation
 - **Business Tab Work Phone Removal**: Removed Work Phone field from Business Information tab - should only contain Business Phone field, not both
 - **Business Phone Data Persistence Fix**: Added missing businessPhone field to form defaultValues to ensure business phone numbers display correctly when editing existing contacts
+- **Business Tab Fallback Logic Fix**: Fixed Business Information Card to include complete fallback hierarchy (businessPhone → spouseWorkPhone → workPhone) for proper phone number display
 - **User Verified**: Business Name field, business address saving, Business tab display, and business phone terminology all confirmed working correctly by user
 
 ### Critical Role Assignment Resolution Fix (July 21, 2025)
