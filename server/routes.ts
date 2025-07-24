@@ -2327,8 +2327,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate AI summary if available
       let summary = "";
-      if (results.length > 0) {
-        summary = await aiSearchService.generateSearchSummary(query, results);
+      try {
+        if (results.length > 0) {
+          summary = await aiSearchService.generateSearchSummary(query, results);
+        }
+      } catch (error) {
+        console.error("Error generating AI summary:", error);
+        summary = `Found ${results.length} results for "${query}".`;
       }
 
       res.json({ results, summary });

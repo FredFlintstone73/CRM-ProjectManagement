@@ -191,9 +191,10 @@ export class AISearchService {
   }
 }
 
-export const aiSearchService = new AISearchService();
+export class ExtendedAISearchService extends AISearchService {
+  async generateSearchSummary(query: string, results: SearchResult[]): Promise<string> {
+    return await abacusAI.generateSearchSummary(query, results);
+  }
+}
 
-// Add generateSearchSummary method to the service
-aiSearchService.generateSearchSummary = async function(query: string, results: SearchResult[]): Promise<string> {
-  return await abacusAI.generateSearchSummary(query, results);
-};
+export const aiSearchService = new ExtendedAISearchService();
