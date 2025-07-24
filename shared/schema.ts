@@ -33,7 +33,8 @@ export const contactTypeEnum = pgEnum("contact_type", [
   "client",
   "prospect", 
   "team_member",
-  "strategic_partner"
+  "strategic_partner",
+  "trusted_professional"
 ]);
 
 // Contact roles enum (for team members and strategic partners)

@@ -138,6 +138,8 @@ export default function ContactDetail() {
         return 'bg-purple-100 text-purple-800';
       case 'strategic_partner':
         return 'bg-orange-100 text-orange-800';
+      case 'trusted_professional':
+        return 'bg-indigo-100 text-indigo-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -503,7 +505,7 @@ export default function ContactDetail() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">
-                {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+                {contact.contactType === "team_member" || contact.contactType === "strategic_partner" || contact.contactType === "trusted_professional"
                   ? "Contact Information" 
                   : "Client 1"}
               </CardTitle>
@@ -517,7 +519,7 @@ export default function ContactDetail() {
               </div>
               
               {/* Role for team members and strategic partners */}
-              {(contact.contactType === "team_member" || contact.contactType === "strategic_partner") && contact.role && (
+              {(contact.contactType === "team_member" || contact.contactType === "strategic_partner" || contact.contactType === "trusted_professional") && contact.role && (
                 <div>
                   <p className="text-sm font-medium text-gray-700">Role:</p>
                   <p className="text-sm">{formatRole(contact.role)}</p>
@@ -651,7 +653,7 @@ export default function ContactDetail() {
             onClick={() => setIsEditDialogOpen(true)}
           >
             <Edit className="h-4 w-4 mr-2" />
-            {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+            {contact.contactType === "team_member" || contact.contactType === "strategic_partner" || contact.contactType === "trusted_professional"
               ? "Edit Contact" 
               : "Edit Client"}
           </Button>
@@ -661,12 +663,12 @@ export default function ContactDetail() {
             <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
-                  {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+                  {contact.contactType === "team_member" || contact.contactType === "strategic_partner" || contact.contactType === "trusted_professional"
                     ? "Edit Contact Information" 
                     : "Edit Client Information"}
                 </DialogTitle>
                 <DialogDescription>
-                  {contact.contactType === "team_member" || contact.contactType === "strategic_partner" 
+                  {contact.contactType === "team_member" || contact.contactType === "strategic_partner" || contact.contactType === "trusted_professional"
                     ? "Update the contact's personal information and contact details." 
                     : "Update the client's personal information, contact details, and family information."}
                 </DialogDescription>

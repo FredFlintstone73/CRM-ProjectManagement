@@ -31,7 +31,8 @@ export default function Contacts() {
     client: true,
     prospect: true,
     team_member: true,
-    strategic_partner: true
+    strategic_partner: true,
+    trusted_professional: true
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'rows'>('cards');
@@ -89,15 +90,17 @@ export default function Contacts() {
           client: selectedTypes.includes('client'),
           prospect: selectedTypes.includes('prospect'),
           team_member: selectedTypes.includes('team_member'),
-          strategic_partner: selectedTypes.includes('strategic_partner')
+          strategic_partner: selectedTypes.includes('strategic_partner'),
+          trusted_professional: selectedTypes.includes('trusted_professional')
         });
-      } else if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner'].includes(typeParam)) {
+      } else if (typeParam && ['client', 'prospect', 'team_member', 'strategic_partner', 'trusted_professional'].includes(typeParam)) {
         // Show only the selected type from URL (legacy support)
         setVisibleTypes({
           client: typeParam === 'client',
           prospect: typeParam === 'prospect',
           team_member: typeParam === 'team_member',
-          strategic_partner: typeParam === 'strategic_partner'
+          strategic_partner: typeParam === 'strategic_partner',
+          trusted_professional: typeParam === 'trusted_professional'
         });
       }
       
@@ -136,7 +139,7 @@ export default function Contacts() {
       .filter(([_, isVisible]) => isVisible)
       .map(([type]) => type);
     
-    if (activeTypes.length > 0 && activeTypes.length < 4) {
+    if (activeTypes.length > 0 && activeTypes.length < 5) {
       // Only add type param if not all types are visible
       params.set('types', activeTypes.join(','));
     }
@@ -172,8 +175,10 @@ export default function Contacts() {
         return { title: 'Team Members', subtitle: 'Manage your team and internal contacts' };
       case 'strategic_partner':
         return { title: 'Strategic Partners', subtitle: 'Manage partnerships and strategic relationships' };
+      case 'trusted_professional':
+        return { title: 'Trusted Professionals', subtitle: 'Manage trusted professional contacts' };
       default:
-        return { title: 'Contacts', subtitle: 'Manage your clients, prospects, team members, and strategic partners' };
+        return { title: 'Contacts', subtitle: 'Manage your clients, prospects, team members, strategic partners, and trusted professionals' };
     }
   };
 
@@ -274,6 +279,8 @@ export default function Contacts() {
         return 'Team Members';
       case 'strategic_partner':
         return 'Strategic Partners';
+      case 'trusted_professional':
+        return 'Trusted Professionals';
       default:
         return type;
     }
@@ -289,6 +296,8 @@ export default function Contacts() {
         return 'Team Member';
       case 'strategic_partner':
         return 'Strategic Partner';
+      case 'trusted_professional':
+        return 'Trusted Professional';
       default:
         return type;
     }
@@ -319,6 +328,8 @@ export default function Contacts() {
         return 'bg-green-100 text-green-800';
       case 'strategic_partner':
         return 'bg-purple-100 text-purple-800';
+      case 'trusted_professional':
+        return 'bg-indigo-100 text-indigo-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -496,8 +507,8 @@ export default function Contacts() {
             <div className="flex flex-wrap items-center gap-4 justify-between">
               <div className="flex flex-wrap gap-2">
                 <span className="text-sm font-medium text-gray-700 flex items-center mr-2">Show:</span>
-                {/* Reordered buttons: Clients, Prospects, Strategic Partners, Team Members */}
-                {['client', 'prospect', 'strategic_partner', 'team_member'].map((type) => (
+                {/* Reordered buttons: Clients, Prospects, Strategic Partners, Team Members, Trusted Professionals */}
+                {['client', 'prospect', 'strategic_partner', 'team_member', 'trusted_professional'].map((type) => (
                   <Toggle
                     key={type}
                     pressed={visibleTypes[type as keyof typeof visibleTypes]}
@@ -595,8 +606,8 @@ export default function Contacts() {
                         <span>{contact.position}</span>
                       </div>
                     )}
-                    {/* Role for Team Members and Strategic Partners */}
-                    {(contact.contactType === 'team_member' || contact.contactType === 'strategic_partner') && contact.role && (
+                    {/* Role for Team Members, Strategic Partners, and Trusted Professionals */}
+                    {(contact.contactType === 'team_member' || contact.contactType === 'strategic_partner' || contact.contactType === 'trusted_professional') && contact.role && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Building className="w-4 h-4" />
                         <span>{formatRole(contact.role)}</span>
@@ -684,7 +695,7 @@ export default function Contacts() {
                         {getSortIcon('cellPhone')}
                       </Button>
                     </TableHead>
-                    {(visibleTypes.strategic_partner || visibleTypes.team_member) && (
+                    {(visibleTypes.strategic_partner || visibleTypes.team_member || visibleTypes.trusted_professional) && (
                       <TableHead>
                         <Button
                           variant="ghost"
@@ -762,9 +773,9 @@ export default function Contacts() {
                           })()}
                         </div>
                       </TableCell>
-                      {(visibleTypes.strategic_partner || visibleTypes.team_member) && (
+                      {(visibleTypes.strategic_partner || visibleTypes.team_member || visibleTypes.trusted_professional) && (
                         <TableCell>
-                          {(contact.contactType === 'team_member' || contact.contactType === 'strategic_partner') && contact.role ? (
+                          {(contact.contactType === 'team_member' || contact.contactType === 'strategic_partner' || contact.contactType === 'trusted_professional') && contact.role ? (
                             <span className="text-sm text-gray-600">{formatRole(contact.role)}</span>
                           ) : (
                             <span className="text-sm text-gray-400">—</span>

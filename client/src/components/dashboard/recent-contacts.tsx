@@ -24,6 +24,8 @@ export default function RecentContacts() {
         return 'bg-green-100 text-green-800';
       case 'strategic_partner':
         return 'bg-purple-100 text-purple-800';
+      case 'trusted_professional':
+        return 'bg-indigo-100 text-indigo-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }

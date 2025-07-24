@@ -28,7 +28,7 @@ interface ContactFormProps {
 }
 
 type ContactCategory = "client_prospect" | "team_strategic" | null;
-type ContactType = "client" | "prospect" | "team_member" | "strategic_partner";
+type ContactType = "client" | "prospect" | "team_member" | "strategic_partner" | "trusted_professional";
 
 export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
 
@@ -426,10 +426,9 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             onClick={() => handleCategorySelect("team_strategic")}
           >
             <CardHeader className="text-center">
-              <CardTitle className="text-lg">Strategic Partner or
-              Team Member</CardTitle>
+              <CardTitle className="text-lg">Team Member, Strategic Partner, or Trusted Professional</CardTitle>
               <CardDescription>
-                Team members, strategic partners, or professional contacts
+                Team members, strategic partners, or trusted professional contacts
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -452,35 +451,34 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       <div className="space-y-6">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">
-            {selectedCategory === "client_prospect" ? "Client or Prospect?" : "Strategic Partner or Team Member?"}
+            {selectedCategory === "client_prospect" ? "Client or Prospect?" : "Team Member, Strategic Partner, or Trusted Professional?"}
           </h3>
           <p className="text-sm text-gray-600 mb-6">Choose the specific type</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {selectedCategory === "client_prospect" ? (
-            <>
-              <Card 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => handleTypeSelect("client")}
-              >
-                <CardHeader className="text-center">
-                  <CardTitle className="text-lg">Client</CardTitle>
-                  <CardDescription>Existing client</CardDescription>
-                </CardHeader>
-              </Card>
-              <Card 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => handleTypeSelect("prospect")}
-              >
-                <CardHeader className="text-center">
-                  <CardTitle className="text-lg">Prospect</CardTitle>
-                  <CardDescription>Potential client</CardDescription>
-                </CardHeader>
-              </Card>
-            </>
-          ) : (
-            <>
+        {selectedCategory === "client_prospect" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card 
+              className="cursor-pointer hover:bg-gray-50 transition-colors"
+              onClick={() => handleTypeSelect("client")}
+            >
+              <CardHeader className="text-center">
+                <CardTitle className="text-lg">Client</CardTitle>
+                <CardDescription>Existing client</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card 
+              className="cursor-pointer hover:bg-gray-50 transition-colors"
+              onClick={() => handleTypeSelect("prospect")}
+            >
+              <CardHeader className="text-center">
+                <CardTitle className="text-lg">Prospect</CardTitle>
+                <CardDescription>Potential client</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card 
                 className="cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => handleTypeSelect("strategic_partner")}
@@ -499,9 +497,17 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   <CardDescription>Internal team member</CardDescription>
                 </CardHeader>
               </Card>
-            </>
-          )}
-        </div>
+              <Card 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleTypeSelect("trusted_professional")}
+              >
+                <CardHeader className="text-center">
+                  <CardTitle className="text-lg">Trusted Professional</CardTitle>
+                  <CardDescription>External trusted professional</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+        )}
         
         <div className="text-center">
           <Button 
@@ -516,12 +522,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
   }
 
   // Render the appropriate form based on selected type
-  if (selectedType === "team_member" || selectedType === "strategic_partner") {
+  if (selectedType === "team_member" || selectedType === "strategic_partner" || selectedType === "trusted_professional") {
     return (
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">
-            {selectedType === "team_member" ? "Team Member" : "Strategic Partner"} Information
+            {selectedType === "team_member" ? "Team Member" : selectedType === "strategic_partner" ? "Strategic Partner" : "Trusted Professional"} Information
           </h3>
           {!contact && (
             <Button 
