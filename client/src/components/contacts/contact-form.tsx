@@ -784,8 +784,9 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       </div>
       
       <Tabs defaultValue="family" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="family">Family</TabsTrigger>
+          <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="address">Address</TabsTrigger>
           <TabsTrigger value="children">Children</TabsTrigger>
           <TabsTrigger value="professionals">Professionals</TabsTrigger>
@@ -1022,23 +1023,13 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="cellPhone">Cell Phone</Label>
-                  <Input
-                    id="cellPhone"
-                    {...form.register("cellPhone")}
-                    placeholder="Enter cell phone"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="workPhone">Work Phone</Label>
-                  <Input
-                    id="workPhone"
-                    {...form.register("workPhone")}
-                    placeholder="Enter work phone"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="cellPhone">Cell Phone</Label>
+                <Input
+                  id="cellPhone"
+                  {...form.register("cellPhone")}
+                  placeholder="Enter cell phone"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -1258,27 +1249,34 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="address" className="space-y-4">
+        <TabsContent value="business" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Address Information</CardTitle>
-              <CardDescription>Mailing and home addresses</CardDescription>
+              <CardTitle>Business Information</CardTitle>
+              <CardDescription>Business details and work contact information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <h4 className="font-semibold">Business Information</h4>
-                <div>
-                  <Label htmlFor="businessName">Business Name</Label>
-                  <Input
-                    id="businessName"
-                    {...form.register("businessName")}
-                    placeholder="Enter business name (optional)"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="businessName">Business Name</Label>
+                <Input
+                  id="businessName"
+                  {...form.register("businessName")}
+                  placeholder="Enter business name (optional)"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="workPhone">Work Phone</Label>
+                <Input
+                  id="workPhone"
+                  type="tel"
+                  {...form.register("workPhone")}
+                  placeholder="Enter work phone number"
+                />
               </div>
 
               <div className="space-y-4">
-                <h4 className="font-semibold">Mailing Address</h4>
+                <h4 className="font-semibold">Business Address</h4>
                 <div>
                   <Label htmlFor="mailingAddressStreet1">Street Address</Label>
                   <Input
@@ -1322,6 +1320,17 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="address" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Address Information</CardTitle>
+              <CardDescription>Home and vacation addresses</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
