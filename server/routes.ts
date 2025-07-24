@@ -2323,20 +2323,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ results: [], summary: "" });
       }
 
-      const results = await aiSearchService.search(query, userId);
-      
-      // Generate AI summary if available
-      let summary = "";
-      try {
-        if (results.length > 0) {
-          summary = await aiSearchService.generateSearchSummary(query, results);
-        }
-      } catch (error) {
-        console.error("Error generating AI summary:", error);
-        summary = `Found ${results.length} results for "${query}".`;
-      }
-
-      res.json({ results, summary });
+      const searchData = await aiSearchService.search(query, userId);
+      res.json(searchData);
     } catch (error) {
       console.error("Error performing AI search:", error);
       res.status(500).json({ message: "Search temporarily unavailable" });

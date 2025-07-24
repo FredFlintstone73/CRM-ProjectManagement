@@ -14,14 +14,22 @@ export class AbacusAIProvider {
     this.config = config;
   }
 
-  async enhanceSearch(query: string, searchResults: any[]): Promise<any[]> {
+  async enhanceSearch(query: string, searchResults: any[]): Promise<{ results: any[], summary: string }> {
     try {
       console.log(`Enhancing search for query: "${query}" with ${searchResults.length} results using Abacus.ai`);
       
       // Create a context string from search results for AI processing
-      const context = searchResults.map(result => 
-        `${result.type}: ${result.title} - ${result.content.substring(0, 200)}`
-      ).join('\n');
+      const context = searchResults.length > 0 
+        ? searchResults.map(result => 
+            `${result.type}: ${result.title} - ${result.content.substring(0, 200)}`
+          ).join('\n')
+        : 'No direct search results found in database.';
+
+      // Determine the type of query to provide better AI context
+      const isAnalyticalQuery = this.isAnalyticalQuery(query);
+      const contextualPrompt = isAnalyticalQuery ? 
+        `This appears to be an analytical question about the database. Please provide insights or analysis based on the available data. If no direct results were found, explain what type of data would be needed to answer this question.` :
+        `Please analyze these search results and provide enhanced relevance insights. Focus on which results best match the user's query and explain why they are relevant.`;
 
       // Call Abacus.ai API for search enhancement  
       const response = await fetch(`https://abacus.ai/api/v0/getChatResponse`, {
@@ -41,7 +49,7 @@ Query: "${query}"
 Current Search Results:
 ${context}
 
-Please analyze these search results and provide enhanced relevance insights. Focus on which results best match the user's query and explain why they are relevant.`
+${contextualPrompt}`
             }
           ],
           regenerateModel: false
@@ -53,25 +61,40 @@ Please analyze these search results and provide enhanced relevance insights. Foc
         const enhancedContent = aiResponse.response;
         
         if (enhancedContent) {
-          // Try to parse AI response and merge with original results
-          try {
-            const aiSuggestions = JSON.parse(enhancedContent);
-            // For now, return original results with AI insights logged
-            console.log('AI Enhancement suggestions:', aiSuggestions);
-            return searchResults;
-          } catch (parseError) {
-            console.log('AI Enhancement text:', enhancedContent);
-            return searchResults;
-          }
+          return {
+            results: searchResults,
+            summary: enhancedContent
+          };
         }
       }
       
-      return searchResults;
+      return {
+        results: searchResults,
+        summary: searchResults.length > 0 
+          ? `Found ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} across ${Array.from(new Set(searchResults.map(r => r.type))).join(', ')} for "${query}".`
+          : ''
+      };
     } catch (error) {
       console.error('Abacus.ai enhancement error:', error);
       // Return original results if AI enhancement fails
-      return searchResults;
+      return {
+        results: searchResults,
+        summary: searchResults.length > 0 
+          ? `Found ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} across ${Array.from(new Set(searchResults.map(r => r.type))).join(', ')} for "${query}".`
+          : ''
+      };
     }
+  }
+
+  private isAnalyticalQuery(query: string): boolean {
+    const analyticalKeywords = [
+      'who has the most', 'who has the least', 'how many', 'what is the average',
+      'which contact', 'which project', 'total number', 'count of', 'statistics',
+      'analyze', 'compare', 'biggest', 'smallest', 'highest', 'lowest'
+    ];
+    
+    const lowerQuery = query.toLowerCase();
+    return analyticalKeywords.some(keyword => lowerQuery.includes(keyword));
   }
 
   async generateSearchInsights(query: string, results: any[]): Promise<string> {
@@ -80,7 +103,7 @@ Please analyze these search results and provide enhanced relevance insights. Foc
       return `No results found for "${query}". Try different keywords or check spelling.`;
     }
     
-    const types = [...new Set(results.map(r => r.type))];
+    const types = Array.from(new Set(results.map(r => r.type)));
     return `Found ${results.length} results across ${types.join(', ')} for "${query}".`;
   }
 

@@ -17,7 +17,7 @@ export interface SearchResult {
 }
 
 export class AISearchService {
-  async search(query: string, userId: string): Promise<SearchResult[]> {
+  async search(query: string, userId: string): Promise<{ results: SearchResult[], summary: string }> {
     const results: SearchResult[] = [];
     
     try {
@@ -44,15 +44,15 @@ export class AISearchService {
 
       // Enhance with AI if available
       if (abacusAI.isConfigured()) {
-        const enhancedResults = await abacusAI.enhanceSearch(query, sortedResults);
-        return enhancedResults;
+        const enhancedData = await abacusAI.enhanceSearch(query, sortedResults);
+        return enhancedData;
       }
 
-      return sortedResults;
+      return { results: sortedResults, summary: '' };
 
     } catch (error) {
       console.error('Search error:', error);
-      return [];
+      return { results: [], summary: '' };
     }
   }
 
