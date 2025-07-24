@@ -145,12 +145,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("PUT /api/contacts/:id called");
+      console.log("Contact ID:", req.params.id);
+      console.log("Request body:", JSON.stringify(req.body, null, 2));
+      console.log("User:", req.user?.claims?.sub);
+      
       const contactData = insertContactSchema.partial().parse(req.body);
+      console.log("Parsed contact data:", JSON.stringify(contactData, null, 2));
+      
       const contact = await storage.updateContact(parseInt(req.params.id), contactData);
+      console.log("Updated contact:", JSON.stringify(contact, null, 2));
+      
       res.json(contact);
     } catch (error) {
       console.error("Error updating contact:", error);
-      res.status(500).json({ message: "Failed to update contact" });
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ message: "Failed to update contact", error: error.message });
     }
   });
 
