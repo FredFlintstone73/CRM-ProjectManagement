@@ -18,28 +18,23 @@ export interface SearchResult {
 
 export class AISearchService {
   async search(query: string, userId: string): Promise<SearchResult[]> {
-    console.log(`Searching for query: "${query}"`);
     const results: SearchResult[] = [];
     
     try {
       // Search contacts
       const contacts = await this.searchContacts(query);
-      console.log(`Found ${contacts.length} contacts for query: "${query}"`);
       results.push(...contacts);
 
       // Search projects
       const projects = await this.searchProjects(query);
-      console.log(`Found ${projects.length} projects for query: "${query}"`);
       results.push(...projects);
 
       // Search tasks
       const tasks = await this.searchTasks(query);
-      console.log(`Found ${tasks.length} tasks for query: "${query}"`);
       results.push(...tasks);
 
       // Search notes
       const notes = await this.searchNotes(query);
-      console.log(`Found ${notes.length} notes for query: "${query}"`);
       results.push(...notes);
 
       // Sort by relevance and limit results
@@ -62,9 +57,7 @@ export class AISearchService {
   }
 
   private async searchContacts(query: string): Promise<SearchResult[]> {
-    console.log(`Searching contacts with query: "${query}"`);
     const contacts = await storage.searchContacts(query);
-    console.log(`Storage returned ${contacts.length} contacts:`, contacts.map(c => `${c.firstName} ${c.lastName}`));
     
     return contacts.map(contact => ({
       id: contact.id.toString(),

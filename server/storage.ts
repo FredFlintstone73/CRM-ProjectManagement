@@ -2524,9 +2524,8 @@ export class DatabaseStorage implements IStorage {
   // Search operations
   async searchContacts(query: string): Promise<Contact[]> {
     const queryLower = query.toLowerCase();
-    console.log(`Storage searchContacts called with query: "${query}" (lowercase: "${queryLower}")`);
     
-    const results = await db
+    return await db
       .select()
       .from(contacts)
       .where(
@@ -2542,9 +2541,6 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .limit(10);
-    
-    console.log(`Database returned ${results.length} contacts`);
-    return results;
   }
 
   async searchProjects(query: string): Promise<Project[]> {
