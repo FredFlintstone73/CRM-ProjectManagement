@@ -144,8 +144,16 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
     form.reset();
   };
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      setOpen(true);
+    } else {
+      handleDialogClose();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleDialogClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button>
