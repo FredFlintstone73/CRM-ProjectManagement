@@ -153,7 +153,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Contact Type Switching Feature**: Added dropdown in Edit Contact windows for Strategic Partners, Team Members, and Trusted Professionals allowing users to change contact type between these three types
 - **Specific Contact Detail Titles**: Updated contact detail pages to show context-specific titles: "Team Member Details", "Strategic Partner Details", and "Trusted Professional Details" instead of generic "Contact Information"
 - **Database Enum Issue Resolution**: Fixed database enum constraint by manually adding trusted_professional value to PostgreSQL database using ALTER TYPE command
-- **User Verified**: Trusted Professionals contact type fully functional across all application interfaces and ready for production use
+- **Business Tab Access Extension**: Extended Business tab visibility to include trusted professionals alongside clients and prospects for complete business information display
+- **Task Visibility Issue Resolution**: Resolved critical bug where newly created tasks weren't appearing in project milestones due to frontend querying template milestone IDs instead of project milestone IDs - confirmed task creation and display functionality working correctly
+- **User Verified**: Trusted Professionals contact type fully functional across all application interfaces and task management system operational
 
 ### Business Information Enhancement for Contact Management (July 24, 2025)
 - **Business Name Field Addition**: Added Business Name field to Strategic Partner and Team Member contact forms in simplified form structure (not tabbed) positioned above Mailing Address section
