@@ -2122,6 +2122,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/user-invitations/:id', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      if (isNaN(invitationId)) {
+        return res.status(400).json({ message: "Invalid invitation ID" });
+      }
+
+      const deleted = await storage.deleteUserInvitation(invitationId, userId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Invitation not found or you don't have permission to delete it" });
+      }
+
+      res.json({ message: "Invitation deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user invitation:", error);
+      res.status(500).json({ message: "Failed to delete user invitation" });
+    }
+  });
+
   app.get('/api/user-invitations/:code', async (req: any, res) => {
     try {
       const invitation = await storage.getUserInvitation(req.params.code);

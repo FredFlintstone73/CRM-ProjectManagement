@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import UserInvitationDialog from "@/components/admin/UserInvitationDialog";
 import EmailConfigurationStatus from "@/components/admin/EmailConfigurationStatus";
 import TeamMemberManagement from "@/components/admin/TeamMemberManagement";
-import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy } from "lucide-react";
+import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy, Trash2 } from "lucide-react";
 
 interface UserInvitation {
   id: number;
@@ -27,10 +27,41 @@ interface UserInvitation {
 export default function UserManagement() {
   const { isAdministrator, isLoading: accessLoading } = useAccessControl();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: invitations, isLoading } = useQuery<UserInvitation[]>({
     queryKey: ['/api/user-invitations'],
     enabled: isAdministrator,
+  });
+
+  const deleteInvitationMutation = useMutation({
+    mutationFn: async (invitationId: number) => {
+      const response = await fetch(`/api/user-invitations/${invitationId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete invitation: ${errorText}`);
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user-invitations'] });
+      toast({
+        title: "Invitation deleted",
+        description: "Team invitation has been removed successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete invitation",
+        description: error.message || "There was an error deleting the invitation",
+        variant: "destructive",
+      });
+    },
   });
 
   // Redirect non-administrators
@@ -205,16 +236,28 @@ export default function UserManagement() {
                         {invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
                       </Badge>
                       
-                      {invitation.status === "pending" && invitation.invitationCode && (
-                        <Button 
-                          variant="outline" 
+                      <div className="flex items-center gap-2">
+                        {invitation.status === "pending" && invitation.invitationCode && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => copyInvitationCode(invitation.invitationCode)}
+                          >
+                            <Copy className="mr-1 h-3 w-3" />
+                            Copy Code
+                          </Button>
+                        )}
+                        
+                        <Button
+                          variant="outline"
                           size="sm"
-                          onClick={() => copyInvitationCode(invitation.invitationCode)}
+                          onClick={() => deleteInvitationMutation.mutate(invitation.id)}
+                          disabled={deleteInvitationMutation.isPending}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
-                          <Copy className="mr-1 h-3 w-3" />
-                          Copy Code
+                          <Trash2 className="h-3 w-3" />
                         </Button>
-                      )}
+                      </div>
                     </div>
                   </div>
                 ))}

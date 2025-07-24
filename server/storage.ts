@@ -70,6 +70,7 @@ export interface IStorage {
   getUserInvitations(invitedBy?: string): Promise<UserInvitation[]>;
   acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation>;
   expireInvitation(invitationCode: string): Promise<void>;
+  deleteUserInvitation(invitationId: number, userId: string): Promise<boolean>;
   
   // User access control operations  
   getUserAccessLevel(userId: string): Promise<string | undefined>;
@@ -2272,6 +2273,18 @@ export class DatabaseStorage implements IStorage {
       .update(userInvitations)
       .set({ status: 'expired' })
       .where(eq(userInvitations.invitationCode, invitationCode));
+  }
+
+  async deleteUserInvitation(invitationId: number, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(userInvitations)
+      .where(and(
+        eq(userInvitations.id, invitationId),
+        eq(userInvitations.invitedBy, userId)
+      ))
+      .returning();
+    
+    return result.length > 0;
   }
 
   // User access control methods
