@@ -1041,13 +1041,24 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="cellPhone">Cell Phone</Label>
-                <Input
-                  id="cellPhone"
-                  {...form.register("cellPhone")}
-                  placeholder="Enter cell phone"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="cellPhone">Cell Phone</Label>
+                  <Input
+                    id="cellPhone"
+                    {...form.register("cellPhone")}
+                    placeholder="Enter cell phone"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workPhone">Work Phone</Label>
+                  <Input
+                    id="workPhone"
+                    type="tel"
+                    {...form.register("workPhone")}
+                    placeholder="Enter work phone number"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
