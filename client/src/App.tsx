@@ -18,6 +18,9 @@ import TaskDetail from "@/pages/task-detail";
 import TaskDetailSimple from "@/pages/task-detail-simple";
 import Tasks from "@/pages/tasks";
 import UserManagement from "@/pages/user-management";
+import Administration from "@/pages/administration";
+import Marketing from "@/pages/marketing";
+import Settings from "@/pages/settings";
 import AcceptInvitation from "@/pages/accept-invitation";
 import Sidebar from "@/components/layout/sidebar";
 
@@ -58,7 +61,10 @@ function Router() {
                 <Route path="/templates/:templateId/tasks/:taskId" component={TaskDetail} />
                 <Route path="/task/:id" component={TaskDetail} />
                 <Route path="/tasks" component={Tasks} />
+                <Route path="/marketing" component={Marketing} />
+                <Route path="/settings" component={Settings} />
                 <Route path="/user-management" component={UserManagement} />
+                <Route path="/administration" component={Administration} />
                 <Route component={NotFound} />
               </Switch>
             </div>

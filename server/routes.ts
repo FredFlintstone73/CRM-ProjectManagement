@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { emailService } from "./emailService";
+import { twoFactorAuthService } from "./twoFactorAuth";
 import { 
   insertContactSchema, 
   insertProjectSchema, 
@@ -17,12 +18,41 @@ import {
   insertTaskCommentSchema,
   insertTaskFileSchema,
   insertUserTaskPrioritySchema,
-  insertUserInvitationSchema
+  insertUserInvitationSchema,
+  insertUserActivitySchema
 } from "@shared/schema";
+
+// Activity logging middleware
+const logUserActivity = async (req: any, res: any, next: any) => {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
+    try {
+      const userId = req.user.claims.sub;
+      const action = req.method === 'GET' ? 'page_view' : 'api_call';
+      const resource = req.originalUrl;
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.get('User-Agent');
+      
+      await storage.createUserActivity({
+        userId,
+        action,
+        resource,
+        details: { method: req.method, endpoint: req.originalUrl },
+        ipAddress,
+        userAgent,
+      });
+    } catch (error) {
+      console.error('Failed to log user activity:', error);
+    }
+  }
+  next();
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Activity logging middleware for authenticated routes
+  app.use('/api', logUserActivity);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -2162,6 +2192,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Administration routes for user activity tracking (Administrator only)
+  app.get('/api/administration/activities', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const { timeRange = '24h', actionFilter = 'all', userFilter = 'all' } = req.query;
+      const activities = await storage.getUserActivities(
+        timeRange as string,
+        actionFilter as string,
+        userFilter as string
+      );
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching user activities:", error);
+      res.status(500).json({ message: "Failed to fetch user activities" });
+    }
+  });
+
+  app.get('/api/administration/stats', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const { timeRange = '24h' } = req.query;
+      const stats = await storage.getUserActivityStats(timeRange as string);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching activity stats:", error);
+      res.status(500).json({ message: "Failed to fetch activity stats" });
+    }
+  });
+
+  // Two-factor authentication routes
+  app.post('/api/auth/2fa/setup', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.email) {
+        return res.status(400).json({ message: "User email not found" });
+      }
+
+      const setup = await twoFactorAuthService.setupTwoFactor(userId, user.email);
+      res.json(setup);
+    } catch (error) {
+      console.error("Error setting up 2FA:", error);
+      res.status(500).json({ message: "Failed to setup 2FA" });
+    }
+  });
+
+  app.post('/api/auth/2fa/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { token, secret } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+
+      let verified = false;
+
+      if (secret) {
+        // Setup verification - enable 2FA
+        const backupCodes = req.body.backupCodes || [];
+        verified = await twoFactorAuthService.enableTwoFactor(userId, secret, token, backupCodes);
+      } else {
+        // Login verification
+        verified = await twoFactorAuthService.verifyTwoFactor(userId, token);
+      }
+
+      if (verified) {
+        res.json({ success: true });
+      } else {
+        res.status(400).json({ message: "Invalid token" });
+      }
+    } catch (error) {
+      console.error("Error verifying 2FA:", error);
+      res.status(500).json({ message: "Failed to verify 2FA" });
+    }
+  });
+
+  app.post('/api/auth/2fa/disable', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await twoFactorAuthService.disableTwoFactor(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error disabling 2FA:", error);
+      res.status(500).json({ message: "Failed to disable 2FA" });
+    }
+  });
+
+  app.get('/api/auth/2fa/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const enabled = await twoFactorAuthService.isTwoFactorEnabled(userId);
+      res.json({ enabled });
+    } catch (error) {
+      console.error("Error checking 2FA status:", error);
+      res.status(500).json({ message: "Failed to check 2FA status" });
     }
   });
 

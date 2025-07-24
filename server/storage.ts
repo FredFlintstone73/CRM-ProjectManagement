@@ -16,6 +16,7 @@ import {
   contactBusinesses,
   userTaskPriorities,
   userInvitations,
+  userActivities,
   type User,
   type UpsertUser,
   type Contact,
@@ -50,6 +51,8 @@ import {
   type InsertUserTaskPriority,
   type UserInvitation,
   type InsertUserInvitation,
+  type UserActivity,
+  type InsertUserActivity,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, not, ilike, count, isNotNull, inArray } from "drizzle-orm";
@@ -192,6 +195,21 @@ export interface IStorage {
   getUserTaskPriority(taskId: number, userId: string): Promise<UserTaskPriority | undefined>;
   setUserTaskPriority(taskId: number, userId: string, contactId: number | null, priority: number): Promise<UserTaskPriority>;
   getUserTasksWithPriorities(userId: string): Promise<(Task & { userPriority: number | null })[]>;
+
+  // User activity tracking operations
+  createUserActivity(activity: InsertUserActivity): Promise<UserActivity>;
+  getUserActivities(timeRange: string, actionFilter: string, userFilter: string): Promise<UserActivity[]>;
+  getUserActivityStats(timeRange: string): Promise<{
+    activeUsers: number;
+    totalActivities: number;
+    loginSessions: number;
+    uniqueIPs: number;
+  }>;
+
+  // Two-factor authentication operations
+  enableTwoFactorAuth(userId: string, secret: string, backupCodes: string[]): Promise<User>;
+  disableTwoFactorAuth(userId: string): Promise<User>;
+  updateUserBackupCodes(userId: string, backupCodes: string[]): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2301,6 +2319,157 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(contactBusinesses)
       .where(eq(contactBusinesses.id, businessId));
+  }
+
+  // User activity tracking operations
+  async createUserActivity(activity: InsertUserActivity): Promise<UserActivity> {
+    const [created] = await db
+      .insert(userActivities)
+      .values(activity)
+      .returning();
+    return created;
+  }
+
+  async getUserActivities(timeRange: string, actionFilter: string, userFilter: string): Promise<UserActivity[]> {
+    let query = db.select().from(userActivities);
+    
+    // Apply time range filter
+    const now = new Date();
+    let timeThreshold: Date;
+    
+    switch (timeRange) {
+      case '1h':
+        timeThreshold = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case '24h':
+        timeThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '7d':
+        timeThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        timeThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        timeThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    }
+    
+    const conditions = [sql`${userActivities.timestamp} >= ${timeThreshold}`];
+    
+    // Apply action filter
+    if (actionFilter !== 'all') {
+      conditions.push(eq(userActivities.action, actionFilter));
+    }
+    
+    // Apply user filter
+    if (userFilter !== 'all') {
+      conditions.push(eq(userActivities.userId, userFilter));
+    }
+    
+    query = query.where(and(...conditions));
+    
+    return await query.orderBy(desc(userActivities.timestamp)).limit(100);
+  }
+
+  async getUserActivityStats(timeRange: string): Promise<{
+    activeUsers: number;
+    totalActivities: number;
+    loginSessions: number;
+    uniqueIPs: number;
+  }> {
+    const now = new Date();
+    let timeThreshold: Date;
+    
+    switch (timeRange) {
+      case '1h':
+        timeThreshold = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case '24h':
+        timeThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '7d':
+        timeThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        timeThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        timeThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    }
+    
+    const timeCondition = sql`${userActivities.timestamp} >= ${timeThreshold}`;
+    
+    // Get active users count
+    const [activeUsersResult] = await db
+      .select({ count: sql<number>`COUNT(DISTINCT ${userActivities.userId})` })
+      .from(userActivities)
+      .where(timeCondition);
+    
+    // Get total activities count
+    const [totalActivitiesResult] = await db
+      .select({ count: count() })
+      .from(userActivities)
+      .where(timeCondition);
+    
+    // Get login sessions count
+    const [loginSessionsResult] = await db
+      .select({ count: count() })
+      .from(userActivities)
+      .where(and(timeCondition, eq(userActivities.action, 'login')));
+    
+    // Get unique IPs count
+    const [uniqueIPsResult] = await db
+      .select({ count: sql<number>`COUNT(DISTINCT ${userActivities.ipAddress})` })
+      .from(userActivities)
+      .where(and(timeCondition, isNotNull(userActivities.ipAddress)));
+    
+    return {
+      activeUsers: activeUsersResult.count || 0,
+      totalActivities: totalActivitiesResult.count || 0,
+      loginSessions: loginSessionsResult.count || 0,
+      uniqueIPs: uniqueIPsResult.count || 0,
+    };
+  }
+
+  // Two-factor authentication operations
+  async enableTwoFactorAuth(userId: string, secret: string, backupCodes: string[]): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        twoFactorSecret: secret,
+        twoFactorEnabled: true,
+        backupCodes: backupCodes,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated;
+  }
+
+  async disableTwoFactorAuth(userId: string): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        twoFactorSecret: null,
+        twoFactorEnabled: false,
+        backupCodes: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated;
+  }
+
+  async updateUserBackupCodes(userId: string, backupCodes: string[]): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        backupCodes: backupCodes,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated;
   }
 }
 

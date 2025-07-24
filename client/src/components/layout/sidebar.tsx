@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
@@ -38,10 +38,13 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     { name: 'Projects', href: '/projects', icon: FolderOpen },
     { name: 'Templates', href: '/templates', icon: FileText },
     { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-    { name: 'Analytics', href: '/analytics', icon: TrendingUp },
+    { name: 'Marketing', href: '/marketing', icon: TrendingUp },
     { name: 'Calendar', href: '/calendar', icon: Calendar },
     { name: 'Messages', href: '/messages', icon: MessageSquare },
-    ...(isAdministrator ? [{ name: 'User Management', href: '/user-management', icon: Users }] : []),
+    ...(isAdministrator ? [
+      { name: 'User Management', href: '/user-management', icon: Users },
+      { name: 'Administration', href: '/administration', icon: Shield }
+    ] : []),
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 

@@ -121,6 +121,9 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").default(true),
   invitedBy: varchar("invited_by").references(() => users.id),
   invitedAt: timestamp("invited_at"),
+  twoFactorSecret: varchar("two_factor_secret"),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  backupCodes: jsonb("backup_codes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -945,6 +948,26 @@ export const insertUserInvitationSchema = createInsertSchema(userInvitations).om
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// User activity tracking table
+export const userActivities = pgTable("user_activities", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  action: varchar("action").notNull(), // login, logout, page_view, api_call, etc.
+  resource: varchar("resource"), // page path, api endpoint, etc.
+  details: jsonb("details"), // additional context like IP, user agent, etc.
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const insertUserActivitySchema = createInsertSchema(userActivities).omit({
+  id: true,
+  timestamp: true,
+});
+
+export type UserActivity = typeof userActivities.$inferSelect;
+export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
 export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type Project = typeof projects.$inferSelect;
