@@ -425,11 +425,16 @@ export class DatabaseStorage implements IStorage {
       throw new Error("User not found");
     }
 
-    // Get the corresponding contact for this user if it exists
+    // Get the corresponding contact for this user if it exists (check both personal and work email)
     const [userContact] = await db
       .select()
       .from(contacts)
-      .where(eq(contacts.email, user.email));
+      .where(
+        or(
+          eq(contacts.personalEmail, user.email),
+          eq(contacts.workEmail, user.email)
+        )
+      );
 
     // If there's a corresponding contact and it's a team member, delete the contact first
     if (userContact && userContact.contactType === 'team_member') {
