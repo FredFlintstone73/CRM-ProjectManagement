@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, requireTwoFactor } from "./replitAuth";
 import { emailService } from "./emailService";
 import { twoFactorAuthService } from "./twoFactorAuth";
 import { aiSearchService } from "./aiSearchService";
@@ -73,6 +73,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Activity logging middleware for authenticated routes
   app.use('/api', logUserActivity);
+
+  // Apply mandatory 2FA to all API routes except auth endpoints
+  app.use('/api', isAuthenticated, requireTwoFactor);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

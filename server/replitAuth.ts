@@ -155,3 +155,39 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return;
   }
 };
+
+export const requireTwoFactor: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+
+  if (!req.isAuthenticated() || !user?.claims?.sub) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // Skip 2FA check for 2FA setup and verification endpoints
+  const skip2FACheck = [
+    '/api/auth/2fa/setup',
+    '/api/auth/2fa/verify',
+    '/api/auth/2fa/status',
+    '/api/logout'
+  ];
+
+  if (skip2FACheck.some(path => req.originalUrl.startsWith(path))) {
+    return next();
+  }
+
+  try {
+    const is2FAEnabled = await storage.isTwoFactorEnabled(user.claims.sub);
+    
+    if (!is2FAEnabled) {
+      return res.status(403).json({ 
+        message: "Two-factor authentication is required",
+        requiresSetup: true 
+      });
+    }
+
+    return next();
+  } catch (error) {
+    console.error('Error checking 2FA status:', error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

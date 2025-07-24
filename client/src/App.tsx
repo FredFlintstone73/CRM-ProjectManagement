@@ -23,6 +23,7 @@ import Marketing from "@/pages/marketing";
 import Settings from "@/pages/settings";
 import AcceptInvitation from "@/pages/accept-invitation";
 import Sidebar from "@/components/layout/sidebar";
+import { Mandatory2FAWrapper } from "@/components/auth/Mandatory2FAWrapper";
 
 
 function Router() {
@@ -43,7 +44,7 @@ function Router() {
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
-        <>
+        <Mandatory2FAWrapper>
           <div className="bg-gray-50 flex h-screen">
             <Sidebar width={sidebarWidth} onWidthChange={setSidebarWidth} />
             <div 
@@ -68,9 +69,8 @@ function Router() {
                 <Route component={NotFound} />
               </Switch>
             </div>
-
           </div>
-        </>
+        </Mandatory2FAWrapper>
       )}
       <Route component={NotFound} />
     </Switch>
