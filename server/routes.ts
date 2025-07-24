@@ -12,7 +12,11 @@ import {
   insertCallTranscriptSchema,
   insertProjectCommentSchema,
   insertContactNoteSchema,
+  insertContactFileSchema,
+  insertContactBusinessSchema,
   insertTaskCommentSchema,
+  insertTaskFileSchema,
+  insertUserTaskPrioritySchema,
   insertUserInvitationSchema
 } from "@shared/schema";
 
@@ -971,6 +975,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error downloading contact file:", error);
       res.status(500).json({ message: "Failed to download file" });
+    }
+  });
+
+  // Contact business routes
+  app.get('/api/contacts/:id/businesses', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const businesses = await storage.getContactBusinesses(contactId);
+      res.json(businesses);
+    } catch (error) {
+      console.error("Error fetching contact businesses:", error);
+      res.status(500).json({ message: "Failed to fetch contact businesses" });
+    }
+  });
+
+  app.post('/api/contacts/:id/businesses', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const businessData = insertContactBusinessSchema.parse({
+        ...req.body,
+        contactId
+      });
+      
+      const business = await storage.createContactBusiness(businessData);
+      res.json(business);
+    } catch (error) {
+      console.error("Error creating contact business:", error);
+      res.status(500).json({ message: "Failed to create contact business" });
+    }
+  });
+
+  app.put('/api/contacts/:id/businesses/:businessId', isAuthenticated, async (req: any, res) => {
+    try {
+      const businessId = parseInt(req.params.businessId);
+      const updates = insertContactBusinessSchema.partial().parse(req.body);
+      
+      const updatedBusiness = await storage.updateContactBusiness(businessId, updates);
+      res.json(updatedBusiness);
+    } catch (error) {
+      console.error("Error updating contact business:", error);
+      res.status(500).json({ message: "Failed to update contact business" });
+    }
+  });
+
+  app.delete('/api/contacts/:id/businesses/:businessId', isAuthenticated, async (req: any, res) => {
+    try {
+      const businessId = parseInt(req.params.businessId);
+      await storage.deleteContactBusiness(businessId);
+      res.json({ message: "Business deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting contact business:", error);
+      res.status(500).json({ message: "Failed to delete contact business" });
     }
   });
 

@@ -13,6 +13,7 @@ import {
   projectComments,
   contactNotes,
   contactFiles,
+  contactBusinesses,
   userTaskPriorities,
   userInvitations,
   type User,
@@ -43,6 +44,8 @@ import {
   type InsertContactNote,
   type ContactFile,
   type InsertContactFile,
+  type ContactBusiness,
+  type InsertContactBusiness,
   type UserTaskPriority,
   type InsertUserTaskPriority,
   type UserInvitation,
@@ -175,6 +178,12 @@ export interface IStorage {
   createContactFile(file: InsertContactFile, userId: string): Promise<ContactFile>;
   updateContactFile(fileId: number, updates: Partial<InsertContactFile>): Promise<ContactFile>;
   deleteContactFile(fileId: number): Promise<void>;
+
+  // Contact business operations
+  getContactBusinesses(contactId: number): Promise<ContactBusiness[]>;
+  createContactBusiness(business: InsertContactBusiness): Promise<ContactBusiness>;
+  updateContactBusiness(businessId: number, updates: Partial<InsertContactBusiness>): Promise<ContactBusiness>;
+  deleteContactBusiness(businessId: number): Promise<void>;
 
   // Role-based assignment operations
   resolveRoleAssignments(projectId: number): Promise<void>;
@@ -2258,6 +2267,40 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return updated;
+  }
+  // Contact business operations
+  async getContactBusinesses(contactId: number): Promise<ContactBusiness[]> {
+    return await db
+      .select()
+      .from(contactBusinesses)
+      .where(eq(contactBusinesses.contactId, contactId))
+      .orderBy(contactBusinesses.sortOrder, contactBusinesses.createdAt);
+  }
+
+  async createContactBusiness(business: InsertContactBusiness): Promise<ContactBusiness> {
+    const [created] = await db
+      .insert(contactBusinesses)
+      .values(business)
+      .returning();
+    return created;
+  }
+
+  async updateContactBusiness(businessId: number, updates: Partial<InsertContactBusiness>): Promise<ContactBusiness> {
+    const [updated] = await db
+      .update(contactBusinesses)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(contactBusinesses.id, businessId))
+      .returning();
+    return updated;
+  }
+
+  async deleteContactBusiness(businessId: number): Promise<void> {
+    await db
+      .delete(contactBusinesses)
+      .where(eq(contactBusinesses.id, businessId));
   }
 }
 

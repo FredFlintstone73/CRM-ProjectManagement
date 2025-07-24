@@ -420,6 +420,25 @@ export const projectComments = pgTable("project_comments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Contact businesses table - For multiple business associations per contact
+export const contactBusinesses = pgTable("contact_businesses", {
+  id: serial("id").primaryKey(),
+  contactId: integer("contact_id").notNull().references(() => contacts.id, { onDelete: "cascade" }),
+  businessName: varchar("business_name"),
+  businessAddressStreet1: varchar("business_address_street1"),
+  businessAddressStreet2: varchar("business_address_street2"),
+  businessAddressCity: varchar("business_address_city"),
+  businessAddressState: varchar("business_address_state"),
+  businessAddressZip: varchar("business_address_zip"),
+  businessPhone: varchar("business_phone"),
+  officeManagerName: varchar("office_manager_name"),
+  businessEin: varchar("business_ein"),
+  partnershipDetails: text("partnership_details"),
+  sortOrder: integer("sort_order").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   contacts: many(contacts),
@@ -444,6 +463,14 @@ export const contactsRelations = relations(contacts, ({ one, many }) => ({
   emailInteractions: many(emailInteractions),
   callTranscripts: many(callTranscripts),
   notes: many(contactNotes),
+  businesses: many(contactBusinesses),
+}));
+
+export const contactBusinessesRelations = relations(contactBusinesses, ({ one }) => ({
+  contact: one(contacts, {
+    fields: [contactBusinesses.contactId],
+    references: [contacts.id],
+  }),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -863,6 +890,12 @@ export const insertUserTaskPrioritySchema = createInsertSchema(userTaskPrioritie
   updatedAt: true,
 });
 
+export const insertContactBusinessSchema = createInsertSchema(contactBusinesses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // User invitations table
 export const userInvitations = pgTable("user_invitations", {
   id: serial("id").primaryKey(),
@@ -942,3 +975,5 @@ export type UserTaskPriority = typeof userTaskPriorities.$inferSelect;
 export type InsertUserTaskPriority = z.infer<typeof insertUserTaskPrioritySchema>;
 export type UserInvitation = typeof userInvitations.$inferSelect;
 export type InsertUserInvitation = z.infer<typeof insertUserInvitationSchema>;
+export type ContactBusiness = typeof contactBusinesses.$inferSelect;
+export type InsertContactBusiness = z.infer<typeof insertContactBusinessSchema>;
