@@ -609,12 +609,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             />
           </div>
           <div>
-            <Label htmlFor="workEmail">Work Email</Label>
+            <Label htmlFor="workEmail">Business Email</Label>
             <Input
               id="workEmail"
               type="email"
               {...form.register("workEmail")}
-              placeholder="Enter work email"
+              placeholder="Enter business email"
             />
           </div>
         </div>
@@ -1061,12 +1061,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="workEmail">Work Email</Label>
+                  <Label htmlFor="workEmail">Business Email</Label>
                   <Input
                     id="workEmail"
                     type="email"
                     {...form.register("workEmail")}
-                    placeholder="Enter work email"
+                    placeholder="Enter business email"
                   />
                 </div>
               </div>
@@ -1082,7 +1082,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                     <SelectItem value="text">Text</SelectItem>
                     <SelectItem value="work_phone">Work Phone</SelectItem>
                     <SelectItem value="personal_email">Personal Email</SelectItem>
-                    <SelectItem value="work_email">Work Email</SelectItem>
+                    <SelectItem value="work_email">Business Email</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1228,12 +1228,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="spouseWorkEmail">Work Email</Label>
+                  <Label htmlFor="spouseWorkEmail">Business Email</Label>
                   <Input
                     id="spouseWorkEmail"
                     type="email"
                     {...form.register("spouseWorkEmail")}
-                    placeholder="Enter work email"
+                    placeholder="Enter business email"
                   />
                 </div>
               </div>
@@ -1250,7 +1250,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                       <SelectItem value="text">Text</SelectItem>
                       <SelectItem value="work_phone">Work Phone</SelectItem>
                       <SelectItem value="personal_email">Personal Email</SelectItem>
-                      <SelectItem value="work_email">Work Email</SelectItem>
+                      <SelectItem value="work_email">Business Email</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1572,7 +1572,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           <Card>
             <CardHeader>
               <CardTitle>Business Information</CardTitle>
-              <CardDescription>Business name, work contact information, and business address</CardDescription>
+              <CardDescription>Business name, business contact information, and business address</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -1585,12 +1585,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
               </div>
               
               <div>
-                <Label htmlFor="workPhone">Work Phone</Label>
+                <Label htmlFor="workPhone">Business Phone</Label>
                 <Input
                   id="workPhone"
                   type="tel"
                   {...form.register("workPhone")}
-                  placeholder="Enter work phone number"
+                  placeholder="Enter business phone number"
                 />
               </div>
 

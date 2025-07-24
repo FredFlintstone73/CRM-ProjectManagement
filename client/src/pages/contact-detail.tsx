@@ -523,7 +523,7 @@ export default function ContactDetail() {
                       <p className="text-sm">{contact.cellPhone || "Not specified"}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-700">Work Phone:</p>
+                      <p className="text-sm font-medium text-gray-700">Business Phone:</p>
                       <p className="text-sm">{contact.workPhone || "Not specified"}</p>
                     </div>
                   </>
@@ -542,7 +542,7 @@ export default function ContactDetail() {
                       <p className="text-sm">{contact.personalEmail || "Not specified"}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-700">Work Email:</p>
+                      <p className="text-sm font-medium text-gray-700">Business Email:</p>
                       <p className="text-sm">{contact.workEmail || "Not specified"}</p>
                     </div>
                   </>
@@ -1198,13 +1198,13 @@ export default function ContactDetail() {
                     )}
                     {contact.workPhone && (
                       <div className="flex justify-between">
-                        <span className="font-medium">Work Phone:</span>
+                        <span className="font-medium">Business Phone:</span>
                         <span>{contact.workPhone}</span>
                       </div>
                     )}
                     {contact.workEmail && (
                       <div className="flex justify-between">
-                        <span className="font-medium">Work Email:</span>
+                        <span className="font-medium">Business Email:</span>
                         <span>{contact.workEmail}</span>
                       </div>
                     )}
