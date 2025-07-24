@@ -212,6 +212,8 @@ export interface IStorage {
   enableTwoFactorAuth(userId: string, secret: string, backupCodes: string[]): Promise<User>;
   disableTwoFactorAuth(userId: string): Promise<User>;
   updateUserBackupCodes(userId: string, backupCodes: string[]): Promise<User>;
+  isTwoFactorEnabled(userId: string): Promise<boolean>;
+  verifyTwoFactor(userId: string, token: string): Promise<boolean>;
 
   // Search operations
   searchContacts(query: string): Promise<Contact[]>;
@@ -2569,6 +2571,38 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return updated;
+  }
+
+  async isTwoFactorEnabled(userId: string): Promise<boolean> {
+    const [user] = await db
+      .select({ twoFactorEnabled: users.twoFactorEnabled })
+      .from(users)
+      .where(eq(users.id, userId));
+    return user?.twoFactorEnabled || false;
+  }
+
+  async verifyTwoFactor(userId: string, token: string): Promise<boolean> {
+    const [user] = await db
+      .select({ 
+        twoFactorSecret: users.twoFactorSecret, 
+        twoFactorEnabled: users.twoFactorEnabled 
+      })
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+      return false;
+    }
+
+    // Import speakeasy for verification
+    const speakeasy = require('speakeasy');
+    
+    return speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token,
+      window: 2, // Allow for time drift
+    });
   }
 
   // Search operations

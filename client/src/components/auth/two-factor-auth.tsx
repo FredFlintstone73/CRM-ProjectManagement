@@ -30,8 +30,9 @@ export default function TwoFactorAuth({ isSetup = false, onComplete }: TwoFactor
   const generateSecret = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('/api/auth/2fa/setup', {
+      const response = await fetch('/api/auth/2fa/setup', {
         method: 'POST',
+        credentials: 'include',
       });
       
       if (response.ok) {
@@ -66,8 +67,9 @@ export default function TwoFactorAuth({ isSetup = false, onComplete }: TwoFactor
 
     try {
       setIsLoading(true);
-      const response = await apiRequest('/api/auth/2fa/verify', {
+      const response = await fetch('/api/auth/2fa/verify', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
