@@ -75,7 +75,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api', logUserActivity);
 
   // Apply mandatory 2FA to all API routes except auth endpoints
-  app.use('/api', isAuthenticated, requireTwoFactor);
+  app.use('/api', (req, res, next) => {
+    // Skip 2FA for auth endpoints
+    if (req.originalUrl.startsWith('/api/auth/') || 
+        req.originalUrl.startsWith('/api/login') || 
+        req.originalUrl.startsWith('/api/logout') || 
+        req.originalUrl.startsWith('/api/callback')) {
+      return next();
+    }
+    // Apply authentication and 2FA to all other routes
+    return isAuthenticated(req, res, () => {
+      requireTwoFactor(req, res, next);
+    });
+  });
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -114,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard routes
-  app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
+  app.get('/api/dashboard/stats', async (req: any, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);

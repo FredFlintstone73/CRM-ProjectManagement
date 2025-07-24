@@ -163,12 +163,12 @@ export const requireTwoFactor: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  // Skip 2FA check for 2FA setup and verification endpoints
+  // Skip 2FA check for authentication and 2FA management endpoints
   const skip2FACheck = [
-    '/api/auth/2fa/setup',
-    '/api/auth/2fa/verify',
-    '/api/auth/2fa/status',
-    '/api/logout'
+    '/api/auth/',
+    '/api/login',
+    '/api/logout',
+    '/api/callback'
   ];
 
   if (skip2FACheck.some(path => req.originalUrl.startsWith(path))) {
