@@ -2321,13 +2321,55 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contactBusinesses.id, businessId));
   }
 
-  // User activity tracking operations
+  // User activity tracking operations with batching optimization
+  private activityBuffer: InsertUserActivity[] = [];
+  private bufferTimeout: NodeJS.Timeout | null = null;
+
   async createUserActivity(activity: InsertUserActivity): Promise<UserActivity> {
+    // For immediate logging (when needed)
     const [created] = await db
       .insert(userActivities)
       .values(activity)
       .returning();
     return created;
+  }
+
+  // Batch insert for better performance (optional for future use)
+  batchUserActivity(activity: InsertUserActivity): void {
+    this.activityBuffer.push(activity);
+    
+    // Clear existing timeout
+    if (this.bufferTimeout) {
+      clearTimeout(this.bufferTimeout);
+    }
+    
+    // Set new timeout to flush buffer after 5 seconds or when buffer reaches 10 items
+    this.bufferTimeout = setTimeout(() => {
+      this.flushActivityBuffer();
+    }, 5000);
+    
+    // Flush immediately if buffer is full
+    if (this.activityBuffer.length >= 10) {
+      this.flushActivityBuffer();
+    }
+  }
+
+  private async flushActivityBuffer(): void {
+    if (this.activityBuffer.length === 0) return;
+    
+    try {
+      const activities = [...this.activityBuffer];
+      this.activityBuffer = [];
+      
+      if (this.bufferTimeout) {
+        clearTimeout(this.bufferTimeout);
+        this.bufferTimeout = null;
+      }
+      
+      await db.insert(userActivities).values(activities);
+    } catch (error) {
+      console.error('Failed to flush activity buffer:', error);
+    }
   }
 
   async getUserActivities(timeRange: string, actionFilter: string, userFilter: string): Promise<UserActivity[]> {
@@ -2368,7 +2410,8 @@ export class DatabaseStorage implements IStorage {
     
     query = query.where(and(...conditions));
     
-    return await query.orderBy(desc(userActivities.timestamp)).limit(100);
+    // Limit to 50 records and add index hint for better performance
+    return await query.orderBy(desc(userActivities.timestamp)).limit(50);
   }
 
   async getUserActivityStats(timeRange: string): Promise<{

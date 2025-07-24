@@ -22,29 +22,48 @@ import {
   insertUserActivitySchema
 } from "@shared/schema";
 
-// Activity logging middleware
-const logUserActivity = async (req: any, res: any, next: any) => {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
-    try {
-      const userId = req.user.claims.sub;
-      const action = req.method === 'GET' ? 'page_view' : 'api_call';
-      const resource = req.originalUrl;
-      const ipAddress = req.ip || req.connection.remoteAddress;
-      const userAgent = req.get('User-Agent');
-      
-      await storage.createUserActivity({
-        userId,
-        action,
-        resource,
-        details: { method: req.method, endpoint: req.originalUrl },
-        ipAddress,
-        userAgent,
-      });
-    } catch (error) {
-      console.error('Failed to log user activity:', error);
-    }
-  }
+// Activity logging middleware with performance optimization
+const logUserActivity = (req: any, res: any, next: any) => {
+  // Call next() immediately to avoid blocking the request
   next();
+  
+  // Log activity asynchronously after response
+  if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
+    // Skip logging for high-frequency endpoints to reduce database load
+    const skipPaths = [
+      '/api/auth/user',
+      '/api/auth/access-level',
+      '/api/auth/contact-id',
+      '/api/dashboard/stats'
+    ];
+    
+    if (skipPaths.some(path => req.originalUrl.startsWith(path))) {
+      return;
+    }
+    
+    // Use setImmediate to ensure logging happens after response is sent
+    setImmediate(async () => {
+      try {
+        const userId = req.user.claims.sub;
+        const action = req.method === 'GET' ? 'page_view' : 'api_call';
+        const resource = req.originalUrl;
+        const ipAddress = req.ip || req.connection.remoteAddress;
+        const userAgent = req.get('User-Agent');
+        
+        await storage.createUserActivity({
+          userId,
+          action,
+          resource,
+          details: { method: req.method, endpoint: req.originalUrl },
+          ipAddress,
+          userAgent,
+        });
+      } catch (error) {
+        // Silently fail activity logging to avoid affecting user experience
+        console.error('Failed to log user activity:', error);
+      }
+    });
+  }
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
