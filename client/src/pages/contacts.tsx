@@ -560,10 +560,10 @@ export default function Contacts() {
                         <span>{contact.personalEmail || contact.workEmail}</span>
                       </div>
                     )}
-                    {(contact.cellPhone || contact.businessPhone || contact.workPhone) && (
+                    {(contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone) && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Phone className="w-4 h-4" />
-                        <span>{contact.cellPhone || contact.businessPhone || contact.workPhone}</span>
+                        <span>{contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone}</span>
                       </div>
                     )}
                     {contact.position && (
@@ -725,10 +725,10 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {(contact.cellPhone || contact.businessPhone || contact.workPhone) && (
+                          {(contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone) && (
                             <>
                               <Phone className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.cellPhone || contact.businessPhone || contact.workPhone}</span>
+                              <span className="text-sm">{contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone}</span>
                             </>
                           )}
                         </div>

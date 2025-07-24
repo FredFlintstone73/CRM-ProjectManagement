@@ -514,7 +514,7 @@ export default function ContactDetail() {
                 {(contact.contactType === "client" || contact.contactType === "prospect") ? (
                   <div>
                     <p className="text-sm font-medium text-gray-700">Phone:</p>
-                    <p className="text-sm">{contact.cellPhone || contact.businessPhone || contact.workPhone || "Not specified"}</p>
+                    <p className="text-sm">{contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone || "Not specified"}</p>
                   </div>
                 ) : (
                   <>
@@ -524,7 +524,7 @@ export default function ContactDetail() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-700">Business Phone:</p>
-                      <p className="text-sm">{contact.businessPhone || contact.workPhone || "Not specified"}</p>
+                      <p className="text-sm">{contact.businessPhone || contact.spouseWorkPhone || contact.workPhone || "Not specified"}</p>
                     </div>
                   </>
                 )}
