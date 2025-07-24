@@ -213,18 +213,30 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       onSuccess?.();
     },
     onError: (error) => {
+      console.error("Contact update error:", error);
       if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
         return;
       }
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update contact. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
   const onSubmit = (data: InsertContact) => {
     // Check if form has validation errors
     if (Object.keys(form.formState.errors).length > 0) {
+      console.log("Form validation errors:", form.formState.errors);
       return;
     }
     
@@ -243,6 +255,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       }).filter(([_, value]) => value !== undefined)
     ) as InsertContact;
     
+    console.log("Submitting contact data:", cleanedData);
     mutation.mutate(cleanedData);
   };
 
