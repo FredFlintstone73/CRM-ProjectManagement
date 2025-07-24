@@ -108,6 +108,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       spouseWorkEmail: contact.spouseWorkEmail || "",
       spousePreferredContactMethod: contact.spousePreferredContactMethod || "",
       businessName: contact.businessName || "",
+      businessPhone: contact.businessPhone || "",
       businessAddressStreet1: contact.businessAddressStreet1 || "",
       businessAddressStreet2: contact.businessAddressStreet2 || "",
       businessAddressCity: contact.businessAddressCity || "",
