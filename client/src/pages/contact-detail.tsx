@@ -22,6 +22,7 @@ import ContactForm from "@/components/contacts/contact-form";
 import ContactNotes from "@/components/contacts/contact-notes";
 import NotesDisplay from "@/components/contacts/notes-display";
 import ContactFiles from "@/components/contacts/contact-files";
+import ContactBusinesses from "@/components/contacts/contact-businesses";
 import PhotoCropper from "@/components/contacts/PhotoCropper";
 import type { Contact, Project } from "@shared/schema";
 
@@ -814,7 +815,7 @@ export default function ContactDetail() {
                  contact.contactType === 'trusted_professional' ? 'Professional' : 'Client'}
               </TabsTrigger>
               <TabsTrigger value="interaction">Interaction</TabsTrigger>
-              {(contact.contactType === 'client' || contact.contactType === 'prospect' || contact.contactType === 'strategic_partner' || contact.contactType === 'team_member' || contact.contactType === 'trusted_professional') && (
+              {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
                 <TabsTrigger value="business">Business</TabsTrigger>
               )}
               <TabsTrigger value="projects">Projects</TabsTrigger>
@@ -1218,102 +1219,10 @@ export default function ContactDetail() {
             </Card>
           </TabsContent>
 
-          {(contact.contactType === 'client' || contact.contactType === 'prospect' || contact.contactType === 'strategic_partner' || contact.contactType === 'team_member' || contact.contactType === 'trusted_professional') && (
+          {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
             <TabsContent value="business" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Business Information Card */}
-              {(contact.businessName || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone || contact.workEmail) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building className="h-5 w-5" />
-                      Business Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {contact.businessName && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Business Name:</span>
-                        <span>{contact.businessName}</span>
-                      </div>
-                    )}
-                    {(() => {
-                      const businessPhoneInfo = getBusinessPhoneInfo(contact);
-                      return businessPhoneInfo && (
-                        <div className="flex justify-between">
-                          <span className="font-medium">Business Phone:</span>
-                          <span>{businessPhoneInfo.number} {businessPhoneInfo.type}</span>
-                        </div>
-                      );
-                    })()}
-                    {contact.workEmail && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Work Email:</span>
-                        <span>{contact.workEmail}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Business Address Card */}
-              {(contact.businessAddressStreet1 || contact.businessAddressCity || contact.businessAddressState) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
-                      Business Address
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {contact.businessAddressStreet1 && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Street 1:</span>
-                        <span>{contact.businessAddressStreet1}</span>
-                      </div>
-                    )}
-                    {contact.businessAddressStreet2 && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Street 2:</span>
-                        <span>{contact.businessAddressStreet2}</span>
-                      </div>
-                    )}
-                    {contact.businessAddressCity && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">City:</span>
-                        <span>{contact.businessAddressCity}</span>
-                      </div>
-                    )}
-                    {contact.businessAddressState && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">State:</span>
-                        <span>{contact.businessAddressState}</span>
-                      </div>
-                    )}
-                    {contact.businessAddressZip && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">ZIP:</span>
-                        <span>{contact.businessAddressZip}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-
-            </div>
-
-            {/* Empty state when no business information */}
-            {!contact.businessName && !contact.businessPhone && !contact.spouseWorkPhone && !contact.workPhone && !contact.workEmail && !(contact.businessAddressStreet1 || contact.businessAddressCity || contact.businessAddressState) && (
-              <Card>
-                <CardContent className="text-center py-8 text-gray-500">
-                  <Building className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p className="text-lg font-medium mb-2">No business information yet</p>
-                  <p className="text-sm">Business details will be displayed here.</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+              <ContactBusinesses contactId={contact.id} />
+            </TabsContent>
           )}
 
           <TabsContent value="projects" className="space-y-4">
