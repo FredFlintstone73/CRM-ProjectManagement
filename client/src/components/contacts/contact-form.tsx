@@ -786,8 +786,8 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       <Tabs defaultValue="family" className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="family">Family</TabsTrigger>
-          <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="address">Address</TabsTrigger>
+          <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="children">Children</TabsTrigger>
           <TabsTrigger value="professionals">Professionals</TabsTrigger>
         </TabsList>
@@ -1253,7 +1253,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           <Card>
             <CardHeader>
               <CardTitle>Business Information</CardTitle>
-              <CardDescription>Business details and work contact information</CardDescription>
+              <CardDescription>Business name and work contact information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -1274,9 +1274,19 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   placeholder="Enter work phone number"
                 />
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
+        <TabsContent value="address" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Address Information</CardTitle>
+              <CardDescription>Mailing, home and vacation addresses</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="space-y-4">
-                <h4 className="font-semibold">Business Address</h4>
+                <h4 className="font-semibold">Mailing Address</h4>
                 <div>
                   <Label htmlFor="mailingAddressStreet1">Street Address</Label>
                   <Input
@@ -1320,17 +1330,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="address" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Address Information</CardTitle>
-              <CardDescription>Home and vacation addresses</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
