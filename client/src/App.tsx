@@ -24,6 +24,7 @@ import Settings from "@/pages/settings";
 import AcceptInvitation from "@/pages/accept-invitation";
 import Sidebar from "@/components/layout/sidebar";
 import { Mandatory2FAWrapper } from "@/components/auth/Mandatory2FAWrapper";
+import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
 
 
 function Router() {
@@ -82,6 +83,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Router />
+        <SessionTimeoutManager />
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -141,6 +141,23 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Complete Automatic Session Timeout System Implementation (July 24, 2025)
+- **90-Minute App Inactivity Timeout**: Automatically logs out users after 90 minutes of app inactivity (no clicks, scrolls, navigation)
+- **30-Minute System Idle Timeout**: Logs out users after 30 minutes of computer idle time (no mouse movement, keyboard activity, or browser focus)
+- **5-Minute Warning System**: Shows warning dialog 5 minutes before timeout with countdown timer and option to extend session
+- **Backend Session Management**: Updated session configuration to 90-minute rolling sessions with automatic activity tracking
+- **Frontend Activity Detection**: Comprehensive activity detection using mouse, keyboard, scroll, and page visibility events
+- **Throttled Backend Updates**: Sends activity updates to backend every 2 minutes to maintain server-side session state
+- **Dual Timeout Logic**: Tracks both app-specific activity and system-level activity independently
+- **Security Enhancement**: Automatic logout for both inactivity scenarios ensures maximum security compliance
+- **Professional Warning Dialog**: Clean warning interface showing timeout reason (app vs system) with formatted countdown
+- **Session Extension**: "Stay Logged In" button resets both activity timers and extends backend session
+- **Immediate Logout Option**: Users can choose to logout immediately when warned about timeout
+- **Page Visibility Integration**: Uses Page Visibility API to detect when user switches tabs or minimizes browser
+- **Complete Activity Tracking**: Monitors clicks, scrolls, navigation, keyboard input, and browser focus changes
+- **Robust Implementation**: Self-contained SessionTimeoutManager component with proper cleanup and error handling
+- **User Verified**: Session timeout system confirmed working - comprehensive security enhancement successfully implemented
+
 ### Complete Team Member Deletion System Implementation (July 24, 2025)
 - **DELETE API Endpoint**: Created DELETE /api/users/:id endpoint with proper authentication and administrator-only access control
 - **Backend Storage Method**: Implemented deleteUser method in DatabaseStorage class with proper contact record cleanup

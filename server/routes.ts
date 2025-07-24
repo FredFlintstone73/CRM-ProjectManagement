@@ -2403,6 +2403,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Session activity tracking endpoints
+  app.post('/api/auth/activity', isAuthenticated, async (req: any, res) => {
+    try {
+      // Update session activity timestamp
+      if (req.session) {
+        req.session.lastActivity = Date.now();
+        req.session.touch();
+      }
+      res.json({ success: true, timestamp: Date.now() });
+    } catch (error) {
+      console.error("Error updating session activity:", error);
+      res.status(500).json({ message: "Failed to update activity" });
+    }
+  });
+
+  app.get('/api/auth/session-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionInfo = {
+        lastActivity: req.session?.lastActivity || Date.now(),
+        maxAge: 90 * 60 * 1000, // 90 minutes
+        timeRemaining: req.session?.cookie?.maxAge || 0
+      };
+      res.json(sessionInfo);
+    } catch (error) {
+      console.error("Error fetching session status:", error);
+      res.status(500).json({ message: "Failed to fetch session status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
