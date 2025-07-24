@@ -677,6 +677,19 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           </div>
         </div>
 
+        {/* Business Name */}
+        <div className="space-y-4">
+          <h4 className="text-md font-medium">Business Information</h4>
+          <div>
+            <Label htmlFor="businessName">Business Name</Label>
+            <Input
+              id="businessName"
+              {...form.register("businessName")}
+              placeholder="Enter business name (optional)"
+            />
+          </div>
+        </div>
+
         {/* Mailing Address */}
         <div className="space-y-4">
           <h4 className="text-md font-medium">Mailing Address</h4>
