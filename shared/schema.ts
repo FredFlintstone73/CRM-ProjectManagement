@@ -170,6 +170,11 @@ export const contacts = pgTable("contacts", {
   
   // Business Information
   businessName: varchar("business_name"),
+  businessAddressStreet1: varchar("business_address_street1"),
+  businessAddressStreet2: varchar("business_address_street2"),
+  businessAddressCity: varchar("business_address_city"),
+  businessAddressState: varchar("business_address_state"),
+  businessAddressZip: varchar("business_address_zip"),
   
   // Address Information
   mailingAddressStreet1: varchar("mailing_address_street1"),

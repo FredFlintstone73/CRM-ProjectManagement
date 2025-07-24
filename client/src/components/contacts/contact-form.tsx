@@ -1253,7 +1253,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           <Card>
             <CardHeader>
               <CardTitle>Business Information</CardTitle>
-              <CardDescription>Business name and work contact information</CardDescription>
+              <CardDescription>Business name, work contact information, and business address</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -1273,6 +1273,52 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   {...form.register("workPhone")}
                   placeholder="Enter work phone number"
                 />
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-semibold">Business Mailing Address</h4>
+                <div>
+                  <Label htmlFor="businessAddressStreet1">Business Street Address</Label>
+                  <Input
+                    id="businessAddressStreet1"
+                    {...form.register("businessAddressStreet1")}
+                    placeholder="Enter business street address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="businessAddressStreet2">Business Street Address 2</Label>
+                  <Input
+                    id="businessAddressStreet2"
+                    {...form.register("businessAddressStreet2")}
+                    placeholder="Suite, floor, etc."
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="businessAddressCity">Business City</Label>
+                    <Input
+                      id="businessAddressCity"
+                      {...form.register("businessAddressCity")}
+                      placeholder="Enter business city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessAddressState">Business State</Label>
+                    <Input
+                      id="businessAddressState"
+                      {...form.register("businessAddressState")}
+                      placeholder="Enter business state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessAddressZip">Business ZIP Code</Label>
+                    <Input
+                      id="businessAddressZip"
+                      {...form.register("businessAddressZip")}
+                      placeholder="Enter business ZIP code"
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
