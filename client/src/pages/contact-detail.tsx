@@ -770,14 +770,16 @@ export default function ContactDetail() {
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="client" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className={`grid w-full ${contact.contactType === 'team_member' || contact.contactType === 'strategic_partner' ? 'grid-cols-5' : 'grid-cols-6'}`}>
               <TabsTrigger value="client">
                 {contact.contactType === 'prospect' ? 'Prospect' : 
                  contact.contactType === 'strategic_partner' ? 'Partner' : 
                  contact.contactType === 'team_member' ? 'Member' : 'Client'}
               </TabsTrigger>
               <TabsTrigger value="interaction">Interaction</TabsTrigger>
-              <TabsTrigger value="business">Business</TabsTrigger>
+              {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
+                <TabsTrigger value="business">Business</TabsTrigger>
+              )}
               <TabsTrigger value="projects">Projects</TabsTrigger>
               <TabsTrigger value="files">Files</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
@@ -897,14 +899,40 @@ export default function ContactDetail() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 gap-6">
-                      <div>
-                        <h4 className="font-semibold mb-2">Mailing Address</h4>
-                        <div className="space-y-1 text-sm">
-                          <div>{contact.mailingAddressStreet1}</div>
-                          {contact.mailingAddressStreet2 && <div>{contact.mailingAddressStreet2}</div>}
-                          <div>{contact.mailingAddressCity}, {contact.mailingAddressState} {contact.mailingAddressZip}</div>
+                      {contact.businessName && (
+                        <div>
+                          <h4 className="font-semibold mb-2">Business</h4>
+                          <div className="space-y-1 text-sm">
+                            <div className="font-medium">{contact.businessName}</div>
+                          </div>
                         </div>
-                      </div>
+                      )}
+                      
+                      {(contact.businessAddressStreet1 || contact.businessAddressCity) && (
+                        <div>
+                          <h4 className="font-semibold mb-2">Business Address</h4>
+                          <div className="space-y-1 text-sm">
+                            {contact.businessAddressStreet1 && <div>{contact.businessAddressStreet1}</div>}
+                            {contact.businessAddressStreet2 && <div>{contact.businessAddressStreet2}</div>}
+                            {contact.businessAddressCity && (
+                              <div>{contact.businessAddressCity}, {contact.businessAddressState} {contact.businessAddressZip}</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {(contact.mailingAddressStreet1 || contact.mailingAddressCity) && (
+                        <div>
+                          <h4 className="font-semibold mb-2">Mailing Address</h4>
+                          <div className="space-y-1 text-sm">
+                            {contact.mailingAddressStreet1 && <div>{contact.mailingAddressStreet1}</div>}
+                            {contact.mailingAddressStreet2 && <div>{contact.mailingAddressStreet2}</div>}
+                            {contact.mailingAddressCity && (
+                              <div>{contact.mailingAddressCity}, {contact.mailingAddressState} {contact.mailingAddressZip}</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1149,7 +1177,8 @@ export default function ContactDetail() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="business" className="space-y-4">
+          {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
+            <TabsContent value="business" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Business Information Card */}
               {contact.businessName && (
@@ -1225,6 +1254,7 @@ export default function ContactDetail() {
               </Card>
             )}
           </TabsContent>
+          )}
 
           <TabsContent value="projects" className="space-y-4">
             <Card>
