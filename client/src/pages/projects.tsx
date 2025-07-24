@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,68 +49,15 @@ export default function Projects() {
   const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
     enabled: isAuthenticated,
+    staleTime: 30000, // 30 seconds
+    gcTime: 300000, // 5 minutes
   });
 
   const { data: contacts } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
-  });
-
-  // Query for comment counts for all projects
-  const { data: projectCommentCounts = {} } = useQuery<Record<number, number>>({
-    queryKey: ['/api/projects/comment-counts'],
-    enabled: isAuthenticated && !!projects,
-    queryFn: async () => {
-      if (!projects) return {};
-      
-      const counts: Record<number, number> = {};
-      await Promise.all(
-        projects.map(async (project) => {
-          try {
-            const response = await fetch(`/api/projects/${project.id}/comments`, {
-              credentials: 'include',
-            });
-            if (response.ok) {
-              const comments = await response.json();
-              counts[project.id] = comments.length;
-            }
-          } catch (error) {
-            counts[project.id] = 0;
-          }
-        })
-      );
-      return counts;
-    },
-  });
-
-  // Query for task counts for all projects to calculate progress
-  const { data: projectTaskData = {} } = useQuery<Record<number, { total: number; completed: number; progress: number }>>({
-    queryKey: ['/api/projects/task-progress'],
-    enabled: isAuthenticated && !!projects,
-    queryFn: async () => {
-      if (!projects) return {};
-      
-      const taskData: Record<number, { total: number; completed: number; progress: number }> = {};
-      await Promise.all(
-        projects.map(async (project) => {
-          try {
-            const response = await fetch(`/api/projects/${project.id}/tasks`, {
-              credentials: 'include',
-            });
-            if (response.ok) {
-              const tasks = await response.json();
-              const totalTasks = tasks.length;
-              const completedTasks = tasks.filter((task: any) => task.status === 'completed').length;
-              const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-              taskData[project.id] = { total: totalTasks, completed: completedTasks, progress };
-            }
-          } catch (error) {
-            taskData[project.id] = { total: 0, completed: 0, progress: 0 };
-          }
-        })
-      );
-      return taskData;
-    },
+    staleTime: 60000, // 1 minute 
+    gcTime: 300000, // 5 minutes
   });
 
   // Helper functions
@@ -205,50 +152,56 @@ export default function Projects() {
     }
   };
 
-  // Filter and sort projects
-  const filteredAndSortedProjects = projects?.filter((project) => {
-    // Text search filter
-    const matchesSearch = searchQuery === "" ||
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description?.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filter and sort projects with useMemo for performance
+  const filteredAndSortedProjects = useMemo(() => {
+    if (!projects) return [];
     
-    if (!matchesSearch) return false;
+    const searchLower = searchQuery.toLowerCase();
     
-    // Date range filter
-    if (dateRange === 'all') return true;
-    
-    const range = getDateRangeFilter();
-    if (!range || !project.dueDate) return dateRange === 'all';
-    
-    const projectDate = new Date(project.dueDate);
-    return projectDate >= range.start && projectDate <= range.end;
-  }).sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    
-    let aValue: string | number | Date;
-    let bValue: string | number | Date;
-    
-    switch (sortConfig.key) {
-      case 'name':
-        aValue = a.name.toLowerCase();
-        bValue = b.name.toLowerCase();
-        break;
-      case 'family':
-        aValue = getFamilyName(a.clientId).toLowerCase();
-        bValue = getFamilyName(b.clientId).toLowerCase();
-        break;
-      case 'date':
-        aValue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
-        bValue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
-        break;
-      default:
-        return 0;
-    }
-    
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  }) || [];
+    return projects.filter((project) => {
+      // Text search filter - early return for empty search
+      if (searchQuery !== "") {
+        const matchesSearch = project.name.toLowerCase().includes(searchLower) ||
+          project.description?.toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+      
+      // Date range filter
+      if (dateRange === 'all') return true;
+      
+      const range = getDateRangeFilter();
+      if (!range || !project.dueDate) return dateRange === 'all';
+      
+      const projectDate = new Date(project.dueDate);
+      return projectDate >= range.start && projectDate <= range.end;
+    }).sort((a, b) => {
+      if (!sortConfig.key) return 0;
+      
+      let aValue: string | number | Date;
+      let bValue: string | number | Date;
+      
+      switch (sortConfig.key) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'family':
+          aValue = getFamilyName(a.clientId).toLowerCase();
+          bValue = getFamilyName(b.clientId).toLowerCase();
+          break;
+        case 'date':
+          aValue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+          bValue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [projects, searchQuery, dateRange, sortConfig, customStartDate, customEndDate, contacts]);
 
 
 
@@ -452,14 +405,6 @@ export default function Projects() {
                       </div>
                     )}
                     
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span>Progress</span>
-                        <span>{projectTaskData[project.id]?.progress || 0}%</span>
-                      </div>
-                      <Progress value={projectTaskData[project.id]?.progress || 0} className="h-6" />
-                    </div>
-                    
                     <div className="flex items-center justify-end pt-2">
                       <Button
                         variant="outline"
@@ -469,11 +414,6 @@ export default function Projects() {
                       >
                         <MessageCircle className="w-4 h-4 mr-1" />
                         Comments
-                        {projectCommentCounts[project.id] > 0 && (
-                          <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                            {projectCommentCounts[project.id]}
-                          </span>
-                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -501,7 +441,7 @@ export default function Projects() {
                         Family Name {getSortIcon('family')}
                       </div>
                     </TableHead>
-                    <TableHead className="text-xs">Progress</TableHead>
+
                     <TableHead 
                       className="cursor-pointer hover:bg-gray-50 select-none text-xs"
                       onClick={() => handleSort('date')}
@@ -556,12 +496,7 @@ export default function Projects() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2 w-20" />
-                          <span>{projectTaskData[project.id]?.progress || 0}%</span>
-                        </div>
-                      </TableCell>
+
                       <TableCell>
                         {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'Not set'}
                       </TableCell>
@@ -574,11 +509,6 @@ export default function Projects() {
                         >
                           <MessageCircle className="w-4 h-4 mr-1" />
                           Comments
-                          {projectCommentCounts[project.id] > 0 && (
-                            <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                              {projectCommentCounts[project.id]}
-                            </span>
-                          )}
                         </Button>
                       </TableCell>
                     </TableRow>

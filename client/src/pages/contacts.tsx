@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -194,6 +194,8 @@ export default function Contacts() {
   const { data: contacts, isLoading: contactsLoading } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
+    staleTime: 60000, // 1 minute
+    gcTime: 300000, // 5 minutes
   });
 
   const deleteContactMutation = useMutation({
@@ -213,43 +215,51 @@ export default function Contacts() {
     },
   });
 
-  const filteredContacts = contacts?.filter((contact) => {
-    // Filter by visible types
-    const isTypeVisible = visibleTypes[contact.contactType as keyof typeof visibleTypes];
+  const filteredContacts = useMemo(() => {
+    if (!contacts) return [];
     
-    // Filter by search query
-    const matchesSearch = searchQuery === "" ||
-      contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (contact.familyName && contact.familyName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (contact.personalEmail && contact.personalEmail.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (contact.spousePersonalEmail && contact.spousePersonalEmail.toLowerCase().includes(searchQuery.toLowerCase()));
+    const searchLower = searchQuery.toLowerCase();
     
-    return isTypeVisible && matchesSearch;
-  }).sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    
-    const aValue = a[sortConfig.key];
-    const bValue = b[sortConfig.key];
-    
-    // Handle null/undefined values
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
-    
-    // Convert to strings for comparison
-    const aStr = String(aValue).toLowerCase();
-    const bStr = String(bValue).toLowerCase();
-    
-    if (aStr < bStr) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    }
-    if (aStr > bStr) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
-    return 0;
-  }) || [];
+    return contacts.filter((contact) => {
+      // Filter by visible types
+      const isTypeVisible = visibleTypes[contact.contactType as keyof typeof visibleTypes];
+      
+      // Early return if type not visible
+      if (!isTypeVisible) return false;
+      
+      // Filter by search query - optimized with early return
+      if (searchQuery === "") return true;
+      
+      return contact.firstName.toLowerCase().includes(searchLower) ||
+        contact.lastName.toLowerCase().includes(searchLower) ||
+        contact.email?.toLowerCase().includes(searchLower) ||
+        contact.company?.toLowerCase().includes(searchLower) ||
+        (contact.familyName && contact.familyName.toLowerCase().includes(searchLower)) ||
+        (contact.personalEmail && contact.personalEmail.toLowerCase().includes(searchLower)) ||
+        (contact.spousePersonalEmail && contact.spousePersonalEmail.toLowerCase().includes(searchLower));
+    }).sort((a, b) => {
+      if (!sortConfig.key) return 0;
+      
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+      
+      // Handle null/undefined values
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+      
+      // Convert to strings for comparison
+      const aStr = String(aValue).toLowerCase();
+      const bStr = String(bValue).toLowerCase();
+      
+      if (aStr < bStr) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (aStr > bStr) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [contacts, visibleTypes, searchQuery, sortConfig]);
 
   const toggleContactType = (type: keyof typeof visibleTypes) => {
     setVisibleTypes(prev => ({
