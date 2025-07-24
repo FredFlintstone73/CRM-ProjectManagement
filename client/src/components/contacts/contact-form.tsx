@@ -107,6 +107,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       spouseWorkPhone: contact.spouseWorkPhone || "",
       spouseWorkEmail: contact.spouseWorkEmail || "",
       spousePreferredContactMethod: contact.spousePreferredContactMethod || "",
+      businessName: contact.businessName || "",
       mailingAddressStreet1: contact.mailingAddressStreet1 || "",
       mailingAddressStreet2: contact.mailingAddressStreet2 || "",
       mailingAddressCity: contact.mailingAddressCity || "",
@@ -179,6 +180,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
       contactType: "client",
       status: "active",
       departments: [],
+      businessName: "",
 
     },
   });
@@ -1263,6 +1265,18 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
               <CardDescription>Mailing and home addresses</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <h4 className="font-semibold">Business Information</h4>
+                <div>
+                  <Label htmlFor="businessName">Business Name</Label>
+                  <Input
+                    id="businessName"
+                    {...form.register("businessName")}
+                    placeholder="Enter business name (optional)"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-4">
                 <h4 className="font-semibold">Mailing Address</h4>
                 <div>

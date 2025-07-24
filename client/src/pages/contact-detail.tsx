@@ -1084,6 +1084,72 @@ export default function ContactDetail() {
               </Card>
             )}
 
+            {/* Business Name - for all contact types */}
+            {contact.businessName && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building className="h-5 w-5" />
+                    Business Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Business Name:</span>
+                      <span>{contact.businessName}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Mailing Address - for all contact types */}
+            {(contact.mailingAddressStreet1 || contact.mailingAddressCity || contact.mailingAddressState) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Mailing Address
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {contact.mailingAddressStreet1 && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">Street Address:</span>
+                        <span>{contact.mailingAddressStreet1}</span>
+                      </div>
+                    )}
+                    {contact.mailingAddressStreet2 && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">Street Address 2:</span>
+                        <span>{contact.mailingAddressStreet2}</span>
+                      </div>
+                    )}
+                    {contact.mailingAddressCity && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">City:</span>
+                        <span>{contact.mailingAddressCity}</span>
+                      </div>
+                    )}
+                    {contact.mailingAddressState && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">State:</span>
+                        <span>{contact.mailingAddressState}</span>
+                      </div>
+                    )}
+                    {contact.mailingAddressZip && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">ZIP Code:</span>
+                        <span>{contact.mailingAddressZip}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Professional Contacts - only for clients and prospects */}
             {(contact.contactType === "client" || contact.contactType === "prospect") && (
               <Card>
