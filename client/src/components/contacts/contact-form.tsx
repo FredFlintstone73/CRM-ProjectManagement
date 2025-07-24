@@ -787,9 +787,9 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="family">Family</TabsTrigger>
           <TabsTrigger value="address">Address</TabsTrigger>
-          <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="children">Children</TabsTrigger>
           <TabsTrigger value="professionals">Professionals</TabsTrigger>
+          <TabsTrigger value="business">Business</TabsTrigger>
         </TabsList>
 
         <TabsContent value="family" className="space-y-4">
@@ -1249,81 +1249,6 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="business" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Business Information</CardTitle>
-              <CardDescription>Business name, work contact information, and business address</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="businessName">Business Name</Label>
-                <Input
-                  id="businessName"
-                  {...form.register("businessName")}
-                  placeholder="Enter business name (optional)"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="workPhone">Work Phone</Label>
-                <Input
-                  id="workPhone"
-                  type="tel"
-                  {...form.register("workPhone")}
-                  placeholder="Enter work phone number"
-                />
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold">Business Mailing Address</h4>
-                <div>
-                  <Label htmlFor="businessAddressStreet1">Business Street Address</Label>
-                  <Input
-                    id="businessAddressStreet1"
-                    {...form.register("businessAddressStreet1")}
-                    placeholder="Enter business street address"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="businessAddressStreet2">Business Street Address 2</Label>
-                  <Input
-                    id="businessAddressStreet2"
-                    {...form.register("businessAddressStreet2")}
-                    placeholder="Suite, floor, etc."
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="businessAddressCity">Business City</Label>
-                    <Input
-                      id="businessAddressCity"
-                      {...form.register("businessAddressCity")}
-                      placeholder="Enter business city"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="businessAddressState">Business State</Label>
-                    <Input
-                      id="businessAddressState"
-                      {...form.register("businessAddressState")}
-                      placeholder="Enter business state"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="businessAddressZip">Business ZIP Code</Label>
-                    <Input
-                      id="businessAddressZip"
-                      {...form.register("businessAddressZip")}
-                      placeholder="Enter business ZIP code"
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="address" className="space-y-4">
           <Card>
             <CardHeader>
@@ -1607,6 +1532,81 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="business" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Business Information</CardTitle>
+              <CardDescription>Business name, work contact information, and business address</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="businessName">Business Name</Label>
+                <Input
+                  id="businessName"
+                  {...form.register("businessName")}
+                  placeholder="Enter business name (optional)"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="workPhone">Work Phone</Label>
+                <Input
+                  id="workPhone"
+                  type="tel"
+                  {...form.register("workPhone")}
+                  placeholder="Enter work phone number"
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-semibold">Business Mailing Address</h4>
+                <div>
+                  <Label htmlFor="businessAddressStreet1">Business Street Address</Label>
+                  <Input
+                    id="businessAddressStreet1"
+                    {...form.register("businessAddressStreet1")}
+                    placeholder="Enter business street address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="businessAddressStreet2">Business Street Address 2</Label>
+                  <Input
+                    id="businessAddressStreet2"
+                    {...form.register("businessAddressStreet2")}
+                    placeholder="Suite, floor, etc."
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="businessAddressCity">Business City</Label>
+                    <Input
+                      id="businessAddressCity"
+                      {...form.register("businessAddressCity")}
+                      placeholder="Enter business city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessAddressState">Business State</Label>
+                    <Input
+                      id="businessAddressState"
+                      {...form.register("businessAddressState")}
+                      placeholder="Enter business state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessAddressZip">Business ZIP Code</Label>
+                    <Input
+                      id="businessAddressZip"
+                      {...form.register("businessAddressZip")}
+                      placeholder="Enter business ZIP code"
+                    />
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
