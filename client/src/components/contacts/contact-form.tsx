@@ -539,6 +539,29 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             </Button>
           )}
         </div>
+
+        {/* Contact Type Dropdown - Only show when editing existing contacts */}
+        {contact && (
+          <div className="mb-6">
+            <Label htmlFor="contactType">Contact Type</Label>
+            <Select 
+              onValueChange={(value) => {
+                form.setValue("contactType", value as ContactType);
+                setSelectedType(value as ContactType);
+              }}
+              defaultValue={contact.contactType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select contact type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="strategic_partner">Strategic Partner</SelectItem>
+                <SelectItem value="team_member">Team Member</SelectItem>
+                <SelectItem value="trusted_professional">Trusted Professional</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         
         {/* Profile Photo Section */}
         <div className="flex justify-center mb-6">

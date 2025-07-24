@@ -150,6 +150,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Comprehensive Form Support**: Extended contact form to handle trusted professionals with same form fields and behavior as Strategic Partners and Team Members including role selection and department assignment
 - **Universal Display Logic**: Updated all display components (cards, table views, contact details, recent contacts dashboard) to properly handle trusted professional contacts
 - **Access Control Integration**: Maintained all existing access level permissions for trusted professional contacts within three-tier system (Administrator, Manager, Team Member)
+- **Contact Type Switching Feature**: Added dropdown in Edit Contact windows for Strategic Partners, Team Members, and Trusted Professionals allowing users to change contact type between these three types
 - **User Verified**: Trusted Professionals contact type fully functional across all application interfaces and ready for production use
 
 ### Business Information Enhancement for Contact Management (July 24, 2025)
