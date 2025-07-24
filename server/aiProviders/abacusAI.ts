@@ -43,8 +43,8 @@ export class AbacusAIProvider {
           deploymentToken: this.config.deploymentToken,
           messages: [
             {
-              role: "user",
-              content: `Search Enhancement Request:
+              is_user: true,
+              text: `Search Enhancement Request:
 Query: "${query}"
 
 Current Search Results:
@@ -138,8 +138,8 @@ ${contextualPrompt}`
           deploymentToken: this.config.deploymentToken,
           messages: [
             {
-              role: "user",
-              content: `Please provide a brief summary of these search results for the query "${query}":
+              is_user: true,
+              text: `Please provide a brief summary of these search results for the query "${query}":
 
 ${context}
 
