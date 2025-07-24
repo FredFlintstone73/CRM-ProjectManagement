@@ -1595,25 +1595,14 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="businessPhone">Business Phone</Label>
-                  <Input
-                    id="businessPhone"
-                    type="tel"
-                    {...form.register("businessPhone")}
-                    placeholder="Enter business phone number"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="workPhone">Work Phone</Label>
-                  <Input
-                    id="workPhone"
-                    type="tel"
-                    {...form.register("workPhone")}
-                    placeholder="Enter work phone number"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="businessPhone">Business Phone</Label>
+                <Input
+                  id="businessPhone"
+                  type="tel"
+                  {...form.register("businessPhone")}
+                  placeholder="Enter business phone number"
+                />
               </div>
 
               <div className="space-y-4">
