@@ -227,6 +227,21 @@ export default function ContactDetail() {
     }
   };
 
+  const getDisplayedPhoneInfo = (contact: any) => {
+    if (contact.cellPhone) return { number: contact.cellPhone, type: "(Cell Phone)" };
+    if (contact.businessPhone) return { number: contact.businessPhone, type: "(Business Phone)" };
+    if (contact.spouseWorkPhone) return { number: contact.spouseWorkPhone, type: "(Work Phone)" };
+    if (contact.workPhone) return { number: contact.workPhone, type: "(Work Phone)" };
+    return null;
+  };
+
+  const getBusinessPhoneInfo = (contact: any) => {
+    if (contact.businessPhone) return { number: contact.businessPhone, type: "(Business Phone)" };
+    if (contact.spouseWorkPhone) return { number: contact.spouseWorkPhone, type: "(Work Phone)" };
+    if (contact.workPhone) return { number: contact.workPhone, type: "(Work Phone)" };
+    return null;
+  };
+
   const formatPreferredContactMethod = (method: string | null | undefined) => {
     if (!method) return "Not specified";
     
@@ -514,17 +529,31 @@ export default function ContactDetail() {
                 {(contact.contactType === "client" || contact.contactType === "prospect") ? (
                   <div>
                     <p className="text-sm font-medium text-gray-700">Phone:</p>
-                    <p className="text-sm">{contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone || "Not specified"}</p>
+                    {(() => {
+                      const phoneInfo = getDisplayedPhoneInfo(contact);
+                      return phoneInfo ? (
+                        <p className="text-sm">{phoneInfo.number} {phoneInfo.type}</p>
+                      ) : (
+                        <p className="text-sm">Not specified</p>
+                      );
+                    })()}
                   </div>
                 ) : (
                   <>
                     <div>
                       <p className="text-sm font-medium text-gray-700">Cell Phone:</p>
-                      <p className="text-sm">{contact.cellPhone || "Not specified"}</p>
+                      <p className="text-sm">{contact.cellPhone ? `${contact.cellPhone} (Cell Phone)` : "Not specified"}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-700">Business Phone:</p>
-                      <p className="text-sm">{contact.businessPhone || contact.spouseWorkPhone || contact.workPhone || "Not specified"}</p>
+                      {(() => {
+                        const businessPhoneInfo = getBusinessPhoneInfo(contact);
+                        return businessPhoneInfo ? (
+                          <p className="text-sm">{businessPhoneInfo.number} {businessPhoneInfo.type}</p>
+                        ) : (
+                          <p className="text-sm">Not specified</p>
+                        );
+                      })()}
                     </div>
                   </>
                 )}
@@ -1196,12 +1225,15 @@ export default function ContactDetail() {
                         <span>{contact.businessName}</span>
                       </div>
                     )}
-                    {(contact.businessPhone || contact.spouseWorkPhone || contact.workPhone) && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Business Phone:</span>
-                        <span>{contact.businessPhone || contact.spouseWorkPhone || contact.workPhone}</span>
-                      </div>
-                    )}
+                    {(() => {
+                      const businessPhoneInfo = getBusinessPhoneInfo(contact);
+                      return businessPhoneInfo && (
+                        <div className="flex justify-between">
+                          <span className="font-medium">Business Phone:</span>
+                          <span>{businessPhoneInfo.number} {businessPhoneInfo.type}</span>
+                        </div>
+                      );
+                    })()}
                     {contact.workEmail && (
                       <div className="flex justify-between">
                         <span className="font-medium">Business Email:</span>

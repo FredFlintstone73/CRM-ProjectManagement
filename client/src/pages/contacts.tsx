@@ -378,6 +378,23 @@ export default function Contacts() {
     }
   };
 
+  const getDisplayedPhoneInfo = (contact: Contact) => {
+    if (contact.spouseCellPhone) return { number: contact.spouseCellPhone, type: "(Cell Phone)" };
+    if (contact.spouseWorkPhone) return { number: contact.spouseWorkPhone, type: "(Work Phone)" };
+    if (contact.cellPhone) return { number: contact.cellPhone, type: "(Cell Phone)" };
+    if (contact.businessPhone) return { number: contact.businessPhone, type: "(Business Phone)" };
+    if (contact.workPhone) return { number: contact.workPhone, type: "(Work Phone)" };
+    return null;
+  };
+
+  const getDisplayedEmailInfo = (contact: Contact) => {
+    if (contact.spousePersonalEmail) return { email: contact.spousePersonalEmail, type: "(Personal Email)" };
+    if (contact.spouseWorkEmail) return { email: contact.spouseWorkEmail, type: "(Work Email)" };
+    if (contact.personalEmail) return { email: contact.personalEmail, type: "(Personal Email)" };
+    if (contact.workEmail) return { email: contact.workEmail, type: "(Work Email)" };
+    return null;
+  };
+
   const handleContactCreated = () => {
     setIsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
@@ -554,18 +571,24 @@ export default function Contacts() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {(contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail) && (
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Mail className="w-4 h-4" />
-                        <span>{contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail}</span>
-                      </div>
-                    )}
-                    {(contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone) && (
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Phone className="w-4 h-4" />
-                        <span>{contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone}</span>
-                      </div>
-                    )}
+                    {(() => {
+                      const emailInfo = getDisplayedEmailInfo(contact);
+                      return emailInfo && (
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <Mail className="w-4 h-4" />
+                          <span>{emailInfo.email} {emailInfo.type}</span>
+                        </div>
+                      );
+                    })()}
+                    {(() => {
+                      const phoneInfo = getDisplayedPhoneInfo(contact);
+                      return phoneInfo && (
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <Phone className="w-4 h-4" />
+                          <span>{phoneInfo.number} {phoneInfo.type}</span>
+                        </div>
+                      );
+                    })()}
                     {contact.position && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Building className="w-4 h-4" />
@@ -715,22 +738,28 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {(contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail) && (
-                            <>
-                              <Mail className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail}</span>
-                            </>
-                          )}
+                          {(() => {
+                            const emailInfo = getDisplayedEmailInfo(contact);
+                            return emailInfo && (
+                              <>
+                                <Mail className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm">{emailInfo.email} {emailInfo.type}</span>
+                              </>
+                            );
+                          })()}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {(contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone) && (
-                            <>
-                              <Phone className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone}</span>
-                            </>
-                          )}
+                          {(() => {
+                            const phoneInfo = getDisplayedPhoneInfo(contact);
+                            return phoneInfo && (
+                              <>
+                                <Phone className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm">{phoneInfo.number} {phoneInfo.type}</span>
+                              </>
+                            );
+                          })()}
                         </div>
                       </TableCell>
                       {(visibleTypes.strategic_partner || visibleTypes.team_member) && (
