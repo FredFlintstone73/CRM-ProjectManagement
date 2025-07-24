@@ -407,6 +407,7 @@ export default function ContactDetail() {
     if (contact.contactType === "prospect") return "Prospect Details";
     if (contact.contactType === "strategic_partner") return "Strategic Partner Details";
     if (contact.contactType === "team_member") return "Team Member Details";
+    if (contact.contactType === "trusted_professional") return "Trusted Professional Details";
     return "Contact Details";
   };
 
