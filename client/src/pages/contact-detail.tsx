@@ -1288,58 +1288,16 @@ export default function ContactDetail() {
                 </Card>
               )}
 
-              {/* Mailing Address Card */}
-              {(contact.mailingAddressStreet1 || contact.mailingAddressCity || contact.mailingAddressState) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
-                      Mailing Address
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {contact.mailingAddressStreet1 && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Street 1:</span>
-                        <span>{contact.mailingAddressStreet1}</span>
-                      </div>
-                    )}
-                    {contact.mailingAddressStreet2 && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Street 2:</span>
-                        <span>{contact.mailingAddressStreet2}</span>
-                      </div>
-                    )}
-                    {contact.mailingAddressCity && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">City:</span>
-                        <span>{contact.mailingAddressCity}</span>
-                      </div>
-                    )}
-                    {contact.mailingAddressState && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">State:</span>
-                        <span>{contact.mailingAddressState}</span>
-                      </div>
-                    )}
-                    {contact.mailingAddressZip && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">ZIP:</span>
-                        <span>{contact.mailingAddressZip}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+
             </div>
 
             {/* Empty state when no business information */}
-            {!contact.businessName && !contact.businessPhone && !contact.spouseWorkPhone && !contact.workPhone && !contact.workEmail && !(contact.businessAddressStreet1 || contact.businessAddressCity || contact.businessAddressState) && !(contact.mailingAddressStreet1 || contact.mailingAddressCity || contact.mailingAddressState) && (
+            {!contact.businessName && !contact.businessPhone && !contact.spouseWorkPhone && !contact.workPhone && !contact.workEmail && !(contact.businessAddressStreet1 || contact.businessAddressCity || contact.businessAddressState) && (
               <Card>
                 <CardContent className="text-center py-8 text-gray-500">
                   <Building className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p className="text-lg font-medium mb-2">No business information yet</p>
-                  <p className="text-sm">Business details and mailing address will be displayed here.</p>
+                  <p className="text-sm">Business details will be displayed here.</p>
                 </CardContent>
               </Card>
             )}
