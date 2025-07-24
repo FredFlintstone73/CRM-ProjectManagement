@@ -554,16 +554,16 @@ export default function Contacts() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {(contact.personalEmail || contact.workEmail) && (
+                    {(contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail) && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Mail className="w-4 h-4" />
-                        <span>{contact.personalEmail || contact.workEmail}</span>
+                        <span>{contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail}</span>
                       </div>
                     )}
-                    {(contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone) && (
+                    {(contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone) && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Phone className="w-4 h-4" />
-                        <span>{contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone}</span>
+                        <span>{contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone}</span>
                       </div>
                     )}
                     {contact.position && (
@@ -715,20 +715,20 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {(contact.personalEmail || contact.workEmail) && (
+                          {(contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail) && (
                             <>
                               <Mail className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.personalEmail || contact.workEmail}</span>
+                              <span className="text-sm">{contact.spousePersonalEmail || contact.spouseWorkEmail || contact.personalEmail || contact.workEmail}</span>
                             </>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {(contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone) && (
+                          {(contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone) && (
                             <>
                               <Phone className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{contact.cellPhone || contact.businessPhone || contact.spouseWorkPhone || contact.workPhone}</span>
+                              <span className="text-sm">{contact.spouseCellPhone || contact.spouseWorkPhone || contact.cellPhone || contact.businessPhone || contact.workPhone}</span>
                             </>
                           )}
                         </div>

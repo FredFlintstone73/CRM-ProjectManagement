@@ -158,6 +158,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Business Tab Work Phone Removal**: Removed Work Phone field from Business Information tab - should only contain Business Phone field, not both
 - **Business Phone Data Persistence Fix**: Added missing businessPhone field to form defaultValues to ensure business phone numbers display correctly when editing existing contacts
 - **Business Tab Fallback Logic Fix**: Fixed Business Information Card to include complete fallback hierarchy (businessPhone → spouseWorkPhone → workPhone) for proper phone number display
+- **Contacts Page Priority Fix**: Updated contacts page card and table views to prioritize Contact 2's information first (spousePersonalEmail/spouseCellPhone) then fall back to Contact 1's information
 - **User Verified**: Business Name field, business address saving, Business tab display, and business phone terminology all confirmed working correctly by user
 
 ### Critical Role Assignment Resolution Fix (July 21, 2025)
