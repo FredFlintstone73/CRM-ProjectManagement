@@ -1196,7 +1196,7 @@ export default function ContactDetail() {
                         <span>{contact.businessName}</span>
                       </div>
                     )}
-                    {contact.workPhone && (
+                    {(contact.workPhone) && (
                       <div className="flex justify-between">
                         <span className="font-medium">Business Phone:</span>
                         <span>{contact.workPhone}</span>
