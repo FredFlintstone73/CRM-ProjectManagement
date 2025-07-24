@@ -4,7 +4,7 @@
 export interface AbacusAIConfig {
   apiKey?: string;
   baseUrl?: string;
-  deploymentId?: string;
+  deploymentToken?: string;
 }
 
 export class AbacusAIProvider {
@@ -39,7 +39,7 @@ export class AbacusAIProvider {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          deploymentId: this.config.deploymentId,
+          deploymentToken: this.config.deploymentToken,
           messages: [
             {
               role: "user",
@@ -113,7 +113,7 @@ ${contextualPrompt}`
   }
 
   isConfigured(): boolean {
-    return !!(this.config.apiKey && this.config.baseUrl);
+    return !!(this.config.apiKey && this.config.deploymentToken);
   }
 
   async generateSearchSummary(query: string, results: any[]): Promise<string> {
@@ -133,7 +133,7 @@ ${contextualPrompt}`
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          deploymentId: this.config.deploymentId,
+          deploymentToken: this.config.deploymentToken,
           messages: [
             {
               role: "user",
@@ -164,9 +164,9 @@ Summarize what was found in 1-2 sentences.`
   }
 }
 
-// Export a default instance with the provided API key
+// Export a default instance with the provided API key and deployment token
 export const abacusAI = new AbacusAIProvider({
   apiKey: "s2_c688f51a70a74263a674a81f01d30127",
   baseUrl: "https://abacus.ai/api/v0",
-  deploymentId: process.env.ABACUS_DEPLOYMENT_ID || "default"
+  deploymentToken: process.env.ABACUS_DEPLOYMENT_TOKEN
 });
