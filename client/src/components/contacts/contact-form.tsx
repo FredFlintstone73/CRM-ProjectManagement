@@ -426,7 +426,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             onClick={() => handleCategorySelect("team_strategic")}
           >
             <CardHeader className="text-center">
-              <CardTitle className="text-lg">Team Member, Strategic Partner, or Trusted Professional</CardTitle>
+              <CardTitle className="text-lg">Strategic Partner, Team Member, or Trusted Professional</CardTitle>
               <CardDescription>
                 Team members, strategic partners, or trusted professional contacts
               </CardDescription>
