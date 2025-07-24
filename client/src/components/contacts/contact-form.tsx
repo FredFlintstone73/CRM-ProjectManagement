@@ -610,12 +610,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
             />
           </div>
           <div>
-            <Label htmlFor="workEmail">Business Email</Label>
+            <Label htmlFor="workEmail">Work Email</Label>
             <Input
               id="workEmail"
               type="email"
               {...form.register("workEmail")}
-              placeholder="Enter business email"
+              placeholder="Enter work email"
             />
           </div>
         </div>
@@ -1073,12 +1073,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="workEmail">Business Email</Label>
+                  <Label htmlFor="workEmail">Work Email</Label>
                   <Input
                     id="workEmail"
                     type="email"
                     {...form.register("workEmail")}
-                    placeholder="Enter business email"
+                    placeholder="Enter work email"
                   />
                 </div>
               </div>
@@ -1094,7 +1094,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                     <SelectItem value="text">Text</SelectItem>
                     <SelectItem value="work_phone">Work Phone</SelectItem>
                     <SelectItem value="personal_email">Personal Email</SelectItem>
-                    <SelectItem value="work_email">Business Email</SelectItem>
+                    <SelectItem value="work_email">Work Email</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1240,12 +1240,12 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="spouseWorkEmail">Business Email</Label>
+                  <Label htmlFor="spouseWorkEmail">Work Email</Label>
                   <Input
                     id="spouseWorkEmail"
                     type="email"
                     {...form.register("spouseWorkEmail")}
-                    placeholder="Enter business email"
+                    placeholder="Enter work email"
                   />
                 </div>
               </div>
@@ -1262,7 +1262,7 @@ export default function ContactForm({ contact, onSuccess }: ContactFormProps) {
                       <SelectItem value="text">Text</SelectItem>
                       <SelectItem value="work_phone">Work Phone</SelectItem>
                       <SelectItem value="personal_email">Personal Email</SelectItem>
-                      <SelectItem value="work_email">Business Email</SelectItem>
+                      <SelectItem value="work_email">Work Email</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
