@@ -38,13 +38,28 @@ class EmailService {
     let config: EmailConfig | null = null;
 
     if (gmailUser && gmailPass) {
-      config = {
-        service: 'gmail',
-        auth: {
-          user: gmailUser,
-          pass: gmailPass, // App-specific password
-        },
-      };
+      // Check if it's an Outlook/Microsoft account
+      if (gmailUser.includes('@outlook.com') || gmailUser.includes('@hotmail.com') || 
+          gmailUser.includes('@live.com') || gmailUser.includes('alignedadvisors.com')) {
+        config = {
+          host: 'smtp-mail.outlook.com',
+          port: 587,
+          secure: false,
+          auth: {
+            user: gmailUser,
+            pass: gmailPass,
+          },
+        };
+      } else {
+        // Gmail configuration
+        config = {
+          service: 'gmail',
+          auth: {
+            user: gmailUser,
+            pass: gmailPass, // App-specific password
+          },
+        };
+      }
     } else if (smtpHost && smtpUser && smtpPass) {
       config = {
         host: smtpHost,
@@ -60,7 +75,8 @@ class EmailService {
     if (config) {
       this.transporter = nodemailer.createTransport(config);
       this.isConfigured = true;
-      console.log('Email service configured successfully');
+      const serviceType = config.service || `${config.host}:${config.port}`;
+      console.log(`Email service configured successfully (${serviceType}) for ${gmailUser}`);
     } else {
       console.log('No email configuration found - invitations will show codes only');
       this.isConfigured = false;
