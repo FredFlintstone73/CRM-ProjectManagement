@@ -34,7 +34,10 @@ interface EmailInteractionsProps {
 export default function EmailInteractions({ contactId, contact, expandEmailId }: EmailInteractionsProps) {
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [replyingTo, setReplyingTo] = useState<EmailInteraction | null>(null);
-  const [expandedThreads, setExpandedThreads] = useState<Set<number>>(new Set());
+  const [expandedThreads, setExpandedThreads] = useState<Set<number>>(
+    // Pre-expand the thread if we have an expandEmailId
+    expandEmailId ? new Set([expandEmailId]) : new Set()
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -54,7 +57,10 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
   const { data: interactions = [], isLoading } = useQuery<EmailInteraction[]>({
     queryKey: ["/api/contacts", contactId, "emails"],
-    staleTime: 30000, // 30 seconds
+    staleTime: 60000, // 60 seconds (increased for better performance)
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window gets focus
+    retry: 1, // Only retry once on failure
   });
 
   // Auto-expand the specified email when component mounts or data loads
@@ -63,13 +69,27 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
       // First, try to find a direct match (main email)
       const targetEmail = interactions.find(interaction => interaction.id === expandEmailId);
       if (targetEmail) {
+        let threadToExpand: number;
         if (targetEmail.parentEmailId) {
           // This is a reply, so expand its parent thread
-          setExpandedThreads(prev => new Set([...prev, targetEmail.parentEmailId]));
+          threadToExpand = targetEmail.parentEmailId;
         } else {
           // This is a main email, expand it directly
-          setExpandedThreads(prev => new Set([...prev, expandEmailId]));
+          threadToExpand = expandEmailId;
         }
+        
+        setExpandedThreads(prev => new Set([...prev, threadToExpand]));
+        
+        // Scroll to the email thread after a short delay to ensure it's rendered
+        setTimeout(() => {
+          const emailElement = document.getElementById(`email-thread-${threadToExpand}`);
+          if (emailElement) {
+            emailElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 100);
       }
     }
   }, [expandEmailId, interactions]);
@@ -432,7 +452,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
         ) : (
           <div className="space-y-4">
             {groupedInteractions().map((interaction) => (
-              <div key={interaction.id}>
+              <div key={interaction.id} id={`email-thread-${interaction.id}`}>
                 {/* Main Email */}
                 <Card className="border-l-4 border-l-blue-500">
                   <CardContent className="pt-4">
