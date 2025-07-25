@@ -678,17 +678,9 @@ export default function Tasks() {
                 pressed={completionFilter === 'all'}
                 onPressedChange={() => setCompletionFilter('all')}
                 variant="outline"
-                className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800 bg-[#dbeafe]"
+                className="data-[state=on]:bg-[#dbeafe] data-[state=on]:text-[#344256]"
               >
                 All
-              </Toggle>
-              <Toggle
-                pressed={completionFilter === 'in_progress'}
-                onPressedChange={() => setCompletionFilter('in_progress')}
-                variant="outline"
-                className="data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800"
-              >
-                In Progress
               </Toggle>
               <Toggle
                 pressed={completionFilter === 'overdue'}
@@ -697,6 +689,14 @@ export default function Tasks() {
                 className="data-[state=on]:bg-red-100 data-[state=on]:text-red-800"
               >
                 Overdue
+              </Toggle>
+              <Toggle
+                pressed={completionFilter === 'in_progress'}
+                onPressedChange={() => setCompletionFilter('in_progress')}
+                variant="outline"
+                className="data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800"
+              >
+                In Progress
               </Toggle>
               <Toggle
                 pressed={completionFilter === 'completed'}
