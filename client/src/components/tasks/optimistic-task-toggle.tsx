@@ -74,6 +74,11 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
         queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
         queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
         queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
+        
+        // Invalidate notification queries so overdue tasks update immediately
+        queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
       });
     },
   });

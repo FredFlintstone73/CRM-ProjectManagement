@@ -265,6 +265,11 @@ export default function Tasks() {
       }
 
       queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      
+      // Invalidate notification queries so overdue tasks update immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
     },
     onError: (error) => {
       // On error, revert optimistic updates
