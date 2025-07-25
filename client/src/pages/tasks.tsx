@@ -678,7 +678,7 @@ export default function Tasks() {
                 pressed={completionFilter === 'all'}
                 onPressedChange={() => setCompletionFilter('all')}
                 variant="outline"
-                className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800"
+                className="data-[state=on]:bg-green-100 data-[state=on]:text-green-800 bg-[#dbeafe]"
               >
                 All
               </Toggle>
