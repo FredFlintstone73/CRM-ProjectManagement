@@ -24,12 +24,12 @@ interface TimelineData {
 }
 
 const PROJECT_TYPE_COLORS = {
-  frm: '#10B981', // Green - Financial Road Map Interview
-  im: '#EAB308',  // Yellow - Implementation Meeting
-  ipu: '#F97316', // Orange - Initial Progress Update
-  csr: '#EF4444', // Red - Comprehensive Safety Review
-  gpo: '#8B5CF6', // Purple - Goals Progress Update
-  tar: '#3B82F6'  // Blue - The Annual Review
+  frm: '#8b5cf6', // Purple - Financial Road Map Interview
+  im: '#3b82f6',  // Blue - Implementation Meeting
+  ipu: '#10b981', // Green - Initial Progress Update
+  csr: '#f97316', // Orange - Comprehensive Safety Review
+  gpo: '#eab308', // Yellow - Goals Progress Update
+  tar: '#ef4444'  // Red - The Annual Review
 };
 
 const PROJECT_TYPE_LABELS = {
