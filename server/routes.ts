@@ -2199,13 +2199,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user-invitations/:code', async (req: any, res) => {
     try {
-      console.log('Looking up invitation code:', req.params.code);
-      const invitation = await storage.getUserInvitation(req.params.code);
+      // Trim and normalize the invitation code
+      const code = req.params.code.trim();
+      console.log('Looking up invitation code:', code, 'Length:', code.length);
+      
+      const invitation = await storage.getUserInvitation(code);
       console.log('Invitation found:', invitation ? 'Yes' : 'No');
       
       if (!invitation) {
         console.log('Invitation not found in database');
-        return res.status(404).json({ message: "Invitation not found" });
+        return res.status(404).json({ 
+          message: "Invitation not found",
+          details: "The invitation code does not exist in our system. Please check the code and try again."
+        });
       }
       
       console.log('Invitation details:', {
@@ -2219,20 +2225,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if invitation is expired
       if (new Date() > new Date(invitation.expiresAt)) {
         console.log('Invitation has expired');
-        await storage.expireInvitation(req.params.code);
-        return res.status(410).json({ message: "Invitation has expired" });
+        await storage.expireInvitation(code);
+        return res.status(410).json({ 
+          message: "Invitation has expired",
+          details: "This invitation has passed its expiration date. Please request a new invitation."
+        });
       }
       
       if (invitation.status !== 'pending') {
         console.log('Invitation status is not pending:', invitation.status);
-        return res.status(400).json({ message: "Invitation is no longer valid" });
+        return res.status(400).json({ 
+          message: "Invitation is no longer valid",
+          details: `This invitation has already been ${invitation.status}. Please request a new invitation if needed.`
+        });
       }
       
       console.log('Invitation is valid, returning details');
       res.json(invitation);
     } catch (error) {
       console.error("Error fetching invitation:", error);
-      res.status(500).json({ message: "Failed to fetch invitation" });
+      res.status(500).json({ 
+        message: "Failed to fetch invitation",
+        details: "There was a server error processing your invitation. Please try again."
+      });
     }
   });
 

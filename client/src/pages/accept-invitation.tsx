@@ -101,7 +101,8 @@ export default function AcceptInvitation() {
   });
 
   const onSubmit = (data: InvitationCodeForm) => {
-    setInvitationCode(data.code);
+    const trimmedCode = data.code.trim();
+    setInvitationCode(trimmedCode);
     setShowCodeInput(false);
   };
 
@@ -185,18 +186,30 @@ export default function AcceptInvitation() {
                 <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Invalid Invitation</h3>
                 <p className="text-muted-foreground mb-4">
-                  This invitation code is not valid or has expired.
+                  {invitationError instanceof Error && invitationError.message.includes('404') 
+                    ? "This invitation code does not exist. Please check the code and try again."
+                    : invitationError instanceof Error && invitationError.message.includes('410')
+                    ? "This invitation has expired. Please request a new invitation."
+                    : invitationError instanceof Error && invitationError.message.includes('400')
+                    ? "This invitation has already been used. Please request a new invitation if needed."
+                    : "This invitation code is not valid or has expired."
+                  }
                 </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowCodeInput(true);
-                    setInvitationCode("");
-                    form.reset();
-                  }}
-                >
-                  Try Another Code
-                </Button>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    Make sure to copy the entire invitation code without any extra spaces.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowCodeInput(true);
+                      setInvitationCode("");
+                      form.reset();
+                    }}
+                  >
+                    Try Another Code
+                  </Button>
+                </div>
               </div>
             ) : invitation ? (
               <div className="space-y-6">
