@@ -5,8 +5,6 @@ interface TaskDetailParams {
 }
 
 export default function TaskDetailSimple() {
-  alert('Simple TaskDetail is working!');
-  console.log('Simple TaskDetail component loaded');
   
   const { id } = useParams<TaskDetailParams>();
   
