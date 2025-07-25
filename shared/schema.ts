@@ -394,10 +394,12 @@ export const projectTemplates = pgTable("project_templates", {
 export const emailInteractions = pgTable("email_interactions", {
   id: serial("id").primaryKey(),
   contactId: integer("contact_id").references(() => contacts.id),
+  parentEmailId: integer("parent_email_id").references(() => emailInteractions.id),
   subject: varchar("subject"),
   body: text("body"),
   sender: varchar("sender"),
   recipient: varchar("recipient"),
+  emailType: varchar("email_type").default("sent"), // 'sent', 'received', 'reply', 'forward'
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow(),
   createdBy: varchar("created_by").references(() => users.id),
@@ -584,16 +586,7 @@ export const taskFilesRelations = relations(taskFiles, ({ one }) => ({
   }),
 }));
 
-export const emailInteractionsRelations = relations(emailInteractions, ({ one }) => ({
-  contact: one(contacts, {
-    fields: [emailInteractions.contactId],
-    references: [contacts.id],
-  }),
-  createdBy: one(users, {
-    fields: [emailInteractions.createdBy],
-    references: [users.id],
-  }),
-}));
+
 
 export const callTranscriptsRelations = relations(callTranscripts, ({ one }) => ({
   contact: one(contacts, {
@@ -889,6 +882,26 @@ export const insertEmailInteractionSchema = createInsertSchema(emailInteractions
   id: true,
   createdAt: true,
 });
+
+// Email interactions relations (updated with thread support)
+export const emailInteractionsRelations = relations(emailInteractions, ({ one, many }) => ({
+  contact: one(contacts, {
+    fields: [emailInteractions.contactId],
+    references: [contacts.id],
+  }),
+  parentEmail: one(emailInteractions, {
+    fields: [emailInteractions.parentEmailId],
+    references: [emailInteractions.id],
+    relationName: "emailThread"
+  }),
+  replies: many(emailInteractions, {
+    relationName: "emailThread"
+  }),
+  createdByUser: one(users, {
+    fields: [emailInteractions.createdBy],
+    references: [users.id],
+  }),
+}));
 
 export const insertCallTranscriptSchema = createInsertSchema(callTranscripts).omit({
   id: true,

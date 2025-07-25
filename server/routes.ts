@@ -2075,7 +2075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/contacts/:id/emails', isAuthenticated, async (req: any, res) => {
     try {
       const contactId = parseInt(req.params.id);
-      const { recipient, subject, body } = req.body;
+      const { recipient, subject, body, parentEmailId, emailType = 'sent' } = req.body;
       const userId = req.user.claims.sub;
       
       // Validate required fields
@@ -2104,13 +2104,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         text: body,
       });
 
-      // Record the email interaction (always record, even if send fails)
+      // Record the email interaction with threading information
       const interactionData = {
         contactId,
+        parentEmailId: parentEmailId || null,
         subject,
         body,
         sender: user.email || 'Unknown',
         recipient,
+        emailType,
         sentAt: new Date(),
       };
 
@@ -2127,6 +2129,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to send email", 
         error: error instanceof Error ? error.message : "Unknown error" 
       });
+    }
+  });
+
+  // Add received email endpoint for external email integration
+  app.post('/api/contacts/:id/emails/received', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const { sender, subject, body, parentEmailId } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Record received email interaction
+      const interactionData = {
+        contactId,
+        parentEmailId: parentEmailId || null,
+        subject,
+        body,
+        sender,
+        recipient: (await storage.getUser(userId))?.email || 'Unknown',
+        emailType: 'received',
+        sentAt: new Date(),
+      };
+
+      const interaction = await storage.createEmailInteraction(interactionData, userId);
+      
+      res.json({ interaction });
+    } catch (error) {
+      console.error("Error recording received email:", error);
+      res.status(500).json({ message: "Failed to record received email" });
     }
   });
 

@@ -1756,11 +1756,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getEmailInteractionsByContact(contactId: number): Promise<EmailInteraction[]> {
-    return await db
+    const interactions = await db
       .select()
       .from(emailInteractions)
       .where(eq(emailInteractions.contactId, contactId))
       .orderBy(desc(emailInteractions.createdAt));
+
+    // Group interactions by thread (parent emails and their replies)
+    const threaded = this.organizeEmailThreads(interactions);
+    return threaded;
+  }
+
+  private organizeEmailThreads(interactions: EmailInteraction[]): EmailInteraction[] {
+    const threaded: EmailInteraction[] = [];
+    const replyMap = new Map<number, EmailInteraction[]>();
+
+    // Separate parent emails and replies
+    const parentEmails = interactions.filter(email => !email.parentEmailId);
+    const replies = interactions.filter(email => email.parentEmailId);
+
+    // Group replies by parent email ID
+    replies.forEach(reply => {
+      const parentId = reply.parentEmailId!;
+      if (!replyMap.has(parentId)) {
+        replyMap.set(parentId, []);
+      }
+      replyMap.get(parentId)!.push(reply);
+    });
+
+    // Add parent emails with their replies
+    parentEmails.forEach(parent => {
+      threaded.push(parent);
+      // Add replies after the parent email (sorted by date)
+      const emailReplies = replyMap.get(parent.id) || [];
+      emailReplies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      threaded.push(...emailReplies);
+    });
+
+    return threaded;
   }
 
   async createEmailInteraction(interaction: InsertEmailInteraction, userId: string): Promise<EmailInteraction> {

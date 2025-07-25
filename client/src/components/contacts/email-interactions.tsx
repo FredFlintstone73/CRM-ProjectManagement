@@ -19,6 +19,8 @@ const emailSchema = z.object({
   recipient: z.string().email("Please enter a valid email address"),
   subject: z.string().min(1, "Subject is required"),
   body: z.string().min(1, "Email body is required"),
+  parentEmailId: z.number().optional(),
+  emailType: z.string().optional(),
 });
 
 type EmailFormData = z.infer<typeof emailSchema>;
@@ -111,10 +113,15 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
       ? interaction.subject 
       : `Re: ${interaction.subject}`;
     
+    // Find the root email ID (parent email or the interaction itself if it's already a parent)
+    const rootEmailId = interaction.parentEmailId || interaction.id;
+    
     form.reset({
       recipient: interaction.sender || getContactEmail(),
       subject: replySubject,
       body: `\n\n--- Original Message ---\nFrom: ${interaction.sender}\nSubject: ${interaction.subject}\nDate: ${new Date(interaction.sentAt || interaction.createdAt).toLocaleString()}\n\n${interaction.body}`,
+      parentEmailId: rootEmailId,
+      emailType: 'reply',
     });
     setReplyingTo(interaction);
     setIsComposeOpen(true);
@@ -129,6 +136,7 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
       recipient: "",
       subject: forwardSubject,
       body: `\n\n--- Forwarded Message ---\nFrom: ${interaction.sender}\nTo: ${interaction.recipient}\nSubject: ${interaction.subject}\nDate: ${new Date(interaction.sentAt || interaction.createdAt).toLocaleString()}\n\n${interaction.body}`,
+      emailType: 'forward',
     });
     setReplyingTo(null);
     setIsComposeOpen(true);
@@ -289,11 +297,27 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
         ) : (
           <div className="space-y-4">
             {interactions.map((interaction) => (
-              <Card key={interaction.id} className="border-l-4 border-l-blue-500">
+              <Card 
+                key={interaction.id} 
+                className={`${
+                  interaction.parentEmailId 
+                    ? "border-l-4 border-l-green-500 ml-6" 
+                    : "border-l-4 border-l-blue-500"
+                }`}
+              >
                 <CardContent className="pt-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
+                        <Badge 
+                          variant={interaction.parentEmailId ? "secondary" : "outline"} 
+                          className="text-xs"
+                        >
+                          {interaction.parentEmailId ? "Reply" : 
+                           (interaction.sender === contact.personalEmail || 
+                            interaction.sender === contact.workEmail || 
+                            interaction.sender === contact.spousePersonalEmail ? "Received" : "Sent")}
+                        </Badge>
                         <Badge variant="outline" className="text-xs">
                           <User className="h-3 w-3 mr-1" />
                           {interaction.sender}
