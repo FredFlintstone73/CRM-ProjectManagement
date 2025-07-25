@@ -397,6 +397,21 @@ export default function Tasks() {
       const hasDirectAssignment = task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : !!task.assignedTo);
       const hasRoleAssignment = task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : !!task.assignedToRole);
       
+      // Debug logging for standalone tasks
+      if (!task.projectId && (task.title === 'To Do 6' || task.title === 'To Do 7')) {
+        console.log('Debug task filtering:', {
+          id: task.id,
+          title: task.title,
+          projectId: task.projectId,
+          assignedTo: task.assignedTo,
+          assignedToType: typeof task.assignedTo,
+          isArray: Array.isArray(task.assignedTo),
+          hasDirectAssignment,
+          hasRoleAssignment,
+          willShow: hasDirectAssignment || hasRoleAssignment
+        });
+      }
+      
       return hasDirectAssignment || hasRoleAssignment;
     });
 
