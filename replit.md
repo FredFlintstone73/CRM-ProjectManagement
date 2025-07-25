@@ -158,21 +158,23 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Robust Implementation**: Self-contained SessionTimeoutManager component with proper cleanup and error handling
 - **User Verified**: Session timeout system confirmed working - comprehensive security enhancement successfully implemented
 
-### Complete @Mention System with Duplicate Name Handling (July 25, 2025)
+### Complete Messages & Notifications System with Task Due Date Alerts (July 25, 2025)
 - **Comprehensive @Mention System**: Implemented complete @mention functionality for team collaboration across task comments, contact notes, and project comments
-- **Messages Page**: Created dedicated Messages page showing all @mentions for logged-in users with unread/read categorization and navigation to source
+- **Enhanced Messages Page**: Created dedicated "Messages & Notifications" page showing @mentions, overdue tasks, and tasks due soon in priority order
 - **Smart Name Resolution**: Enhanced mention processing to handle duplicate names with multiple matching strategies:
   - **@FirstLast**: Full name format (e.g., @ChadTennant) for precise identification
   - **@FirstL**: First name + last initial (e.g., @ChadT) for shorter unique references  
   - **@First**: First name only when unique (prevents ambiguous mentions when multiple people share same first name)
-- **Database Schema**: Added mentions table with proper relations to users, tasks, contacts, and projects for complete mention tracking
-- **Automatic Processing**: Real-time mention detection and notification creation when comments/notes are posted
-- **Navigation Integration**: Added Messages menu item to sidebar with MessageSquare icon for easy access
-- **Context Preservation**: Mentions include contextual text and source information for better understanding
-- **Read/Unread Management**: Complete read state management with "Mark as Read" functionality and visual indicators
-- **Source Navigation**: Clickable links to navigate directly to the original comment/note where mention occurred
-- **Ambiguity Prevention**: System logs ambiguous mentions and skips notification when multiple users share first names without unique identifiers
-- **User Experience**: Professional interface with timestamps, user attribution, source type badges, and empty state guidance
+- **Complete Task Notifications System**: Added overdue tasks and tasks due soon notifications with color-coded urgency indicators
+- **Three-Badge Header**: Header displays counts for unread @mentions, tasks due soon, and overdue tasks with appropriate styling
+- **Priority-Based Display**: Overdue tasks appear first (red alerts), followed by tasks due soon (orange/yellow), then @mentions
+- **Database Schema**: Added mentions table with proper relations plus backend APIs for task due date notifications
+- **Automatic Processing**: Real-time mention detection and task due date monitoring with proper date handling
+- **Navigation Integration**: Added Messages menu item to sidebar with comprehensive notification access
+- **Context Preservation**: All notifications include project context, clickable navigation links, and detailed information
+- **Professional Interface**: Clean card-based layout with proper styling, badges, and contextual information for each notification type
+- **Critical Bug Fixes**: Resolved date handling issues in backend queries using SQL DATE() functions for proper timestamp comparisons
+- **User Verified**: Complete system working with task notifications properly displaying overdue and due soon tasks
 
 ### Complete Team Member Deletion System Implementation (July 24, 2025)
 - **DELETE API Endpoint**: Created DELETE /api/users/:id endpoint with proper authentication and administrator-only access control
