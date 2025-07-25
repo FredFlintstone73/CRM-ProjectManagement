@@ -951,69 +951,7 @@ export class DatabaseStorage implements IStorage {
       processedTask.dueDate = null;
     }
     
-    // Handle assignment - convert array of team_xxx to contact IDs, or handle me_xxx for current user
-    if (processedTask.assignedTo && Array.isArray(processedTask.assignedTo)) {
-      const assignedToIds: number[] = [];
-      
-      for (const assignment of processedTask.assignedTo) {
-        if (typeof assignment === 'string') {
-          if (assignment.startsWith('team_')) {
-            // Extract contact ID from team_xxx format
-            const contactId = parseInt(assignment.replace('team_', ''));
-            // Verify the contact is a team member
-            const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
-            if (contact.length > 0 && contact[0].contactType === 'team_member') {
-              assignedToIds.push(contactId);
-            }
-          } else if (assignment.startsWith('me_')) {
-            // Handle "Assign to Me" - create or find user contact
-            const currentUserId = assignment.replace('me_', '');
-            // Find or create a contact for the current user
-            const userContact = await this.findOrCreateUserContact(currentUserId);
-            assignedToIds.push(userContact.id);
-          }
-        }
-      }
-      
-      processedTask.assignedTo = assignedToIds.length > 0 ? assignedToIds : null;
-    } else if (processedTask.assignedTo && typeof processedTask.assignedTo === 'string') {
-      // Handle backward compatibility for single assignments
-      if (processedTask.assignedTo.startsWith('team_')) {
-        const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
-        const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
-        if (contact.length > 0 && contact[0].contactType === 'team_member') {
-          processedTask.assignedTo = [contactId];
-        } else {
-          processedTask.assignedTo = null;
-        }
-      } else if (processedTask.assignedTo.startsWith('me_')) {
-        const currentUserId = processedTask.assignedTo.replace('me_', '');
-        const userContact = await this.findOrCreateUserContact(currentUserId);
-        processedTask.assignedTo = [userContact.id];
-      } else {
-        // Handle direct contact ID assignment (e.g., "15")
-        const contactId = parseInt(processedTask.assignedTo);
-        if (!isNaN(contactId)) {
-          const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
-          if (contact.length > 0 && contact[0].contactType === 'team_member') {
-            processedTask.assignedTo = [contactId];
-          } else {
-            processedTask.assignedTo = null;
-          }
-        } else {
-          processedTask.assignedTo = null;
-        }
-      }
-    } else if (processedTask.assignedTo && typeof processedTask.assignedTo === 'number') {
-      // Handle direct contact ID assignment as number
-      const contactId = processedTask.assignedTo;
-      const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
-      if (contact.length > 0 && contact[0].contactType === 'team_member') {
-        processedTask.assignedTo = [contactId];
-      } else {
-        processedTask.assignedTo = null;
-      }
-    }
+    // Assignment processing is handled by the route layer, just pass through
     
     const taskData = { ...processedTask, createdBy: userId } as any;
     
