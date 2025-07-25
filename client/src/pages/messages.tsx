@@ -95,8 +95,9 @@ export default function Messages() {
   const { data: emailNotifications = [], isLoading: emailsLoading } = useQuery<EmailNotification[]>({
     queryKey: ['/api/email-notifications'],
     enabled: !!user?.id,
-    refetchInterval: 30000, // Check for new emails every 30 seconds
-    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchInterval: 60000, // Check for new emails every 60 seconds (reduced from 30s)
+    staleTime: 30000, // Consider data stale after 30 seconds (increased from 10s)
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
   });
 
   const markAsRead = async (mentionId: number) => {
@@ -115,14 +116,33 @@ export default function Messages() {
   const markEmailAsReadMutation = useMutation({
     mutationFn: (notificationId: number) =>
       apiRequest('PATCH', `/api/email-notifications/${notificationId}/mark-read`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/email-notifications'] });
+    onMutate: async (notificationId: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/email-notifications'] });
+      
+      // Snapshot the previous value
+      const previousEmails = queryClient.getQueryData(['/api/email-notifications']);
+      
+      // Optimistically remove the email from the list
+      queryClient.setQueryData(['/api/email-notifications'], (old: EmailNotification[] = []) =>
+        old.filter(email => email.id !== notificationId)
+      );
+      
+      return { previousEmails };
     },
-    onError: (error: any) => {
+    onError: (error: any, notificationId: number, context: any) => {
+      // Rollback on error
+      queryClient.setQueryData(['/api/email-notifications'], context?.previousEmails);
       toast({
         title: "Error",
         description: "Failed to mark email as read",
         variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      requestIdleCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/email-notifications'] });
       });
     },
   });
@@ -279,10 +299,10 @@ export default function Messages() {
                         <Mail className="w-4 h-4 text-muted-foreground" />
                         <h3 className="font-medium">
                           <button
-                            onClick={async () => {
-                              // Mark as read first
-                              await markEmailAsReadMutation.mutateAsync(notification.id);
-                              // Then navigate to the email
+                            onClick={() => {
+                              // Start mark as read and navigate immediately (don't wait)
+                              markEmailAsReadMutation.mutate(notification.id);
+                              // Navigate immediately for faster perceived performance
                               window.location.href = `/contacts/${notification.email.contactId}?tab=interactions&email=${notification.emailInteractionId}`;
                             }}
                             className="hover:underline text-blue-600 text-left"

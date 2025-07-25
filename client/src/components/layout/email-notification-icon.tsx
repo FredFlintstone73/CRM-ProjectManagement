@@ -22,8 +22,9 @@ interface EmailNotification {
 export default function EmailNotificationIcon() {
   const { data: notifications = [], isLoading } = useQuery<EmailNotification[]>({
     queryKey: ['/api/email-notifications'],
-    refetchInterval: 30000, // Check for new emails every 30 seconds
-    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchInterval: 60000, // Check for new emails every 60 seconds (reduced from 30s)
+    staleTime: 30000, // Consider data stale after 30 seconds (increased from 10s)
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
   });
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
