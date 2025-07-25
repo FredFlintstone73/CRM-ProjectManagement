@@ -16,56 +16,52 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
 
   const toggleMutation = useMutation({
     mutationFn: async (newStatus: string) => {
+      console.log(`🔥 API call starting for task ${task.id}`);
       const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         status: newStatus,
       });
-      return response.json();
+      const result = await response.json();
+      console.log(`🔥 API call completed for task ${task.id}:`, result);
+      return result;
     },
     onSuccess: (updatedTask) => {
-      console.log(`✓ Task ${task.id} updated to ${updatedTask.status}`);
+      console.log(`✅ SUCCESS: Task ${task.id} updated to ${updatedTask.status}`);
       
-      // IMMEDIATE synchronous cache updates for all query keys
-      const queries = [
-        ['/api/tasks'],
-        ['/api/tasks/my-tasks-with-priorities'],
-        ['/api/tasks', task.id.toString()],
-      ];
+      // AGGRESSIVE cache invalidation - invalidate everything
+      console.log(`🔥 Starting aggressive cache invalidation...`);
+      
+      // Invalidate all task-related caches without exact matching
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
       
       if (projectId) {
-        queries.push(['/api/projects', projectId, 'tasks']);
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       }
       
-      // Update all caches immediately with server response
-      queries.forEach(queryKey => {
-        queryClient.setQueryData(queryKey, (old: any) => {
-          if (!old) return old;
-          
-          if (Array.isArray(old)) {
-            return old.map(item => item.id === task.id ? updatedTask : item);
-          } else if (old.id === task.id) {
-            return updatedTask;
-          }
-          
-          return old;
-        });
-      });
+      // Also invalidate individual task cache
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
       
-      // Force immediate cache invalidation to trigger re-renders
-      queries.forEach(queryKey => {
-        queryClient.invalidateQueries({ queryKey, exact: true });
-      });
+      console.log(`🔥 Cache invalidation completed`);
+    },
+    onError: (error) => {
+      console.error(`❌ ERROR: Failed to update task ${task.id}:`, error);
     }
   });
 
   const handleClick = (e: React.MouseEvent) => {
-    console.log(`🔄 Toggling task ${task.id} from ${task.status}`);
+    console.log(`🔄 CLICK DETECTED: Toggling task ${task.id} from ${task.status}`);
+    console.log(`🔄 isPending: ${toggleMutation.isPending}`);
     
     e.preventDefault();
     e.stopPropagation();
     
-    if (toggleMutation.isPending) return;
+    if (toggleMutation.isPending) {
+      console.log(`🔄 BLOCKED: Mutation already pending`);
+      return;
+    }
     
     const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+    console.log(`🔄 CALLING MUTATION: ${task.status} -> ${newStatus}`);
     toggleMutation.mutate(newStatus);
   };
 
