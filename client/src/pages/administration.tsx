@@ -144,27 +144,32 @@ export default function Administration() {
     }
 
     return (
-      <TooltipProvider>
+      <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex items-center gap-2 font-mono text-sm cursor-help">
-              <Globe className="h-3 w-3 text-muted-foreground" />
+            <div className="flex items-center gap-2 font-mono text-sm cursor-help hover:bg-muted/50 px-2 py-1 rounded transition-colors">
+              <Globe className={`h-3 w-3 ${location ? 'text-green-600' : 'text-muted-foreground'}`} />
               {ipAddress}
               {isLoading && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
+              {location && <span className="text-xs text-muted-foreground ml-1">📍</span>}
             </div>
           </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-xs">
+          <TooltipContent side="top" className="max-w-xs p-3">
             {location ? (
-              <div className="space-y-1 text-xs">
-                <div className="font-semibold">{location.location}</div>
-                <div>ISP: {location.isp}</div>
-                <div>Timezone: {location.timezone}</div>
-                <div className="text-muted-foreground">
-                  {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
+              <div className="space-y-2 text-sm">
+                <div className="font-semibold text-foreground">{location.location}</div>
+                <div className="space-y-1 text-xs">
+                  <div><span className="font-medium">ISP:</span> {location.isp}</div>
+                  <div><span className="font-medium">Timezone:</span> {location.timezone}</div>
+                  <div className="text-muted-foreground">
+                    <span className="font-medium">Coordinates:</span> {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="text-xs">Location lookup failed</div>
+              <div className="text-sm">
+                {isLoading ? "Looking up location..." : "Location lookup failed"}
+              </div>
             )}
           </TooltipContent>
         </Tooltip>
