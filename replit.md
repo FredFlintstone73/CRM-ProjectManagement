@@ -174,7 +174,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Context Preservation**: All notifications include project context, clickable navigation links, and detailed information
 - **Professional Interface**: Clean card-based layout with proper styling, badges, and contextual information for each notification type
 - **Critical Bug Fixes**: Resolved date handling issues in backend queries using SQL DATE() functions for proper timestamp comparisons
-- **User Verified**: Complete system working with task notifications properly displaying overdue and due soon tasks
+- **Notification Cache Invalidation Fix**: Fixed critical issue where overdue task notifications weren't updating when tasks completed - added comprehensive cache invalidation across all task completion components (OptimisticTaskToggle, TaskDetail page, Tasks page, SectionTaskManager)
+- **Real-time Notification Updates**: Overdue tasks now immediately disappear from Messages page when completed, providing instant feedback
+- **User Verified**: Complete system working with task notifications properly displaying overdue and due soon tasks, with immediate updates when task status changes
 
 ### Complete Team Member Deletion System Implementation (July 24, 2025)
 - **DELETE API Endpoint**: Created DELETE /api/users/:id endpoint with proper authentication and administrator-only access control
