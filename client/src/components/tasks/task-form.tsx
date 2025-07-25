@@ -21,7 +21,7 @@ import { MultiSelect, type MultiSelectOption } from "@/components/ui/multi-selec
 
 interface TaskFormProps {
   task?: Task | null;
-  projectId: number;
+  projectId?: number;
   onSuccess?: () => void;
 }
 
@@ -141,7 +141,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
-      projectId: projectId,
+      projectId: projectId || undefined,
       priority: task?.priority || 25,
       dueDate: task?.dueDate || undefined,
     },
