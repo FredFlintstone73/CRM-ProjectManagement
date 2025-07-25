@@ -16,12 +16,10 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
   const queryClient = useQueryClient();
   const [optimisticStatus, setOptimisticStatus] = useState(task.status);
   
-  console.log('OptimisticTaskToggle render:', { 
-    taskId: task.id, 
-    projectId, 
-    taskProjectId: task.projectId,
-    currentStatus: optimisticStatus 
-  });
+  console.log('=== OPTIMISTIC TOGGLE DEBUG ===');
+  console.log('Task:', { id: task.id, title: task.title, status: task.status, projectId: task.projectId });
+  console.log('Props:', { projectId, optimisticStatus });
+  console.log('===============================');
   
   const toggleMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -89,20 +87,24 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       queryClient.setQueryData(['/api/dashboard/projects-due'], context?.dashboardProjects);
     },
     onSettled: () => {
-      // Ultra-fast background refresh - fire and forget for cascading updates
-      requestIdleCallback(() => {
-        if (projectId) {
-          queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-        }
-        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
-        
-        // Invalidate notification queries so overdue tasks update immediately
-        queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
-      });
+      console.log('=== CACHE INVALIDATION ===');
+      console.log('Invalidating all caches immediately');
+      
+      // IMMEDIATE cache invalidation - no requestIdleCallback delay
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
+      
+      // Invalidate notification queries so overdue tasks update immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
+      
+      console.log('Cache invalidation completed');
+      console.log('========================');
     },
   });
 
@@ -111,6 +113,9 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     e.stopPropagation();
     
     const newStatus = optimisticStatus === 'completed' ? 'todo' : 'completed';
+    console.log('=== TOGGLE CLICK ===');
+    console.log('Toggling task', task.id, 'from', optimisticStatus, 'to', newStatus);
+    console.log('==================');
     toggleMutation.mutate(newStatus);
   };
 

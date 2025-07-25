@@ -322,18 +322,27 @@ export default function TaskDetail() {
   // Use the navigation calculation  
   const { previousTask, nextTask } = calculateNavigation();
   
-  // Debug navigation
-  console.log('Task navigation debug:', {
-    taskId: task?.id,
-    projectId: task?.projectId,
-    hasProjectTasks: !!projectTasks,
-    projectTasksCount: projectTasks?.length || 0,
-    hasAllTasks: !!allTasks,
-    allTasksCount: allTasks?.length || 0,
-    standaloneTasksCount: allTasks?.filter(t => !t.projectId && t.assignedTo && Array.isArray(t.assignedTo) && t.assignedTo.length > 0)?.length || 0,
+  // Debug navigation and data
+  console.log('=== TASK DETAIL DEBUG ===');
+  console.log('Current task:', { id: task?.id, title: task?.title, projectId: task?.projectId, status: task?.status });
+  console.log('Project tasks:', { hasProjectTasks: !!projectTasks, count: projectTasks?.length || 0 });
+  console.log('All tasks:', { hasAllTasks: !!allTasks, count: allTasks?.length || 0 });
+  
+  if (allTasks) {
+    const standaloneAssignedTasks = allTasks.filter(t => 
+      !t.projectId && 
+      t.assignedTo && 
+      Array.isArray(t.assignedTo) && 
+      t.assignedTo.length > 0
+    );
+    console.log('Standalone assigned tasks:', standaloneAssignedTasks.map(t => ({ id: t.id, title: t.title, assignedTo: t.assignedTo })));
+  }
+  
+  console.log('Navigation result:', {
     previousTask: previousTask ? { id: previousTask.id, title: previousTask.title } : null,
     nextTask: nextTask ? { id: nextTask.id, title: nextTask.title } : null
   });
+  console.log('========================');
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
