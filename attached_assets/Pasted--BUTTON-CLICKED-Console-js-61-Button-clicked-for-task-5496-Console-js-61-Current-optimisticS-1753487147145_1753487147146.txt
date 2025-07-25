@@ -1,0 +1,177 @@
+=== BUTTON CLICKED ===
+Console.js:61 Button clicked for task: 5496
+Console.js:61 Current optimisticStatus: todo
+Console.js:61 Mutation pending: false
+Console.js:61 === TOGGLE CLICK ===
+Console.js:61 Toggling task 5496 from todo to completed
+Console.js:61 ==================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 5496, title: 'To Do 7', status: 'todo', projectId: null}
+Console.js:61 Props: {projectId: null, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 5496, title: 'To Do 7', status: 'todo', projectId: null}
+Console.js:61 Props: {projectId: null, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4157, title: 'Submit Critical Reports and Final Highest Priority Conversation Topic', status: 'todo', projectId: 66}
+Console.js:61 Props: {projectId: 66, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4182, title: 'Tax Planner', status: 'todo', projectId: 66}
+Console.js:61 Props: {projectId: 66, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4743, title: 'Submit Your Items Still Needed & Initial Highest Priority Conversation Reports', status: 'todo', projectId: 68}
+Console.js:61 Props: {projectId: 68, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4927, title: 'Tax Planner', status: 'todo', projectId: 69}
+Console.js:61 Props: {projectId: 69, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4902, title: 'Submit Critical Reports and Final Highest Priority Conversation Topic', status: 'todo', projectId: 69}
+Console.js:61 Props: {projectId: 69, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4906, title: 'Nominations and Deliverables Checkpoints', status: 'todo', projectId: 69}
+Console.js:61 Props: {projectId: 69, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === SUCCESS HANDLER ===
+Console.js:61 Task update successful: {id: 5496, title: 'To Do 7', description: '', projectId: null, milestoneId: null, …}
+Console.js:61 SUCCESS: All caches updated with fresh server data
+Console.js:61 =========================
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4157, title: 'Submit Critical Reports and Final Highest Priority Conversation Topic', status: 'todo', projectId: 66}
+Console.js:61 Props: {projectId: 66, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4182, title: 'Tax Planner', status: 'todo', projectId: 66}
+Console.js:61 Props: {projectId: 66, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4743, title: 'Submit Your Items Still Needed & Initial Highest Priority Conversation Reports', status: 'todo', projectId: 68}
+Console.js:61 Props: {projectId: 68, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4927, title: 'Tax Planner', status: 'todo', projectId: 69}
+Console.js:61 Props: {projectId: 69, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4902, title: 'Submit Critical Reports and Final Highest Priority Conversation Topic', status: 'todo', projectId: 69}
+Console.js:61 Props: {projectId: 69, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4906, title: 'Nominations and Deliverables Checkpoints', status: 'todo', projectId: 69}
+Console.js:61 Props: {projectId: 69, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 Background cache invalidation starting...
+Console.js:61 Background invalidation completed
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 5496, title: 'To Do 7', status: 'completed', projectId: null}
+Console.js:61 Props: {projectId: null, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4012, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 65}
+Console.js:61 Props: {projectId: 65, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 2373, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 57}
+Console.js:61 Props: {projectId: 57, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 3551, title: 'Submit Your Items Still Needed & Initial Highest Priority Conversation Reports', status: 'completed', projectId: 63}
+Console.js:61 Props: {projectId: 63, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 5496, title: 'To Do 7', status: 'completed', projectId: null}
+Console.js:61 Props: {projectId: null, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4012, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 65}
+Console.js:61 Props: {projectId: 65, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 2373, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 57}
+Console.js:61 Props: {projectId: 57, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 3551, title: 'Submit Your Items Still Needed & Initial Highest Priority Conversation Reports', status: 'completed', projectId: 63}
+Console.js:61 Props: {projectId: 63, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 5496, title: 'To Do 7', status: 'completed', projectId: null}
+Console.js:61 Props: {projectId: null, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4012, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 65}
+Console.js:61 Props: {projectId: 65, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 2373, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 57}
+Console.js:61 Props: {projectId: 57, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 3551, title: 'Submit Your Items Still Needed & Initial Highest Priority Conversation Reports', status: 'completed', projectId: 63}
+Console.js:61 Props: {projectId: 63, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === BUTTON CLICKED ===
+Console.js:61 Button clicked for task: 5496
+Console.js:61 Current optimisticStatus: completed
+Console.js:61 Mutation pending: false
+Console.js:61 === TOGGLE CLICK ===
+Console.js:61 Toggling task 5496 from completed to todo
+Console.js:61 ==================
+Console.js:61 Updated individual task cache for task 5496 with status: todo
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 5496, title: 'To Do 7', status: 'completed', projectId: null}
+Console.js:61 Props: {projectId: null, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 5496, title: 'To Do 7', status: 'completed', projectId: null}
+Console.js:61 Props: {projectId: null, optimisticStatus: 'todo'}
+Console.js:61 ===============================
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4012, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 65}
+Console.js:61 Props: {projectId: 65, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 2373, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 57}
+Console.js:61 Props: {projectId: 57, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 3551, title: 'Submit Your Items Still Needed & Initial Highest Priority Conversation Reports', status: 'completed', projectId: 63}
+Console.js:61 Props: {projectId: 63, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === SUCCESS HANDLER ===
+Console.js:61 Task update successful: {id: 5496, title: 'To Do 7', description: '', projectId: null, milestoneId: null, …}
+Console.js:61 SUCCESS: All caches updated with fresh server data
+Console.js:61 =========================
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 4012, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 65}
+Console.js:61 Props: {projectId: 65, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 2373, title: 'Nominations and Deliverables Checkpoints', status: 'completed', projectId: 57}
+Console.js:61 Props: {projectId: 57, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 === OPTIMISTIC TOGGLE DEBUG ===
+Console.js:61 Task: {id: 3551, title: 'Submit Your Items Still Needed & Initial Highest Priority Conversation Reports', status: 'completed', projectId: 63}
+Console.js:61 Props: {projectId: 63, optimisticStatus: 'completed'}
+Console.js:61 ===============================
+Console.js:61 Background cache invalidation starting...
+Console.js:61 Background invalidation completed

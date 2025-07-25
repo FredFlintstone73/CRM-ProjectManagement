@@ -14,7 +14,9 @@ interface OptimisticTaskToggleProps {
 
 export function OptimisticTaskToggle({ task, projectId, className = "", size = "sm" }: OptimisticTaskToggleProps) {
   const queryClient = useQueryClient();
-  const [optimisticStatus, setOptimisticStatus] = useState(task.status);
+  
+  // Use task.status directly instead of separate optimistic state
+  const optimisticStatus = task.status;
   
   console.log('=== OPTIMISTIC TOGGLE DEBUG ===');
   console.log('Task:', { id: task.id, title: task.title, status: task.status, projectId: task.projectId });
@@ -29,8 +31,8 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       return response.json();
     },
     onMutate: (newStatus) => {
-      // INSTANT optimistic update - maximum speed with minimal allocations
-      setOptimisticStatus(newStatus as "completed" | "cancelled" | "todo" | "in_progress" | null);
+      // INSTANT optimistic update - directly update cache data
+      console.log(`OPTIMISTIC: Setting task ${task.id} to ${newStatus}`);
       
       // Snapshot and cancel queries synchronously
       const snapshot = {
@@ -87,7 +89,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     },
     onError: (err, newStatus, context) => {
       // Instant rollback with minimal operations
-      setOptimisticStatus(task.status);
+      console.log(`ERROR: Rolling back task ${task.id} to original status`);
       if (projectId && context?.projectTasks) {
         queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context.projectTasks);
       }
@@ -98,7 +100,6 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onSuccess: (updatedTask) => {
       console.log('=== SUCCESS HANDLER ===');
       console.log('Task update successful:', updatedTask);
-      setOptimisticStatus(updatedTask.status);
       
       // IMMEDIATE cache updates with server response to prevent flickering
       queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => 
