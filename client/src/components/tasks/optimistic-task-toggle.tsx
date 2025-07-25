@@ -123,6 +123,11 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
   });
 
   const handleClick = (e: React.MouseEvent) => {
+    console.log('=== BUTTON CLICKED ===');
+    console.log('Button clicked for task:', task.id);
+    console.log('Current optimisticStatus:', optimisticStatus);
+    console.log('Mutation pending:', toggleMutation.isPending);
+    
     e.preventDefault();
     e.stopPropagation();
     
