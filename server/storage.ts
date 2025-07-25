@@ -2335,7 +2335,13 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           isNotNull(tasks.assignedTo),
-          isNotNull(tasks.projectId), // Filter out template tasks
+          or(
+            isNotNull(tasks.projectId), // Include project tasks
+            and(
+              isNull(tasks.projectId), // Include standalone tasks with assignments
+              sql`array_length(${tasks.assignedTo}, 1) > 0`
+            )
+          ),
           sql`${userContact} = ANY(${tasks.assignedTo})`
         )
       );

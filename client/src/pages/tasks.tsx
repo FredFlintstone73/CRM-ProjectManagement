@@ -103,7 +103,7 @@ export default function Tasks() {
   const { data: userTasksWithPriorities } = useQuery<(Task & { userPriority: number | null })[]>({
     queryKey: ['/api/tasks/my-tasks-with-priorities'],
     enabled: isAuthenticated && taskFilter === 'my_tasks',
-    staleTime: 60000, // 60 seconds
+    staleTime: 0, // Force fresh data to test the fix
     gcTime: 300000 // 5 minutes
   });
 
