@@ -2176,6 +2176,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email notifications endpoints
+  app.get('/api/email-notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getEmailNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error getting email notifications:", error);
+      res.status(500).json({ message: "Failed to get email notifications" });
+    }
+  });
+
+  app.patch('/api/email-notifications/:id/mark-read', isAuthenticated, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.markEmailNotificationAsRead(notificationId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking email notification as read:", error);
+      res.status(500).json({ message: "Failed to mark email notification as read" });
+    }
+  });
+
+  app.patch('/api/email-notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.markAllEmailNotificationsAsRead(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all email notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all email notifications as read" });
+    }
+  });
+
   // Call transcript routes
   app.get('/api/call-transcripts', isAuthenticated, async (req: any, res) => {
     try {

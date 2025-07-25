@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import ContactForm from "@/components/contacts/contact-form";
 import ProjectForm from "@/components/projects/project-form";
+import EmailNotificationIcon from "./email-notification-icon";
 
 interface HeaderProps {
   title: string;
@@ -34,8 +35,11 @@ export default function Header({ title, subtitle, showActions = false }: HeaderP
           <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
           <p className="text-sm text-gray-600">{subtitle}</p>
         </div>
-        {showActions && (
-          <div className="flex items-center space-x-4">
+        
+        <div className="flex items-center space-x-4">
+          <EmailNotificationIcon />
+          {showActions && (
+            <>
             <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-primary hover:bg-primary/90">
@@ -65,8 +69,9 @@ export default function Header({ title, subtitle, showActions = false }: HeaderP
                 <ProjectForm onSuccess={handleProjectCreated} />
               </DialogContent>
             </Dialog>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

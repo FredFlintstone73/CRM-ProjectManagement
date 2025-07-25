@@ -244,6 +244,12 @@ export interface IStorage {
   updateCalendarConnection(id: number, updates: Partial<CalendarConnection>): Promise<CalendarConnection>;
   deleteCalendarConnection(id: number, userId: string): Promise<void>;
   getCalendarConnection(id: number): Promise<CalendarConnection | undefined>;
+
+  // Email notification operations
+  getEmailNotifications(userId: string): Promise<any[]>;
+  createEmailNotification(notification: InsertEmailNotification): Promise<EmailNotification>;
+  markEmailNotificationAsRead(notificationId: number, userId: string): Promise<void>;
+  markAllEmailNotificationsAsRead(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3190,6 +3196,62 @@ export class DatabaseStorage implements IStorage {
       .from(calendarConnections)
       .where(eq(calendarConnections.id, id));
     return connection;
+  }
+
+  // Email notification operations
+  async getEmailNotifications(userId: string): Promise<any[]> {
+    const notifications = await db
+      .select({
+        id: emailNotifications.id,
+        emailInteractionId: emailNotifications.emailInteractionId,
+        isRead: emailNotifications.isRead,
+        createdAt: emailNotifications.createdAt,
+        email: {
+          id: emailInteractions.id,
+          contactId: emailInteractions.contactId,
+          subject: emailInteractions.subject,
+          sender: emailInteractions.sender,
+          sentAt: emailInteractions.sentAt,
+          emailType: emailInteractions.emailType,
+          contact: {
+            firstName: contacts.firstName,
+            lastName: contacts.lastName,
+            familyName: contacts.familyName,
+          },
+        },
+      })
+      .from(emailNotifications)
+      .innerJoin(emailInteractions, eq(emailNotifications.emailInteractionId, emailInteractions.id))
+      .innerJoin(contacts, eq(emailInteractions.contactId, contacts.id))
+      .where(eq(emailNotifications.userId, userId))
+      .orderBy(desc(emailNotifications.createdAt));
+
+    return notifications;
+  }
+
+  async createEmailNotification(notification: InsertEmailNotification): Promise<EmailNotification> {
+    const [created] = await db
+      .insert(emailNotifications)
+      .values(notification)
+      .returning();
+    return created;
+  }
+
+  async markEmailNotificationAsRead(notificationId: number, userId: string): Promise<void> {
+    await db
+      .update(emailNotifications)
+      .set({ isRead: true })
+      .where(and(
+        eq(emailNotifications.id, notificationId),
+        eq(emailNotifications.userId, userId)
+      ));
+  }
+
+  async markAllEmailNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(emailNotifications)
+      .set({ isRead: true })
+      .where(eq(emailNotifications.userId, userId));
   }
 }
 

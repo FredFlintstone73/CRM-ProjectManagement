@@ -467,6 +467,15 @@ export const mentions = pgTable("mentions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Email notifications table - Tracks unread received emails
+export const emailNotifications = pgTable("email_notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  emailInteractionId: integer("email_interaction_id").notNull().references(() => emailInteractions.id),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   contacts: many(contacts),
@@ -1106,3 +1115,12 @@ export const insertMentionSchema = createInsertSchema(mentions).omit({
 
 export type Mention = typeof mentions.$inferSelect;
 export type InsertMention = z.infer<typeof insertMentionSchema>;
+
+// Email notification types
+export const insertEmailNotificationSchema = createInsertSchema(emailNotifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type EmailNotification = typeof emailNotifications.$inferSelect;
+export type InsertEmailNotification = z.infer<typeof insertEmailNotificationSchema>;
