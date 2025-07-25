@@ -1016,6 +1016,14 @@ export class DatabaseStorage implements IStorage {
     }
     
     const taskData = { ...processedTask, createdBy: userId } as any;
+    
+    console.log('STORAGE DEBUG - Final task data to database:', {
+      title: taskData.title,
+      assignedTo: taskData.assignedTo,
+      assignedToType: typeof taskData.assignedTo,
+      isArray: Array.isArray(taskData.assignedTo)
+    });
+    
     const [newTask] = await db
       .insert(tasks)
       .values(taskData)
