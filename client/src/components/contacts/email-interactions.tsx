@@ -57,17 +57,6 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
 
   const sendEmailMutation = useMutation({
     mutationFn: async (data: EmailFormData) => {
-      // If it's a received email, don't actually send it, just record it
-      if (data.emailType === "received") {
-        const response = await apiRequest("POST", `/api/contacts/${contactId}/emails/received`, {
-          sender: getContactEmail(),
-          subject: data.subject,
-          body: data.body,
-          parentEmailId: data.parentEmailId,
-        });
-        return response.json();
-      }
-      
       const response = await apiRequest("POST", `/api/contacts/${contactId}/emails`, data);
       return response.json();
     },
@@ -222,23 +211,15 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
                   Compose Email
                 </Button>
               </DialogTrigger>
-              <Button variant="outline" onClick={handleAddReceived}>
-                <Mail className="h-4 w-4 mr-2" />
-                Add Received Email
-              </Button>
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>
-                  {form.watch("emailType") === "received" ? "Add Received Email" :
-                   (replyingTo ? "Reply to Email" : "Compose Email")}
+                  {replyingTo ? "Reply to Email" : "Compose Email"}
                 </DialogTitle>
                 <DialogDescription>
-                  {form.watch("emailType") === "received" 
-                    ? `Record an email you received from ${contact.firstName} ${contact.lastName}`
-                    : (replyingTo 
-                        ? `Replying to: ${replyingTo.subject}` 
-                        : `Send an email to ${contact.firstName} ${contact.lastName}`)
-                  }
+                  {replyingTo 
+                    ? `Replying to: ${replyingTo.subject}` 
+                    : `Send an email to ${contact.firstName} ${contact.lastName}`}
                 </DialogDescription>
               </DialogHeader>
               <Form {...form}>
@@ -248,13 +229,11 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
                     name="recipient"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{form.watch("emailType") === "received" ? "From" : "To"}</FormLabel>
+                        <FormLabel>To</FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
-                            placeholder={form.watch("emailType") === "received" ? getContactEmail() : "recipient@example.com"}
-                            value={form.watch("emailType") === "received" ? getContactEmail() : field.value}
-                            readOnly={form.watch("emailType") === "received"}
+                            placeholder="recipient@example.com"
                           />
                         </FormControl>
                         <FormMessage />
@@ -300,17 +279,8 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
                       Cancel
                     </Button>
                     <Button type="submit" disabled={sendEmailMutation.isPending}>
-                      {form.watch("emailType") === "received" ? (
-                        <>
-                          <Mail className="h-4 w-4 mr-2" />
-                          {sendEmailMutation.isPending ? "Adding..." : "Add Received Email"}
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          {sendEmailMutation.isPending ? "Sending..." : "Send Email"}
-                        </>
-                      )}
+                      <Send className="h-4 w-4 mr-2" />
+                      {sendEmailMutation.isPending ? "Sending..." : "Send Email"}
                     </Button>
                   </div>
                 </form>
