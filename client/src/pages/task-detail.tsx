@@ -321,6 +321,19 @@ export default function TaskDetail() {
 
   // Use the navigation calculation  
   const { previousTask, nextTask } = calculateNavigation();
+  
+  // Debug navigation
+  console.log('Task navigation debug:', {
+    taskId: task?.id,
+    projectId: task?.projectId,
+    hasProjectTasks: !!projectTasks,
+    projectTasksCount: projectTasks?.length || 0,
+    hasAllTasks: !!allTasks,
+    allTasksCount: allTasks?.length || 0,
+    standaloneTasksCount: allTasks?.filter(t => !t.projectId && t.assignedTo && Array.isArray(t.assignedTo) && t.assignedTo.length > 0)?.length || 0,
+    previousTask: previousTask ? { id: previousTask.id, title: previousTask.title } : null,
+    nextTask: nextTask ? { id: nextTask.id, title: nextTask.title } : null
+  });
 
   const toggleTaskMutation = useMutation({
     mutationFn: async (completed: boolean) => {
@@ -420,9 +433,8 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  if (previousTask) {
-                    setLocation(`/task/${(previousTask as any).id}`);
-                  }
+                  console.log('Navigating to previous task:', previousTask.id);
+                  setLocation(`/task/${previousTask.id}`);
                 }}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -434,15 +446,19 @@ export default function TaskDetail() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  if (nextTask) {
-                    setLocation(`/task/${(nextTask as any).id}`);
-                  }
+                  console.log('Navigating to next task:', nextTask.id);
+                  setLocation(`/task/${nextTask.id}`);
                 }}
               >
                 Next Task
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             )}
+            
+            {/* Debug info - remove after testing */}
+            <div className="text-xs text-gray-500">
+              Nav: {previousTask ? 'Prev' : 'No Prev'} | {nextTask ? 'Next' : 'No Next'}
+            </div>
           </div>
         </div>
         
@@ -454,6 +470,39 @@ export default function TaskDetail() {
               size="md"
               className="h-8 w-8"
             />
+            
+            {/* Alternative toggle for debugging */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 ml-2"
+              onClick={async () => {
+                console.log('Manual toggle clicked for task:', task.id);
+                const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+                try {
+                  const response = await fetch(`/api/tasks/${task.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status: newStatus })
+                  });
+                  
+                  if (response.ok) {
+                    console.log('Task status updated successfully');
+                    // Force invalidate all relevant caches
+                    queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
+                  } else {
+                    console.error('Failed to update task status');
+                  }
+                } catch (error) {
+                  console.error('Error updating task:', error);
+                }
+              }}
+            >
+              🔄
+            </Button>
             
             <h1 className={`text-2xl font-bold ${
               isCompleted ? 'line-through text-gray-500' : 'text-gray-900'

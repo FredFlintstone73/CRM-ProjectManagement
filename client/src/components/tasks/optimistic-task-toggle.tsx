@@ -16,6 +16,13 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
   const queryClient = useQueryClient();
   const [optimisticStatus, setOptimisticStatus] = useState(task.status);
   
+  console.log('OptimisticTaskToggle render:', { 
+    taskId: task.id, 
+    projectId, 
+    taskProjectId: task.projectId,
+    currentStatus: optimisticStatus 
+  });
+  
   const toggleMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
@@ -29,13 +36,15 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       
       // Snapshot and cancel queries synchronously
       const snapshot = {
-        projectTasks: queryClient.getQueryData(['/api/projects', projectId, 'tasks']),
+        projectTasks: projectId ? queryClient.getQueryData(['/api/projects', projectId, 'tasks']) : null,
         allTasks: queryClient.getQueryData(['/api/tasks']),
         myTasks: queryClient.getQueryData(['/api/tasks/my-tasks-with-priorities']),
         dashboardProjects: queryClient.getQueryData(['/api/dashboard/projects-due'])
       };
       
-      queryClient.cancelQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      if (projectId) {
+        queryClient.cancelQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      }
       queryClient.cancelQueries({ queryKey: ['/api/tasks'] });
       queryClient.cancelQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
       queryClient.cancelQueries({ queryKey: ['/api/dashboard/projects-due'] });
@@ -43,9 +52,11 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       // Ultra-optimized cache updates with single-pass operations
       const completedAt = newStatus === 'completed' ? new Date() : null;
       
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (old: Task[] | undefined) => 
-        old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
-      );
+      if (projectId) {
+        queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (old: Task[] | undefined) => 
+          old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
+        );
+      }
       
       queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => 
         old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
@@ -70,7 +81,9 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onError: (err, newStatus, context) => {
       // Instant rollback with minimal operations
       setOptimisticStatus(task.status);
-      queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context?.projectTasks);
+      if (projectId && context?.projectTasks) {
+        queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context.projectTasks);
+      }
       queryClient.setQueryData(['/api/tasks'], context?.allTasks);
       queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], context?.myTasks);
       queryClient.setQueryData(['/api/dashboard/projects-due'], context?.dashboardProjects);
@@ -78,7 +91,9 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onSettled: () => {
       // Ultra-fast background refresh - fire and forget for cascading updates
       requestIdleCallback(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        if (projectId) {
+          queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        }
         queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
         queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
         queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
