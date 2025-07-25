@@ -163,6 +163,52 @@ class EmailService {
     }
   }
 
+  async sendEmail(emailData: EmailData): Promise<{ sent: boolean; message: string }> {
+    if (!this.isConfigured) {
+      return {
+        sent: false,
+        message: 'Email service not configured. Please configure OUTLOOK_USER/OUTLOOK_PASSWORD or GMAIL_USER/GMAIL_APP_PASSWORD.',
+      };
+    }
+
+    try {
+      await this.transporter.sendMail({
+        from: process.env.OUTLOOK_USER || process.env.GMAIL_USER || process.env.SMTP_USER,
+        to: emailData.to,
+        subject: emailData.subject,
+        html: emailData.html,
+        text: emailData.text,
+      });
+
+      return {
+        sent: true,
+        message: 'Email sent successfully',
+      };
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      return {
+        sent: false,
+        message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+  }
+
+  getConfigurationStatus(): {
+    isConfigured: boolean;
+    serviceType: string;
+    user: string;
+  } {
+    const outlookUser = process.env.OUTLOOK_USER;
+    const gmailUser = process.env.GMAIL_USER;
+    const smtpUser = process.env.SMTP_USER;
+    
+    return {
+      isConfigured: this.isConfigured,
+      serviceType: outlookUser ? 'outlook' : (gmailUser ? 'gmail' : (smtpUser ? 'smtp' : 'none')),
+      user: outlookUser || gmailUser || smtpUser || 'none',
+    };
+  }
+
   isEmailConfigured(): boolean {
     return this.isConfigured;
   }

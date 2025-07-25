@@ -2060,6 +2060,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact-specific email routes
+  app.get('/api/contacts/:id/emails', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const interactions = await storage.getEmailInteractionsByContact(contactId);
+      res.json(interactions);
+    } catch (error) {
+      console.error("Error fetching contact emails:", error);
+      res.status(500).json({ message: "Failed to fetch contact emails" });
+    }
+  });
+
+  app.post('/api/contacts/:id/emails', isAuthenticated, async (req: any, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const { recipient, subject, body } = req.body;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Send the actual email
+      const emailResult = await emailService.sendEmail({
+        to: recipient,
+        subject: subject,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <p>Hello,</p>
+            <div style="white-space: pre-wrap;">${body}</div>
+            <br>
+            <p>Best regards,<br>${user.firstName} ${user.lastName}</p>
+          </div>
+        `,
+        text: body,
+      });
+
+      // Record the email interaction
+      const interactionData = {
+        contactId,
+        subject,
+        body,
+        sender: user.email,
+        recipient,
+        sentAt: new Date(),
+      };
+
+      const interaction = await storage.createEmailInteraction(interactionData, userId);
+      
+      res.json({ 
+        interaction, 
+        emailSent: emailResult.sent,
+        message: emailResult.message 
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      res.status(500).json({ message: "Failed to send email" });
+    }
+  });
+
   // Call transcript routes
   app.get('/api/call-transcripts', isAuthenticated, async (req: any, res) => {
     try {

@@ -23,6 +23,7 @@ import ContactNotes from "@/components/contacts/contact-notes";
 import NotesDisplay from "@/components/contacts/notes-display";
 import ContactFiles from "@/components/contacts/contact-files";
 import ContactBusinesses from "@/components/contacts/contact-businesses";
+import EmailInteractions from "@/components/contacts/email-interactions";
 import PhotoCropper from "@/components/contacts/PhotoCropper";
 import type { Contact, Project } from "@shared/schema";
 
@@ -1213,16 +1214,7 @@ export default function ContactDetail() {
           </TabsContent>
 
           <TabsContent value="interaction" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Interaction History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-gray-500 text-center py-8">
-                  Interaction history will be displayed here
-                </div>
-              </CardContent>
-            </Card>
+            <EmailInteractions contactId={contact.id} contact={contact} />
           </TabsContent>
 
           {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
