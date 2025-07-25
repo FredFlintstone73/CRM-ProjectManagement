@@ -2199,22 +2199,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user-invitations/:code', async (req: any, res) => {
     try {
+      console.log('Looking up invitation code:', req.params.code);
       const invitation = await storage.getUserInvitation(req.params.code);
+      console.log('Invitation found:', invitation ? 'Yes' : 'No');
       
       if (!invitation) {
+        console.log('Invitation not found in database');
         return res.status(404).json({ message: "Invitation not found" });
       }
       
+      console.log('Invitation details:', {
+        id: invitation.id,
+        email: invitation.email,
+        status: invitation.status,
+        expiresAt: invitation.expiresAt,
+        now: new Date().toISOString()
+      });
+      
       // Check if invitation is expired
       if (new Date() > new Date(invitation.expiresAt)) {
+        console.log('Invitation has expired');
         await storage.expireInvitation(req.params.code);
         return res.status(410).json({ message: "Invitation has expired" });
       }
       
       if (invitation.status !== 'pending') {
+        console.log('Invitation status is not pending:', invitation.status);
         return res.status(400).json({ message: "Invitation is no longer valid" });
       }
       
+      console.log('Invitation is valid, returning details');
       res.json(invitation);
     } catch (error) {
       console.error("Error fetching invitation:", error);
