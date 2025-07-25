@@ -7,7 +7,7 @@ import type { Task } from "@shared/schema";
 
 interface OptimisticTaskToggleProps {
   task: Task;
-  projectId: number;
+  projectId: number | null;
   className?: string;
   size?: "sm" | "md";
 }
