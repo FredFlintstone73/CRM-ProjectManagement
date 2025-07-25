@@ -2077,6 +2077,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contactId = parseInt(req.params.id);
       const { recipient, subject, body } = req.body;
       const userId = req.user.claims.sub;
+      
+      // Validate required fields
+      if (!recipient || !subject || !body) {
+        return res.status(400).json({ message: "Recipient, subject, and body are required" });
+      }
+
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -2090,7 +2096,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <p>Hello,</p>
-            <div style="white-space: pre-wrap;">${body}</div>
+            <div style="white-space: pre-wrap;">${body.replace(/\n/g, '<br>')}</div>
             <br>
             <p>Best regards,<br>${user.firstName} ${user.lastName}</p>
           </div>
@@ -2098,12 +2104,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         text: body,
       });
 
-      // Record the email interaction
+      // Record the email interaction (always record, even if send fails)
       const interactionData = {
         contactId,
         subject,
         body,
-        sender: user.email,
+        sender: user.email || 'Unknown',
         recipient,
         sentAt: new Date(),
       };
@@ -2117,7 +2123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error sending email:", error);
-      res.status(500).json({ message: "Failed to send email" });
+      res.status(500).json({ 
+        message: "Failed to send email", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 

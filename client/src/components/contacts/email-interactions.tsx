@@ -54,12 +54,14 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
   });
 
   const sendEmailMutation = useMutation({
-    mutationFn: (data: EmailFormData) => 
-      apiRequest(`/api/contacts/${contactId}/emails`, {
+    mutationFn: async (data: EmailFormData) => {
+      const response = await apiRequest(`/api/contacts/${contactId}/emails`, {
         method: "POST",
         body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
+      });
+      return response;
+    },
+    onSuccess: (result: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts", contactId, "emails"] });
       setIsComposeOpen(false);
       setReplyingTo(null);
@@ -68,12 +70,23 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
         subject: "",
         body: "",
       });
-      toast({
-        title: "Email Sent",
-        description: "Your email has been sent successfully.",
-      });
+      
+      // Show appropriate message based on email sending result
+      if (result.emailSent) {
+        toast({
+          title: "Email Sent",
+          description: "Your email has been sent successfully and recorded.",
+        });
+      } else {
+        toast({
+          title: "Email Recorded",
+          description: `Email interaction saved, but sending failed: ${result.message}`,
+          variant: "destructive",
+        });
+      }
     },
     onError: (error: any) => {
+      console.error("Email send error:", error);
       toast({
         title: "Send Failed",
         description: error.message || "Failed to send email",
