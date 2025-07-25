@@ -55,10 +55,7 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
 
   const sendEmailMutation = useMutation({
     mutationFn: async (data: EmailFormData) => {
-      const response = await apiRequest(`/api/contacts/${contactId}/emails`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest(`/api/contacts/${contactId}/emails`, "POST", data);
       return response;
     },
     onSuccess: (result: any) => {
