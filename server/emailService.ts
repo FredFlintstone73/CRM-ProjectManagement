@@ -399,6 +399,19 @@ class EmailService {
         }
       }
 
+      // Check if we've already recorded this email to avoid duplicates
+      const existingEmails = await this.storage.getEmailInteractionsByContact(matchingContact.id);
+      const isDuplicate = existingEmails.some(email => 
+        email.subject === subject &&
+        email.sender === from &&
+        Math.abs(new Date(email.sentAt).getTime() - (email.date || new Date()).getTime()) < 60000 // Within 1 minute
+      );
+
+      if (isDuplicate) {
+        console.log('Email already recorded, skipping duplicate');
+        return;
+      }
+
       // Create email interaction record
       await this.storage.createEmailInteraction({
         contactId: matchingContact.id,
@@ -411,7 +424,7 @@ class EmailService {
         sentAt: email.date || new Date(),
       });
 
-      console.log(`Automatically recorded ${isReply ? 'reply' : 'email'} from ${matchingContact.firstName} ${matchingContact.lastName}`);
+      console.log(`Automatically recorded ${isReply ? 'reply email' : 'new email conversation'} from ${matchingContact.firstName} ${matchingContact.lastName}`);
     } catch (error) {
       console.error('Error processing incoming email:', error);
     }

@@ -240,10 +240,12 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Abacus.ai Integration Status**: AI integration prepared but temporarily disabled pending proper deployment credentials (deploymentId + deploymentToken)
 
 ### Complete Automatic Email Threading System with IMAP Monitoring (July 25, 2025)
-- **Automatic Email Reply Detection**: Implemented comprehensive IMAP monitoring system that automatically detects incoming email replies and creates threaded conversations
+- **Comprehensive Email Detection**: Implemented IMAP monitoring system that automatically detects ALL incoming emails from recognized contacts, including new conversations and replies
 - **Real-time Email Processing**: IMAP client monitors Gmail/Outlook inbox for new emails, automatically parsing and matching them to existing contacts
 - **Intelligent Thread Linking**: System automatically identifies reply emails (containing "Re:") and links them to original sent emails using parentEmailId
+- **New Conversation Capture**: Automatically captures emails initiated by contacts (not just replies) and stores them in contact interactions
 - **Contact Email Matching**: Automatic contact detection by matching sender email addresses (personal, work, or spouse email) against contact database
+- **Duplicate Prevention**: Smart duplicate detection prevents re-recording of already processed emails
 - **Background Email Monitoring**: Email monitoring service runs continuously in background, processing new emails without user intervention
 - **Manual Email Addition**: "Add Received Email" button provides fallback for manually recording emails when automatic detection isn't available
 - **IMAP Configuration Support**: Supports both Gmail (IMAP) and Microsoft Outlook/365 (IMAP) with automatic configuration detection
