@@ -410,7 +410,7 @@ export default function Projects() {
                     <div className="flex items-center space-x-3 text-sm text-gray-600">
                       {getClientContact(project.clientId)?.profileImageUrl ? (
                         <img 
-                          src={getClientContact(project.clientId)?.profileImageUrl} 
+                          src={getClientContact(project.clientId)?.profileImageUrl || ""} 
                           alt={getFamilyName(project.clientId) || ""}
                           className="w-8 h-8 rounded-full object-cover border border-gray-200"
                         />
@@ -521,7 +521,7 @@ export default function Projects() {
                         <div className="flex items-center space-x-3">
                           {getClientContact(project.clientId)?.profileImageUrl ? (
                             <img 
-                              src={getClientContact(project.clientId)?.profileImageUrl} 
+                              src={getClientContact(project.clientId)?.profileImageUrl || ""} 
                               alt={getFamilyName(project.clientId) || ""}
                               className="w-8 h-8 rounded-full object-cover border border-gray-200"
                             />
