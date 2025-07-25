@@ -606,7 +606,7 @@ export default function Contacts() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {useMemo(() => {
+                    {(() => {
                       const emailInfo = getDisplayedEmailInfo(contact);
                       return emailInfo && (
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -614,8 +614,8 @@ export default function Contacts() {
                           <span>{emailInfo.email} {emailInfo.type}</span>
                         </div>
                       );
-                    }, [contact.spousePersonalEmail, contact.spouseWorkEmail, contact.personalEmail, contact.workEmail])}
-                    {useMemo(() => {
+                    })()}
+                    {(() => {
                       const phoneInfo = getDisplayedPhoneInfo(contact);
                       return phoneInfo && (
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -623,7 +623,7 @@ export default function Contacts() {
                           <span>{phoneInfo.number} {phoneInfo.type}</span>
                         </div>
                       );
-                    }, [contact.spouseCellPhone, contact.spouseWorkPhone, contact.cellPhone, contact.businessPhone, contact.workPhone])}
+                    })()}
                     {contact.position && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Building className="w-4 h-4" />
@@ -773,7 +773,7 @@ export default function Contacts() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {useMemo(() => {
+                          {(() => {
                             const emailInfo = getDisplayedEmailInfo(contact);
                             return emailInfo && (
                               <>
@@ -781,12 +781,12 @@ export default function Contacts() {
                                 <span className="text-sm">{emailInfo.email} {emailInfo.type}</span>
                               </>
                             );
-                          }, [contact.spousePersonalEmail, contact.spouseWorkEmail, contact.personalEmail, contact.workEmail])}
+                          })()}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {useMemo(() => {
+                          {(() => {
                             const phoneInfo = getDisplayedPhoneInfo(contact);
                             return phoneInfo && (
                               <>
@@ -794,7 +794,7 @@ export default function Contacts() {
                                 <span className="text-sm">{phoneInfo.number} {phoneInfo.type}</span>
                               </>
                             );
-                          }, [contact.spouseCellPhone, contact.spouseWorkPhone, contact.cellPhone, contact.businessPhone, contact.workPhone])}
+                          })()}
                         </div>
                       </TableCell>
                       {(visibleTypes.strategic_partner || visibleTypes.team_member || visibleTypes.trusted_professional) && (
