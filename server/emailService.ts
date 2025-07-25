@@ -373,9 +373,9 @@ class EmailService {
       
       const contacts = await this.storage.getContacts();
       const matchingContact = contacts.find(contact => 
-        (contact.personalEmail && fromEmail.toLowerCase().includes(contact.personalEmail.toLowerCase())) ||
-        (contact.workEmail && fromEmail.toLowerCase().includes(contact.workEmail.toLowerCase())) ||
-        (contact.spousePersonalEmail && fromEmail.toLowerCase().includes(contact.spousePersonalEmail.toLowerCase()))
+        (contact.personalEmail && fromEmail.toLowerCase() === contact.personalEmail.toLowerCase()) ||
+        (contact.workEmail && fromEmail.toLowerCase() === contact.workEmail.toLowerCase()) ||
+        (contact.spousePersonalEmail && fromEmail.toLowerCase() === contact.spousePersonalEmail.toLowerCase())
       );
 
       // Check if this is a reply (contains "Re:" or "RE:")
