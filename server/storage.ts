@@ -2918,8 +2918,8 @@ export class DatabaseStorage implements IStorage {
           sql`${tasks.assignedTo} @> ARRAY[${contactId}]::integer[]`,
           not(eq(tasks.status, 'completed')),
           isNotNull(tasks.dueDate),
-          gte(tasks.dueDate, now.toISOString().split('T')[0]),
-          lte(tasks.dueDate, nextWeek.toISOString().split('T')[0])
+          sql`DATE(${tasks.dueDate}) >= DATE(${now.toISOString()})`,
+          sql`DATE(${tasks.dueDate}) <= DATE(${nextWeek.toISOString()})`
         )
       )
       .orderBy(tasks.dueDate);
@@ -2988,7 +2988,7 @@ export class DatabaseStorage implements IStorage {
           sql`${tasks.assignedTo} @> ARRAY[${contactId}]::integer[]`,
           not(eq(tasks.status, 'completed')),
           isNotNull(tasks.dueDate),
-          lte(tasks.dueDate, now.toISOString().split('T')[0])
+          sql`DATE(${tasks.dueDate}) < DATE(${now.toISOString()})`
         )
       )
       .orderBy(tasks.dueDate);
