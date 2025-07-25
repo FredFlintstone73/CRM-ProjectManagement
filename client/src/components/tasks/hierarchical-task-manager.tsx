@@ -102,11 +102,18 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
 
   // Create task mutation
   const createTaskMutation = useMutation({
-    mutationFn: (taskData: TaskFormData) => 
-      apiRequest('/api/tasks', {
+    mutationFn: (taskData: TaskFormData) => {
+      // Convert assignedTo to array format if it's a single value
+      const processedData = {
+        ...taskData,
+        projectId,
+        assignedTo: taskData.assignedTo && taskData.assignedTo !== '' ? [taskData.assignedTo] : null
+      };
+      return apiRequest('/api/tasks', {
         method: 'POST',
-        body: { ...taskData, projectId }
-      }),
+        body: processedData
+      });
+    },
     onSuccess: () => {
       // Remove all cached queries to force fresh data
       queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'task-hierarchy'] });
