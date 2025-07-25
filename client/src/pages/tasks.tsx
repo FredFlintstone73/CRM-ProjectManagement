@@ -95,7 +95,7 @@ export default function Tasks() {
   const { data: allTasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
     enabled: isAuthenticated,
-    staleTime: 0, // Force fresh data to test the fix
+    staleTime: 60000, // 60 seconds
     gcTime: 300000 // 5 minutes
   });
 
@@ -103,7 +103,7 @@ export default function Tasks() {
   const { data: userTasksWithPriorities } = useQuery<(Task & { userPriority: number | null })[]>({
     queryKey: ['/api/tasks/my-tasks-with-priorities'],
     enabled: isAuthenticated && taskFilter === 'my_tasks',
-    staleTime: 0, // Force fresh data to test the fix
+    staleTime: 60000, // 60 seconds
     gcTime: 300000 // 5 minutes
   });
 
@@ -357,19 +357,7 @@ export default function Tasks() {
   const filteredAndSortedTasks = useMemo(() => {
     if (!tasks) return [];
     
-    // Debug: Check if our tasks are in the data
-    const debugTasks = tasks.filter(t => t.title === 'To Do 6' || t.title === 'To Do 7');
-    if (debugTasks.length > 0) {
-      console.log('Debug: Found target tasks in data:', debugTasks.map(t => ({
-        id: t.id,
-        title: t.title,
-        projectId: t.projectId,
-        assignedTo: t.assignedTo
-      })));
-    } else {
-      console.log('Debug: Target tasks NOT found in data. Total tasks:', tasks.length);
-      console.log('Debug: All task titles:', tasks.map(t => t.title));
-    }
+
     
     // Pre-compute values for better performance
     const searchLower = searchQuery.toLowerCase();
@@ -411,24 +399,7 @@ export default function Tasks() {
       const hasDirectAssignment = task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : !!task.assignedTo);
       const hasRoleAssignment = task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : !!task.assignedToRole);
       
-      // Debug logging for target tasks
-      if (task.title === 'To Do 6' || task.title === 'To Do 7') {
-        console.log('Debug task filtering:', {
-          id: task.id,
-          title: task.title,
-          projectId: task.projectId,
-          assignedTo: task.assignedTo,
-          assignedToType: typeof task.assignedTo,
-          isArray: Array.isArray(task.assignedTo),
-          hasDirectAssignment,
-          hasRoleAssignment,
-          taskFilter: taskFilter,
-          completionFilter: completionFilter,
-          dueDateFilter: dueDateFilter,
-          passesSearch: !hasSearch || task.title.toLowerCase().includes(searchLower),
-          willShow: hasDirectAssignment || hasRoleAssignment
-        });
-      }
+
       
       return hasDirectAssignment || hasRoleAssignment;
     });

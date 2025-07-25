@@ -207,6 +207,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Messages & Notifications Integration**: Email notifications now properly appear in Messages page with unread status and envelope icon counts
 - **User Verified**: Email notification system confirmed working - new email replies now display as unread notifications as intended
 
+### Complete "Assign to Me" Task Assignment System Implementation (July 25, 2025)
+- **Root Issue Resolution**: Fixed critical backend bug where getTasks() method filtered out standalone tasks (tasks without project IDs), preventing assigned standalone tasks from appearing in Tasks page
+- **Backend API Enhancement**: Modified getTasks() and getUserTasksWithPriorities() methods to include standalone tasks with assignments alongside project tasks using SQL OR conditions
+- **My Tasks View Fix**: Updated getUserTasksWithPriorities() to include both project tasks and standalone assigned tasks, resolving display issue in "My Tasks" filter
+- **Assignment Logic Verification**: Confirmed "Assign to Me" functionality works correctly at database level - tasks properly assigned to user's contact ID (Chad Tennant = contact ID 15)
+- **Frontend Display Clarification**: Standalone tasks show "No client" in Family name column as expected behavior since they're not associated with any project or client
+- **Cache Optimization**: Applied proper cache invalidation and staleTime settings for immediate task display updates after assignment
+- **Complete Workflow Success**: Task assignment now works end-to-end for both project tasks and standalone tasks, appearing correctly in both "All Tasks" and "My Tasks" views
+- **User Verified**: Chad Tennant confirmed task assignment functionality working completely - "To Do 6" and "To Do 7" tasks now visible in both task views after assignment
+
 ### Complete Automatic Session Timeout System Implementation (July 24, 2025)
 - **90-Minute App Inactivity Timeout**: Automatically logs out users after 90 minutes of app inactivity (no clicks, scrolls, navigation)
 - **30-Minute System Idle Timeout**: Logs out users after 30 minutes of computer idle time (no mouse movement, keyboard activity, or browser focus)
