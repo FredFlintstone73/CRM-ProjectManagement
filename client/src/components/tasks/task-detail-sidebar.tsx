@@ -149,22 +149,14 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
   // Get task navigation info with parent→child priority (SAME LOGIC AS TASK DETAIL PAGE)
   const getTaskNavigation = () => {
     try {
-      console.log('=== SIDEBAR NAVIGATION CALCULATION START ===');
-      console.log('Current task ID:', selectedTask?.id, 'Title:', selectedTask?.title);
-      
       if (!selectedTask || !projectTasks || projectTasks.length === 0) {
-        console.log('Missing data - selectedTask or projectTasks is null');
         return { prevTask: null, nextTask: null };
       }
 
       // Special handling for parent tasks - check for children first (SAME LOGIC AS TASK DETAIL PAGE)
       const childTasks = projectTasks.filter(t => t.parentTaskId === selectedTask.id);
-      console.log('Children found for current task:', childTasks.length);
       
       if (childTasks.length > 0) {
-        console.log('PARENT TASK DETECTED - has', childTasks.length, 'children');
-        childTasks.forEach((child, i) => console.log(`  Child ${i + 1}: ${child.title} (ID: ${child.id}, Sort: ${child.sortOrder})`));
-        
         // If current task has children, next should be the first child (sorted by sortOrder)
         const sortedChildren = childTasks.sort((a, b) => {
           if (a.sortOrder !== null && b.sortOrder !== null && a.sortOrder !== b.sortOrder) {
@@ -174,7 +166,6 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         });
         
         const firstChild = sortedChildren[0];
-        console.log('NAVIGATING TO FIRST CHILD:', firstChild.title, '(ID:', firstChild.id, ')');
         
         // For parent tasks, find previous task in hierarchical sequence
         const hierarchicalTasks = buildHierarchicalTasks(projectTasks);
@@ -187,27 +178,20 @@ export function TaskDetailSidebar({ task, isOpen, onClose, projectId, onTaskUpda
         };
       }
       
-      console.log('NO CHILDREN - using hierarchical sequence');
       // If no children, use hierarchical sequence as before
       const hierarchicalTasks = buildHierarchicalTasks(projectTasks);
       const currentIndex = hierarchicalTasks.findIndex(t => t.id === selectedTask.id);
-      console.log('Current index in hierarchy:', currentIndex, '/', hierarchicalTasks.length);
       
       const prev = currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null;
       const next = currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 
         ? hierarchicalTasks[currentIndex + 1] 
         : null;
       
-      console.log('Previous task from hierarchy:', prev ? `${prev.title} (${prev.id})` : 'None');
-      console.log('Next task from hierarchy:', next ? `${next.title} (${next.id})` : 'None');
-      console.log('=== SIDEBAR NAVIGATION CALCULATION END ===');
-      
       return {
         prevTask: prev,
         nextTask: next
       };
     } catch (error) {
-      console.error('Error in getTaskNavigation:', error);
       return { prevTask: null, nextTask: null };
     }
   };

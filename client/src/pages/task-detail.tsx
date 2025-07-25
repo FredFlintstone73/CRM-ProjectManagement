@@ -393,12 +393,6 @@ export default function TaskDetail() {
                 variant="outline"
                 onClick={() => {
                   if (nextTask) {
-                    alert(`NEXT BUTTON: From ${task?.id} (${task?.title}) to ${(nextTask as any).id} (${(nextTask as any).title})`);
-                    console.log('=== NEXT BUTTON CLICKED ===');
-                    console.log('Current task:', task?.id, task?.title);
-                    console.log('Next task:', (nextTask as any).id, (nextTask as any).title);
-                    console.log('Navigating to:', `/task/${(nextTask as any).id}`);
-                    console.log('=== END NEXT BUTTON ===');
                     setLocation(`/task/${(nextTask as any).id}`);
                   }
                 }}
