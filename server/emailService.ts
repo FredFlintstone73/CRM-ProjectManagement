@@ -433,7 +433,7 @@ class EmailService {
       }
 
       // Create email interaction record
-      await this.storage.createEmailInteraction({
+      const emailInteraction = await this.storage.createEmailInteraction({
         contactId: targetContact.id,
         parentEmailId,
         subject,
@@ -444,7 +444,22 @@ class EmailService {
         sentAt: email.date || new Date(),
       });
 
-      console.log(`Automatically recorded ${isReply ? 'reply email' : 'new email conversation'} from ${from} to contact: ${targetContact.firstName} ${targetContact.lastName}`);
+      // Create email notification for all users (they can mark as read individually)
+      try {
+        const allUsers = await this.storage.getUsers();
+        for (const user of allUsers) {
+          await this.storage.createEmailNotification({
+            userId: user.id,
+            emailInteractionId: emailInteraction.id,
+            isRead: false,
+          });
+        }
+      } catch (error) {
+        console.error('Error creating email notifications:', error);
+        // Continue execution even if notification creation fails
+      }
+
+      console.log(`Automatically recorded ${isReply ? 'reply email' : 'new email conversation'} from ${from} to contact: ${targetContact.firstName} ${targetContact.lastName} and created notifications`);
     } catch (error) {
       console.error('Error processing incoming email:', error);
     }
