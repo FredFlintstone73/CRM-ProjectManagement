@@ -1168,6 +1168,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskData = insertTaskSchema.parse(req.body);
       const userId = req.user.claims.sub;
       
+      console.log('Task creation - raw data:', {
+        title: taskData.title,
+        assignedTo: taskData.assignedTo,
+        userId: userId,
+        userEmail: req.user.email || req.user.claims?.email
+      });
+      
 
       
       // Handle assignedTo - can be array (multi-select) or single value
