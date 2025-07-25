@@ -48,14 +48,34 @@ export default function Administration() {
   }, [isAuthenticated, user, toast]);
 
   const { data: activities = [], isLoading, refetch } = useQuery<UserActivity[]>({
-    queryKey: [`/api/administration/activities`, timeRange, actionFilter, userFilter],
+    queryKey: ['/api/administration/activities', { timeRange, actionFilter, userFilter }],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        timeRange,
+        actionFilter,
+        userFilter
+      });
+      const response = await fetch(`/api/administration/activities?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch activities');
+      }
+      return response.json();
+    },
     enabled: isAuthenticated && user?.accessLevel === 'administrator',
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
   });
 
   const { data: stats = {}, isLoading: statsLoading } = useQuery({
-    queryKey: [`/api/administration/stats`, timeRange],
+    queryKey: ['/api/administration/stats', { timeRange }],
+    queryFn: async () => {
+      const params = new URLSearchParams({ timeRange });
+      const response = await fetch(`/api/administration/stats?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+      return response.json();
+    },
     enabled: isAuthenticated && user?.accessLevel === 'administrator',
     staleTime: 60000, // 1 minute
   });
