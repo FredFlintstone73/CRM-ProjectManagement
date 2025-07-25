@@ -42,9 +42,9 @@ export default function Tasks() {
     direction: 'asc' | 'desc';
   }>({ key: 'priority', direction: 'asc' });
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('all_tasks');
-  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress'>('all');
-  const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_30_days' | 'next_122_days' | 'custom'>('all');
+  const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('my_tasks');
+  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress'>('in_progress');
+  const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_30_days' | 'next_122_days' | 'custom'>('next_30_days');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
 
