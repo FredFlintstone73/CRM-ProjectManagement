@@ -129,7 +129,7 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
     const rootEmailId = interaction.parentEmailId || interaction.id;
     
     form.reset({
-      recipient: interaction.sender || getContactEmail(),
+      recipient: extractEmailAddress(interaction.sender) || getContactEmail(),
       subject: replySubject,
       body: `\n\n--- Original Message ---\nFrom: ${interaction.sender}\nSubject: ${interaction.subject}\nDate: ${formatDate(interaction.sentAt || interaction.createdAt)}\n\n${interaction.body}`,
       parentEmailId: rootEmailId,
@@ -163,6 +163,20 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Extract email address from "Name <email>" format
+  const extractEmailAddress = (emailString: string | null) => {
+    if (!emailString) return "";
+    
+    // Check if it's in "Name <email>" format
+    const match = emailString.match(/<([^>]+)>/);
+    if (match) {
+      return match[1]; // Return just the email address
+    }
+    
+    // If no angle brackets, assume it's already just an email
+    return emailString;
   };
 
   const truncateBody = (body: string, maxLength: number = 150) => {
@@ -437,17 +451,19 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
                           size="sm"
                           variant="outline"
                           onClick={() => handleReply(interaction)}
-                          className="h-8 px-2"
+                          className="h-8 px-3"
                         >
-                          <Reply className="h-3 w-3" />
+                          <Reply className="h-3 w-3 mr-1" />
+                          Reply
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleForward(interaction)}
-                          className="h-8 px-2"
+                          className="h-8 px-3"
                         >
-                          <Forward className="h-3 w-3" />
+                          <Forward className="h-3 w-3 mr-1" />
+                          Forward
                         </Button>
                         <Button
                           size="sm"
@@ -510,17 +526,19 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleReply(reply)}
-                                className="h-8 px-2"
+                                className="h-8 px-3"
                               >
-                                <Reply className="h-3 w-3" />
+                                <Reply className="h-3 w-3 mr-1" />
+                                Reply
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleForward(reply)}
-                                className="h-8 px-2"
+                                className="h-8 px-3"
                               >
-                                <Forward className="h-3 w-3" />
+                                <Forward className="h-3 w-3 mr-1" />
+                                Forward
                               </Button>
                               <Button
                                 size="sm"
