@@ -60,27 +60,16 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
   // Auto-expand the specified email when component mounts or data loads
   useEffect(() => {
     if (expandEmailId && interactions.length > 0) {
-      console.log('Auto-expanding email ID:', expandEmailId);
-      console.log('Available interactions:', interactions.map(i => ({ 
-        id: i.id, 
-        subject: i.subject, 
-        parentEmailId: i.parentEmailId 
-      })));
-      
       // First, try to find a direct match (main email)
       const targetEmail = interactions.find(interaction => interaction.id === expandEmailId);
       if (targetEmail) {
         if (targetEmail.parentEmailId) {
           // This is a reply, so expand its parent thread
-          console.log('Target is a reply, expanding parent thread for email:', targetEmail.subject);
           setExpandedThreads(prev => new Set([...prev, targetEmail.parentEmailId]));
         } else {
           // This is a main email, expand it directly
-          console.log('Found main email, expanding:', targetEmail.subject);
           setExpandedThreads(prev => new Set([...prev, expandEmailId]));
         }
-      } else {
-        console.log('Email not found in interactions');
       }
     }
   }, [expandEmailId, interactions]);

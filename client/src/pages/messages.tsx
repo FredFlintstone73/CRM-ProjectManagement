@@ -278,12 +278,18 @@ export default function Messages() {
                       <div className="flex items-center gap-2 mb-1">
                         <Mail className="w-4 h-4 text-muted-foreground" />
                         <h3 className="font-medium">
-                          <Link 
-                            href={`/contacts/${notification.email.contactId}?tab=interactions&email=${notification.emailInteractionId}`}
-                            className="hover:underline text-blue-600"
+                          <button
+                            onClick={async () => {
+                              // Mark as read first
+                              await markEmailAsReadMutation.mutateAsync(notification.id);
+                              // Then navigate to the email
+                              window.location.href = `/contacts/${notification.email.contactId}?tab=interactions&email=${notification.emailInteractionId}`;
+                            }}
+                            className="hover:underline text-blue-600 text-left"
+                            disabled={markEmailAsReadMutation.isPending}
                           >
                             {notification.email.subject}
-                          </Link>
+                          </button>
                         </h3>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
