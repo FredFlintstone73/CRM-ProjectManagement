@@ -1,0 +1,132 @@
+Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+_app-3ef66c996c9fad66.js:18  GET https://dotdevproxy.janeway.repl.co/__reachability net::ERR_CERT_AUTHORITY_INVALID
+(anonymous) @ _app-3ef66c996c9fad66.js:18
+(anonymous) @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ main-98a40530111367b6.js:1
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+b @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ main-98a40530111367b6.js:1
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1Understand this error
+_app-3ef66c996c9fad66.js:18  GET https://dotdevproxy.janeway.repl.co/__reachability net::ERR_CERT_AUTHORITY_INVALID
+(anonymous) @ _app-3ef66c996c9fad66.js:18
+(anonymous) @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ main-98a40530111367b6.js:1
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+b @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ main-98a40530111367b6.js:1
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+r @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ main-98a40530111367b6.js:1
+n @ main-98a40530111367b6.js:1
+c @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+(anonymous) @ main-98a40530111367b6.js:1
+b @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ _app-3ef66c996c9fad66.js:40
+(anonymous) @ main-98a40530111367b6.js:1
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1
+Promise.then
+n @ main-98a40530111367b6.js:1
+u @ main-98a40530111367b6.js:1Understand this error

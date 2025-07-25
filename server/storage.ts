@@ -64,7 +64,7 @@ import {
   type InsertEmailNotification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, or, not, ilike, count, isNotNull, inArray, gte, lte } from "drizzle-orm";
+import { eq, desc, sql, and, or, not, ilike, count, isNotNull, isNull, inArray, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -881,11 +881,24 @@ export class DatabaseStorage implements IStorage {
 
   // Task operations
   async getTasks(): Promise<Task[]> {
-    // Only return tasks that are assigned to actual projects, not template tasks
+    // Return tasks that are either:
+    // 1. Assigned to actual projects (not template tasks)
+    // 2. Standalone tasks with assignments (not template tasks)
     return await db
       .select()
       .from(tasks)
-      .where(isNotNull(tasks.projectId))
+      .where(
+        or(
+          isNotNull(tasks.projectId), // Project tasks
+          and(
+            isNull(tasks.projectId), // Standalone tasks
+            or(
+              sql`${tasks.assignedTo} IS NOT NULL AND array_length(${tasks.assignedTo}, 1) > 0`, // Has direct assignments
+              sql`${tasks.assignedToRole} IS NOT NULL AND array_length(${tasks.assignedToRole}, 1) > 0` // Has role assignments
+            )
+          )
+        )
+      )
       .orderBy(desc(tasks.createdAt));
   }
 

@@ -95,7 +95,7 @@ export default function Tasks() {
   const { data: allTasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
     enabled: isAuthenticated,
-    staleTime: 60000, // 60 seconds
+    staleTime: 0, // Force fresh data to test the fix
     gcTime: 300000 // 5 minutes
   });
 
