@@ -861,7 +861,12 @@ export class DatabaseStorage implements IStorage {
 
   // Task operations
   async getTasks(): Promise<Task[]> {
-    return await db.select().from(tasks).orderBy(desc(tasks.createdAt));
+    // Only return tasks that are assigned to actual projects, not template tasks
+    return await db
+      .select()
+      .from(tasks)
+      .where(isNotNull(tasks.projectId))
+      .orderBy(desc(tasks.createdAt));
   }
 
   async getTasksWithAccessControl(userId: string, userAccessLevel: string): Promise<Task[]> {
@@ -1118,7 +1123,12 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(tasks)
-      .where(eq(tasks.assignedTo, userId))
+      .where(
+        and(
+          isNotNull(tasks.projectId), // Filter out template tasks
+          eq(tasks.assignedTo, userId)
+        )
+      )
       .orderBy(desc(tasks.createdAt));
   }
 
@@ -1131,6 +1141,7 @@ export class DatabaseStorage implements IStorage {
       .from(tasks)
       .where(
         and(
+          isNotNull(tasks.projectId), // Filter out template tasks
           eq(tasks.status, "todo"),
           sql`${tasks.dueDate} BETWEEN ${now} AND ${nextWeek}`
         )
@@ -1146,6 +1157,7 @@ export class DatabaseStorage implements IStorage {
       .from(tasks)
       .where(
         and(
+          isNotNull(tasks.projectId), // Filter out template tasks
           eq(tasks.status, "todo"),
           sql`${tasks.dueDate} < ${now}`
         )
@@ -2290,6 +2302,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           isNotNull(tasks.assignedTo),
+          isNotNull(tasks.projectId), // Filter out template tasks
           sql`${userContact} = ANY(${tasks.assignedTo})`
         )
       );
