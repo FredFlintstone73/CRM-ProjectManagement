@@ -43,7 +43,7 @@ export default function Tasks() {
   }>({ key: 'priority', direction: 'asc' });
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskFilter, setTaskFilter] = useState<'my_tasks' | 'all_tasks'>('my_tasks');
-  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress'>('in_progress');
+  const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'in_progress' | 'overdue'>('in_progress');
   const [dueDateFilter, setDueDateFilter] = useState<'all' | 'today' | 'this_week' | 'next_two_weeks' | 'next_30_days' | 'next_122_days' | 'custom'>('next_30_days');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
@@ -344,7 +344,8 @@ export default function Tasks() {
     const matchesCompletion = 
       completionFilter === 'all' || 
       (completionFilter === 'completed' && task.status === 'completed') ||
-      (completionFilter === 'in_progress' && task.status !== 'completed');
+      (completionFilter === 'in_progress' && task.status !== 'completed') ||
+      (completionFilter === 'overdue' && task.status !== 'completed' && task.dueDate && new Date(task.dueDate) < new Date());
 
     const matchesTaskFilter = () => {
       if (taskFilter === 'all_tasks') return true;
@@ -688,6 +689,14 @@ export default function Tasks() {
                 className="data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800"
               >
                 In Progress
+              </Toggle>
+              <Toggle
+                pressed={completionFilter === 'overdue'}
+                onPressedChange={() => setCompletionFilter('overdue')}
+                variant="outline"
+                className="data-[state=on]:bg-red-100 data-[state=on]:text-red-800"
+              >
+                Overdue
               </Toggle>
               <Toggle
                 pressed={completionFilter === 'completed'}
