@@ -217,8 +217,14 @@ export default function ContactDetail() {
         return 'Insurance - Life, LTC, & Disability';
       case 'insurance_pc':
         return 'Insurance - P&C';
+      case 'loan_officer':
+        return 'Loan Officer';
+      case 'marketing_director':
+        return 'Marketing Director';
       case 'money_manager':
         return 'Money Manager';
+      case 'strategic_relations_director':
+        return 'Strategic Relations Director';
       case 'tax_planner':
         return 'Tax Planner';
       case 'trusted_advisor':

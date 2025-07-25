@@ -50,7 +50,10 @@ export const contactRoleEnum = pgEnum("contact_role", [
   "insurance_health",
   "insurance_life_ltc_disability",
   "insurance_pc",
+  "loan_officer",
+  "marketing_director", 
   "money_manager",
+  "strategic_relations_director",
   "tax_planner",
   "trusted_advisor",
   "other"
@@ -62,6 +65,14 @@ export const contactStatusEnum = pgEnum("contact_status", [
   "inactive",
   "follow_up",
   "converted"
+]);
+
+// Calendar provider enum
+export const calendarProviderEnum = pgEnum("calendar_provider", [
+  "google",
+  "outlook",
+  "apple",
+  "other"
 ]);
 
 // Project status enum
@@ -833,7 +844,10 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
       "insurance_health",
       "insurance_life_ltc_disability",
       "insurance_pc",
+      "loan_officer",
+      "marketing_director",
       "money_manager",
+      "strategic_relations_director",
       "tax_planner",
       "trusted_advisor",
       "other"
@@ -850,7 +864,10 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
       "insurance_health",
       "insurance_life_ltc_disability",
       "insurance_pc",
+      "loan_officer",
+      "marketing_director",
       "money_manager",
+      "strategic_relations_director",
       "tax_planner",
       "trusted_advisor",
       "other"
@@ -943,6 +960,27 @@ export const userInvitations = pgTable("user_invitations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Calendar connections table
+export const calendarConnections = pgTable("calendar_connections", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  provider: calendarProviderEnum("provider").notNull(),
+  calendarId: varchar("calendar_id"), // External calendar ID
+  calendarName: varchar("calendar_name"),
+  accessToken: text("access_token"), // Encrypted OAuth access token
+  refreshToken: text("refresh_token"), // Encrypted OAuth refresh token
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
+  syncEnabled: boolean("sync_enabled").default(true),
+  lastSyncAt: timestamp("last_sync_at"),
+  settings: jsonb("settings"), // Calendar-specific settings
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("calendar_user_idx").on(table.userId),
+  index("calendar_provider_idx").on(table.provider),
+]);
+
 // Relations
 export const userRelations = relations(users, ({ many, one }) => ({
   invitations: many(userInvitations, { relationName: "userInvitations" }),
@@ -960,6 +998,13 @@ export const userInvitationsRelations = relations(userInvitations, ({ one }) => 
   })
 }));
 
+export const calendarConnectionsRelations = relations(calendarConnections, ({ one }) => ({
+  user: one(users, {
+    fields: [calendarConnections.userId],
+    references: [users.id],
+  }),
+}));
+
 export const insertUserInvitationSchema = createInsertSchema(userInvitations).omit({
   id: true,
   createdAt: true,
@@ -970,6 +1015,16 @@ export const insertUserInvitationSchema = createInsertSchema(userInvitations).om
   acceptedAt: true,
   invitedBy: true,
   expiresAt: true,
+});
+
+export const insertCalendarConnectionSchema = createInsertSchema(calendarConnections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  accessToken: true,
+  refreshToken: true,
+  expiresAt: true,
+  lastSyncAt: true,
 });
 
 // Types
@@ -1027,6 +1082,8 @@ export type UserInvitation = typeof userInvitations.$inferSelect;
 export type InsertUserInvitation = z.infer<typeof insertUserInvitationSchema>;
 export type ContactBusiness = typeof contactBusinesses.$inferSelect;
 export type InsertContactBusiness = z.infer<typeof insertContactBusinessSchema>;
+export type CalendarConnection = typeof calendarConnections.$inferSelect;
+export type InsertCalendarConnection = z.infer<typeof insertCalendarConnectionSchema>;
 
 // Mentions schema and types
 export const insertMentionSchema = createInsertSchema(mentions).omit({

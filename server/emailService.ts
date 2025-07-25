@@ -74,7 +74,7 @@ class EmailService {
     if (config) {
       this.transporter = nodemailer.createTransport(config);
       this.isConfigured = true;
-      const serviceType = config.service || `${config.host}:${config.port}`;
+      const serviceType = outlookUser ? 'outlook' : (config.service || `${config.host}:${config.port}`);
       const emailUser = outlookUser || gmailUser || smtpUser;
       console.log(`Email service configured successfully (${serviceType}) for ${emailUser}`);
     } else {

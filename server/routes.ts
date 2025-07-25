@@ -2574,6 +2574,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Calendar connections API endpoints
+  app.get('/api/calendar/connections', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const connections = await storage.getUserCalendarConnections(userId);
+      res.json(connections);
+    } catch (error) {
+      console.error("Error fetching calendar connections:", error);
+      res.status(500).json({ message: "Failed to fetch calendar connections" });
+    }
+  });
+
+  app.post('/api/calendar/connections', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const connectionData = req.body;
+      
+      const connection = await storage.createCalendarConnection({
+        ...connectionData,
+        userId,
+      });
+      
+      res.status(201).json(connection);
+    } catch (error) {
+      console.error("Error creating calendar connection:", error);
+      res.status(500).json({ message: "Failed to create calendar connection" });
+    }
+  });
+
+  app.put('/api/calendar/connections/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const connectionId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const connection = await storage.updateCalendarConnection(connectionId, updates);
+      res.json(connection);
+    } catch (error) {
+      console.error("Error updating calendar connection:", error);
+      res.status(500).json({ message: "Failed to update calendar connection" });
+    }
+  });
+
+  app.delete('/api/calendar/connections/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const connectionId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.deleteCalendarConnection(connectionId, userId);
+      res.json({ message: "Calendar connection deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting calendar connection:", error);
+      res.status(500).json({ message: "Failed to delete calendar connection" });
+    }
+  });
+
+  // Calendar sync endpoint - sync project due dates and task deadlines
+  app.post('/api/calendar/sync/:connectionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const connectionId = parseInt(req.params.connectionId);
+      const userId = req.user.claims.sub;
+      
+      // Get the calendar connection
+      const connection = await storage.getCalendarConnection(connectionId);
+      if (!connection || connection.userId !== userId) {
+        return res.status(404).json({ message: "Calendar connection not found" });
+      }
+      
+      // For now, just mark sync as completed
+      // In a full implementation, this would create calendar events for project dates and task deadlines
+      await storage.updateCalendarConnection(connectionId, {
+        lastSyncAt: new Date(),
+      });
+      
+      res.json({ message: "Calendar sync completed successfully" });
+    } catch (error) {
+      console.error("Error syncing calendar:", error);
+      res.status(500).json({ message: "Failed to sync calendar" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

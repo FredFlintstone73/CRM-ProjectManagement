@@ -1,0 +1,404 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Calendar as CalendarIcon, Plus, Trash2, RefreshCw, Settings } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import type { CalendarConnection } from "@shared/schema";
+
+const calendarProviders = [
+  { value: "google", label: "Google Calendar" },
+  { value: "outlook", label: "Microsoft Outlook" },
+  { value: "apple", label: "Apple Calendar" },
+  { value: "other", label: "Other" },
+];
+
+const connectionSchema = z.object({
+  provider: z.enum(["google", "outlook", "apple", "other"]),
+  calendarName: z.string().min(1, "Calendar name is required"),
+  calendarId: z.string().optional(),
+  syncEnabled: z.boolean().default(true),
+});
+
+type ConnectionFormData = z.infer<typeof connectionSchema>;
+
+export default function CalendarPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const form = useForm<ConnectionFormData>({
+    resolver: zodResolver(connectionSchema),
+    defaultValues: {
+      provider: "google",
+      calendarName: "",
+      syncEnabled: true,
+    },
+  });
+
+  const { data: connections = [], isLoading } = useQuery<CalendarConnection[]>({
+    queryKey: ["/api/calendar/connections"],
+  });
+
+  const createConnectionMutation = useMutation({
+    mutationFn: (data: ConnectionFormData) => 
+      apiRequest("/api/calendar/connections", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
+      setDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Calendar Connected",
+        description: "Your calendar has been connected successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect calendar",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteConnectionMutation = useMutation({
+    mutationFn: (id: number) => 
+      apiRequest(`/api/calendar/connections/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
+      toast({
+        title: "Calendar Disconnected",
+        description: "Calendar connection has been removed.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to remove calendar connection",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const syncConnectionMutation = useMutation({
+    mutationFn: (id: number) => 
+      apiRequest(`/api/calendar/sync/${id}`, {
+        method: "POST",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
+      toast({
+        title: "Sync Complete",
+        description: "Calendar has been synced with project dates and task deadlines.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync calendar",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateSyncMutation = useMutation({
+    mutationFn: ({ id, syncEnabled }: { id: number; syncEnabled: boolean }) => 
+      apiRequest(`/api/calendar/connections/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ syncEnabled }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
+      toast({
+        title: "Settings Updated",
+        description: "Calendar sync settings have been updated.",
+      });
+    },
+  });
+
+  const onSubmit = (data: ConnectionFormData) => {
+    createConnectionMutation.mutate(data);
+  };
+
+  const handleDelete = (id: number) => {
+    if (confirm("Are you sure you want to disconnect this calendar?")) {
+      deleteConnectionMutation.mutate(id);
+    }
+  };
+
+  const handleSync = (id: number) => {
+    syncConnectionMutation.mutate(id);
+  };
+
+  const handleSyncToggle = (id: number, syncEnabled: boolean) => {
+    updateSyncMutation.mutate({ id, syncEnabled });
+  };
+
+  const getProviderLabel = (provider: string) => {
+    return calendarProviders.find(p => p.value === provider)?.label || provider;
+  };
+
+  const getProviderIcon = (provider: string) => {
+    switch (provider) {
+      case "google":
+        return "🗓️";
+      case "outlook":
+        return "📅";
+      case "apple":
+        return "🍎";
+      default:
+        return "🗓️";
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Calendar Integration</h1>
+            <p className="text-muted-foreground">
+              Connect your calendars to sync project due dates and task deadlines
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-1/2"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Calendar Integration</h1>
+          <p className="text-muted-foreground">
+            Connect your calendars to sync project due dates and task deadlines
+          </p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Connect Calendar
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Connect Calendar</DialogTitle>
+              <DialogDescription>
+                Add a new calendar connection to sync your project dates and task deadlines.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="provider"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Calendar Provider</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a calendar provider" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {calendarProviders.map((provider) => (
+                            <SelectItem key={provider.value} value={provider.value}>
+                              {provider.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="calendarName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Calendar Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="My Work Calendar" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="calendarId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Calendar ID (Optional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="your-email@domain.com" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="syncEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Enable Sync</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Automatically sync project dates and task deadlines
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createConnectionMutation.isPending}>
+                    {createConnectionMutation.isPending ? "Connecting..." : "Connect"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {connections.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Calendar Connections</h3>
+            <p className="text-muted-foreground mb-4">
+              Connect your calendar to automatically sync project due dates and task deadlines.
+            </p>
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Connect Your First Calendar
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {connections.map((connection) => (
+            <Card key={connection.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">{getProviderIcon(connection.provider)}</span>
+                    <div>
+                      <CardTitle className="flex items-center space-x-2">
+                        <span>{connection.calendarName}</span>
+                        <Badge variant={connection.isActive ? "default" : "secondary"}>
+                          {connection.isActive ? "Connected" : "Disconnected"}
+                        </Badge>
+                      </CardTitle>
+                      <CardDescription>
+                        {getProviderLabel(connection.provider)}
+                        {connection.calendarId && ` • ${connection.calendarId}`}
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-muted-foreground">Sync</span>
+                      <Switch
+                        checked={connection.syncEnabled}
+                        onCheckedChange={(checked) => handleSyncToggle(connection.id, checked)}
+                        disabled={updateSyncMutation.isPending}
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSync(connection.id)}
+                      disabled={syncConnectionMutation.isPending || !connection.syncEnabled}
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${syncConnectionMutation.isPending ? 'animate-spin' : ''}`} />
+                      Sync Now
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(connection.id)}
+                      disabled={deleteConnectionMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Disconnect
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Created:</span> {new Date(connection.createdAt).toLocaleDateString()}
+                  </div>
+                  <div>
+                    <span className="font-medium">Last Sync:</span>{" "}
+                    {connection.lastSyncAt
+                      ? new Date(connection.lastSyncAt).toLocaleDateString()
+                      : "Never"}
+                  </div>
+                </div>
+                {connection.settings && (
+                  <div className="mt-4">
+                    <details className="group">
+                      <summary className="flex items-center space-x-2 cursor-pointer text-sm font-medium">
+                        <Settings className="h-4 w-4" />
+                        <span>Connection Settings</span>
+                      </summary>
+                      <div className="mt-2 p-3 bg-muted rounded text-xs">
+                        <pre>{JSON.stringify(connection.settings, null, 2)}</pre>
+                      </div>
+                    </details>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

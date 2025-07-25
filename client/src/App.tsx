@@ -23,6 +23,7 @@ import Marketing from "@/pages/marketing";
 import Settings from "@/pages/settings";
 import AcceptInvitation from "@/pages/accept-invitation";
 import Messages from "@/pages/messages";
+import Calendar from "@/pages/calendar";
 import Sidebar from "@/components/layout/sidebar";
 import { Mandatory2FAWrapper } from "@/components/auth/Mandatory2FAWrapper";
 import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
@@ -65,6 +66,7 @@ function Router() {
                 <Route path="/task/:id" component={TaskDetail} />
                 <Route path="/tasks" component={Tasks} />
                 <Route path="/marketing" component={Marketing} />
+                <Route path="/calendar" component={Calendar} />
                 <Route path="/messages" component={Messages} />
                 <Route path="/settings" component={Settings} />
                 <Route path="/user-management" component={UserManagement} />

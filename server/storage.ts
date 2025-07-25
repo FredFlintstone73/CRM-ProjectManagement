@@ -18,6 +18,7 @@ import {
   userInvitations,
   userActivities,
   mentions,
+  calendarConnections,
   type User,
   type UpsertUser,
   type Contact,
@@ -56,6 +57,8 @@ import {
   type InsertUserActivity,
   type Mention,
   type InsertMention,
+  type CalendarConnection,
+  type InsertCalendarConnection,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, not, ilike, count, isNotNull, inArray, gte, lte } from "drizzle-orm";
@@ -234,6 +237,13 @@ export interface IStorage {
   // Task due date notifications
   getTasksDueSoon(userId: string): Promise<(Task & { projectName?: string; daysUntilDue: number })[]>;
   getOverdueTasks(userId: string): Promise<(Task & { projectName?: string; daysOverdue: number })[]>;
+  
+  // Calendar operations
+  getUserCalendarConnections(userId: string): Promise<CalendarConnection[]>;
+  createCalendarConnection(connection: InsertCalendarConnection): Promise<CalendarConnection>;
+  updateCalendarConnection(id: number, updates: Partial<CalendarConnection>): Promise<CalendarConnection>;
+  deleteCalendarConnection(id: number, userId: string): Promise<void>;
+  getCalendarConnection(id: number): Promise<CalendarConnection | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3059,6 +3069,94 @@ export class DatabaseStorage implements IStorage {
         daysOverdue
       };
     });
+  }
+
+  // Calendar operations
+  async getUserCalendarConnections(userId: string): Promise<CalendarConnection[]> {
+    return await db
+      .select()
+      .from(calendarConnections)
+      .where(eq(calendarConnections.userId, userId))
+      .orderBy(desc(calendarConnections.createdAt));
+  }
+
+  async createCalendarConnection(connection: InsertCalendarConnection): Promise<CalendarConnection> {
+    const [newConnection] = await db
+      .insert(calendarConnections)
+      .values({
+        ...connection,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    // Log activity
+    await this.createActivityLog({
+      userId: connection.userId,
+      action: "created_calendar_connection",
+      entityType: "calendar_connection",
+      entityId: newConnection.id,
+      description: `Connected ${connection.provider} calendar`,
+      metadata: { provider: connection.provider, calendarName: connection.calendarName }
+    });
+
+    return newConnection;
+  }
+
+  async updateCalendarConnection(id: number, updates: Partial<CalendarConnection>): Promise<CalendarConnection> {
+    const [updatedConnection] = await db
+      .update(calendarConnections)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(calendarConnections.id, id))
+      .returning();
+
+    if (!updatedConnection) {
+      throw new Error(`Calendar connection with id ${id} not found`);
+    }
+
+    // Log activity
+    await this.createActivityLog({
+      userId: updatedConnection.userId,
+      action: "updated_calendar_connection",
+      entityType: "calendar_connection",
+      entityId: id,
+      description: `Updated ${updatedConnection.provider} calendar connection`,
+      metadata: updates
+    });
+
+    return updatedConnection;
+  }
+
+  async deleteCalendarConnection(id: number, userId: string): Promise<void> {
+    const connection = await this.getCalendarConnection(id);
+    if (!connection || connection.userId !== userId) {
+      throw new Error("Calendar connection not found or access denied");
+    }
+
+    await db
+      .delete(calendarConnections)
+      .where(eq(calendarConnections.id, id));
+
+    // Log activity
+    await this.createActivityLog({
+      userId,
+      action: "deleted_calendar_connection",
+      entityType: "calendar_connection",
+      entityId: id,
+      description: `Deleted ${connection.provider} calendar connection`,
+      metadata: { provider: connection.provider, calendarName: connection.calendarName }
+    });
+  }
+
+  async getCalendarConnection(id: number): Promise<CalendarConnection | undefined> {
+    const [connection] = await db
+      .select()
+      .from(calendarConnections)
+      .where(eq(calendarConnections.id, id));
+    return connection;
   }
 }
 
