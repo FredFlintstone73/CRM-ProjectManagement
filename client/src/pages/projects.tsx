@@ -60,6 +60,39 @@ export default function Projects() {
     gcTime: 300000, // 5 minutes
   });
 
+  // Fetch task data for progress calculation
+  const { data: projectTaskData = {} } = useQuery<Record<number, { total: number; completed: number; progress: number }>>({
+    queryKey: ['/api/projects/task-progress'],
+    enabled: !!projects && isAuthenticated,
+    staleTime: 30000, // 30 seconds
+    gcTime: 300000, // 5 minutes
+    queryFn: async () => {
+      if (!projects) return {};
+      
+      const taskData: Record<number, { total: number; completed: number; progress: number }> = {};
+      
+      await Promise.all(
+        projects.map(async (project) => {
+          try {
+            const response = await fetch(`/api/projects/${project.id}/tasks`, {
+              credentials: 'include',
+            });
+            if (response.ok) {
+              const tasks = await response.json();
+              const totalTasks = tasks.filter((task: any) => task.projectId !== null).length; // Exclude template tasks
+              const completedTasks = tasks.filter((task: any) => task.status === 'completed' && task.projectId !== null).length;
+              const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+              taskData[project.id] = { total: totalTasks, completed: completedTasks, progress };
+            }
+          } catch (error) {
+            taskData[project.id] = { total: 0, completed: 0, progress: 0 };
+          }
+        })
+      );
+      return taskData;
+    },
+  });
+
   // Helper functions
   const getProjectStatusColor = (status: string) => {
     switch (status) {
@@ -404,6 +437,18 @@ export default function Projects() {
                         <span>Meeting: {new Date(project.dueDate).toLocaleDateString()}</span>
                       </div>
                     )}
+
+                    {/* Progress Bar */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Progress</span>
+                        <span className="text-gray-800 font-medium">
+                          {projectTaskData[project.id]?.progress || 0}% 
+                          ({projectTaskData[project.id]?.completed || 0}/{projectTaskData[project.id]?.total || 0} tasks)
+                        </span>
+                      </div>
+                      <Progress value={projectTaskData[project.id]?.progress || 0} className="h-2" />
+                    </div>
                     
                     <div className="flex items-center justify-end pt-2">
                       <Button
@@ -450,6 +495,7 @@ export default function Projects() {
                         Meeting Date {getSortIcon('date')}
                       </div>
                     </TableHead>
+                    <TableHead className="text-xs">Progress</TableHead>
                     <TableHead className="text-xs">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -499,6 +545,19 @@ export default function Projects() {
 
                       <TableCell>
                         {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'Not set'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1 min-w-[120px]">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-600">
+                              {projectTaskData[project.id]?.progress || 0}%
+                            </span>
+                            <span className="text-gray-500">
+                              {projectTaskData[project.id]?.completed || 0}/{projectTaskData[project.id]?.total || 0}
+                            </span>
+                          </div>
+                          <Progress value={projectTaskData[project.id]?.progress || 0} className="h-1.5" />
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Button
