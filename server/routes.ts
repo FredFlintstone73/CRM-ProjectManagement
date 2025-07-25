@@ -1175,6 +1175,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userEmail: req.user.email || req.user.claims?.email
       });
       
+      console.log('Complete user object:', JSON.stringify(req.user, null, 2));
+      
 
       
       // Handle assignedTo - can be array (multi-select) or single value
@@ -1236,12 +1238,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priority = isNaN(priorityNum) ? 25 : priorityNum;
       }
       
+      console.log('Final processed assignedTo:', assignedTo);
+      
       const processedTaskData = {
         ...taskData,
         assignedTo: assignedTo,
         priority: priority,
         assignedToRole: assignedToRole,
       };
+      
+      console.log('Final processedTaskData:', JSON.stringify(processedTaskData, null, 2));
       
 
       
