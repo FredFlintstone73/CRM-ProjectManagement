@@ -856,6 +856,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // Project tasks route
   app.get('/api/projects/:id/tasks', isAuthenticated, async (req: any, res) => {
     try {
@@ -1139,6 +1141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Apply access control for "All Tasks" view
         const userAccessLevel = await storage.getUserAccessLevel(currentUserId);
         tasks = await storage.getTasksWithAccessControl(currentUserId, userAccessLevel || 'team_member');
+        console.log(`Access Control Applied - User: ${currentUserId}, Level: ${userAccessLevel}, Tasks visible: ${tasks.length}`);
       }
       
       res.json(tasks);
