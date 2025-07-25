@@ -1,4 +1,7 @@
 import nodemailer from 'nodemailer';
+import Imap from 'imap';
+import { simpleParser } from 'mailparser';
+import type { IStorage } from './storage';
 
 interface EmailConfig {
   service?: string; // 'gmail', 'outlook', etc.
@@ -21,9 +24,17 @@ interface EmailData {
 class EmailService {
   private transporter: any = null;
   private isConfigured = false;
+  private imapClient: Imap | null = null;
+  private storage: IStorage | null = null;
+  private monitoring = false;
 
   constructor() {
     this.initializeTransporter();
+  }
+
+  // Set storage reference for email monitoring
+  setStorage(storage: IStorage) {
+    this.storage = storage;
   }
 
   private initializeTransporter() {
@@ -211,6 +222,208 @@ class EmailService {
 
   isEmailConfigured(): boolean {
     return this.isConfigured;
+  }
+
+  // Start monitoring incoming emails for automatic threading
+  async startEmailMonitoring() {
+    if (this.monitoring || !this.storage) {
+      return;
+    }
+
+    try {
+      const imapConfig = this.getImapConfig();
+      if (!imapConfig) {
+        console.log('IMAP not configured, email monitoring disabled');
+        return;
+      }
+
+      this.imapClient = new Imap(imapConfig);
+      this.monitoring = true;
+
+      this.imapClient.once('ready', () => {
+        console.log('IMAP connection ready, monitoring emails...');
+        this.openInbox();
+      });
+
+      this.imapClient.once('error', (err: Error) => {
+        console.error('IMAP connection error:', err);
+        this.monitoring = false;
+      });
+
+      this.imapClient.once('end', () => {
+        console.log('IMAP connection ended');
+        this.monitoring = false;
+      });
+
+      this.imapClient.connect();
+    } catch (error) {
+      console.error('Error starting email monitoring:', error);
+      this.monitoring = false;
+    }
+  }
+
+  private getImapConfig() {
+    const outlookUser = process.env.OUTLOOK_USER;
+    const outlookPass = process.env.OUTLOOK_PASSWORD;
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailPass = process.env.GMAIL_APP_PASSWORD;
+
+    if (outlookUser && outlookPass) {
+      return {
+        user: outlookUser,
+        password: outlookPass,
+        host: 'outlook.office365.com',
+        port: 993,
+        tls: true,
+        tlsOptions: { rejectUnauthorized: false }
+      };
+    } else if (gmailUser && gmailPass) {
+      return {
+        user: gmailUser,
+        password: gmailPass,
+        host: 'imap.gmail.com',
+        port: 993,
+        tls: true,
+        tlsOptions: { rejectUnauthorized: false }
+      };
+    }
+
+    return null;
+  }
+
+  private openInbox() {
+    if (!this.imapClient) return;
+
+    this.imapClient.openBox('INBOX', false, (err: Error, box: any) => {
+      if (err) {
+        console.error('Error opening inbox:', err);
+        return;
+      }
+
+      console.log('Inbox opened, watching for new emails...');
+      
+      // Listen for new emails
+      this.imapClient!.on('mail', (numNewMsgs: number) => {
+        console.log(`${numNewMsgs} new email(s) received`);
+        this.processNewEmails(numNewMsgs);
+      });
+    });
+  }
+
+  private async processNewEmails(numNewMsgs: number) {
+    if (!this.imapClient || !this.storage) return;
+
+    try {
+      // Search for recent unread emails
+      this.imapClient.search(['UNSEEN'], (err: Error, results: number[]) => {
+        if (err) {
+          console.error('Error searching emails:', err);
+          return;
+        }
+
+        if (results.length === 0) return;
+
+        // Process each new email
+        const fetch = this.imapClient!.fetch(results, {
+          bodies: '',
+          markSeen: false
+        });
+
+        fetch.on('message', (msg: any) => {
+          msg.on('body', (stream: any) => {
+            let buffer = '';
+            stream.on('data', (chunk: any) => {
+              buffer += chunk.toString('utf8');
+            });
+            
+            stream.once('end', async () => {
+              try {
+                const parsed = await simpleParser(buffer);
+                await this.processIncomingEmail(parsed);
+              } catch (error) {
+                console.error('Error parsing email:', error);
+              }
+            });
+          });
+        });
+
+        fetch.once('error', (err: Error) => {
+          console.error('Fetch error:', err);
+        });
+      });
+    } catch (error) {
+      console.error('Error processing new emails:', error);
+    }
+  }
+
+  private async processIncomingEmail(email: any) {
+    if (!this.storage) return;
+
+    try {
+      const subject = email.subject || '';
+      const from = email.from?.text || '';
+      const body = email.text || email.html || '';
+      
+      console.log(`Processing incoming email from: ${from}, subject: ${subject}`);
+
+      // Try to find matching contact by email
+      const contacts = await this.storage.getContacts();
+      const matchingContact = contacts.find(contact => 
+        from.includes(contact.personalEmail || '') ||
+        from.includes(contact.workEmail || '') ||
+        from.includes(contact.spousePersonalEmail || '')
+      );
+
+      if (!matchingContact) {
+        console.log('No matching contact found for email from:', from);
+        return;
+      }
+
+      // Check if this is a reply (contains "Re:" or "RE:")
+      const isReply = subject.toLowerCase().includes('re:');
+      let parentEmailId = null;
+
+      if (isReply) {
+        // Try to find the original email this is replying to
+        const originalSubject = subject.replace(/^re:\s*/i, '').trim();
+        const existingEmails = await this.storage.getEmailInteractionsByContact(matchingContact.id);
+        
+        const originalEmail = existingEmails.find(email => 
+          email.subject?.toLowerCase().includes(originalSubject.toLowerCase()) &&
+          email.emailType === 'sent'
+        );
+
+        if (originalEmail) {
+          parentEmailId = originalEmail.id;
+          console.log(`Found parent email ID: ${parentEmailId} for reply`);
+        }
+      }
+
+      // Create email interaction record
+      await this.storage.createEmailInteraction({
+        contactId: matchingContact.id,
+        parentEmailId,
+        subject,
+        body,
+        sender: from,
+        recipient: this.transporter?.options?.auth?.user || '',
+        emailType: 'received',
+        sentAt: email.date || new Date(),
+      });
+
+      console.log(`Automatically recorded ${isReply ? 'reply' : 'email'} from ${matchingContact.firstName} ${matchingContact.lastName}`);
+    } catch (error) {
+      console.error('Error processing incoming email:', error);
+    }
+  }
+
+  // Stop email monitoring
+  stopEmailMonitoring() {
+    if (this.imapClient && this.monitoring) {
+      this.imapClient.end();
+      this.monitoring = false;
+      console.log('Email monitoring stopped');
+    }
   }
 }
 

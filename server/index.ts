@@ -65,7 +65,22 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, () => {
+  }, async () => {
     log(`serving on port ${port}`);
+    
+    // Initialize email monitoring after server starts
+    try {
+      const { emailService } = await import("./emailService");
+      const { storage } = await import("./storage");
+      
+      // Set storage reference for email service
+      emailService.setStorage(storage);
+      
+      // Start email monitoring for automatic threading
+      await emailService.startEmailMonitoring();
+      console.log('Email monitoring initialized');
+    } catch (error) {
+      console.error('Error initializing email monitoring:', error);
+    }
   });
 })();

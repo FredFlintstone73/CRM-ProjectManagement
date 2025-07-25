@@ -2160,6 +2160,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email monitoring status endpoint
+  app.get('/api/email-monitoring/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const { emailService } = await import('./emailService');
+      const status = {
+        monitoring: emailService.monitoring || false,
+        configured: emailService.isEmailConfigured(),
+        serviceType: emailService.getConfigurationStatus().serviceType,
+      };
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting email monitoring status:", error);
+      res.status(500).json({ message: "Failed to get email monitoring status" });
+    }
+  });
+
   // Call transcript routes
   app.get('/api/call-transcripts', isAuthenticated, async (req: any, res) => {
     try {
