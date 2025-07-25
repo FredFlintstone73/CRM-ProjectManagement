@@ -366,41 +366,59 @@ class EmailService {
       
       console.log(`Processing incoming email from: ${from}, subject: ${subject}`);
 
-      // Try to find matching contact by email
+      // Try to find matching contact by email - extract actual email address from the from field
+      const emailRegex = /<([^>]+)>/;
+      const emailMatch = from.match(emailRegex);
+      const fromEmail = emailMatch ? emailMatch[1] : from.trim();
+      
       const contacts = await this.storage.getContacts();
       const matchingContact = contacts.find(contact => 
-        from.includes(contact.personalEmail || '') ||
-        from.includes(contact.workEmail || '') ||
-        from.includes(contact.spousePersonalEmail || '')
+        (contact.personalEmail && fromEmail.toLowerCase().includes(contact.personalEmail.toLowerCase())) ||
+        (contact.workEmail && fromEmail.toLowerCase().includes(contact.workEmail.toLowerCase())) ||
+        (contact.spousePersonalEmail && fromEmail.toLowerCase().includes(contact.spousePersonalEmail.toLowerCase()))
       );
-
-      if (!matchingContact) {
-        console.log('No matching contact found for email from:', from);
-        return;
-      }
 
       // Check if this is a reply (contains "Re:" or "RE:")
       const isReply = subject.toLowerCase().includes('re:');
       let parentEmailId = null;
+      let targetContact = matchingContact;
 
       if (isReply) {
-        // Try to find the original email this is replying to
+        // For replies, we need to find the original conversation across ALL contacts
         const originalSubject = subject.replace(/^re:\s*/i, '').trim();
-        const existingEmails = await this.storage.getEmailInteractionsByContact(matchingContact.id);
+        console.log(`Looking for original email with subject: ${originalSubject}`);
         
-        const originalEmail = existingEmails.find(email => 
-          email.subject?.toLowerCase().includes(originalSubject.toLowerCase()) &&
-          email.emailType === 'sent'
-        );
+        // Search all contacts for the original email
+        const allContacts = await this.storage.getContacts();
+        let originalEmail = null;
+        
+        for (const contact of allContacts) {
+          const contactEmails = await this.storage.getEmailInteractionsByContact(contact.id);
+          const foundEmail = contactEmails.find(email => 
+            email.subject?.toLowerCase().includes(originalSubject.toLowerCase()) &&
+            email.emailType === 'sent'
+          );
+          
+          if (foundEmail) {
+            originalEmail = foundEmail;
+            targetContact = contact; // The reply should be associated with the contact who received the original email
+            break;
+          }
+        }
 
         if (originalEmail) {
           parentEmailId = originalEmail.id;
-          console.log(`Found parent email ID: ${parentEmailId} for reply`);
+          console.log(`Found parent email ID: ${parentEmailId} for reply, associating with contact: ${targetContact.firstName} ${targetContact.lastName}`);
         }
       }
 
+      if (!targetContact) {
+        console.log('No target contact found for email from:', from);
+        return;
+      }
+
       // Check if we've already recorded this email to avoid duplicates
-      const existingEmails = await this.storage.getEmailInteractionsByContact(matchingContact.id);
+      const existingEmails = await this.storage.getEmailInteractionsByContact(targetContact.id);
       const isDuplicate = existingEmails.some(email => 
         email.subject === subject &&
         email.sender === from &&
@@ -414,7 +432,7 @@ class EmailService {
 
       // Create email interaction record
       await this.storage.createEmailInteraction({
-        contactId: matchingContact.id,
+        contactId: targetContact.id,
         parentEmailId,
         subject,
         body,
@@ -424,7 +442,7 @@ class EmailService {
         sentAt: email.date || new Date(),
       });
 
-      console.log(`Automatically recorded ${isReply ? 'reply email' : 'new email conversation'} from ${matchingContact.firstName} ${matchingContact.lastName}`);
+      console.log(`Automatically recorded ${isReply ? 'reply email' : 'new email conversation'} from ${from} to contact: ${targetContact.firstName} ${targetContact.lastName}`);
     } catch (error) {
       console.error('Error processing incoming email:', error);
     }
