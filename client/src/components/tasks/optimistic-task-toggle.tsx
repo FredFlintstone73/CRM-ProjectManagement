@@ -63,6 +63,15 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (old: any[] | undefined) => 
         old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
       );
+
+      // Update individual task query for Task Details page sync
+      queryClient.setQueryData(['/api/tasks', task.id.toString()], (old: Task | undefined) => {
+        if (old) {
+          console.log(`Updated individual task cache for task ${task.id} with status: ${newStatus}`);
+          return { ...old, status: newStatus, completedAt };
+        }
+        return old;
+      });
       
       // Instant progress calculation with optimized logic
       queryClient.setQueryData(['/api/dashboard/projects-due'], (old: any[] | undefined) => 
@@ -90,20 +99,25 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       console.log('=== CACHE INVALIDATION ===');
       console.log('Invalidating all caches immediately');
       
-      // IMMEDIATE cache invalidation - no requestIdleCallback delay
+      // COMPREHENSIVE cache invalidation for cross-page sync
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       }
+      
+      // Invalidate all task-related queries
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
       
-      // Invalidate notification queries so overdue tasks update immediately
+      // Invalidate individual task queries (for Task Details page)
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
+      
+      // Invalidate dashboard and notification queries
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
       queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
       
-      console.log('Cache invalidation completed');
+      console.log('Cache invalidation completed - all pages should update');
       console.log('========================');
     },
   });
