@@ -37,16 +37,16 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   const teamMembers = contacts?.filter(contact => 
     contact.contactType === 'team_member' && 
     contact.status === 'active' &&
-    contact.personalEmail !== user?.email &&
-    contact.workEmail !== user?.email
+    contact.personalEmail !== (user as any)?.email &&
+    contact.workEmail !== (user as any)?.email
   ) || [];
 
   // Get current user's contact ID
   const getCurrentUserContactId = () => {
     if (!user || !contacts) return null;
     const userContact = contacts.find((contact: any) => 
-      contact.personalEmail === user.email || 
-      contact.workEmail === user.email
+      contact.personalEmail === (user as any).email || 
+      contact.workEmail === (user as any).email
     );
     return userContact?.id || null;
   };
@@ -60,7 +60,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     
     return assignedToArray.map(id => {
       if (currentUserContactId && id === currentUserContactId) {
-        return `me_${user?.id}`;
+        return `me_${(user as any)?.id}`;
       }
       return `team_${id}`;
     });
@@ -71,11 +71,17 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   const [dueDate, setDueDate] = useState<Date | undefined>(() => {
     if (!task?.dueDate) return undefined;
     // Parse date string as local date (YYYY-MM-DD format)
-    const dateStr = task.dueDate.split('T')[0]; // Remove time portion if present
+    const dateStr = typeof task.dueDate === 'string' ? task.dueDate.split('T')[0] : task.dueDate.toISOString().split('T')[0];
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day); // month is 0-indexed
   });
-  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>(() => {
+    // Auto-assign to current user for new tasks
+    if (!task && user) {
+      return [`me_${(user as any).id}`];
+    }
+    return [];
+  });
   const [selectedRoles, setSelectedRoles] = useState<string[]>(() => 
     Array.isArray(task?.assignedToRole) ? task.assignedToRole : (task?.assignedToRole ? [task.assignedToRole] : [])
   );
@@ -88,20 +94,23 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       
       const defaultAssignees = assignedToArray.map(id => {
         if (currentUserContactId && id === currentUserContactId) {
-          return `me_${user?.id}`;
+          return `me_${(user as any)?.id}`;
         }
         return `team_${id}`;
       });
       
       setSelectedAssignees(defaultAssignees);
+    } else if (!task && user && selectedAssignees.length === 0) {
+      // Auto-assign to current user for new tasks when contacts load
+      setSelectedAssignees([`me_${(user as any).id}`]);
     }
   }, [contacts, task, user]);
 
   // Create options for multi-select components
   const assigneeOptions: MultiSelectOption[] = [
     ...(user ? [{
-      label: `Assign to Me (${user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email})`,
-      value: `me_${user.id}`
+      label: `Assign to Me (${(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : (user as any).email})`,
+      value: `me_${(user as any).id}`
     }] : []),
     ...teamMembers.map(member => ({
       label: `${member.firstName} ${member.lastName}`,

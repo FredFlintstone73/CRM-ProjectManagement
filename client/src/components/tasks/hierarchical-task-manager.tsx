@@ -28,6 +28,7 @@ import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { getDueDateBadgeProps } from '@/lib/dueDateUtils';
 import { OptimisticTaskToggle } from './optimistic-task-toggle';
+import { useAuth } from '@/hooks/useAuth';
 import { Task, Milestone, Contact } from '@shared/schema';
 
 interface HierarchicalTaskManagerProps {
@@ -52,6 +53,7 @@ interface TaskFormData {
 export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerProps) {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskFormData, setTaskFormData] = useState<TaskFormData>({
@@ -213,12 +215,23 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
 
 
 
+  // Get current user's contact ID for auto-assignment
+  const getCurrentUserContactId = () => {
+    if (!user || !contacts) return null;
+    const userContact = contacts.find((contact: any) => 
+      contact.personalEmail === (user as any).email || 
+      contact.workEmail === (user as any).email
+    );
+    return userContact?.id || null;
+  };
+
   const resetForm = () => {
+    const currentUserContactId = getCurrentUserContactId();
     setTaskFormData({
       title: '',
       description: '',
       dueDate: '',
-      assignedTo: '',
+      assignedTo: currentUserContactId ? currentUserContactId.toString() : '',
       milestoneId: null,
       parentTaskId: null,
       level: 0
@@ -608,7 +621,17 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Unassigned</SelectItem>
-                    {contacts.filter(c => c.contactType === 'team_member').map(contact => (
+                    {user && (
+                      <SelectItem value={getCurrentUserContactId()?.toString() || 'me'}>
+                        Assign to Me ({(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : (user as any).email})
+                      </SelectItem>
+                    )}
+                    {contacts.filter(c => 
+                      c.contactType === 'team_member' && 
+                      c.status === 'active' &&
+                      c.personalEmail !== (user as any)?.email &&
+                      c.workEmail !== (user as any)?.email
+                    ).map(contact => (
                       <SelectItem key={contact.id} value={contact.id.toString()}>
                         {contact.firstName} {contact.lastName}
                       </SelectItem>
