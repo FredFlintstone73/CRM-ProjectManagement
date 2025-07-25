@@ -179,6 +179,11 @@ export function HierarchicalTaskManager({ projectId }: HierarchicalTaskManagerPr
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString()] });
       queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
+      
+      // Invalidate Messages & Notifications queries to remove deleted tasks
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
     },
   });
 

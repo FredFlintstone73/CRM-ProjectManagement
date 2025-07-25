@@ -114,6 +114,11 @@ export default function ProjectDetail() {
         if (!oldTasks) return oldTasks;
         return oldTasks.filter(task => task.id !== taskId);
       });
+      
+      // Invalidate Messages & Notifications queries to remove deleted tasks
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
     },
   });
 

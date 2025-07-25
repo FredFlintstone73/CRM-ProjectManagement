@@ -345,6 +345,12 @@ export default function TaskDetail() {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', task.projectId, 'tasks'] });
         queryClient.invalidateQueries({ queryKey: ['/api/milestones'] });
       }
+      
+      // Invalidate Messages & Notifications queries to remove deleted tasks
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
+      
       window.history.back();
     },
   });
