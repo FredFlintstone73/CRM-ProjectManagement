@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Activity, Users, Clock, MapPin, Monitor, RefreshCw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Shield, Activity, Users, Clock, MapPin, Monitor, RefreshCw, Globe } from "lucide-react";
 import { format } from "date-fns";
 import type { UserActivity } from "@shared/schema";
 
@@ -97,6 +98,78 @@ export default function Administration() {
 
   const formatTimestamp = (timestamp: string) => {
     return format(new Date(timestamp), 'MMM d, yyyy h:mm:ss a');
+  };
+
+  // IP Geolocation lookup hook
+  const useIPLocation = (ipAddress: string) => {
+    return useQuery({
+      queryKey: ['ip-location', ipAddress],
+      queryFn: async () => {
+        if (!ipAddress || ipAddress === '-') return null;
+        
+        try {
+          // Using ipapi.co (free, HTTPS supported)
+          const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+          const data = await response.json();
+          
+          if (!data.error) {
+            return {
+              country: data.country_name,
+              region: data.region,
+              city: data.city,
+              latitude: data.latitude,
+              longitude: data.longitude,
+              timezone: data.timezone,
+              isp: data.org,
+              location: `${data.city}, ${data.region}, ${data.country_name}`
+            };
+          }
+          return null;
+        } catch (error) {
+          return null;
+        }
+      },
+      enabled: !!ipAddress && ipAddress !== '-',
+      staleTime: 24 * 60 * 60 * 1000, // Cache for 24 hours
+      gcTime: 24 * 60 * 60 * 1000,
+    });
+  };
+
+  // Component for IP address with location
+  const IPAddressCell = ({ ipAddress }: { ipAddress: string }) => {
+    const { data: location, isLoading } = useIPLocation(ipAddress);
+    
+    if (!ipAddress || ipAddress === '-') {
+      return <span className="font-mono text-sm">-</span>;
+    }
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-2 font-mono text-sm cursor-help">
+              <Globe className="h-3 w-3 text-muted-foreground" />
+              {ipAddress}
+              {isLoading && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-xs">
+            {location ? (
+              <div className="space-y-1 text-xs">
+                <div className="font-semibold">{location.location}</div>
+                <div>ISP: {location.isp}</div>
+                <div>Timezone: {location.timezone}</div>
+                <div className="text-muted-foreground">
+                  {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs">Location lookup failed</div>
+            )}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
   };
 
   if (!isAuthenticated || user?.accessLevel !== 'administrator') {
@@ -279,8 +352,8 @@ export default function Administration() {
                         <TableCell className="font-mono text-sm">
                           {activity.resource || '-'}
                         </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {activity.ipAddress || '-'}
+                        <TableCell>
+                          <IPAddressCell ipAddress={activity.ipAddress || '-'} />
                         </TableCell>
                         <TableCell className="max-w-xs truncate text-sm">
                           {activity.userAgent || '-'}
