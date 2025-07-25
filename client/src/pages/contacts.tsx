@@ -218,46 +218,49 @@ export default function Contacts() {
   const filteredContacts = useMemo(() => {
     if (!contacts) return [];
     
+    // Pre-compute search string for better performance
     const searchLower = searchQuery.toLowerCase();
+    const hasSearch = searchQuery !== "";
     
-    return contacts.filter((contact) => {
-      // Filter by visible types
-      const isTypeVisible = visibleTypes[contact.contactType as keyof typeof visibleTypes];
+    // Filter first, then sort to minimize sorting operations
+    const filtered = contacts.filter((contact) => {
+      // Filter by visible types - early return for better performance
+      if (!visibleTypes[contact.contactType as keyof typeof visibleTypes]) {
+        return false;
+      }
       
-      // Early return if type not visible
-      if (!isTypeVisible) return false;
+      // Skip search filtering if no search query
+      if (!hasSearch) return true;
       
-      // Filter by search query - optimized with early return
-      if (searchQuery === "") return true;
+      // Use early returns for search performance
+      if (contact.firstName.toLowerCase().includes(searchLower)) return true;
+      if (contact.lastName.toLowerCase().includes(searchLower)) return true;
+      if (contact.email?.toLowerCase().includes(searchLower)) return true;
+      if (contact.company?.toLowerCase().includes(searchLower)) return true;
+      if (contact.familyName?.toLowerCase().includes(searchLower)) return true;
+      if (contact.personalEmail?.toLowerCase().includes(searchLower)) return true;
+      if (contact.spousePersonalEmail?.toLowerCase().includes(searchLower)) return true;
       
-      return contact.firstName.toLowerCase().includes(searchLower) ||
-        contact.lastName.toLowerCase().includes(searchLower) ||
-        contact.email?.toLowerCase().includes(searchLower) ||
-        contact.company?.toLowerCase().includes(searchLower) ||
-        (contact.familyName && contact.familyName.toLowerCase().includes(searchLower)) ||
-        (contact.personalEmail && contact.personalEmail.toLowerCase().includes(searchLower)) ||
-        (contact.spousePersonalEmail && contact.spousePersonalEmail.toLowerCase().includes(searchLower));
-    }).sort((a, b) => {
-      if (!sortConfig.key) return 0;
+      return false;
+    });
+    
+    // Sort only if sorting is configured
+    if (!sortConfig.key) return filtered;
+    
+    return filtered.sort((a, b) => {
+      const aValue = a[sortConfig.key!];
+      const bValue = b[sortConfig.key!];
       
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      
-      // Handle null/undefined values
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
+      // Handle null/undefined values efficiently
+      if (aValue == null) return bValue == null ? 0 : 1;
+      if (bValue == null) return -1;
       
       // Convert to strings for comparison
       const aStr = String(aValue).toLowerCase();
       const bStr = String(bValue).toLowerCase();
       
-      if (aStr < bStr) {
-        return sortConfig.direction === 'asc' ? -1 : 1;
-      }
-      if (aStr > bStr) {
-        return sortConfig.direction === 'asc' ? 1 : -1;
-      }
-      return 0;
+      const comparison = aStr.localeCompare(bStr);
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
   }, [contacts, visibleTypes, searchQuery, sortConfig]);
 
@@ -268,7 +271,7 @@ export default function Contacts() {
     }));
   };
 
-  // Save state to localStorage whenever it changes
+  // Save state to localStorage whenever it changes (deferred for performance)
   useEffect(() => {
     const state = {
       visibleTypes,
@@ -276,7 +279,18 @@ export default function Contacts() {
       sortConfig,
       searchQuery
     };
-    localStorage.setItem('contactsPageState', JSON.stringify(state));
+    
+    // Use requestIdleCallback to defer localStorage writes
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        localStorage.setItem('contactsPageState', JSON.stringify(state));
+      });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        localStorage.setItem('contactsPageState', JSON.stringify(state));
+      }, 0);
+    }
   }, [visibleTypes, viewMode, sortConfig, searchQuery]);
 
   const getContactTypeLabel = (type: string) => {

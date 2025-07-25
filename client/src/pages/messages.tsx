@@ -48,16 +48,22 @@ export default function Messages() {
   const { data: mentions = [], isLoading: mentionsLoading } = useQuery({
     queryKey: ['/api/mentions', user?.id],
     enabled: !!user?.id,
+    staleTime: 30000, // 30 seconds
+    gcTime: 300000 // 5 minutes
   });
 
   const { data: taskNotifications = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['/api/notifications/tasks-due', user?.id],
     enabled: !!user?.id,
+    staleTime: 60000, // 60 seconds
+    gcTime: 300000 // 5 minutes
   });
 
   const { data: overdueTasks = [], isLoading: overdueLoading } = useQuery({
     queryKey: ['/api/notifications/tasks-overdue', user?.id],
     enabled: !!user?.id,
+    staleTime: 60000, // 60 seconds
+    gcTime: 300000 // 5 minutes
   });
 
   const markAsRead = async (mentionId: number) => {

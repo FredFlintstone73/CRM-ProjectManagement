@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentUserContact } from "@/hooks/useCurrentUserContact";
@@ -95,12 +95,16 @@ export default function Tasks() {
   const { data: allTasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
     enabled: isAuthenticated,
+    staleTime: 60000, // 60 seconds
+    gcTime: 300000 // 5 minutes
   });
 
   // Get tasks with user-specific priorities when viewing "My Tasks"
   const { data: userTasksWithPriorities } = useQuery<(Task & { userPriority: number | null })[]>({
     queryKey: ['/api/tasks/my-tasks-with-priorities'],
     enabled: isAuthenticated && taskFilter === 'my_tasks',
+    staleTime: 60000, // 60 seconds
+    gcTime: 300000 // 5 minutes
   });
 
   // Use appropriate task data based on filter
@@ -111,11 +115,15 @@ export default function Tasks() {
   const { data: projects } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
     enabled: isAuthenticated,
+    staleTime: 120000, // 2 minutes
+    gcTime: 600000 // 10 minutes
   });
 
   const { data: contacts } = useQuery({
     queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
+    staleTime: 120000, // 2 minutes
+    gcTime: 600000 // 10 minutes
   });
 
   // Helper function to format role names
@@ -336,64 +344,56 @@ export default function Tasks() {
 
 
 
-  const filteredAndSortedTasks = tasks?.filter((task) => {
-    const matchesSearch = searchQuery === "" ||
-      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCompletion = 
-      completionFilter === 'all' || 
-      (completionFilter === 'completed' && task.status === 'completed') ||
-      (completionFilter === 'in_progress' && task.status !== 'completed') ||
-      (completionFilter === 'overdue' && task.status !== 'completed' && task.dueDate && new Date(task.dueDate) < new Date());
-
-    const matchesTaskFilter = () => {
-      if (taskFilter === 'all_tasks') return true;
-      if (taskFilter === 'my_tasks') {
-        // When viewing My Tasks, we're using the userTasksWithPriorities query
-        // so all tasks in the array are already filtered for the current user
-        return true;
+  const filteredAndSortedTasks = useMemo(() => {
+    if (!tasks) return [];
+    
+    // Pre-compute values for better performance
+    const searchLower = searchQuery.toLowerCase();
+    const hasSearch = searchQuery !== "";
+    const currentDate = new Date();
+    
+    const filtered = tasks.filter((task) => {
+      // Search filtering with early returns
+      if (hasSearch) {
+        if (!task.title.toLowerCase().includes(searchLower) && 
+            !task.description?.toLowerCase().includes(searchLower)) {
+          return false;
+        }
       }
-      return true;
-    };
 
-    const matchesDueDate = () => {
-      if (dueDateFilter === 'all') return true;
-      if (!task.dueDate) return false;
-      
-      const dateRange = getDateRangeForFilter(dueDateFilter);
-      if (!dateRange) return false;
-      
-      const taskDueDate = new Date(task.dueDate);
-      return taskDueDate >= dateRange.start && taskDueDate <= dateRange.end;
-    };
+      // Completion filtering
+      if (completionFilter !== 'all') {
+        const isCompleted = task.status === 'completed';
+        if (completionFilter === 'completed' && !isCompleted) return false;
+        if (completionFilter === 'in_progress' && isCompleted) return false;
+        if (completionFilter === 'overdue' && (isCompleted || !task.dueDate || new Date(task.dueDate) >= currentDate)) return false;
+      }
 
-    // Filter out template tasks - only show project tasks or assigned standalone tasks
-    const isNotTemplateTask = () => {
-      // If task has a project, it's a real project task (regardless of assignments)
-      if (task.projectId) return true;
-      
-      // For tasks without projects, only show if they have assignments (standalone tasks)
-      if (!task.projectId) {
-        // Check for direct assignments
-        if (task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : task.assignedTo)) {
-          return true;
+      // Due date filtering
+      if (dueDateFilter !== 'all' && task.dueDate) {
+        const dateRange = getDateRangeForFilter(dueDateFilter);
+        if (dateRange) {
+          const taskDueDate = new Date(task.dueDate);
+          if (taskDueDate < dateRange.start || taskDueDate > dateRange.end) return false;
         }
-        
-        // Check for role assignments
-        if (task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : task.assignedToRole)) {
-          return true;
-        }
-        
-        // No project and no assignments = template task
+      } else if (dueDateFilter !== 'all' && !task.dueDate) {
         return false;
       }
+
+      // Filter out template tasks - only show project tasks or assigned standalone tasks
+      if (task.projectId) return true; // Real project task
       
-      return true;
-    };
+      // For tasks without projects, only show if they have assignments
+      const hasDirectAssignment = task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : !!task.assignedTo);
+      const hasRoleAssignment = task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : !!task.assignedToRole);
+      
+      return hasDirectAssignment || hasRoleAssignment;
+    });
+
+    // Sort only if needed
+    if (!sortConfig.key) return filtered;
     
-    return matchesSearch && matchesCompletion && matchesTaskFilter() && matchesDueDate() && isNotTemplateTask();
-  }).sort((a, b) => {
+    return filtered.sort((a, b) => {
     if (!sortConfig.key) return 0;
     
     let result = 0;
@@ -448,7 +448,8 @@ export default function Tasks() {
     
     // Apply sort direction
     return sortConfig.direction === 'desc' ? -result : result;
-  }) || [];
+    });
+  }, [tasks, searchQuery, completionFilter, dueDateFilter, taskFilter, sortConfig, customStartDate, customEndDate, contacts, currentUserContactId]);
 
   // Calculate progress for tasks assigned to current user only, considering due date filter
   const getCurrentUserTaskProgress = () => {
