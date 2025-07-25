@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import TaskForm from "@/components/tasks/task-form";
 import { UserPriorityInput } from "@/components/tasks/user-priority-input";
 import { TaskDetailSidebar } from "@/components/tasks/task-detail-sidebar";
+import { OptimisticTaskToggle } from "@/components/tasks/optimistic-task-toggle";
 import { getDueDateBadgeProps } from "@/lib/dueDateUtils";
 import type { Task, Project, Contact, User as UserType } from "@shared/schema";
 import { Link, useLocation } from "wouter";
@@ -119,7 +120,7 @@ export default function Tasks() {
     gcTime: 600000 // 10 minutes
   });
 
-  const { data: contacts } = useQuery({
+  const { data: contacts } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
     staleTime: 120000, // 2 minutes
@@ -184,7 +185,7 @@ export default function Tasks() {
     // Project found but no client assigned
     if (!project?.clientId || !contacts) return '';
     
-    const client = contacts.find((c: any) => c.id === project.clientId);
+    const client = contacts?.find((c: Contact) => c.id === project.clientId);
     
     // Client not found
     if (!client) return '';
@@ -421,7 +422,7 @@ export default function Tasks() {
         const bPriority = (taskFilter === 'my_tasks' && 'userPriority' in b && b.userPriority !== null) 
           ? b.userPriority 
           : (b.priority || 50);
-        result = aPriority - bPriority; // Sort 1-50, with null/undefined treated as 50
+        result = (aPriority || 50) - (bPriority || 50); // Sort 1-50, with null/undefined treated as 50
         break;
       case "dueDate":
         if (!a.dueDate && !b.dueDate) result = 0;
@@ -446,7 +447,7 @@ export default function Tasks() {
           }
           
           if (!assigneeId) return 'Unassigned';
-          const assignee = contacts.find((c: any) => c.id === assigneeId);
+          const assignee = contacts?.find((c: Contact) => c.id === assigneeId);
           return assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unassigned';
         };
         result = getAssigneeName(a.id).localeCompare(getAssigneeName(b.id));
@@ -806,19 +807,12 @@ export default function Tasks() {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start flex-1 gap-3">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 mt-0.5"
-                          onClick={() => toggleTaskCompletion.mutate(task)}
-                          disabled={toggleTaskCompletion.isPending}
-                        >
-                          {task.status === 'completed' ? (
-                            <CheckCircle className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <Circle className="h-5 w-5 text-gray-400" />
-                          )}
-                        </Button>
+                        <OptimisticTaskToggle 
+                          task={task} 
+                          projectId={task.projectId} 
+                          size="md"
+                          className="mt-0.5"
+                        />
                         {/* Show user priority input for My Tasks, regular badge for All Tasks */}
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
@@ -994,19 +988,11 @@ export default function Tasks() {
                     <div className="grid grid-cols-12 gap-4 items-center">
                       {/* Status Column */}
                       <div className="col-span-1 flex justify-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          onClick={() => toggleTaskCompletion.mutate(task)}
-                          disabled={toggleTaskCompletion.isPending}
-                        >
-                          {task.status === 'completed' ? (
-                            <CheckCircle className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <Circle className="h-5 w-5 text-gray-400" />
-                          )}
-                        </Button>
+                        <OptimisticTaskToggle 
+                          task={task} 
+                          projectId={task.projectId} 
+                          size="md"
+                        />
                       </div>
                       
                       {/* Priority Column */}
