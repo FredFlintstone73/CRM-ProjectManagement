@@ -100,24 +100,6 @@ export default function Administration() {
     return format(new Date(timestamp), 'MMM d, yyyy h:mm:ss a');
   };
 
-  // Check if IP is private/internal
-  const isPrivateIP = (ip: string) => {
-    if (!ip || ip === '-') return false;
-    
-    // Private IP ranges
-    const privateRanges = [
-      /^10\./,                    // 10.0.0.0/8
-      /^172\.(1[6-9]|2\d|3[01])\./, // 172.16.0.0/12
-      /^192\.168\./,              // 192.168.0.0/16
-      /^127\./,                   // 127.0.0.0/8 (localhost)
-      /^169\.254\./,              // 169.254.0.0/16 (link-local)
-      /^::1$/,                    // IPv6 localhost
-      /^fe80:/,                   // IPv6 link-local
-    ];
-    
-    return privateRanges.some(range => range.test(ip));
-  };
-
   // IP Geolocation lookup hook
   const useIPLocation = (ipAddress: string) => {
     return useQuery({
@@ -125,90 +107,25 @@ export default function Administration() {
       queryFn: async () => {
         if (!ipAddress || ipAddress === '-') return null;
         
-        // Skip geolocation for private/internal IPs
-        if (isPrivateIP(ipAddress)) {
-          return {
-            country: 'Internal Network',
-            region: 'Replit Infrastructure',
-            city: 'Internal',
-            latitude: null,
-            longitude: null,
-            timezone: null,
-            isp: 'Replit',
-            location: 'Replit Internal Network'
-          };
-        }
-        
         try {
-          // Try multiple IP geolocation services
-          const services = [
-            {
-              name: 'ipapi.co',
-              url: `https://ipapi.co/${ipAddress}/json/`,
-              parser: (data: any) => ({
-                country: data.country_name,
-                region: data.region,
-                city: data.city,
-                latitude: data.latitude,
-                longitude: data.longitude,
-                timezone: data.timezone,
-                isp: data.org,
-                location: `${data.city}, ${data.region}, ${data.country_name}`
-              })
-            },
-            {
-              name: 'ipgeolocation.io',
-              url: `https://api.ipgeolocation.io/ipgeo?apiKey=free&ip=${ipAddress}`,
-              parser: (data: any) => ({
-                country: data.country_name,
-                region: data.state_prov,
-                city: data.city,
-                latitude: parseFloat(data.latitude),
-                longitude: parseFloat(data.longitude),
-                timezone: data.time_zone?.name,
-                isp: data.isp,
-                location: `${data.city}, ${data.state_prov}, ${data.country_name}`
-              })
-            }
-          ];
-
-          for (const service of services) {
-            try {
-              const response = await fetch(service.url);
-              
-              if (!response.ok) {
-                console.warn(`${service.name} lookup failed for ${ipAddress}:`, response.status);
-                continue;
-              }
-              
-              const data = await response.json();
-              
-              // Check for API error response
-              if (data.error || data.status === 'fail') {
-                console.warn(`${service.name} error for ${ipAddress}:`, data.message || data.reason || data.error);
-                continue;
-              }
-              
-              const parsed = service.parser(data);
-              
-              // Validate required fields
-              if (!parsed.city || !parsed.country) {
-                console.warn(`Incomplete data from ${service.name} for ${ipAddress}:`, data);
-                continue;
-              }
-              
-              console.log(`Successful IP lookup via ${service.name} for ${ipAddress}:`, parsed);
-              return parsed;
-              
-            } catch (serviceError) {
-              console.warn(`${service.name} request failed for ${ipAddress}:`, serviceError);
-              continue;
-            }
-          }
+          // Using ipapi.co (free, HTTPS supported)
+          const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+          const data = await response.json();
           
+          if (!data.error) {
+            return {
+              country: data.country_name,
+              region: data.region,
+              city: data.city,
+              latitude: data.latitude,
+              longitude: data.longitude,
+              timezone: data.timezone,
+              isp: data.org,
+              location: `${data.city}, ${data.region}, ${data.country_name}`
+            };
+          }
           return null;
         } catch (error) {
-          console.error(`All IP lookup services failed for ${ipAddress}:`, error);
           return null;
         }
       },
@@ -243,24 +160,15 @@ export default function Administration() {
                 <div className="font-semibold text-foreground">{location.location}</div>
                 <div className="space-y-1 text-xs">
                   <div><span className="font-medium">ISP:</span> {location.isp}</div>
-                  {location.timezone && (
-                    <div><span className="font-medium">Timezone:</span> {location.timezone}</div>
-                  )}
-                  {location.latitude && location.longitude && (
-                    <div className="text-muted-foreground">
-                      <span className="font-medium">Coordinates:</span> {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
-                    </div>
-                  )}
-                  {isPrivateIP(ipAddress) && (
-                    <div className="text-muted-foreground text-xs mt-2 border-t pt-1">
-                      Private network address - geolocation not available
-                    </div>
-                  )}
+                  <div><span className="font-medium">Timezone:</span> {location.timezone}</div>
+                  <div className="text-muted-foreground">
+                    <span className="font-medium">Coordinates:</span> {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="text-sm">
-                {isLoading ? "Looking up location..." : isPrivateIP(ipAddress) ? "Private network address" : "Location lookup failed"}
+                {isLoading ? "Looking up location..." : "Location lookup failed"}
               </div>
             )}
           </TooltipContent>
