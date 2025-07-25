@@ -366,6 +366,9 @@ export default function Tasks() {
         projectId: t.projectId,
         assignedTo: t.assignedTo
       })));
+    } else {
+      console.log('Debug: Target tasks NOT found in data. Total tasks:', tasks.length);
+      console.log('Debug: All task titles:', tasks.map(t => t.title));
     }
     
     // Pre-compute values for better performance
@@ -419,6 +422,10 @@ export default function Tasks() {
           isArray: Array.isArray(task.assignedTo),
           hasDirectAssignment,
           hasRoleAssignment,
+          taskFilter: taskFilter,
+          completionFilter: completionFilter,
+          dueDateFilter: dueDateFilter,
+          passesSearch: !hasSearch || task.title.toLowerCase().includes(searchLower),
           willShow: hasDirectAssignment || hasRoleAssignment
         });
       }
