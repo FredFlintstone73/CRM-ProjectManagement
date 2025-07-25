@@ -1252,6 +1252,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       
       const task = await storage.createTask(processedTaskData, userId);
+      
+      console.log('Created task result:', {
+        id: task.id,
+        title: task.title,
+        assignedTo: task.assignedTo
+      });
+      
       res.json(task);
     } catch (error) {
       console.error("Error creating task:", error);
