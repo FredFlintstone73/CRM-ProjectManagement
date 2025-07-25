@@ -37,6 +37,11 @@ interface TaskNotification extends Task {
   daysUntilDue: number;
 }
 
+interface OverdueTask extends Task {
+  projectName?: string;
+  daysOverdue: number;
+}
+
 export default function Messages() {
   const { user } = useAuth() as { user: UserType | null };
 
@@ -47,6 +52,11 @@ export default function Messages() {
 
   const { data: taskNotifications = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['/api/notifications/tasks-due', user?.id],
+    enabled: !!user?.id,
+  });
+
+  const { data: overdueTasks = [], isLoading: overdueLoading } = useQuery({
+    queryKey: ['/api/notifications/tasks-overdue', user?.id],
     enabled: !!user?.id,
   });
 
@@ -127,7 +137,16 @@ export default function Messages() {
     return `Due in ${daysUntilDue} days`;
   };
 
-  if (mentionsLoading || tasksLoading) {
+  const getOverdueBadgeColor = (daysOverdue: number) => {
+    return "bg-red-100 text-red-800";
+  };
+
+  const getOverdueText = (daysOverdue: number) => {
+    if (daysOverdue === 1) return "1 day overdue";
+    return `${daysOverdue} days overdue`;
+  };
+
+  if (mentionsLoading || tasksLoading || overdueLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -149,8 +168,61 @@ export default function Messages() {
           <Badge variant="outline" className="text-sm">
             {taskNotifications.length} tasks due soon
           </Badge>
+          <Badge variant="destructive" className="text-sm">
+            {overdueTasks.length} overdue tasks
+          </Badge>
         </div>
       </div>
+
+      {/* Overdue Tasks */}
+      {overdueTasks.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            Overdue Tasks ({overdueTasks.length})
+          </h2>
+          
+          <div className="grid gap-3">
+            {overdueTasks.map((task: OverdueTask) => (
+              <Card key={task.id} className="border-l-4 border-l-red-500">
+                <CardContent className="py-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CheckSquare className="w-4 h-4 text-muted-foreground" />
+                        <h3 className="font-medium">
+                          <Link 
+                            href={`/task/${task.id}`}
+                            className="hover:underline text-blue-600"
+                          >
+                            {task.title}
+                          </Link>
+                        </h3>
+                      </div>
+                      {task.projectName && (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Project: {task.projectName}
+                        </p>
+                      )}
+                      {task.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {task.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge className={getOverdueBadgeColor(task.daysOverdue)}>
+                        {getOverdueText(task.daysOverdue)}
+                      </Badge>
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Task Due Date Notifications */}
       {taskNotifications.length > 0 && (
@@ -204,17 +276,19 @@ export default function Messages() {
         </div>
       )}
 
-      {mentions.length === 0 && taskNotifications.length === 0 ? (
+      {mentions.length === 0 && taskNotifications.length === 0 && overdueTasks.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No messages or notifications yet</h3>
             <p className="text-muted-foreground text-center max-w-md">
-              This page shows @mentions from team members and task due date reminders.
+              This page shows @mentions from team members, overdue tasks, and task due date reminders.
               <br /><br />
               <strong>@Mentions:</strong> You can use @Pat, @PatSmith, or @PatS to mention team members.
               <br />
-              <strong>Task Notifications:</strong> Tasks due in the next couple of days and next week will appear here automatically.
+              <strong>Overdue Tasks:</strong> Tasks past their due date will appear here with red alerts.
+              <br />
+              <strong>Due Soon:</strong> Tasks due in the next couple of days and next week will appear here automatically.
               <br /><br />
               <strong>Tip:</strong> If multiple people share the same first name, use their full name (@FirstLast) or first name + last initial (@FirstL) to avoid ambiguous mentions.
             </p>

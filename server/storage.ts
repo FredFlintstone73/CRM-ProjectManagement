@@ -232,6 +232,7 @@ export interface IStorage {
   
   // Task due date notifications
   getTasksDueSoon(userId: string): Promise<(Task & { projectName?: string; daysUntilDue: number })[]>;
+  getOverdueTasks(userId: string): Promise<(Task & { projectName?: string; daysOverdue: number })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2916,6 +2917,7 @@ export class DatabaseStorage implements IStorage {
         and(
           sql`${tasks.assignedTo} @> ARRAY[${contactId}]::integer[]`,
           not(eq(tasks.status, 'completed')),
+          isNotNull(tasks.dueDate),
           gte(tasks.dueDate, now.toISOString().split('T')[0]),
           lte(tasks.dueDate, nextWeek.toISOString().split('T')[0])
         )
@@ -2931,6 +2933,75 @@ export class DatabaseStorage implements IStorage {
       return {
         ...task,
         daysUntilDue
+      };
+    });
+  }
+
+  // Get overdue tasks for user
+  async getOverdueTasks(userId: string): Promise<(Task & { projectName?: string; daysOverdue: number })[]> {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Start of today
+
+    // Get user's contact ID to filter assigned tasks
+    const userContact = await db
+      .select({ id: contacts.id })
+      .from(contacts)
+      .leftJoin(users, and(
+        eq(users.firstName, contacts.firstName),
+        eq(users.lastName, contacts.lastName)
+      ))
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!userContact.length) {
+      return [];
+    }
+
+    const contactId = userContact[0].id;
+
+    // Get tasks assigned to user that are overdue and not completed
+    const tasksWithProjects = await db
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        description: tasks.description,
+        dueDate: tasks.dueDate,
+        priority: tasks.priority,
+        status: tasks.status,
+        assignedTo: tasks.assignedTo,
+        assignedToRole: tasks.assignedToRole,
+        projectId: tasks.projectId,
+        milestoneId: tasks.milestoneId,
+        parentTaskId: tasks.parentTaskId,
+        level: tasks.level,
+        sortOrder: tasks.sortOrder,
+        dependsOnTaskId: tasks.dependsOnTaskId,
+        daysFromMeeting: tasks.daysFromMeeting,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+        projectName: projects.name,
+      })
+      .from(tasks)
+      .leftJoin(projects, eq(tasks.projectId, projects.id))
+      .where(
+        and(
+          sql`${tasks.assignedTo} @> ARRAY[${contactId}]::integer[]`,
+          not(eq(tasks.status, 'completed')),
+          isNotNull(tasks.dueDate),
+          lte(tasks.dueDate, now.toISOString().split('T')[0])
+        )
+      )
+      .orderBy(tasks.dueDate);
+
+    // Calculate days overdue and add to results
+    return tasksWithProjects.map(task => {
+      const dueDate = new Date(task.dueDate);
+      const timeDiff = now.getTime() - dueDate.getTime();
+      const daysOverdue = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      return {
+        ...task,
+        daysOverdue
       };
     });
   }
