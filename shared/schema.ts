@@ -442,6 +442,18 @@ export const contactBusinesses = pgTable("contact_businesses", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Mentions table - Tracks @mentions across all comment/note types
+export const mentions = pgTable("mentions", {
+  id: serial("id").primaryKey(),
+  mentionedUserId: varchar("mentioned_user_id").notNull().references(() => users.id),
+  mentionedByUserId: varchar("mentioned_by_user_id").notNull().references(() => users.id),
+  sourceType: varchar("source_type").notNull(), // 'task_comment', 'contact_note', 'project_comment'
+  sourceId: integer("source_id").notNull(), // ID of the comment/note
+  contextText: text("context_text"), // Surrounding text for context
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   contacts: many(contacts),
@@ -455,6 +467,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   projectComments: many(projectComments),
   taskComments: many(taskComments),
   taskFiles: many(taskFiles),
+  mentionsReceived: many(mentions, { relationName: "mentionsReceived" }),
+  mentionsSent: many(mentions, { relationName: "mentionsSent" }),
 }));
 
 export const contactsRelations = relations(contacts, ({ one, many }) => ({
@@ -617,6 +631,19 @@ export const contactNotesRelations = relations(contactNotes, ({ one }) => ({
   user: one(users, {
     fields: [contactNotes.userId],
     references: [users.id],
+  }),
+}));
+
+export const mentionsRelations = relations(mentions, ({ one }) => ({
+  mentionedUser: one(users, {
+    fields: [mentions.mentionedUserId],
+    references: [users.id],
+    relationName: "mentionsReceived",
+  }),
+  mentionedByUser: one(users, {
+    fields: [mentions.mentionedByUserId],
+    references: [users.id],
+    relationName: "mentionsSent",
   }),
 }));
 
@@ -1000,3 +1027,12 @@ export type UserInvitation = typeof userInvitations.$inferSelect;
 export type InsertUserInvitation = z.infer<typeof insertUserInvitationSchema>;
 export type ContactBusiness = typeof contactBusinesses.$inferSelect;
 export type InsertContactBusiness = z.infer<typeof insertContactBusinessSchema>;
+
+// Mentions schema and types
+export const insertMentionSchema = createInsertSchema(mentions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Mention = typeof mentions.$inferSelect;
+export type InsertMention = z.infer<typeof insertMentionSchema>;

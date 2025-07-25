@@ -17,6 +17,7 @@ import {
   userTaskPriorities,
   userInvitations,
   userActivities,
+  mentions,
   type User,
   type UpsertUser,
   type Contact,
@@ -53,6 +54,8 @@ import {
   type InsertUserInvitation,
   type UserActivity,
   type InsertUserActivity,
+  type Mention,
+  type InsertMention,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, not, ilike, count, isNotNull, inArray } from "drizzle-orm";
@@ -220,6 +223,12 @@ export interface IStorage {
   searchProjects(query: string): Promise<Project[]>;
   searchTasks(query: string): Promise<Task[]>;
   searchContactNotes(query: string): Promise<(ContactNote & { authorName?: string })[]>;
+
+  // Mentions operations
+  getMentionsForUser(userId: string): Promise<(Mention & { mentionedBy: { firstName: string; lastName: string; profileImageUrl?: string; }; source?: any; })[]>;
+  createMention(mention: InsertMention): Promise<Mention>;
+  markMentionAsRead(mentionId: number, userId: string): Promise<void>;
+  processMentionsInText(text: string, sourceType: string, sourceId: number, authorId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2676,6 +2685,150 @@ export class DatabaseStorage implements IStorage {
       .limit(10);
 
     return notesWithAuthors;
+  }
+
+  // Mentions operations
+  async getMentionsForUser(userId: string): Promise<(Mention & { 
+    mentionedBy: { firstName: string; lastName: string; profileImageUrl?: string; }; 
+    source?: any; 
+  })[]> {
+    const mentionsWithSources = await db
+      .select({
+        id: mentions.id,
+        mentionedUserId: mentions.mentionedUserId,
+        mentionedByUserId: mentions.mentionedByUserId,
+        sourceType: mentions.sourceType,
+        sourceId: mentions.sourceId,
+        contextText: mentions.contextText,
+        isRead: mentions.isRead,
+        createdAt: mentions.createdAt,
+        mentionedByFirstName: users.firstName,
+        mentionedByLastName: users.lastName,
+        mentionedByProfileImage: users.profileImageUrl,
+      })
+      .from(mentions)
+      .leftJoin(users, eq(mentions.mentionedByUserId, users.id))
+      .where(eq(mentions.mentionedUserId, userId))
+      .orderBy(desc(mentions.createdAt));
+
+    // Enrich with source information
+    const enrichedMentions = await Promise.all(
+      mentionsWithSources.map(async (mention) => {
+        let source = {};
+        
+        try {
+          switch (mention.sourceType) {
+            case 'task_comment':
+              const task = await this.getTask(mention.sourceId);
+              if (task) {
+                source = {
+                  id: task.id,
+                  taskTitle: task.title,
+                };
+              }
+              break;
+            case 'contact_note':
+              const contact = await this.getContact(mention.sourceId);
+              if (contact) {
+                source = {
+                  id: contact.id,
+                  contactName: contact.familyName || `${contact.firstName} ${contact.lastName}`.trim(),
+                };
+              }
+              break;
+            case 'project_comment':
+              const project = await this.getProject(mention.sourceId);
+              if (project) {
+                source = {
+                  id: project.id,
+                  projectName: project.name,
+                };
+              }
+              break;
+          }
+        } catch (error) {
+          console.error(`Error enriching mention source ${mention.sourceType}:${mention.sourceId}:`, error);
+        }
+
+        return {
+          id: mention.id,
+          mentionedUserId: mention.mentionedUserId,
+          mentionedByUserId: mention.mentionedByUserId,
+          sourceType: mention.sourceType,
+          sourceId: mention.sourceId,
+          contextText: mention.contextText,
+          isRead: mention.isRead,
+          createdAt: mention.createdAt,
+          mentionedBy: {
+            firstName: mention.mentionedByFirstName || 'Unknown',
+            lastName: mention.mentionedByLastName || 'User',
+            profileImageUrl: mention.mentionedByProfileImage,
+          },
+          source,
+        };
+      })
+    );
+
+    return enrichedMentions;
+  }
+
+  async createMention(mention: InsertMention): Promise<Mention> {
+    const [created] = await db
+      .insert(mentions)
+      .values(mention)
+      .returning();
+
+    return created;
+  }
+
+  async markMentionAsRead(mentionId: number, userId: string): Promise<void> {
+    await db
+      .update(mentions)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(mentions.id, mentionId),
+          eq(mentions.mentionedUserId, userId)
+        )
+      );
+  }
+
+  async processMentionsInText(text: string, sourceType: string, sourceId: number, authorId: string): Promise<void> {
+    // Find @mentions in text (matching @FirstName)
+    const mentionMatches = text.match(/@([A-Za-z]+)/g);
+    
+    if (!mentionMatches) return;
+
+    // Get all team members to match first names
+    const teamMembers = await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      })
+      .from(users)
+      .where(eq(users.isActive, true));
+
+    for (const match of mentionMatches) {
+      const firstName = match.substring(1); // Remove @
+      
+      // Find user by first name
+      const mentionedUser = teamMembers.find(
+        user => user.firstName.toLowerCase() === firstName.toLowerCase()
+      );
+
+      if (mentionedUser && mentionedUser.id !== authorId) {
+        // Create mention record
+        await this.createMention({
+          mentionedUserId: mentionedUser.id,
+          mentionedByUserId: authorId,
+          sourceType,
+          sourceId,
+          contextText: text.length > 200 ? text.substring(0, 197) + '...' : text,
+          isRead: false,
+        });
+      }
+    }
   }
 }
 

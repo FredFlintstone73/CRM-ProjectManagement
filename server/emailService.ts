@@ -28,6 +28,8 @@ class EmailService {
 
   private initializeTransporter() {
     // Check for different email service configurations
+    const outlookUser = process.env.OUTLOOK_USER;
+    const outlookPass = process.env.OUTLOOK_PASSWORD;
     const gmailUser = process.env.GMAIL_USER;
     const gmailPass = process.env.GMAIL_APP_PASSWORD;
     const smtpHost = process.env.SMTP_HOST;
@@ -37,29 +39,26 @@ class EmailService {
 
     let config: EmailConfig | null = null;
 
-    if (gmailUser && gmailPass) {
-      // Check if it's an Outlook/Microsoft account
-      if (gmailUser.includes('@outlook.com') || gmailUser.includes('@hotmail.com') || 
-          gmailUser.includes('@live.com') || gmailUser.includes('alignedadvisors.com')) {
-        config = {
-          host: 'smtp-mail.outlook.com',
-          port: 587,
-          secure: false,
-          auth: {
-            user: gmailUser,
-            pass: gmailPass,
-          },
-        };
-      } else {
-        // Gmail configuration
-        config = {
-          service: 'gmail',
-          auth: {
-            user: gmailUser,
-            pass: gmailPass, // App-specific password
-          },
-        };
-      }
+    if (outlookUser && outlookPass) {
+      // Microsoft Outlook/365 configuration
+      config = {
+        host: 'smtp-mail.outlook.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: outlookUser,
+          pass: outlookPass,
+        },
+      };
+    } else if (gmailUser && gmailPass) {
+      // Gmail configuration
+      config = {
+        service: 'gmail',
+        auth: {
+          user: gmailUser,
+          pass: gmailPass, // App-specific password
+        },
+      };
     } else if (smtpHost && smtpUser && smtpPass) {
       config = {
         host: smtpHost,
@@ -76,7 +75,8 @@ class EmailService {
       this.transporter = nodemailer.createTransport(config);
       this.isConfigured = true;
       const serviceType = config.service || `${config.host}:${config.port}`;
-      console.log(`Email service configured successfully (${serviceType}) for ${gmailUser}`);
+      const emailUser = outlookUser || gmailUser || smtpUser;
+      console.log(`Email service configured successfully (${serviceType}) for ${emailUser}`);
     } else {
       console.log('No email configuration found - invitations will show codes only');
       this.isConfigured = false;
@@ -143,7 +143,7 @@ class EmailService {
 
     try {
       await this.transporter.sendMail({
-        from: process.env.SMTP_FROM || process.env.GMAIL_USER,
+        from: process.env.SMTP_FROM || process.env.OUTLOOK_USER || process.env.GMAIL_USER,
         to: invitation.email,
         subject,
         html,

@@ -20,7 +20,8 @@ import {
   insertTaskFileSchema,
   insertUserTaskPrioritySchema,
   insertUserInvitationSchema,
-  insertUserActivitySchema
+  insertUserActivitySchema,
+  insertMentionSchema
 } from "@shared/schema";
 
 // Activity logging middleware with performance optimization
@@ -887,7 +888,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         projectId,
       });
+      
       const comment = await storage.createProjectComment(commentData, userId);
+      
+      // Process mentions in the comment content
+      if (commentData.comment) {
+        await storage.processMentionsInText(
+          commentData.comment,
+          'project_comment',
+          projectId,
+          userId
+        );
+      }
+      
       res.json(comment);
     } catch (error) {
       console.error("Error creating project comment:", error);
@@ -915,7 +928,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         contactId,
       });
+      
       const note = await storage.createContactNote(noteData, userId);
+      
+      // Process mentions in the note content
+      if (noteData.content) {
+        await storage.processMentionsInText(
+          noteData.content,
+          'contact_note',
+          contactId,
+          userId
+        );
+      }
+      
       res.json(note);
     } catch (error) {
       console.error("Error creating contact note:", error);
@@ -1449,8 +1474,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/tasks/:id/comments', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const commentData = { ...req.body, taskId: parseInt(req.params.id) };
+      const taskId = parseInt(req.params.id);
+      const commentData = { ...req.body, taskId };
+      
       const comment = await storage.createTaskComment(commentData, userId);
+      
+      // Process mentions in the comment content
+      if (commentData.content) {
+        await storage.processMentionsInText(
+          commentData.content,
+          'task_comment',
+          taskId,
+          userId
+        );
+      }
+      
       res.json(comment);
     } catch (error) {
       console.error("Error creating task comment:", error);
@@ -2429,6 +2467,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching session status:", error);
       res.status(500).json({ message: "Failed to fetch session status" });
+    }
+  });
+
+  // Mentions API endpoints
+  app.get('/api/mentions/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      const currentUserId = req.user.claims.sub;
+      
+      // Only allow users to access their own mentions
+      if (userId !== currentUserId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const mentions = await storage.getMentionsForUser(userId);
+      res.json(mentions);
+    } catch (error) {
+      console.error("Error fetching mentions:", error);
+      res.status(500).json({ message: "Failed to fetch mentions" });
+    }
+  });
+
+  app.patch('/api/mentions/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const mentionId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.markMentionAsRead(mentionId, userId);
+      res.json({ message: "Mention marked as read" });
+    } catch (error) {
+      console.error("Error marking mention as read:", error);
+      res.status(500).json({ message: "Failed to mark mention as read" });
     }
   });
 
