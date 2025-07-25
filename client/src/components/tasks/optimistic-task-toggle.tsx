@@ -95,30 +95,42 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], context?.myTasks);
       queryClient.setQueryData(['/api/dashboard/projects-due'], context?.dashboardProjects);
     },
+    onSuccess: (updatedTask) => {
+      console.log('=== SUCCESS HANDLER ===');
+      console.log('Task update successful:', updatedTask);
+      setOptimisticStatus(updatedTask.status);
+      
+      // IMMEDIATE cache updates with server response to prevent flickering
+      queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => 
+        old?.map(t => t.id === task.id ? updatedTask : t) || old
+      );
+      
+      queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (old: any[] | undefined) => 
+        old?.map(t => t.id === task.id ? { ...t, ...updatedTask } : t) || old
+      );
+      
+      // Update individual task cache for Task Details page
+      queryClient.setQueryData(['/api/tasks', task.id.toString()], updatedTask);
+      
+      console.log('SUCCESS: All caches updated with fresh server data');
+      console.log('=========================');
+    },
     onSettled: () => {
-      console.log('=== CACHE INVALIDATION ===');
-      console.log('Invalidating all caches immediately');
-      
-      // COMPREHENSIVE cache invalidation for cross-page sync
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      }
-      
-      // Invalidate all task-related queries
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
-      
-      // Invalidate individual task queries (for Task Details page)
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
-      
-      // Invalidate dashboard and notification queries
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
-      
-      console.log('Cache invalidation completed - all pages should update');
-      console.log('========================');
+      // Background cache invalidation - but only after success updates
+      setTimeout(() => {
+        console.log('Background cache invalidation starting...');
+        
+        if (projectId) {
+          queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        }
+        
+        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
+        
+        console.log('Background invalidation completed');
+      }, 100);
     },
   });
 
