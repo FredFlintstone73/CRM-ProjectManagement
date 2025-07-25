@@ -1168,14 +1168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskData = insertTaskSchema.parse(req.body);
       const userId = req.user.claims.sub;
       
-      console.log('Task creation - raw data:', {
-        title: taskData.title,
-        assignedTo: taskData.assignedTo,
-        userId: userId,
-        userEmail: req.user.email || req.user.claims?.email
-      });
-      
-      console.log('Complete user object:', JSON.stringify(req.user, null, 2));
+
       
 
       
@@ -1238,7 +1231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priority = isNaN(priorityNum) ? 25 : priorityNum;
       }
       
-      console.log('Final processed assignedTo:', assignedTo);
+
       
       const processedTaskData = {
         ...taskData,
@@ -1253,11 +1246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const task = await storage.createTask(processedTaskData, userId);
       
-      console.log('Created task result:', {
-        id: task.id,
-        title: task.title,
-        assignedTo: task.assignedTo
-      });
+
       
       res.json(task);
     } catch (error) {
