@@ -199,6 +199,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Universal Filter Application**: Applied template filtering to getTasks(), getUserTasksWithPriorities(), getUpcomingTasks(), getOverdueTasks(), and getTasksByUser() methods
 - **User Verified**: Both access control and template filtering confirmed working correctly - task views are now clean and properly restricted
 
+### Email Notification Display Bug Fix (July 25, 2025)
+- **Root Cause Resolution**: Fixed critical issue where email replies received through IMAP monitoring weren't displaying as unread notifications in Messages & Notifications page
+- **Database Query Fix**: Updated `getEmailNotifications` method to filter for only unread notifications using `eq(emailNotifications.isRead, false)`
+- **IMAP Monitoring Confirmed Working**: Email detection and storage system functioning correctly - emails being automatically processed and stored in database
+- **Cache Invalidation Enhancement**: Added comprehensive notification cache invalidation to all task deletion locations (task-detail, tasks page, project-detail, hierarchical-task-manager, section-task-manager)
+- **Messages & Notifications Integration**: Email notifications now properly appear in Messages page with unread status and envelope icon counts
+- **User Verified**: Email notification system confirmed working - new email replies now display as unread notifications as intended
+
 ### Complete Automatic Session Timeout System Implementation (July 24, 2025)
 - **90-Minute App Inactivity Timeout**: Automatically logs out users after 90 minutes of app inactivity (no clicks, scrolls, navigation)
 - **30-Minute System Idle Timeout**: Logs out users after 30 minutes of computer idle time (no mouse movement, keyboard activity, or browser focus)
