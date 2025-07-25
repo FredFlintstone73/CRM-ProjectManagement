@@ -82,6 +82,12 @@ export default function TaskDetail() {
     },
   });
 
+  // Get all tasks for standalone task navigation
+  const { data: allTasks } = useQuery<Task[]>({
+    queryKey: ['/api/tasks'],
+    enabled: !task?.projectId, // Only fetch when task has no project
+  });
+
   const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
   
   // Helper function to format role names
@@ -251,7 +257,31 @@ export default function TaskDetail() {
 
   // Navigation logic that prioritizes children over chronological sequence
   const calculateNavigation = () => {
-    if (!projectTasks || !task) {
+    if (!task) {
+      return { previousTask: null, nextTask: null };
+    }
+
+    // For standalone tasks (no project), use simple all tasks navigation
+    if (!task.projectId && allTasks) {
+      const standaloneAssignedTasks = allTasks.filter(t => 
+        !t.projectId && 
+        t.assignedTo && 
+        Array.isArray(t.assignedTo) && 
+        t.assignedTo.length > 0
+      );
+      
+      // Sort by ID for simple navigation
+      const sortedTasks = standaloneAssignedTasks.sort((a, b) => a.id - b.id);
+      const currentIndex = sortedTasks.findIndex(t => t.id === task.id);
+      
+      return {
+        previousTask: currentIndex > 0 ? sortedTasks[currentIndex - 1] : null,
+        nextTask: currentIndex >= 0 && currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null
+      };
+    }
+
+    // For project tasks, use existing logic
+    if (!projectTasks) {
       return { previousTask: null, nextTask: null };
     }
 

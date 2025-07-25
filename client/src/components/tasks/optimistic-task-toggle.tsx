@@ -31,11 +31,13 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       const snapshot = {
         projectTasks: queryClient.getQueryData(['/api/projects', projectId, 'tasks']),
         allTasks: queryClient.getQueryData(['/api/tasks']),
+        myTasks: queryClient.getQueryData(['/api/tasks/my-tasks-with-priorities']),
         dashboardProjects: queryClient.getQueryData(['/api/dashboard/projects-due'])
       };
       
       queryClient.cancelQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       queryClient.cancelQueries({ queryKey: ['/api/tasks'] });
+      queryClient.cancelQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
       queryClient.cancelQueries({ queryKey: ['/api/dashboard/projects-due'] });
       
       // Ultra-optimized cache updates with single-pass operations
@@ -46,6 +48,10 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       );
       
       queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => 
+        old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
+      );
+
+      queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (old: any[] | undefined) => 
         old?.map(t => t.id === task.id ? { ...t, status: newStatus, completedAt } : t) || old
       );
       
@@ -66,6 +72,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       setOptimisticStatus(task.status);
       queryClient.setQueryData(['/api/projects', projectId, 'tasks'], context?.projectTasks);
       queryClient.setQueryData(['/api/tasks'], context?.allTasks);
+      queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], context?.myTasks);
       queryClient.setQueryData(['/api/dashboard/projects-due'], context?.dashboardProjects);
     },
     onSettled: () => {
@@ -73,6 +80,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       requestIdleCallback(() => {
         queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
         queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
         queryClient.invalidateQueries({ queryKey: ['/api/dashboard/projects-due'] });
         
         // Invalidate notification queries so overdue tasks update immediately
