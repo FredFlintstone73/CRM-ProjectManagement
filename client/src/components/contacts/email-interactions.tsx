@@ -57,6 +57,17 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
 
   const sendEmailMutation = useMutation({
     mutationFn: async (data: EmailFormData) => {
+      // If it's a received email, don't actually send it, just record it
+      if (data.emailType === "received") {
+        const response = await apiRequest("POST", `/api/contacts/${contactId}/emails/received`, {
+          sender: getContactEmail(),
+          subject: data.subject,
+          body: data.body,
+          parentEmailId: data.parentEmailId,
+        });
+        return response.json();
+      }
+      
       const response = await apiRequest("POST", `/api/contacts/${contactId}/emails`, data);
       return response.json();
     },
@@ -108,6 +119,17 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
     setIsComposeOpen(true);
   };
 
+  const handleAddReceived = () => {
+    form.reset({
+      recipient: getContactEmail(), // Set contact as sender for received email display
+      subject: "",
+      body: "",
+      emailType: "received",
+    });
+    setReplyingTo(null);
+    setIsComposeOpen(true);
+  };
+
   const handleReply = (interaction: EmailInteraction) => {
     const replySubject = interaction.subject?.startsWith("Re: ") 
       ? interaction.subject 
@@ -119,7 +141,7 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
     form.reset({
       recipient: interaction.sender || getContactEmail(),
       subject: replySubject,
-      body: `\n\n--- Original Message ---\nFrom: ${interaction.sender}\nSubject: ${interaction.subject}\nDate: ${new Date(interaction.sentAt || interaction.createdAt).toLocaleString()}\n\n${interaction.body}`,
+      body: `\n\n--- Original Message ---\nFrom: ${interaction.sender}\nSubject: ${interaction.subject}\nDate: ${formatDate(interaction.sentAt || interaction.createdAt)}\n\n${interaction.body}`,
       parentEmailId: rootEmailId,
       emailType: 'reply',
     });
@@ -135,14 +157,15 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
     form.reset({
       recipient: "",
       subject: forwardSubject,
-      body: `\n\n--- Forwarded Message ---\nFrom: ${interaction.sender}\nTo: ${interaction.recipient}\nSubject: ${interaction.subject}\nDate: ${new Date(interaction.sentAt || interaction.createdAt).toLocaleString()}\n\n${interaction.body}`,
+      body: `\n\n--- Forwarded Message ---\nFrom: ${interaction.sender}\nTo: ${interaction.recipient}\nSubject: ${interaction.subject}\nDate: ${formatDate(interaction.sentAt || interaction.createdAt)}\n\n${interaction.body}`,
       emailType: 'forward',
     });
     setReplyingTo(null);
     setIsComposeOpen(true);
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | Date | null) => {
+    if (!dateString) return "";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -191,22 +214,30 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
             <Mail className="h-5 w-5 mr-2" />
             Email Interactions
           </span>
-          <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={handleCompose}>
-                <Send className="h-4 w-4 mr-2" />
-                Compose Email
+          <div className="flex space-x-2">
+            <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={handleCompose}>
+                  <Send className="h-4 w-4 mr-2" />
+                  Compose Email
+                </Button>
+              </DialogTrigger>
+              <Button variant="outline" onClick={handleAddReceived}>
+                <Mail className="h-4 w-4 mr-2" />
+                Add Received Email
               </Button>
-            </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>
-                  {replyingTo ? "Reply to Email" : "Compose Email"}
+                  {form.watch("emailType") === "received" ? "Add Received Email" :
+                   (replyingTo ? "Reply to Email" : "Compose Email")}
                 </DialogTitle>
                 <DialogDescription>
-                  {replyingTo 
-                    ? `Replying to: ${replyingTo.subject}` 
-                    : `Send an email to ${contact.firstName} ${contact.lastName}`
+                  {form.watch("emailType") === "received" 
+                    ? `Record an email you received from ${contact.firstName} ${contact.lastName}`
+                    : (replyingTo 
+                        ? `Replying to: ${replyingTo.subject}` 
+                        : `Send an email to ${contact.firstName} ${contact.lastName}`)
                   }
                 </DialogDescription>
               </DialogHeader>
@@ -217,9 +248,14 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
                     name="recipient"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>To</FormLabel>
+                        <FormLabel>{form.watch("emailType") === "received" ? "From" : "To"}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="recipient@example.com" />
+                          <Input 
+                            {...field} 
+                            placeholder={form.watch("emailType") === "received" ? getContactEmail() : "recipient@example.com"}
+                            value={form.watch("emailType") === "received" ? getContactEmail() : field.value}
+                            readOnly={form.watch("emailType") === "received"}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -264,14 +300,24 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
                       Cancel
                     </Button>
                     <Button type="submit" disabled={sendEmailMutation.isPending}>
-                      <Send className="h-4 w-4 mr-2" />
-                      {sendEmailMutation.isPending ? "Sending..." : "Send Email"}
+                      {form.watch("emailType") === "received" ? (
+                        <>
+                          <Mail className="h-4 w-4 mr-2" />
+                          {sendEmailMutation.isPending ? "Adding..." : "Add Received Email"}
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          {sendEmailMutation.isPending ? "Sending..." : "Send Email"}
+                        </>
+                      )}
                     </Button>
                   </div>
                 </form>
               </Form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
