@@ -8,6 +8,7 @@ import {
   taskFiles,
   projectTemplates,
   emailInteractions,
+  emailNotifications,
   callTranscripts,
   activityLog,
   projectComments,
@@ -59,6 +60,8 @@ import {
   type InsertMention,
   type CalendarConnection,
   type InsertCalendarConnection,
+  type EmailNotification,
+  type InsertEmailNotification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, or, not, ilike, count, isNotNull, inArray, gte, lte } from "drizzle-orm";

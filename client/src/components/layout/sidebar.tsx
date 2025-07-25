@@ -17,7 +17,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth() as { user: User | null; isAuthenticated: boolean; isLoading: boolean };
   const { isAdministrator } = useAccessControl();
-  const [isContactsExpanded, setIsContactsExpanded] = useState(false);
+
   const [isResizing, setIsResizing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -27,12 +27,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
 
 
 
-  // Auto-expand contacts when on contacts page
-  useEffect(() => {
-    if (location.startsWith('/contacts')) {
-      setIsContactsExpanded(true);
-    }
-  }, [location]);
+
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },
@@ -49,13 +44,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
-  const contactSubCategories = [
-    { name: 'Clients', href: '/contacts?type=client', icon: UserCheck },
-    { name: 'Prospects', href: '/contacts?type=prospect', icon: UserPlus },
-    { name: 'Strategic Partners', href: '/contacts?type=strategic_partner', icon: Handshake },
-    { name: 'Team Members', href: '/contacts?type=team_member', icon: UserCog },
-    { name: 'Trusted Professionals', href: '/contacts?type=trusted_professional', icon: UserCheck },
-  ];
+
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -156,39 +145,15 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
             {!isCollapsed && <span>Dashboard</span>}
           </Link>
 
-          {/* Contacts with Sub-categories */}
-          <div className="space-y-1">
-            <button
-              onClick={() => !isCollapsed && setIsContactsExpanded(!isContactsExpanded)}
-              className={`sidebar-nav-item w-full ${isCollapsed ? 'justify-center' : ''} ${location.startsWith('/contacts') ? 'active' : ''}`}
-              title={isCollapsed ? "Contacts" : ""}
-            >
-              <Users size={20} />
-              {!isCollapsed && <span>Contacts</span>}
-              {!isCollapsed && (
-                isContactsExpanded ? (
-                  <ChevronDown size={16} className="ml-auto" />
-                ) : (
-                  <ChevronRight size={16} className="ml-auto" />
-                )
-              )}
-            </button>
-            
-            {isContactsExpanded && !isCollapsed && (
-              <div className="ml-4 space-y-1">
-                {contactSubCategories.map((subItem) => {
-                  const SubIcon = subItem.icon;
-                  const isSubActive = location === subItem.href;
-                  return (
-                    <Link key={subItem.name} href={subItem.href} className={`sidebar-nav-item text-sm ${isSubActive ? 'active' : ''}`}>
-                      <SubIcon size={16} />
-                      <span>{subItem.name}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          {/* Contacts */}
+          <Link 
+            href="/contacts" 
+            className={`sidebar-nav-item ${isCollapsed ? 'justify-center' : ''} ${location.startsWith('/contacts') ? 'active' : ''}`}
+            title={isCollapsed ? "Contacts" : ""}
+          >
+            <Users size={20} />
+            {!isCollapsed && <span>Contacts</span>}
+          </Link>
 
           {/* Other navigation items */}
           {navigation.slice(1).map((item) => {
