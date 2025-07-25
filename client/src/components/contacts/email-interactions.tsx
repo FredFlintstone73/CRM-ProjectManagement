@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,9 +28,10 @@ type EmailFormData = z.infer<typeof emailSchema>;
 interface EmailInteractionsProps {
   contactId: number;
   contact: Contact;
+  expandEmailId?: number;
 }
 
-export default function EmailInteractions({ contactId, contact }: EmailInteractionsProps) {
+export default function EmailInteractions({ contactId, contact, expandEmailId }: EmailInteractionsProps) {
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [replyingTo, setReplyingTo] = useState<EmailInteraction | null>(null);
   const [expandedThreads, setExpandedThreads] = useState<Set<number>>(new Set());
@@ -55,6 +56,13 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
     queryKey: ["/api/contacts", contactId, "emails"],
     staleTime: 30000, // 30 seconds
   });
+
+  // Auto-expand the specified email when component mounts
+  useEffect(() => {
+    if (expandEmailId) {
+      setExpandedThreads(prev => new Set([...prev, expandEmailId]));
+    }
+  }, [expandEmailId]);
 
   const sendEmailMutation = useMutation({
     mutationFn: async (data: EmailFormData) => {

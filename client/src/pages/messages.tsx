@@ -279,7 +279,7 @@ export default function Messages() {
                         <Mail className="w-4 h-4 text-muted-foreground" />
                         <h3 className="font-medium">
                           <Link 
-                            href={`/contacts/${notification.email.contactId}`}
+                            href={`/contacts/${notification.email.contactId}?tab=interactions&email=${notification.emailInteractionId}`}
                             className="hover:underline text-blue-600"
                           >
                             {notification.email.subject}

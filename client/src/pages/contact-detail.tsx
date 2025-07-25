@@ -39,12 +39,18 @@ export default function ContactDetail() {
   const { id } = useParams<ContactDetailParams>();
   const [, navigate] = useLocation();
   const searchString = useSearch();
+  
+  // Parse URL parameters for tab and email navigation
+  const urlParams = new URLSearchParams(searchString);
+  const tabParam = urlParams.get('tab');
+  const emailParam = urlParams.get('email');
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(tabParam === 'interactions' ? 'interaction' : 'client');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -53,7 +59,7 @@ export default function ContactDetail() {
     navigate('/contacts');
   };
 
-  const { data: contact, isLoading: contactLoading } = useQuery({
+  const { data: contact, isLoading: contactLoading } = useQuery<Contact>({
     queryKey: ['/api/contacts', id],
     enabled: isAuthenticated && !!id,
     staleTime: 0, // Force fresh data
@@ -813,7 +819,7 @@ export default function ContactDetail() {
         <div className="flex-1 p-6">
 
           {/* Main Content Tabs */}
-          <Tabs defaultValue="client" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className={`grid w-full ${contact.contactType === 'team_member' || contact.contactType === 'strategic_partner' || contact.contactType === 'trusted_professional' ? 'grid-cols-5' : 'grid-cols-6'}`}>
               <TabsTrigger value="client">
                 {contact.contactType === 'prospect' ? 'Prospect' : 
@@ -1214,7 +1220,11 @@ export default function ContactDetail() {
           </TabsContent>
 
           <TabsContent value="interaction" className="space-y-4">
-            <EmailInteractions contactId={contact.id} contact={contact} />
+            <EmailInteractions 
+              contactId={contact.id} 
+              contact={contact} 
+              expandEmailId={emailParam ? parseInt(emailParam) : undefined}
+            />
           </TabsContent>
 
           {(contact.contactType === 'client' || contact.contactType === 'prospect') && (
