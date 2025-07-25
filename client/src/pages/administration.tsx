@@ -110,9 +110,16 @@ export default function Administration() {
         try {
           // Using ipapi.co (free, HTTPS supported)
           const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
-          const data = await response.json();
           
-          if (!data.error) {
+          if (!response.ok) {
+            console.error(`IP lookup failed for ${ipAddress}: ${response.status} ${response.statusText}`);
+            return null;
+          }
+          
+          const data = await response.json();
+          console.log(`Successful IP lookup via ipapi.co for ${ipAddress}:`, data);
+          
+          if (!data.error && data.country_name) {
             return {
               country: data.country_name,
               region: data.region,
@@ -124,8 +131,11 @@ export default function Administration() {
               location: `${data.city}, ${data.region}, ${data.country_name}`
             };
           }
+          
+          console.warn(`IP lookup returned error for ${ipAddress}:`, data);
           return null;
         } catch (error) {
+          console.error(`IP lookup failed for ${ipAddress}:`, error);
           return null;
         }
       },
