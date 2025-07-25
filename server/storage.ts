@@ -991,6 +991,26 @@ export class DatabaseStorage implements IStorage {
         const userContact = await this.findOrCreateUserContact(currentUserId);
         processedTask.assignedTo = [userContact.id];
       } else {
+        // Handle direct contact ID assignment (e.g., "15")
+        const contactId = parseInt(processedTask.assignedTo);
+        if (!isNaN(contactId)) {
+          const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
+          if (contact.length > 0 && contact[0].contactType === 'team_member') {
+            processedTask.assignedTo = [contactId];
+          } else {
+            processedTask.assignedTo = null;
+          }
+        } else {
+          processedTask.assignedTo = null;
+        }
+      }
+    } else if (processedTask.assignedTo && typeof processedTask.assignedTo === 'number') {
+      // Handle direct contact ID assignment as number
+      const contactId = processedTask.assignedTo;
+      const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
+      if (contact.length > 0 && contact[0].contactType === 'team_member') {
+        processedTask.assignedTo = [contactId];
+      } else {
         processedTask.assignedTo = null;
       }
     }
