@@ -2525,11 +2525,12 @@ export class DatabaseStorage implements IStorage {
       .from(userActivities)
       .where(timeCondition);
     
-    // Get login sessions count
+    // Get login sessions count - count unique user sessions (first page_view per IP+User combo)
+    // Since Replit Auth doesn't create explicit 'login' events, we'll count unique sessions
     const [loginSessionsResult] = await db
-      .select({ count: count() })
+      .select({ count: sql<number>`COUNT(DISTINCT CONCAT(${userActivities.userId}, ':', COALESCE(${userActivities.ipAddress}, 'unknown')))` })
       .from(userActivities)
-      .where(and(timeCondition, eq(userActivities.action, 'login')));
+      .where(and(timeCondition, eq(userActivities.action, 'page_view')));
     
     // Get unique IPs count
     const [uniqueIPsResult] = await db
