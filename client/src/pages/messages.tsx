@@ -3,10 +3,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, ExternalLink, Calendar, User, FileText, CheckSquare } from "lucide-react";
+import { MessageSquare, ExternalLink, Calendar, User, FileText, CheckSquare, Clock, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
-import { formatDistanceToNow } from "date-fns";
-import type { User as UserType } from "@shared/schema";
+import { formatDistanceToNow, format } from "date-fns";
+import type { User as UserType, Task } from "@shared/schema";
 
 interface MentionWithSource {
   id: number;
@@ -32,11 +32,21 @@ interface MentionWithSource {
   };
 }
 
+interface TaskNotification extends Task {
+  projectName?: string;
+  daysUntilDue: number;
+}
+
 export default function Messages() {
   const { user } = useAuth() as { user: UserType | null };
 
-  const { data: mentions = [], isLoading } = useQuery({
+  const { data: mentions = [], isLoading: mentionsLoading } = useQuery({
     queryKey: ['/api/mentions', user?.id],
+    enabled: !!user?.id,
+  });
+
+  const { data: taskNotifications = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ['/api/notifications/tasks-due', user?.id],
     enabled: !!user?.id,
   });
 
@@ -105,7 +115,19 @@ export default function Messages() {
     }
   };
 
-  if (isLoading) {
+  const getDueDateBadgeColor = (daysUntilDue: number) => {
+    if (daysUntilDue <= 1) return "bg-red-100 text-red-800";
+    if (daysUntilDue <= 3) return "bg-orange-100 text-orange-800";
+    return "bg-yellow-100 text-yellow-800";
+  };
+
+  const getDueDateText = (daysUntilDue: number) => {
+    if (daysUntilDue === 0) return "Due today";
+    if (daysUntilDue === 1) return "Due tomorrow";
+    return `Due in ${daysUntilDue} days`;
+  };
+
+  if (mentionsLoading || tasksLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -119,20 +141,80 @@ export default function Messages() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-        <Badge variant="secondary" className="text-sm">
-          {unreadMentions.length} unread @mentions
-        </Badge>
+        <h1 className="text-3xl font-bold tracking-tight">Messages & Notifications</h1>
+        <div className="flex gap-2">
+          <Badge variant="secondary" className="text-sm">
+            {unreadMentions.length} unread @mentions
+          </Badge>
+          <Badge variant="outline" className="text-sm">
+            {taskNotifications.length} tasks due soon
+          </Badge>
+        </div>
       </div>
 
-      {mentions.length === 0 ? (
+      {/* Task Due Date Notifications */}
+      {taskNotifications.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Clock className="w-5 h-5" />
+            Task Due Date Reminders ({taskNotifications.length})
+          </h2>
+          
+          <div className="grid gap-3">
+            {taskNotifications.map((task: TaskNotification) => (
+              <Card key={task.id} className="border-l-4 border-l-orange-500">
+                <CardContent className="py-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CheckSquare className="w-4 h-4 text-muted-foreground" />
+                        <h3 className="font-medium">
+                          <Link 
+                            href={`/task/${task.id}`}
+                            className="hover:underline text-blue-600"
+                          >
+                            {task.title}
+                          </Link>
+                        </h3>
+                      </div>
+                      {task.projectName && (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Project: {task.projectName}
+                        </p>
+                      )}
+                      {task.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {task.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge className={getDueDateBadgeColor(task.daysUntilDue)}>
+                        {getDueDateText(task.daysUntilDue)}
+                      </Badge>
+                      {task.daysUntilDue <= 1 && (
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {mentions.length === 0 && taskNotifications.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No @mentions yet</h3>
+            <h3 className="text-lg font-semibold mb-2">No messages or notifications yet</h3>
             <p className="text-muted-foreground text-center max-w-md">
-              When team members @mention you in comments or notes, they'll appear here.
-              You can use @Pat, @PatSmith, or @PatS to mention team members.
+              This page shows @mentions from team members and task due date reminders.
+              <br /><br />
+              <strong>@Mentions:</strong> You can use @Pat, @PatSmith, or @PatS to mention team members.
+              <br />
+              <strong>Task Notifications:</strong> Tasks due in the next couple of days and next week will appear here automatically.
               <br /><br />
               <strong>Tip:</strong> If multiple people share the same first name, use their full name (@FirstLast) or first name + last initial (@FirstL) to avoid ambiguous mentions.
             </p>
