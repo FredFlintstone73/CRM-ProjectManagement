@@ -132,7 +132,9 @@ export default function Messages() {
             <h3 className="text-lg font-semibold mb-2">No @mentions yet</h3>
             <p className="text-muted-foreground text-center max-w-md">
               When team members @mention you in comments or notes, they'll appear here.
-              Use @{user?.firstName} in any comment to mention yourself.
+              You can use @{user?.firstName}, @{user?.firstName}{user?.lastName}, or @{user?.firstName}{user?.lastName?.charAt(0)} to mention team members.
+              <br /><br />
+              <strong>Tip:</strong> If multiple people share the same first name, use their full name (@FirstLast) or first name + last initial (@FirstL) to avoid ambiguous mentions.
             </p>
           </CardContent>
         </Card>

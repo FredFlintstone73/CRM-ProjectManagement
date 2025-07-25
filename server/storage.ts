@@ -2794,12 +2794,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async processMentionsInText(text: string, sourceType: string, sourceId: number, authorId: string): Promise<void> {
-    // Find @mentions in text (matching @FirstName)
-    const mentionMatches = text.match(/@([A-Za-z]+)/g);
+    // Find @mentions in text - support both @FirstName and @FirstLast formats
+    const mentionMatches = text.match(/@([A-Za-z]+(?:[A-Za-z]+)?)/g);
     
     if (!mentionMatches) return;
 
-    // Get all team members to match first names
+    // Get all team members to match names
     const teamMembers = await db
       .select({
         id: users.id,
@@ -2810,23 +2810,54 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.isActive, true));
 
     for (const match of mentionMatches) {
-      const firstName = match.substring(1); // Remove @
+      const mentionText = match.substring(1).toLowerCase(); // Remove @ and lowercase
       
-      // Find user by first name
-      const mentionedUser = teamMembers.find(
-        user => user.firstName.toLowerCase() === firstName.toLowerCase()
+      // Try different matching strategies
+      let mentionedUsers = [];
+      
+      // Strategy 1: Exact first name match
+      const firstNameMatches = teamMembers.filter(
+        user => user.firstName.toLowerCase() === mentionText
+      );
+      
+      // Strategy 2: FirstLast format (e.g., @ChadTennant)
+      const firstLastMatches = teamMembers.filter(
+        user => (user.firstName + user.lastName).toLowerCase() === mentionText
+      );
+      
+      // Strategy 3: First name + last initial (e.g., @ChadT)
+      const firstLastInitialMatches = teamMembers.filter(
+        user => (user.firstName + user.lastName.charAt(0)).toLowerCase() === mentionText
       );
 
-      if (mentionedUser && mentionedUser.id !== authorId) {
-        // Create mention record
-        await this.createMention({
-          mentionedUserId: mentionedUser.id,
-          mentionedByUserId: authorId,
-          sourceType,
-          sourceId,
-          contextText: text.length > 200 ? text.substring(0, 197) + '...' : text,
-          isRead: false,
-        });
+      // Prioritize matches: exact firstlast > first+initial > first name only
+      if (firstLastMatches.length > 0) {
+        mentionedUsers = firstLastMatches;
+      } else if (firstLastInitialMatches.length > 0) {
+        mentionedUsers = firstLastInitialMatches;
+      } else if (firstNameMatches.length === 1) {
+        // Only use first name if there's exactly one match
+        mentionedUsers = firstNameMatches;
+      }
+      
+      // If multiple people have the same first name and no unique identifier was used, skip
+      if (firstNameMatches.length > 1 && mentionedUsers.length === 0) {
+        console.log(`Ambiguous mention @${mentionText} - multiple users with name: ${firstNameMatches.map(u => `${u.firstName} ${u.lastName}`).join(', ')}`);
+        continue;
+      }
+
+      // Create mentions for resolved users
+      for (const mentionedUser of mentionedUsers) {
+        if (mentionedUser.id !== authorId) {
+          await this.createMention({
+            mentionedUserId: mentionedUser.id,
+            mentionedByUserId: authorId,
+            sourceType,
+            sourceId,
+            contextText: text.length > 200 ? text.substring(0, 197) + '...' : text,
+            isRead: false,
+          });
+        }
       }
     }
   }
