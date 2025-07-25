@@ -223,11 +223,26 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
 
   // Group emails by conversation thread
   const groupedInteractions = () => {
+    // First, deduplicate interactions to handle IMAP duplicate issues
+    const uniqueInteractions = interactions.filter((interaction, index, arr) => {
+      // Find if there's another interaction with same key attributes
+      const duplicateIndex = arr.findIndex(other => 
+        other.contactId === interaction.contactId &&
+        other.parentEmailId === interaction.parentEmailId &&
+        other.subject === interaction.subject &&
+        other.sender === interaction.sender &&
+        other.sentAt === interaction.sentAt &&
+        other.emailType === interaction.emailType
+      );
+      // Keep only the first occurrence (lowest index)
+      return duplicateIndex === index;
+    });
+
     const groups: { [key: number]: EmailInteraction[] } = {};
     const threaded: number[] = [];
     
     // First, group replies with their parent emails
-    interactions.forEach(interaction => {
+    uniqueInteractions.forEach(interaction => {
       if (interaction.parentEmailId) {
         if (!groups[interaction.parentEmailId]) {
           groups[interaction.parentEmailId] = [];
@@ -239,11 +254,13 @@ export default function EmailInteractions({ contactId, contact }: EmailInteracti
     
     // Then add parent emails and standalone emails
     const result: (EmailInteraction & { replies?: EmailInteraction[] })[] = [];
-    interactions.forEach(interaction => {
+    uniqueInteractions.forEach(interaction => {
       if (!threaded.includes(interaction.id)) {
         result.push({
           ...interaction,
-          replies: groups[interaction.id] || []
+          replies: (groups[interaction.id] || []).sort((a, b) => 
+            new Date(a.sentAt || a.createdAt).getTime() - new Date(b.sentAt || b.createdAt).getTime()
+          )
         });
       }
     });

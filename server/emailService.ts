@@ -419,10 +419,12 @@ class EmailService {
 
       // Check if we've already recorded this email to avoid duplicates
       const existingEmails = await this.storage.getEmailInteractionsByContact(targetContact.id);
-      const isDuplicate = existingEmails.some(email => 
-        email.subject === subject &&
-        email.sender === from &&
-        Math.abs(new Date(email.sentAt).getTime() - (email.date || new Date()).getTime()) < 60000 // Within 1 minute
+      const currentTimestamp = email.date || new Date();
+      const isDuplicate = existingEmails.some(existingEmail => 
+        existingEmail.subject === subject &&
+        existingEmail.sender === from &&
+        existingEmail.emailType === 'received' &&
+        Math.abs(new Date(existingEmail.sentAt).getTime() - currentTimestamp.getTime()) < 300000 // Within 5 minutes
       );
 
       if (isDuplicate) {
