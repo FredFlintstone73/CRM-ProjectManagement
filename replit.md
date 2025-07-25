@@ -141,6 +141,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Team Member Task Access Control Implementation (July 25, 2025)
+- **Access Control System**: Implemented comprehensive task access control for Team Members in "All Tasks" view
+- **Project-Based Restrictions**: Team Members can only see tasks from projects where they have assigned tasks (same project/meeting restriction)
+- **Role-Based Access**: Administrators and Managers maintain full task visibility across all projects
+- **Backend Enhancement**: Added getTasksWithAccessControl method in DatabaseStorage class with PostgreSQL array queries
+- **Route Protection**: Updated /api/tasks route to apply access control automatically based on user access level
+- **Database Query Optimization**: Enhanced SQL queries to filter tasks by project associations using PostgreSQL array operators
+- **Security Compliance**: Ensures Team Members cannot access tasks from projects they're not involved in
+- **Seamless Integration**: Access control applied transparently in "All Tasks" view without changing user interface
+
 ### Complete Automatic Session Timeout System Implementation (July 24, 2025)
 - **90-Minute App Inactivity Timeout**: Automatically logs out users after 90 minutes of app inactivity (no clicks, scrolls, navigation)
 - **30-Minute System Idle Timeout**: Logs out users after 30 minutes of computer idle time (no mouse movement, keyboard activity, or browser focus)

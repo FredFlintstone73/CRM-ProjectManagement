@@ -1124,6 +1124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {
       const { projectId, userId, upcoming, overdue } = req.query;
+      const currentUserId = req.user?.claims?.sub;
       let tasks;
       
       if (upcoming) {
@@ -1135,7 +1136,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (userId) {
         tasks = await storage.getTasksByUser(userId as string);
       } else {
-        tasks = await storage.getTasks();
+        // Apply access control for "All Tasks" view
+        const userAccessLevel = await storage.getUserAccessLevel(currentUserId);
+        tasks = await storage.getTasksWithAccessControl(currentUserId, userAccessLevel || 'team_member');
       }
       
       res.json(tasks);

@@ -101,6 +101,7 @@ export interface IStorage {
 
   // Task operations
   getTasks(): Promise<Task[]>;
+  getTasksWithAccessControl(userId: string, userAccessLevel: string): Promise<Task[]>;
   getTask(id: number): Promise<Task | undefined>;
   createTask(task: InsertTask, userId: string): Promise<Task>;
   updateTask(id: number, task: Partial<InsertTask>): Promise<Task>;
@@ -861,6 +862,46 @@ export class DatabaseStorage implements IStorage {
   // Task operations
   async getTasks(): Promise<Task[]> {
     return await db.select().from(tasks).orderBy(desc(tasks.createdAt));
+  }
+
+  async getTasksWithAccessControl(userId: string, userAccessLevel: string): Promise<Task[]> {
+    // Administrators and Managers can see all tasks
+    if (userAccessLevel === 'administrator' || userAccessLevel === 'manager') {
+      return await this.getTasks();
+    }
+
+    // Team Members can only see tasks from projects where they have assigned tasks
+    if (userAccessLevel === 'team_member') {
+      // First, get the user's contact ID
+      const userContact = await this.getUserContactId({ id: userId } as any);
+      if (!userContact) {
+        return []; // No contact record, no tasks visible
+      }
+
+      // Get all projects where the user has assigned tasks
+      const userProjectIds = await db
+        .selectDistinct({ projectId: tasks.projectId })
+        .from(tasks)
+        .where(
+          sql`${tasks.assignedTo} @> ARRAY[${userContact}]::integer[] AND ${tasks.projectId} IS NOT NULL`
+        );
+
+      if (userProjectIds.length === 0) {
+        return []; // User has no assigned tasks, no tasks visible
+      }
+
+      const projectIds = userProjectIds.map(p => p.projectId).filter(id => id !== null);
+
+      // Return all tasks from projects where the user has assigned tasks
+      return await db
+        .select()
+        .from(tasks)
+        .where(inArray(tasks.projectId, projectIds))
+        .orderBy(desc(tasks.createdAt));
+    }
+
+    // Default: no access
+    return [];
   }
 
   async getTask(id: number): Promise<Task | undefined> {
