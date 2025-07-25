@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, ExternalLink, Calendar, User, FileText, CheckSquare, Clock, AlertCircle } from "lucide-react";
+import { MessageSquare, ExternalLink, Calendar, User, FileText, CheckSquare, Clock, AlertCircle, Mail, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 import { formatDistanceToNow, format } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { User as UserType, Task } from "@shared/schema";
 
 interface MentionWithSource {
@@ -42,8 +44,32 @@ interface OverdueTask extends Task {
   daysOverdue: number;
 }
 
+interface EmailWithContact {
+  id: number;
+  contactId: number;
+  subject: string;
+  sender: string;
+  sentAt: string;
+  emailType: string;
+  isRead?: boolean;
+  contact: {
+    firstName: string;
+    lastName: string;
+    familyName: string;
+  };
+}
+
+interface EmailNotification {
+  id: number;
+  emailInteractionId: number;
+  isRead: boolean;
+  email: EmailWithContact;
+}
+
 export default function Messages() {
   const { user } = useAuth() as { user: UserType | null };
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: mentions = [], isLoading: mentionsLoading } = useQuery({
     queryKey: ['/api/mentions', user?.id],
@@ -66,6 +92,13 @@ export default function Messages() {
     gcTime: 300000 // 5 minutes
   });
 
+  const { data: emailNotifications = [], isLoading: emailsLoading } = useQuery<EmailNotification[]>({
+    queryKey: ['/api/email-notifications'],
+    enabled: !!user?.id,
+    refetchInterval: 30000, // Check for new emails every 30 seconds
+    staleTime: 10000, // Consider data stale after 10 seconds
+  });
+
   const markAsRead = async (mentionId: number) => {
     try {
       await fetch(`/api/mentions/${mentionId}/read`, {
@@ -78,6 +111,40 @@ export default function Messages() {
       console.error('Failed to mark mention as read:', error);
     }
   };
+
+  const markEmailAsReadMutation = useMutation({
+    mutationFn: (notificationId: number) =>
+      apiRequest('PATCH', `/api/email-notifications/${notificationId}/mark-read`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/email-notifications'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to mark email as read",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const markAllEmailsAsReadMutation = useMutation({
+    mutationFn: () =>
+      apiRequest('PATCH', '/api/email-notifications/mark-all-read'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/email-notifications'] });
+      toast({
+        title: "Success",
+        description: "All emails marked as read",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to mark all emails as read",
+        variant: "destructive",
+      });
+    },
+  });
 
   const getSourceIcon = (sourceType: string) => {
     switch (sourceType) {
@@ -152,7 +219,7 @@ export default function Messages() {
     return `${daysOverdue} days overdue`;
   };
 
-  if (mentionsLoading || tasksLoading || overdueLoading) {
+  if (mentionsLoading || tasksLoading || overdueLoading || emailsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -162,12 +229,16 @@ export default function Messages() {
 
   const unreadMentions = mentions.filter((m: MentionWithSource) => !m.isRead);
   const readMentions = mentions.filter((m: MentionWithSource) => m.isRead);
+  const unreadEmails = emailNotifications.filter(n => !n.isRead);
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Messages & Notifications</h1>
         <div className="flex gap-2">
+          <Badge variant="secondary" className="text-sm">
+            {unreadEmails.length} unread emails
+          </Badge>
           <Badge variant="secondary" className="text-sm">
             {unreadMentions.length} unread @mentions
           </Badge>
@@ -177,8 +248,76 @@ export default function Messages() {
           <Badge variant="destructive" className="text-sm">
             {overdueTasks.length} overdue tasks
           </Badge>
+          {unreadEmails.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => markAllEmailsAsReadMutation.mutate()}
+              disabled={markAllEmailsAsReadMutation.isPending}
+            >
+              Mark All Emails Read
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Unread Email Notifications */}
+      {unreadEmails.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Mail className="w-5 h-5 text-blue-500" />
+            Unread Email Messages ({unreadEmails.length})
+          </h2>
+          
+          <div className="grid gap-3">
+            {unreadEmails.map((notification: EmailNotification) => (
+              <Card key={notification.id} className="border-l-4 border-l-blue-500">
+                <CardContent className="py-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <h3 className="font-medium">
+                          <Link 
+                            href={`/contacts/${notification.email.contactId}`}
+                            className="hover:underline text-blue-600"
+                          >
+                            {notification.email.subject}
+                          </Link>
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        From: {notification.email.sender}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Contact: {notification.email.contact.familyName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Received: {formatDistanceToNow(new Date(notification.email.sentAt), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        {notification.email.emailType === 'received' ? 'Received' : 'Sent'}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => markEmailAsReadMutation.mutate(notification.id)}
+                        disabled={markEmailAsReadMutation.isPending}
+                        className="text-xs"
+                      >
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Mark Read
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Overdue Tasks */}
       {overdueTasks.length > 0 && (
@@ -282,14 +421,16 @@ export default function Messages() {
         </div>
       )}
 
-      {mentions.length === 0 && taskNotifications.length === 0 && overdueTasks.length === 0 ? (
+      {mentions.length === 0 && taskNotifications.length === 0 && overdueTasks.length === 0 && emailNotifications.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No messages or notifications yet</h3>
             <p className="text-muted-foreground text-center max-w-md">
-              This page shows @mentions from team members, overdue tasks, and task due date reminders.
+              This page shows email notifications, @mentions from team members, overdue tasks, and task due date reminders.
               <br /><br />
+              <strong>Email Notifications:</strong> Unread emails from contacts appear here automatically via IMAP monitoring.
+              <br />
               <strong>@Mentions:</strong> You can use @Pat, @PatSmith, or @PatS to mention team members.
               <br />
               <strong>Overdue Tasks:</strong> Tasks past their due date will appear here with red alerts.

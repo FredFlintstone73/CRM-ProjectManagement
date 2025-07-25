@@ -29,7 +29,7 @@ export default function EmailNotificationIcon() {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <Link href="/consolidated-messages">
+    <Link href="/messages">
       <Button 
         variant="ghost" 
         size="sm" 
