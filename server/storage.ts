@@ -157,6 +157,7 @@ export interface IStorage {
   getEmailInteractions(): Promise<EmailInteraction[]>;
   getEmailInteractionsByContact(contactId: number): Promise<EmailInteraction[]>;
   createEmailInteraction(interaction: InsertEmailInteraction, userId: string): Promise<EmailInteraction>;
+  deleteEmailInteraction(emailId: number): Promise<void>;
 
   // Call transcript operations
   getCallTranscripts(): Promise<CallTranscript[]>;
@@ -1812,6 +1813,12 @@ export class DatabaseStorage implements IStorage {
       .values(interactionData)
       .returning();
     return newInteraction;
+  }
+
+  async deleteEmailInteraction(emailId: number): Promise<void> {
+    await db
+      .delete(emailInteractions)
+      .where(eq(emailInteractions.id, emailId));
   }
 
   // Call transcript operations

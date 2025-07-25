@@ -2160,6 +2160,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete email interaction
+  app.delete('/api/contacts/:id/emails/:emailId', isAuthenticated, async (req: any, res) => {
+    try {
+      const emailId = parseInt(req.params.emailId);
+      await storage.deleteEmailInteraction(emailId);
+      res.json({ message: "Email interaction deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting email interaction:", error);
+      res.status(500).json({ message: "Failed to delete email interaction" });
+    }
+  });
+
   // Email monitoring status endpoint
   app.get('/api/email-monitoring/status', isAuthenticated, async (req: any, res) => {
     try {
