@@ -3253,7 +3253,10 @@ export class DatabaseStorage implements IStorage {
       .from(emailNotifications)
       .innerJoin(emailInteractions, eq(emailNotifications.emailInteractionId, emailInteractions.id))
       .innerJoin(contacts, eq(emailInteractions.contactId, contacts.id))
-      .where(eq(emailNotifications.userId, userId))
+      .where(and(
+        eq(emailNotifications.userId, userId),
+        eq(emailNotifications.isRead, false)
+      ))
       .orderBy(desc(emailNotifications.createdAt));
 
     return notifications;
