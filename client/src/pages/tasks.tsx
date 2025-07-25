@@ -357,6 +357,17 @@ export default function Tasks() {
   const filteredAndSortedTasks = useMemo(() => {
     if (!tasks) return [];
     
+    // Debug: Check if our tasks are in the data
+    const debugTasks = tasks.filter(t => t.title === 'To Do 6' || t.title === 'To Do 7');
+    if (debugTasks.length > 0) {
+      console.log('Debug: Found target tasks in data:', debugTasks.map(t => ({
+        id: t.id,
+        title: t.title,
+        projectId: t.projectId,
+        assignedTo: t.assignedTo
+      })));
+    }
+    
     // Pre-compute values for better performance
     const searchLower = searchQuery.toLowerCase();
     const hasSearch = searchQuery !== "";
@@ -397,8 +408,8 @@ export default function Tasks() {
       const hasDirectAssignment = task.assignedTo && (Array.isArray(task.assignedTo) ? task.assignedTo.length > 0 : !!task.assignedTo);
       const hasRoleAssignment = task.assignedToRole && (Array.isArray(task.assignedToRole) ? task.assignedToRole.length > 0 : !!task.assignedToRole);
       
-      // Debug logging for standalone tasks
-      if (!task.projectId && (task.title === 'To Do 6' || task.title === 'To Do 7')) {
+      // Debug logging for target tasks
+      if (task.title === 'To Do 6' || task.title === 'To Do 7') {
         console.log('Debug task filtering:', {
           id: task.id,
           title: task.title,
