@@ -41,6 +41,20 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Add error handler for unhandled promise rejections
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled promise rejection in EmailInteractions:', event.reason);
+      event.preventDefault();
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   // Get the contact's primary email
   const getContactEmail = () => {
     return contact.personalEmail || contact.workEmail || contact.spousePersonalEmail || "";
@@ -96,8 +110,16 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
   const sendEmailMutation = useMutation({
     mutationFn: async (data: EmailFormData) => {
-      const response = await apiRequest("POST", `/api/contacts/${contactId}/emails`, data);
-      return response.json();
+      try {
+        const response = await apiRequest("POST", `/api/contacts/${contactId}/emails`, data);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Email mutation error:", error);
+        throw error;
+      }
     },
     onSuccess: (result: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts", contactId, "emails"] });
@@ -134,7 +156,16 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
   });
 
   const onSubmit = (data: EmailFormData) => {
-    sendEmailMutation.mutate(data);
+    try {
+      sendEmailMutation.mutate(data);
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit email form",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCompose = () => {
@@ -224,8 +255,16 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
   const deleteEmailMutation = useMutation({
     mutationFn: async (emailId: number) => {
-      const response = await apiRequest("DELETE", `/api/contacts/${contactId}/emails/${emailId}`);
-      return response.json();
+      try {
+        const response = await apiRequest("DELETE", `/api/contacts/${contactId}/emails/${emailId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Delete email mutation error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts", contactId, "emails"] });
@@ -255,7 +294,16 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
   const handleDelete = (emailId: number) => {
     if (confirm("Are you sure you want to delete this email interaction?")) {
-      deleteEmailMutation.mutate(emailId);
+      try {
+        deleteEmailMutation.mutate(emailId);
+      } catch (error) {
+        console.error("Delete error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete email",
+          variant: "destructive",
+        });
+      }
     }
   };
 
