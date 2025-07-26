@@ -203,11 +203,20 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
 
     const assignedToIds = convertAssignees(selectedAssignees);
 
+    console.log('TaskForm onSubmit debug:', {
+      isEditing: !!task,
+      taskId: task?.id,
+      selectedAssignees,
+      assignedToIds,
+      originalAssignedTo: task?.assignedTo
+    });
+
     const processedData = {
       ...data,
       dueDate: dueDate ? formatDateForServer(dueDate) : undefined,
       projectId: projectId,
-      ...(assignedToIds.length > 0 && { assignedTo: assignedToIds }),
+      // For edits, always include assignment data (even if empty) to avoid clearing existing assignments
+      assignedTo: assignedToIds.length > 0 ? assignedToIds : (task ? task.assignedTo : []),
       ...(selectedRoles.length > 0 && { assignedToRole: selectedRoles }),
     };
     createTaskMutation.mutate(processedData);
