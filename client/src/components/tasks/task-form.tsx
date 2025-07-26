@@ -151,19 +151,18 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     { label: "Other", value: "other" }
   ];
 
-  const form = useForm<InsertTask>({
+  const form = useForm({
     resolver: zodResolver(insertTaskSchema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
-      projectId: projectId || undefined,
       priority: task?.priority || 25,
-      dueDate: task?.dueDate || undefined,
     },
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: async (data: InsertTask) => {
+    mutationFn: async (data: any) => {
+      console.log('🔥 TaskForm mutation sending data:', JSON.stringify(data, null, 2));
       const url = task ? `/api/tasks/${task.id}` : '/api/tasks';
       const method = task ? 'PATCH' : 'POST';
       return await apiRequest(method, url, data);
