@@ -48,6 +48,19 @@ export function UserPriorityInput({ taskId, currentPriority, taskFilter }: UserP
 
   const displayPriority = currentPriority || 50;
 
+  // Priority color function (matching Tasks page)
+  const getPriorityColor = (priority: number) => {
+    if (priority <= 10) {
+      return 'bg-green-100 text-green-800';
+    } else if (priority <= 20) {
+      return 'bg-yellow-100 text-yellow-800';
+    } else if (priority <= 35) {
+      return 'bg-orange-100 text-orange-800';
+    } else {
+      return 'bg-red-100 text-red-800';
+    }
+  };
+
   if (isEditing) {
     return (
       <div className="flex items-center space-x-2">
@@ -89,8 +102,7 @@ export function UserPriorityInput({ taskId, currentPriority, taskFilter }: UserP
   return (
     <div className="flex items-center space-x-2">
       <Badge
-        variant="outline"
-        className="cursor-pointer hover:bg-muted"
+        className={`cursor-pointer hover:bg-muted ${getPriorityColor(displayPriority)}`}
         onClick={() => setIsEditing(true)}
       >
         {displayPriority}
