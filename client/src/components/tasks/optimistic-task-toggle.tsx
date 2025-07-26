@@ -76,8 +76,10 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
   });
 
   const handleClick = (e: React.MouseEvent) => {
-    console.log(`🔄 CLICK DETECTED: Toggling task ${task.id} from ${task.status}`);
+    console.log(`🔄 CLICK DETECTED: Toggling task ${task.id} from ${task.status} (in Task Details page)`);
     console.log(`🔄 isPending: ${toggleMutation.isPending}`);
+    console.log(`🔄 Event target:`, e.target);
+    console.log(`🔄 Current target:`, e.currentTarget);
     
     e.preventDefault();
     e.stopPropagation();
