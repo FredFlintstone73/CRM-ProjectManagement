@@ -57,8 +57,8 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
   const { data: interactions = [], isLoading } = useQuery<EmailInteraction[]>({
     queryKey: ["/api/contacts", contactId, "emails"],
-    staleTime: 60000, // 60 seconds (increased for better performance)
-    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes for better performance
+    gcTime: 10 * 60 * 1000, // Keep cache for 10 minutes
     refetchOnWindowFocus: false, // Don't refetch when window gets focus
     retry: 1, // Only retry once on failure
   });
@@ -80,8 +80,8 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
         
         setExpandedThreads(prev => new Set([...prev, threadToExpand]));
         
-        // Scroll to the email thread after a short delay to ensure it's rendered
-        setTimeout(() => {
+        // Scroll to the email thread immediately for faster navigation
+        requestAnimationFrame(() => {
           const emailElement = document.getElementById(`email-thread-${threadToExpand}`);
           if (emailElement) {
             emailElement.scrollIntoView({ 
@@ -89,7 +89,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
               block: 'center' 
             });
           }
-        }, 100);
+        });
       }
     }
   }, [expandEmailId, interactions]);

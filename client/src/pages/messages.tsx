@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, ExternalLink, Calendar, User, FileText, CheckSquare, Clock, AlertCircle, Mail, CheckCircle2 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { formatDistanceToNow, format } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -70,6 +70,7 @@ export default function Messages() {
   const { user } = useAuth() as { user: UserType | null };
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const { data: mentions = [], isLoading: mentionsLoading } = useQuery({
     queryKey: ['/api/mentions', user?.id],
@@ -300,13 +301,19 @@ export default function Messages() {
                         <h3 className="font-medium">
                           <button
                             onClick={() => {
-                              // Start mark as read and navigate immediately (don't wait)
+                              // Navigate immediately using client-side routing (much faster)
+                              setLocation(`/contacts/${notification.email.contactId}?tab=interactions&email=${notification.emailInteractionId}`);
+                              // Mark as read in background (non-blocking)
                               markEmailAsReadMutation.mutate(notification.id);
-                              // Navigate immediately for faster perceived performance
-                              window.location.href = `/contacts/${notification.email.contactId}?tab=interactions&email=${notification.emailInteractionId}`;
+                            }}
+                            onMouseEnter={() => {
+                              // Prefetch email data on hover for instant loading
+                              queryClient.prefetchQuery({
+                                queryKey: ["/api/contacts", notification.email.contactId, "emails"],
+                                staleTime: 60000,
+                              });
                             }}
                             className="hover:underline text-blue-600 text-left"
-                            disabled={markEmailAsReadMutation.isPending}
                           >
                             {notification.email.subject}
                           </button>

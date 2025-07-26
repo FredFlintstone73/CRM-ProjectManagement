@@ -62,8 +62,8 @@ export default function ContactDetail() {
   const { data: contact, isLoading: contactLoading } = useQuery<Contact>({
     queryKey: ['/api/contacts', id],
     enabled: isAuthenticated && !!id,
-    staleTime: 0, // Force fresh data
-    gcTime: 0, // Don't cache data
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes for better performance
+    gcTime: 10 * 60 * 1000, // Keep cache for 10 minutes
   });
 
   // Query for projects associated with this contact
