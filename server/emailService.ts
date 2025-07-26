@@ -446,7 +446,7 @@ class EmailService {
 
       // Create email notification for all users (they can mark as read individually)
       try {
-        const allUsers = await this.storage.getUsers();
+        const allUsers = await this.storage.getAllUsers();
         console.log(`📧 Creating email notifications for ${allUsers.length} users for email interaction ${emailInteraction.id}`);
         
         for (const user of allUsers) {

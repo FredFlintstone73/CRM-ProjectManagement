@@ -2827,6 +2827,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email refresh endpoint
+  app.post('/api/email/refresh', isAuthenticated, async (req: any, res) => {
+    try {
+      // Force email refresh by restarting email monitoring
+      emailService.stopEmailMonitoring();
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+      emailService.startEmailMonitoring();
+      res.json({ message: "Email refresh triggered successfully", success: true });
+    } catch (error) {
+      console.error("Error refreshing emails:", error);
+      res.status(500).json({ message: "Failed to refresh emails", success: false });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
