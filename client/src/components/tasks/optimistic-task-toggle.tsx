@@ -30,56 +30,18 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onSuccess: (updatedTask) => {
       console.log(`✅ SUCCESS: Task ${task.id} updated to ${updatedTask.status}`);
       
-      // DIRECT cache updates first - replace stale data immediately
-      console.log(`🔥 Starting direct cache updates for task ${task.id}...`);
+      // SIMPLE: Just invalidate all caches and let them refetch fresh data
+      console.log(`🔥 Invalidating all task caches for fresh data...`);
       
-      // Update main tasks list
-      const allTasksUpdated = queryClient.setQueryData(['/api/tasks'], (oldData: any) => {
-        if (!oldData || !Array.isArray(oldData)) {
-          console.log(`🔥 No allTasks data to update`);
-          return oldData;
-        }
-        const updated = oldData.map((t: any) => t.id === task.id ? updatedTask : t);
-        console.log(`🔥 Updated allTasks cache: task ${task.id} status = ${updatedTask.status}`);
-        return updated;
-      });
-      
-      // Update my tasks list
-      const myTasksUpdated = queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (oldData: any) => {
-        if (!oldData || !Array.isArray(oldData)) {
-          console.log(`🔥 No myTasks data to update`);
-          return oldData;
-        }
-        const updated = oldData.map((t: any) => t.id === task.id ? { ...t, ...updatedTask } : t);
-        console.log(`🔥 Updated myTasks cache: task ${task.id} status = ${updatedTask.status}`);
-        return updated;
-      });
-      
-      // Update individual task cache
-      queryClient.setQueryData(['/api/tasks', task.id.toString()], updatedTask);
-      console.log(`🔥 Updated individual task cache: task ${task.id} status = ${updatedTask.status}`);
-      
-      // Update project tasks if applicable
-      if (projectId) {
-        queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldData: any) => {
-          if (!oldData || !Array.isArray(oldData)) return oldData;
-          return oldData.map((t: any) => t.id === task.id ? updatedTask : t);
-        });
-        console.log(`🔥 Updated project tasks cache for project ${projectId}`);
-      }
-      
-      console.log(`🔥 Direct cache updates completed`);
-      
-      // IMMEDIATE force refresh - refetch all queries NOW
-      console.log(`🔥 Starting IMMEDIATE force refresh...`);
-      queryClient.refetchQueries({ queryKey: ['/api/tasks'] });
-      queryClient.refetchQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
       
       if (projectId) {
-        queryClient.refetchQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       }
       
-      console.log(`🔥 Force refresh completed`);
+      console.log(`🔥 Cache invalidation completed - fresh data will load`);
     },
     onError: (error) => {
       console.error(`❌ ERROR: Failed to update task ${task.id}:`, error);
