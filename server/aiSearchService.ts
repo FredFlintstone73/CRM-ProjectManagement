@@ -1,5 +1,5 @@
 import { storage } from "./storage";
-import { abacusAI } from "./aiProviders/abacusAI";
+import { openAI } from "./aiProviders/openAI";
 
 export interface SearchResult {
   id: string;
@@ -56,11 +56,14 @@ export class AISearchService {
         summary = `No results found for "${query}". Try different keywords or check spelling.`;
       }
 
-      // Try AI enhancement if available (currently disabled pending proper deployment credentials)
-      // if (abacusAI.isConfigured()) {
-      //   const enhancedData = await abacusAI.enhanceSearch(query, sortedResults);
-      //   return enhancedData;
-      // }
+      // Try AI enhancement with OpenAI
+      try {
+        const enhancedData = await openAI.enhanceSearch(query, sortedResults);
+        return enhancedData;
+      } catch (error) {
+        console.error('OpenAI enhancement failed, using fallback:', error);
+        // Continue with fallback summary if AI fails
+      }
 
       return { results: sortedResults, summary };
 
@@ -236,7 +239,7 @@ export class AISearchService {
 
 export class ExtendedAISearchService extends AISearchService {
   async generateSearchSummary(query: string, results: SearchResult[]): Promise<string> {
-    return await abacusAI.generateSearchSummary(query, results);
+    return await openAI.generateSearchSummary(query, results);
   }
 }
 
