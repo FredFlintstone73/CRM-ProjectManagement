@@ -2670,80 +2670,40 @@ export class DatabaseStorage implements IStorage {
 
   // Search operations
   async searchContacts(query: string): Promise<Contact[]> {
-    
+    // Simplified search to avoid SQL parameter overflow
     return await db
       .select()
       .from(contacts)
       .where(
         or(
-          // Primary contact information
+          // Core contact information
           ilike(contacts.firstName, `%${query}%`),
           ilike(contacts.lastName, `%${query}%`),
           ilike(contacts.familyName, `%${query}%`),
           ilike(contacts.nickname, `%${query}%`),
           
-          // Business information  
-          ilike(contacts.businessName, `%${query}%`),
-          ilike(contacts.businessPhone, `%${query}%`),
+          // Spouse information (key for Ted Smith search)
+          ilike(contacts.spouseFirstName, `%${query}%`),
+          ilike(contacts.spouseLastName, `%${query}%`),
+          ilike(contacts.spouseNickname, `%${query}%`),
           
           // Contact details
           ilike(contacts.personalEmail, `%${query}%`),
           ilike(contacts.workEmail, `%${query}%`),
-          ilike(contacts.cellPhone, `%${query}%`),
-          ilike(contacts.workPhone, `%${query}%`),
-          
-          // Spouse information
-          ilike(contacts.spouseFirstName, `%${query}%`),
-          ilike(contacts.spouseLastName, `%${query}%`),
-          ilike(contacts.spouseNickname, `%${query}%`),
           ilike(contacts.spousePersonalEmail, `%${query}%`),
           ilike(contacts.spouseWorkEmail, `%${query}%`),
+          ilike(contacts.cellPhone, `%${query}%`),
+          ilike(contacts.workPhone, `%${query}%`),
+          ilike(contacts.businessPhone, `%${query}%`),
           ilike(contacts.spouseCellPhone, `%${query}%`),
           ilike(contacts.spouseWorkPhone, `%${query}%`),
           
-          // Address information
-          ilike(contacts.mailingAddressStreet1, `%${query}%`),
-          ilike(contacts.mailingAddressStreet2, `%${query}%`),
+          // Business and location
+          ilike(contacts.businessName, `%${query}%`),
           ilike(contacts.mailingAddressCity, `%${query}%`),
           ilike(contacts.mailingAddressState, `%${query}%`),
-          ilike(contacts.mailingAddressZip, `%${query}%`),
-          ilike(contacts.homeAddressStreet1, `%${query}%`),
-          ilike(contacts.homeAddressStreet2, `%${query}%`),
           ilike(contacts.homeAddressCity, `%${query}%`),
-          ilike(contacts.homeAddressState, `%${query}%`),
-          ilike(contacts.homeAddressZip, `%${query}%`),
-          ilike(contacts.businessAddressStreet1, `%${query}%`),
-          ilike(contacts.businessAddressStreet2, `%${query}%`),
-          ilike(contacts.businessAddressCity, `%${query}%`),
-          ilike(contacts.businessAddressState, `%${query}%`),
-          ilike(contacts.businessAddressZip, `%${query}%`),
-          
-          // Professional contacts
-          ilike(contacts.investmentAdvisorName, `%${query}%`),
-          ilike(contacts.investmentAdvisorPhone, `%${query}%`),
-          ilike(contacts.investmentAdvisorEmail, `%${query}%`),
-          ilike(contacts.taxProfessionalName, `%${query}%`),
-          ilike(contacts.taxProfessionalPhone, `%${query}%`),
-          ilike(contacts.taxProfessionalEmail, `%${query}%`),
-          ilike(contacts.attorneyName, `%${query}%`),
-          ilike(contacts.attorneyPhone, `%${query}%`),
-          ilike(contacts.attorneyEmail, `%${query}%`),
-          ilike(contacts.insuranceAgentName, `%${query}%`),
-          ilike(contacts.insuranceAgentPhone, `%${query}%`),
-          ilike(contacts.insuranceAgentEmail, `%${query}%`),
-          
-          // Children information
-          ilike(contacts.child1Name, `%${query}%`),
-          ilike(contacts.child2Name, `%${query}%`),
-          ilike(contacts.child3Name, `%${query}%`),
-          ilike(contacts.child4Name, `%${query}%`),
-          ilike(contacts.child5Name, `%${query}%`),
-          ilike(contacts.child6Name, `%${query}%`),
-          ilike(contacts.child7Name, `%${query}%`),
-          
-          // Role and department info
-          ilike(contacts.role, `%${query}%`),
-          ilike(contacts.title, `%${query}%`)
+          ilike(contacts.homeAddressState, `%${query}%`)
         )
       )
       .limit(20);

@@ -2657,7 +2657,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ results: [], summary: "" });
       }
 
-      // For now, use direct contact search instead of complex AI search
+      // Use simplified direct contact search
+      console.log('Starting direct contact search...');
       const contacts = await storage.searchContacts(query);
       console.log(`Direct search found ${contacts.length} contacts`);
       
@@ -2665,17 +2666,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: contact.id.toString(),
         type: 'contact',
         title: contact.familyName || `${contact.firstName} ${contact.lastName}`,
-        content: `${contact.firstName} ${contact.lastName}${contact.spouseFirstName ? ` (Spouse: ${contact.spouseFirstName} ${contact.spouseLastName || ''})` : ''}`,
+        content: `${contact.firstName} ${contact.lastName}${contact.spouseFirstName ? ` (Spouse: ${contact.spouseFirstName} ${contact.spouseLastName || ''})` : ''}${contact.businessName ? ` - ${contact.businessName}` : ''}`,
         relevance: 1,
         metadata: {
           contactName: contact.familyName || `${contact.firstName} ${contact.lastName}`,
-          contactType: contact.contactType
+          contactType: contact.contactType,
+          route: `/contacts/${contact.id}`
         }
       }));
       
-      const summary = `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${query}".`;
+      const summary = `Found ${results.length} contact${results.length !== 1 ? 's' : ''} matching "${query}".`;
       
-      console.log(`Search completed for: "${query}"`);
+      console.log(`Search completed successfully for: "${query}" - returning ${results.length} results`);
       res.json({ results, summary });
     } catch (error) {
       console.error("Error performing search:", error);
