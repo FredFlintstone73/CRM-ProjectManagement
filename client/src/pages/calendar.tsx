@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,11 +37,26 @@ export default function CalendarPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Add error handler for unhandled promise rejections
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled promise rejection in Calendar:', event.reason);
+      event.preventDefault();
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   const form = useForm<ConnectionFormData>({
     resolver: zodResolver(connectionSchema),
     defaultValues: {
-      provider: "google",
+      provider: "google" as const,
       calendarName: "",
+      calendarId: "",
       syncEnabled: true,
     },
   });
@@ -51,15 +66,19 @@ export default function CalendarPage() {
   });
 
   const createConnectionMutation = useMutation({
-    mutationFn: (data: ConnectionFormData) => 
-      apiRequest("/api/calendar/connections", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+    mutationFn: async (data: ConnectionFormData) => {
+      const response = await apiRequest("POST", "/api/calendar/connections", data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
       setDialogOpen(false);
-      form.reset();
+      form.reset({
+        provider: "google" as const,
+        calendarName: "",
+        calendarId: "",
+        syncEnabled: true,
+      });
       toast({
         title: "Calendar Connected",
         description: "Your calendar has been connected successfully.",
@@ -75,10 +94,10 @@ export default function CalendarPage() {
   });
 
   const deleteConnectionMutation = useMutation({
-    mutationFn: (id: number) => 
-      apiRequest(`/api/calendar/connections/${id}`, {
-        method: "DELETE",
-      }),
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/calendar/connections/${id}`);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
       toast({
@@ -96,10 +115,10 @@ export default function CalendarPage() {
   });
 
   const syncConnectionMutation = useMutation({
-    mutationFn: (id: number) => 
-      apiRequest(`/api/calendar/sync/${id}`, {
-        method: "POST",
-      }),
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("POST", `/api/calendar/sync/${id}`);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
       toast({
@@ -117,11 +136,10 @@ export default function CalendarPage() {
   });
 
   const updateSyncMutation = useMutation({
-    mutationFn: ({ id, syncEnabled }: { id: number; syncEnabled: boolean }) => 
-      apiRequest(`/api/calendar/connections/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ syncEnabled }),
-      }),
+    mutationFn: async ({ id, syncEnabled }: { id: number; syncEnabled: boolean }) => {
+      const response = await apiRequest("PUT", `/api/calendar/connections/${id}`, { syncEnabled });
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
       toast({
@@ -131,8 +149,13 @@ export default function CalendarPage() {
     },
   });
 
-  const onSubmit = (data: ConnectionFormData) => {
-    createConnectionMutation.mutate(data);
+  const onSubmit = async (data: ConnectionFormData) => {
+    try {
+      await createConnectionMutation.mutateAsync(data);
+    } catch (error) {
+      console.error("Calendar connection error:", error);
+      // Error handling is already in the mutation's onError callback
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -343,7 +366,7 @@ export default function CalendarPage() {
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-muted-foreground">Sync</span>
                       <Switch
-                        checked={connection.syncEnabled}
+                        checked={connection.syncEnabled ?? false}
                         onCheckedChange={(checked) => handleSyncToggle(connection.id, checked)}
                         disabled={updateSyncMutation.isPending}
                       />
@@ -372,7 +395,7 @@ export default function CalendarPage() {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium">Created:</span> {new Date(connection.createdAt).toLocaleDateString()}
+                    <span className="font-medium">Created:</span> {connection.createdAt ? new Date(connection.createdAt).toLocaleDateString() : "Unknown"}
                   </div>
                   <div>
                     <span className="font-medium">Last Sync:</span>{" "}
