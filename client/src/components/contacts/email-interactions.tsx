@@ -351,7 +351,13 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
     const groups: { [key: number]: EmailInteraction[] } = {};
     const threaded: number[] = [];
     
-    // First, group replies with their parent emails
+    // Helper function to normalize subject for thread matching
+    const normalizeSubject = (subject: string | null) => {
+      if (!subject) return "";
+      return subject.replace(/^(Re:\s*|Fwd:\s*|RE:\s*|FW:\s*)+/i, "").trim().toLowerCase();
+    };
+    
+    // First, group replies with their parent emails (explicit parentEmailId)
     uniqueInteractions.forEach(interaction => {
       if (interaction.parentEmailId) {
         if (!groups[interaction.parentEmailId]) {
@@ -362,7 +368,43 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
       }
     });
     
-    // Then add parent emails and standalone emails
+    // Second, try to group emails by subject pattern (implicit threading)
+    const subjectGroups: { [key: string]: EmailInteraction[] } = {};
+    uniqueInteractions.forEach(interaction => {
+      if (!threaded.includes(interaction.id)) {
+        const normalizedSubject = normalizeSubject(interaction.subject);
+        if (normalizedSubject) {
+          if (!subjectGroups[normalizedSubject]) {
+            subjectGroups[normalizedSubject] = [];
+          }
+          subjectGroups[normalizedSubject].push(interaction);
+        }
+      }
+    });
+    
+    // Group emails with same normalized subject into threads
+    Object.values(subjectGroups).forEach(subjectGroup => {
+      if (subjectGroup.length > 1) {
+        // Sort by date to find the original email (earliest)
+        const sortedGroup = subjectGroup.sort((a, b) => 
+          new Date(a.sentAt || a.createdAt || '').getTime() - new Date(b.sentAt || b.createdAt || '').getTime()
+        );
+        
+        const originalEmail = sortedGroup[0];
+        const replies = sortedGroup.slice(1);
+        
+        // Add replies to the original email's group
+        if (!groups[originalEmail.id]) {
+          groups[originalEmail.id] = [];
+        }
+        groups[originalEmail.id].push(...replies);
+        
+        // Mark replies as threaded
+        replies.forEach(reply => threaded.push(reply.id));
+      }
+    });
+    
+    // Finally, build the result with parent emails and standalone emails
     const result: (EmailInteraction & { replies?: EmailInteraction[] })[] = [];
     uniqueInteractions.forEach(interaction => {
       if (!threaded.includes(interaction.id)) {
