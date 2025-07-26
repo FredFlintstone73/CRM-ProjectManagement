@@ -141,6 +141,13 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Task Filter Consistency Fix (July 26, 2025)
+- **Root Issue Resolution**: Fixed inconsistency where tasks appeared differently in "My Tasks" vs "All Tasks" filters
+- **Cache Synchronization**: Updated TaskForm component to invalidate both `/api/tasks` and `/api/tasks/my-tasks-with-priorities` caches when tasks are created
+- **Consistent Task Display**: New tasks now appear consistently across both "My Tasks" and "All Tasks" views immediately after creation
+- **Cache Timing Optimization**: Reduced staleTime from 60 seconds to 30 seconds for both task queries to improve data freshness
+- **Enhanced Task Creation**: Task creation now properly updates all relevant caches ensuring immediate visibility across all filters
+
 ### Complete Real Calendar Integration Implementation (July 25, 2025)
 - **OAuth Authentication System**: Implemented complete OAuth flow for Google Calendar and Microsoft Outlook integration with secure token management
 - **Real Calendar Sync**: Created calendarService and oauthService modules for actual calendar event creation (not just preview)

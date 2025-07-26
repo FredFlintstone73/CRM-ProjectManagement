@@ -158,6 +158,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
       }
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       onSuccess?.();
     },

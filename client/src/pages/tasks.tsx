@@ -96,7 +96,7 @@ export default function Tasks() {
   const { data: allTasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
     enabled: isAuthenticated,
-    staleTime: 60000, // 60 seconds
+    staleTime: 30000, // 30 seconds - shorter cache for more consistent updates
     gcTime: 300000 // 5 minutes
   });
 
@@ -104,7 +104,7 @@ export default function Tasks() {
   const { data: userTasksWithPriorities } = useQuery<(Task & { userPriority: number | null })[]>({
     queryKey: ['/api/tasks/my-tasks-with-priorities'],
     enabled: isAuthenticated && taskFilter === 'my_tasks',
-    staleTime: 60000, // 60 seconds
+    staleTime: 30000, // 30 seconds - shorter cache for more consistent updates
     gcTime: 300000 // 5 minutes
   });
 
@@ -555,6 +555,7 @@ export default function Tasks() {
   const handleTaskCreated = () => {
     setIsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
   };
 
   const handleSort = (key: 'priority' | 'dueDate' | 'title' | 'assignee' | 'familyName') => {
