@@ -164,6 +164,14 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Task Management Cache Synchronization Investigation (July 25, 2025)
+- **Priority Badge Color Fix**: Successfully resolved Priority 7 display inconsistency - now shows green in both "All Tasks" and "My Tasks" filters using getPriorityColor() function in UserPriorityInput component
+- **Cache Key Analysis**: Identified and attempted to fix cache key mismatch between Task Details page queries and OptimisticTaskToggle cache updates (string vs number ID handling)
+- **Debug Enhancement**: Added comprehensive logging to track cache synchronization and click event handling in OptimisticTaskToggle component
+- **Manual Toggle Removal**: Eliminated interfering debug manual toggle button from Task Details page to isolate OptimisticTaskToggle functionality
+- **Cache Synchronization Issue**: Task Details page cache updates remain problematic when navigating from "My Tasks" filter - server-side PATCH requests succeed but client-side optimistic updates don't trigger properly
+- **Investigation Status**: Cache invalidation approach works (manual refresh), but optimistic update approach needs further investigation - issue appears to be in event handling or component rendering rather than cache key matching
+
 ### Projects Page Progress Status Bars Implementation (July 25, 2025)
 - **Real-time Progress Tracking**: Added comprehensive progress status bars to Projects page showing task completion percentages for each client project
 - **Dual View Support**: Progress bars integrated into both card view (detailed with task counts) and table view (compact with percentages)
