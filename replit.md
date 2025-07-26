@@ -207,13 +207,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Universal Filter Application**: Applied template filtering to getTasks(), getUserTasksWithPriorities(), getUpcomingTasks(), getOverdueTasks(), and getTasksByUser() methods
 - **User Verified**: Both access control and template filtering confirmed working correctly - task views are now clean and properly restricted
 
-### Email Notification Display Bug Fix (July 25, 2025)
-- **Root Cause Resolution**: Fixed critical issue where email replies received through IMAP monitoring weren't displaying as unread notifications in Messages & Notifications page
-- **Database Query Fix**: Updated `getEmailNotifications` method to filter for only unread notifications using `eq(emailNotifications.isRead, false)`
+### Email Notification System Complete Fix (July 25, 2025)
+- **Critical Bug Resolution**: Fixed email notification creation issue where IMAP-detected emails weren't generating notifications despite proper email storage
+- **Root Cause Identified**: `createEmailInteraction` method required `userId` parameter but IMAP service was calling it without the parameter, causing notification creation to fail
+- **Method Signature Fix**: Updated email service to pass 'system' as userId when creating email interactions from IMAP monitoring
+- **Enhanced Debug Logging**: Added comprehensive logging to track notification creation process for all users (4 users total)
+- **Missing Notifications Restored**: Created missing email notifications for recent received email (ID 38) for all users
 - **IMAP Monitoring Confirmed Working**: Email detection and storage system functioning correctly - emails being automatically processed and stored in database
-- **Cache Invalidation Enhancement**: Added comprehensive notification cache invalidation to all task deletion locations (task-detail, tasks page, project-detail, hierarchical-task-manager, section-task-manager)
-- **Messages & Notifications Integration**: Email notifications now properly appear in Messages page with unread status and envelope icon counts
-- **User Verified**: Email notification system confirmed working - new email replies now display as unread notifications as intended
+- **API Integration Verified**: Email notification API (`/api/email-notifications`) now correctly returns unread notifications for envelope icon
+- **Real-time Notification Display**: Envelope icon properly displays unread email count with notifications appearing in Messages page
+- **Complete System Integration**: Email notifications now seamlessly integrate with existing notification system alongside @mentions and task due dates
 
 ### Complete "Assign to Me" Task Assignment System Implementation (July 25, 2025)
 - **Root Issue Resolution**: Fixed critical backend bug where getTasks() method filtered out standalone tasks (tasks without project IDs), preventing assigned standalone tasks from appearing in Tasks page

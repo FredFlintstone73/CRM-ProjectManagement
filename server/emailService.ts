@@ -442,18 +442,22 @@ class EmailService {
         recipient: this.transporter?.options?.auth?.user || '',
         emailType: 'received',
         sentAt: email.date || new Date(),
-      });
+      }, 'system');
 
       // Create email notification for all users (they can mark as read individually)
       try {
         const allUsers = await this.storage.getUsers();
+        console.log(`📧 Creating email notifications for ${allUsers.length} users for email interaction ${emailInteraction.id}`);
+        
         for (const user of allUsers) {
-          await this.storage.createEmailNotification({
+          const notification = await this.storage.createEmailNotification({
             userId: user.id,
             emailInteractionId: emailInteraction.id,
             isRead: false,
           });
+          console.log(`📧 Created notification ID ${notification.id} for user ${user.email} (${user.id})`);
         }
+        console.log(`📧 Successfully created notifications for all ${allUsers.length} users`);
       } catch (error) {
         console.error('Error creating email notifications:', error);
         // Continue execution even if notification creation fails
