@@ -2609,21 +2609,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple direct search endpoint for testing Ted Smith
+  app.get('/api/test-search', isAuthenticated, async (req: any, res) => {
+    try {
+      const query = req.query.q as string || 'ted';
+      console.log(`Direct test search for: "${query}"`);
+      
+      // Direct database search for Ted Smith
+      const contacts = await storage.searchContacts(query);
+      console.log(`Found ${contacts.length} contacts matching "${query}"`);
+      
+      // Look specifically for spouse information
+      const tedSmithResults = contacts.filter(c => 
+        c.spouseFirstName?.toLowerCase().includes('ted') ||
+        c.spouseLastName?.toLowerCase().includes('smith') ||
+        c.firstName?.toLowerCase().includes('ted') ||
+        c.lastName?.toLowerCase().includes('smith')
+      );
+      
+      res.json({
+        query,
+        totalContacts: contacts.length,
+        tedSmithResults: tedSmithResults.length,
+        results: tedSmithResults.map(c => ({
+          id: c.id,
+          name: `${c.firstName} ${c.lastName}`,
+          spouse: `${c.spouseFirstName || ''} ${c.spouseLastName || ''}`.trim(),
+          contactType: c.contactType
+        }))
+      });
+    } catch (error) {
+      console.error("Test search error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // AI Search endpoint
   app.get('/api/search', isAuthenticated, async (req: any, res) => {
+    console.log('Search endpoint called');
     try {
       const userId = req.user.claims.sub;
       const query = req.query.q as string;
 
-      if (!query || query.length < 3) {
+      console.log(`Search request for: "${query}" by user: ${userId}`);
+
+      if (!query || query.length < 2) {
         return res.json({ results: [], summary: "" });
       }
 
-      const searchData = await aiSearchService.search(query, userId);
-      res.json(searchData);
+      // For now, use direct contact search instead of complex AI search
+      const contacts = await storage.searchContacts(query);
+      console.log(`Direct search found ${contacts.length} contacts`);
+      
+      const results = contacts.map(contact => ({
+        id: contact.id.toString(),
+        type: 'contact',
+        title: contact.familyName || `${contact.firstName} ${contact.lastName}`,
+        content: `${contact.firstName} ${contact.lastName}${contact.spouseFirstName ? ` (Spouse: ${contact.spouseFirstName} ${contact.spouseLastName || ''})` : ''}`,
+        relevance: 1,
+        metadata: {
+          contactName: contact.familyName || `${contact.firstName} ${contact.lastName}`,
+          contactType: contact.contactType
+        }
+      }));
+      
+      const summary = `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${query}".`;
+      
+      console.log(`Search completed for: "${query}"`);
+      res.json({ results, summary });
     } catch (error) {
-      console.error("Error performing AI search:", error);
-      res.status(500).json({ message: "Search temporarily unavailable" });
+      console.error("Error performing search:", error);
+      res.status(500).json({ 
+        results: [], 
+        summary: `Search error: ${error.message}`,
+        message: "Search temporarily unavailable" 
+      });
     }
   });
 

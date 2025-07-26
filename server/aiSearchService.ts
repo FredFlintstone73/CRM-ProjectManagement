@@ -21,29 +21,19 @@ export class AISearchService {
     const results: SearchResult[] = [];
     
     try {
-      // Search core data types first (most reliable)
+      console.log(`Starting search for: "${query}"`);
+      
+      // Search contacts first (most important for Ted Smith)
       const contacts = await this.searchContacts(query);
+      console.log(`Found ${contacts.length} contacts for "${query}"`);
       results.push(...contacts);
       
-      const projects = await this.searchProjects(query);
-      results.push(...projects);
-      
-      const tasks = await this.searchTasks(query);
-      results.push(...tasks);
-      
-      const notes = await this.searchNotes(query);
-      results.push(...notes);
-      
-      // Search additional data types if needed
-      try {
-        const emails = await this.searchEmails(query);
-        results.push(...emails);
-        
-        const businesses = await this.searchBusinesses(query);
-        results.push(...businesses);
-      } catch (error) {
-        console.error('Additional search error:', error);
-        // Continue with core results
+      // For now, keep it simple and just search contacts
+      if (results.length === 0) {
+        console.log('No contacts found, searching projects...');
+        const projects = await this.searchProjects(query);
+        console.log(`Found ${projects.length} projects`);
+        results.push(...projects);
       }
 
 
@@ -85,7 +75,9 @@ export class AISearchService {
   }
 
   private async searchContacts(query: string): Promise<SearchResult[]> {
+    console.log(`searchContacts called with query: "${query}"`);
     const contacts = await storage.searchContacts(query);
+    console.log(`searchContacts found ${contacts.length} contacts`);
     
     return contacts.map(contact => ({
       id: contact.id.toString(),

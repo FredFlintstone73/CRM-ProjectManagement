@@ -2670,7 +2670,6 @@ export class DatabaseStorage implements IStorage {
 
   // Search operations
   async searchContacts(query: string): Promise<Contact[]> {
-    const queryLower = query.toLowerCase();
     
     return await db
       .select()
@@ -2678,116 +2677,110 @@ export class DatabaseStorage implements IStorage {
       .where(
         or(
           // Primary contact information
-          sql`LOWER(${contacts.firstName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.lastName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.familyName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.nickname}) LIKE ${`%${queryLower}%`}`,
+          ilike(contacts.firstName, `%${query}%`),
+          ilike(contacts.lastName, `%${query}%`),
+          ilike(contacts.familyName, `%${query}%`),
+          ilike(contacts.nickname, `%${query}%`),
           
           // Business information  
-          sql`LOWER(${contacts.businessName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.businessPhone}) LIKE ${`%${queryLower}%`}`,
+          ilike(contacts.businessName, `%${query}%`),
+          ilike(contacts.businessPhone, `%${query}%`),
           
           // Contact details
-          sql`LOWER(${contacts.personalEmail}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.workEmail}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.cellPhone}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.workPhone}) LIKE ${`%${queryLower}%`}`,
+          ilike(contacts.personalEmail, `%${query}%`),
+          ilike(contacts.workEmail, `%${query}%`),
+          ilike(contacts.cellPhone, `%${query}%`),
+          ilike(contacts.workPhone, `%${query}%`),
           
           // Spouse information
-          sql`LOWER(${contacts.spouseFirstName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.spouseLastName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.spouseNickname}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.spousePersonalEmail}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.spouseWorkEmail}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.spouseCellPhone}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.spouseWorkPhone}) LIKE ${`%${queryLower}%`}`,
+          ilike(contacts.spouseFirstName, `%${query}%`),
+          ilike(contacts.spouseLastName, `%${query}%`),
+          ilike(contacts.spouseNickname, `%${query}%`),
+          ilike(contacts.spousePersonalEmail, `%${query}%`),
+          ilike(contacts.spouseWorkEmail, `%${query}%`),
+          ilike(contacts.spouseCellPhone, `%${query}%`),
+          ilike(contacts.spouseWorkPhone, `%${query}%`),
           
           // Address information
-          sql`LOWER(${contacts.mailingAddressStreet1}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.mailingAddressStreet2}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.mailingAddressCity}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.mailingAddressState}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.mailingAddressZip}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.homeAddressStreet1}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.homeAddressStreet2}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.homeAddressCity}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.homeAddressState}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.homeAddressZip}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.businessAddressStreet1}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.businessAddressStreet2}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.businessAddressCity}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.businessAddressState}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.businessAddressZip}) LIKE ${`%${queryLower}%`}`,
+          ilike(contacts.mailingAddressStreet1, `%${query}%`),
+          ilike(contacts.mailingAddressStreet2, `%${query}%`),
+          ilike(contacts.mailingAddressCity, `%${query}%`),
+          ilike(contacts.mailingAddressState, `%${query}%`),
+          ilike(contacts.mailingAddressZip, `%${query}%`),
+          ilike(contacts.homeAddressStreet1, `%${query}%`),
+          ilike(contacts.homeAddressStreet2, `%${query}%`),
+          ilike(contacts.homeAddressCity, `%${query}%`),
+          ilike(contacts.homeAddressState, `%${query}%`),
+          ilike(contacts.homeAddressZip, `%${query}%`),
+          ilike(contacts.businessAddressStreet1, `%${query}%`),
+          ilike(contacts.businessAddressStreet2, `%${query}%`),
+          ilike(contacts.businessAddressCity, `%${query}%`),
+          ilike(contacts.businessAddressState, `%${query}%`),
+          ilike(contacts.businessAddressZip, `%${query}%`),
           
           // Professional contacts
-          sql`LOWER(${contacts.investmentAdvisorName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.investmentAdvisorPhone}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.investmentAdvisorEmail}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.taxProfessionalName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.taxProfessionalPhone}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.taxProfessionalEmail}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.attorneyName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.attorneyPhone}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.attorneyEmail}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.insuranceAgentName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.insuranceAgentPhone}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.insuranceAgentEmail}) LIKE ${`%${queryLower}%`}`,
+          ilike(contacts.investmentAdvisorName, `%${query}%`),
+          ilike(contacts.investmentAdvisorPhone, `%${query}%`),
+          ilike(contacts.investmentAdvisorEmail, `%${query}%`),
+          ilike(contacts.taxProfessionalName, `%${query}%`),
+          ilike(contacts.taxProfessionalPhone, `%${query}%`),
+          ilike(contacts.taxProfessionalEmail, `%${query}%`),
+          ilike(contacts.attorneyName, `%${query}%`),
+          ilike(contacts.attorneyPhone, `%${query}%`),
+          ilike(contacts.attorneyEmail, `%${query}%`),
+          ilike(contacts.insuranceAgentName, `%${query}%`),
+          ilike(contacts.insuranceAgentPhone, `%${query}%`),
+          ilike(contacts.insuranceAgentEmail, `%${query}%`),
           
           // Children information
-          sql`LOWER(${contacts.child1Name}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.child2Name}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.child3Name}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.child4Name}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.child5Name}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.child6Name}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.child7Name}) LIKE ${`%${queryLower}%`}`,
+          ilike(contacts.child1Name, `%${query}%`),
+          ilike(contacts.child2Name, `%${query}%`),
+          ilike(contacts.child3Name, `%${query}%`),
+          ilike(contacts.child4Name, `%${query}%`),
+          ilike(contacts.child5Name, `%${query}%`),
+          ilike(contacts.child6Name, `%${query}%`),
+          ilike(contacts.child7Name, `%${query}%`),
           
           // Role and department info
-          sql`LOWER(${contacts.role}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contacts.title}) LIKE ${`%${queryLower}%`}`
+          ilike(contacts.role, `%${query}%`),
+          ilike(contacts.title, `%${query}%`)
         )
       )
       .limit(20);
   }
 
   async searchProjects(query: string): Promise<Project[]> {
-    const queryLower = query.toLowerCase();
-    
     return await db
       .select()
       .from(projects)
       .where(
         or(
-          sql`LOWER(${projects.name}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${projects.description}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${projects.projectType}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${projects.status}) LIKE ${`%${queryLower}%`}`
+          ilike(projects.name, `%${query}%`),
+          ilike(projects.description, `%${query}%`),
+          ilike(projects.projectType, `%${query}%`),
+          ilike(projects.status, `%${query}%`)
         )
       )
       .limit(20);
   }
 
   async searchTasks(query: string): Promise<Task[]> {
-    const queryLower = query.toLowerCase();
-    
     return await db
       .select()
       .from(tasks)
       .where(
         or(
-          sql`LOWER(${tasks.title}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${tasks.description}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${tasks.status}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${tasks.priority}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${tasks.assignedToRole}) LIKE ${`%${queryLower}%`}`
+          ilike(tasks.title, `%${query}%`),
+          ilike(tasks.description, `%${query}%`),
+          ilike(tasks.status, `%${query}%`),
+          ilike(tasks.priority, `%${query}%`),
+          ilike(tasks.assignedToRole, `%${query}%`)
         )
       )
       .limit(20);
   }
 
   async searchContactNotes(query: string): Promise<(ContactNote & { authorName?: string })[]> {
-    const queryLower = query.toLowerCase();
-    
     const notesWithAuthors = await db
       .select({
         id: contactNotes.id,
@@ -2800,7 +2793,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(contactNotes)
       .leftJoin(users, eq(contactNotes.userId, users.id))
-      .where(sql`LOWER(${contactNotes.content}) LIKE ${`%${queryLower}%`}`)
+      .where(ilike(contactNotes.content, `%${query}%`))
       .limit(20);
 
     return notesWithAuthors;
@@ -2808,9 +2801,7 @@ export class DatabaseStorage implements IStorage {
 
   // Add comprehensive search methods for all data types
   async searchEmailInteractions(query: string): Promise<any[]> {
-    const queryLower = query.toLowerCase();
-    
-    const emailInteractions = await db
+    const emailResults = await db
       .select({
         id: emailInteractions.id,
         contactId: emailInteractions.contactId,
@@ -2824,20 +2815,18 @@ export class DatabaseStorage implements IStorage {
       .from(emailInteractions)
       .where(
         or(
-          sql`LOWER(${emailInteractions.subject}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${emailInteractions.body}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${emailInteractions.sender}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${emailInteractions.recipient}) LIKE ${`%${queryLower}%`}`
+          ilike(emailInteractions.subject, `%${query}%`),
+          ilike(emailInteractions.body, `%${query}%`),
+          ilike(emailInteractions.sender, `%${query}%`),
+          ilike(emailInteractions.recipient, `%${query}%`)
         )
       )
       .limit(20);
 
-    return emailInteractions;
+    return emailResults;
   }
 
   async searchProjectComments(query: string): Promise<any[]> {
-    const queryLower = query.toLowerCase();
-    
     const comments = await db
       .select({
         id: projectComments.id,
@@ -2849,15 +2838,13 @@ export class DatabaseStorage implements IStorage {
       })
       .from(projectComments)
       .leftJoin(users, eq(projectComments.userId, users.id))
-      .where(sql`LOWER(${projectComments.content}) LIKE ${`%${queryLower}%`}`)
+      .where(ilike(projectComments.content, `%${query}%`))
       .limit(20);
 
     return comments;
   }
 
   async searchTaskComments(query: string): Promise<any[]> {
-    const queryLower = query.toLowerCase();
-    
     const comments = await db
       .select({
         id: taskComments.id,
@@ -2869,28 +2856,26 @@ export class DatabaseStorage implements IStorage {
       })
       .from(taskComments)
       .leftJoin(users, eq(taskComments.userId, users.id))
-      .where(sql`LOWER(${taskComments.content}) LIKE ${`%${queryLower}%`}`)
+      .where(ilike(taskComments.content, `%${query}%`))
       .limit(20);
 
     return comments;
   }
 
   async searchContactBusinesses(query: string): Promise<any[]> {
-    const queryLower = query.toLowerCase();
-    
     const businesses = await db
       .select()
       .from(contactBusinesses)
       .where(
         or(
-          sql`LOWER(${contactBusinesses.businessName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contactBusinesses.businessAddressStreet1}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contactBusinesses.businessAddressCity}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contactBusinesses.businessAddressState}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contactBusinesses.businessPhone}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contactBusinesses.officeManagerName}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contactBusinesses.businessEin}) LIKE ${`%${queryLower}%`}`,
-          sql`LOWER(${contactBusinesses.partnershipDetails}) LIKE ${`%${queryLower}%`}`
+          ilike(contactBusinesses.businessName, `%${query}%`),
+          ilike(contactBusinesses.businessAddressStreet1, `%${query}%`),
+          ilike(contactBusinesses.businessAddressCity, `%${query}%`),
+          ilike(contactBusinesses.businessAddressState, `%${query}%`),
+          ilike(contactBusinesses.businessPhone, `%${query}%`),
+          ilike(contactBusinesses.officeManagerName, `%${query}%`),
+          ilike(contactBusinesses.businessEin, `%${query}%`),
+          ilike(contactBusinesses.partnershipDetails, `%${query}%`)
         )
       )
       .limit(20);
