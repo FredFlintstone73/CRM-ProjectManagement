@@ -497,7 +497,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                           )}
                         </div>
                         <h4 className="font-semibold text-sm mt-[0px] mb-[0px]">{interaction.subject}</h4>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-[12px]">
                           {truncateBody(interaction.body || "")}
                         </p>
                       </div>
