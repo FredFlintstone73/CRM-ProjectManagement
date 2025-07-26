@@ -205,7 +205,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
 
     const assignedToIds = convertAssignees(selectedAssignees);
 
-    console.log('TaskForm onSubmit debug:', {
+    console.log('🔥 TaskForm onSubmit debug:', {
       isEditing: !!task,
       taskId: task?.id,
       selectedAssignees,
@@ -213,16 +213,24 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       assignedToIds,
       assignedToIdsLength: assignedToIds.length,
       originalAssignedTo: task?.assignedTo,
-      finalAssignedTo: selectedAssignees.length === 0 && task ? task.assignedTo : assignedToIds
+      willPreserveOriginal: task && selectedAssignees.length === 0
     });
+
+    // Fix assignment preservation logic
+    let finalAssignedTo;
+    if (task && selectedAssignees.length === 0) {
+      // Editing existing task and no assignments were selected - preserve original
+      finalAssignedTo = task.assignedTo;
+    } else {
+      // New task or assignments were actively selected/changed
+      finalAssignedTo = assignedToIds;
+    }
 
     const processedData = {
       ...data,
       dueDate: dueDate ? formatDateForServer(dueDate) : undefined,
       projectId: projectId,
-      // For edits: if user cleared all assignments, send empty array; otherwise use the converted IDs
-      // If no assignments selected but we're editing an existing task, preserve original assignments
-      assignedTo: selectedAssignees.length === 0 && task ? task.assignedTo : assignedToIds,
+      assignedTo: finalAssignedTo,
       assignedToRole: selectedRoles.length > 0 ? selectedRoles : undefined,
     };
     createTaskMutation.mutate(processedData as any);
