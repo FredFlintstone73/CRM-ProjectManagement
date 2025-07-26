@@ -16,7 +16,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { EmailInteraction, Contact } from "@shared/schema";
 
 const emailSchema = z.object({
-  recipient: z.string().email("Please enter a valid email address"),
+  recipient: z.string().min(1, "Recipient is required").email("Please enter a valid email address"),
   subject: z.string().min(1, "Subject is required"),
   body: z.string().min(1, "Email body is required"),
   parentEmailId: z.number().optional(),
@@ -63,9 +63,11 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
   const form = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
     defaultValues: {
-      recipient: getContactEmail(),
+      recipient: getContactEmail() || "",
       subject: "",
       body: "",
+      parentEmailId: undefined,
+      emailType: undefined,
     },
   });
 
@@ -111,11 +113,15 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
   const sendEmailMutation = useMutation({
     mutationFn: async (data: EmailFormData) => {
       try {
+        console.log('Sending email data:', data);
         const response = await apiRequest("POST", `/api/contacts/${contactId}/emails`, data);
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
         }
-        return await response.json();
+        const result = await response.json();
+        console.log('Email sent successfully:', result);
+        return result;
       } catch (error) {
         console.error("Email mutation error:", error);
         throw error;
@@ -126,9 +132,11 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
       setIsComposeOpen(false);
       setReplyingTo(null);
       form.reset({
-        recipient: getContactEmail(),
+        recipient: getContactEmail() || "",
         subject: "",
         body: "",
+        parentEmailId: undefined,
+        emailType: undefined,
       });
       
       // Show appropriate message based on email sending result
@@ -155,14 +163,26 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
     },
   });
 
-  const onSubmit = (data: EmailFormData) => {
+  const onSubmit = async (data: EmailFormData) => {
     try {
-      sendEmailMutation.mutate(data);
+      console.log('Form submitted with data:', data);
+      
+      // Validate required fields
+      if (!data.recipient || !data.subject || !data.body) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      await sendEmailMutation.mutateAsync(data);
     } catch (error) {
       console.error("Submit error:", error);
       toast({
         title: "Error",
-        description: "Failed to submit email form",
+        description: error instanceof Error ? error.message : "Failed to submit email form",
         variant: "destructive",
       });
     }
@@ -170,9 +190,11 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
   const handleCompose = () => {
     form.reset({
-      recipient: getContactEmail(),
+      recipient: getContactEmail() || "",
       subject: "",
       body: "",
+      parentEmailId: undefined,
+      emailType: undefined,
     });
     setReplyingTo(null);
     setIsComposeOpen(true);
@@ -180,9 +202,10 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
   const handleAddReceived = () => {
     form.reset({
-      recipient: getContactEmail(), // Set contact as sender for received email display
+      recipient: getContactEmail() || "", // Set contact as sender for received email display
       subject: "",
       body: "",
+      parentEmailId: undefined,
       emailType: "received",
     });
     setReplyingTo(null);
@@ -217,6 +240,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
       recipient: "",
       subject: forwardSubject,
       body: `\n\n--- Forwarded Message ---\nFrom: ${interaction.sender}\nTo: ${interaction.recipient}\nSubject: ${interaction.subject}\nDate: ${formatDate(interaction.sentAt || interaction.createdAt)}\n\n${interaction.body}`,
+      parentEmailId: undefined,
       emailType: 'forward',
     });
     setReplyingTo(null);
