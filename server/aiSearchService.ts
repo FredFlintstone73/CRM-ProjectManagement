@@ -3,7 +3,7 @@ import { openAI } from "./aiProviders/openAI";
 
 export interface SearchResult {
   id: string;
-  type: 'contact' | 'project' | 'task' | 'note' | 'communication';
+  type: 'contact' | 'project' | 'task' | 'note' | 'communication' | 'business' | 'email' | 'comment';
   title: string;
   content: string;
   relevance: number;
@@ -21,26 +21,37 @@ export class AISearchService {
     const results: SearchResult[] = [];
     
     try {
-      // Search contacts
+      // Search core data types first (most reliable)
       const contacts = await this.searchContacts(query);
       results.push(...contacts);
-
-      // Search projects
+      
       const projects = await this.searchProjects(query);
       results.push(...projects);
-
-      // Search tasks
+      
       const tasks = await this.searchTasks(query);
       results.push(...tasks);
-
-      // Search notes
+      
       const notes = await this.searchNotes(query);
       results.push(...notes);
+      
+      // Search additional data types if needed
+      try {
+        const emails = await this.searchEmails(query);
+        results.push(...emails);
+        
+        const businesses = await this.searchBusinesses(query);
+        results.push(...businesses);
+      } catch (error) {
+        console.error('Additional search error:', error);
+        // Continue with core results
+      }
+
+
 
       // Sort by relevance and limit results
       const sortedResults = results
         .sort((a, b) => b.relevance - a.relevance)
-        .slice(0, 20);
+        .slice(0, 30);
 
       // Generate a basic summary for search results
       let summary = '';
@@ -79,18 +90,12 @@ export class AISearchService {
     return contacts.map(contact => ({
       id: contact.id.toString(),
       type: 'contact' as const,
-      title: `${contact.firstName} ${contact.lastName}`,
-      content: [
-        contact.familyName,
-        contact.businessName,
-        contact.personalEmail,
-        contact.workEmail,
-        contact.cellPhone,
-        contact.workPhone
-      ].filter(Boolean).join(' • '),
+      title: contact.familyName || `${contact.firstName} ${contact.lastName}`,
+      content: this.buildContactContent(contact),
       relevance: this.calculateContactRelevance(contact, query),
       metadata: {
-        contactName: `${contact.firstName} ${contact.lastName}`,
+        contactName: contact.familyName || `${contact.firstName} ${contact.lastName}`,
+        contactType: contact.contactType,
         date: contact.createdAt?.toISOString()
       }
     }));
@@ -143,18 +148,218 @@ export class AISearchService {
     }));
   }
 
+  private async searchEmails(query: string): Promise<SearchResult[]> {
+    const emails = await storage.searchEmailInteractions(query);
+    return emails.map(email => ({
+      id: email.id.toString(),
+      type: 'email' as const,
+      title: email.subject || 'Email Communication',
+      content: `From: ${email.sender} | To: ${email.recipient} | ${email.body?.substring(0, 200) || ''}`,
+      relevance: this.calculateTextRelevance(query, (email.subject || '') + ' ' + (email.body || '') + ' ' + email.sender + ' ' + email.recipient),
+      metadata: {
+        contactId: email.contactId,
+        sender: email.sender,
+        recipient: email.recipient,
+        date: email.timestamp?.toISOString() || ''
+      }
+    }));
+  }
+
+  private async searchProjectComments(query: string): Promise<SearchResult[]> {
+    const comments = await storage.searchProjectComments(query);
+    return comments.map(comment => ({
+      id: comment.id.toString(),
+      type: 'comment' as const,
+      title: `Project Comment by ${comment.authorName || 'Unknown'}`,
+      content: comment.content,
+      relevance: this.calculateTextRelevance(query, comment.content),
+      metadata: {
+        projectId: comment.projectId,
+        authorName: comment.authorName,
+        date: comment.createdAt?.toISOString() || ''
+      }
+    }));
+  }
+
+  private async searchTaskComments(query: string): Promise<SearchResult[]> {
+    const comments = await storage.searchTaskComments(query);
+    return comments.map(comment => ({
+      id: comment.id.toString(),
+      type: 'comment' as const,
+      title: `Task Comment by ${comment.authorName || 'Unknown'}`,
+      content: comment.content,
+      relevance: this.calculateTextRelevance(query, comment.content),
+      metadata: {
+        taskId: comment.taskId,
+        authorName: comment.authorName,
+        date: comment.createdAt?.toISOString() || ''
+      }
+    }));
+  }
+
+  private async searchBusinesses(query: string): Promise<SearchResult[]> {
+    const businesses = await storage.searchContactBusinesses(query);
+    return businesses.map(business => ({
+      id: business.id.toString(),
+      type: 'business' as const,
+      title: business.businessName || 'Business Information',
+      content: this.buildBusinessContent(business),
+      relevance: this.calculateBusinessRelevance(query, business),
+      metadata: {
+        contactId: business.contactId,
+        businessName: business.businessName,
+        businessPhone: business.businessPhone
+      }
+    }));
+  }
+
+  // Helper methods for building content
+  private buildContactContent(contact: any): string {
+    const parts = [];
+    
+    // Primary contact
+    if (contact.firstName && contact.lastName) {
+      parts.push(`${contact.firstName} ${contact.lastName}`);
+    }
+    
+    // Spouse information
+    if (contact.spouseFirstName && contact.spouseLastName) {
+      parts.push(`Spouse: ${contact.spouseFirstName} ${contact.spouseLastName}`);
+    }
+    
+    // Contact details
+    const contactInfo = [
+      contact.personalEmail,
+      contact.workEmail,
+      contact.spousePersonalEmail,
+      contact.spouseWorkEmail,
+      contact.cellPhone,
+      contact.workPhone,
+      contact.businessPhone
+    ].filter(Boolean);
+    
+    if (contactInfo.length > 0) {
+      parts.push(`Contact: ${contactInfo.join(', ')}`);
+    }
+    
+    // Business and address info
+    if (contact.businessName) parts.push(`Business: ${contact.businessName}`);
+    if (contact.mailingAddressCity && contact.mailingAddressState) {
+      parts.push(`Location: ${contact.mailingAddressCity}, ${contact.mailingAddressState}`);
+    }
+    
+    // Professional contacts
+    const professionals = [];
+    if (contact.investmentAdvisorName) professionals.push(`Investment Advisor: ${contact.investmentAdvisorName}`);
+    if (contact.taxProfessionalName) professionals.push(`Tax Professional: ${contact.taxProfessionalName}`);
+    if (contact.attorneyName) professionals.push(`Attorney: ${contact.attorneyName}`);
+    if (contact.insuranceAgentName) professionals.push(`Insurance Agent: ${contact.insuranceAgentName}`);
+    
+    if (professionals.length > 0) {
+      parts.push(`Professionals: ${professionals.join(', ')}`);
+    }
+    
+    // Children
+    const children = [
+      contact.child1Name,
+      contact.child2Name,
+      contact.child3Name,
+      contact.child4Name,
+      contact.child5Name,
+      contact.child6Name,
+      contact.child7Name
+    ].filter(Boolean);
+    
+    if (children.length > 0) {
+      parts.push(`Children: ${children.join(', ')}`);
+    }
+    
+    return parts.join(' • ');
+  }
+
+  private buildBusinessContent(business: any): string {
+    const parts = [];
+    
+    if (business.businessName) parts.push(business.businessName);
+    if (business.businessPhone) parts.push(`Phone: ${business.businessPhone}`);
+    if (business.officeManagerName) parts.push(`Manager: ${business.officeManagerName}`);
+    if (business.businessAddressCity && business.businessAddressState) {
+      parts.push(`Location: ${business.businessAddressCity}, ${business.businessAddressState}`);
+    }
+    if (business.businessEin) parts.push(`EIN: ${business.businessEin}`);
+    if (business.partnershipDetails) parts.push(`Partnership: ${business.partnershipDetails}`);
+    
+    return parts.join(' • ');
+  }
+
   // Simple relevance scoring - can be enhanced with AI
   private calculateContactRelevance(contact: any, query: string): number {
     const queryLower = query.toLowerCase();
     let score = 0;
     
+    // Comprehensive search fields for contacts including spouse info
     const searchableFields = [
       contact.firstName,
       contact.lastName,
       contact.familyName,
+      contact.nickname,
+      contact.spouseFirstName,
+      contact.spouseLastName,
+      contact.spouseNickname,
       contact.businessName,
       contact.personalEmail,
-      contact.workEmail
+      contact.workEmail,
+      contact.spousePersonalEmail,
+      contact.spouseWorkEmail,
+      contact.cellPhone,
+      contact.workPhone,
+      contact.businessPhone,
+      contact.investmentAdvisorName,
+      contact.taxProfessionalName,
+      contact.attorneyName,
+      contact.insuranceAgentName
+    ];
+    
+    searchableFields.forEach(field => {
+      if (field && field.toLowerCase().includes(queryLower)) {
+        score += field.toLowerCase() === queryLower ? 100 : 50;
+      }
+    });
+    
+    return score;
+  }
+
+  private calculateTextRelevance(query: string, text: string): number {
+    if (!text) return 0;
+    
+    const queryLower = query.toLowerCase();
+    const textLower = text.toLowerCase();
+    
+    if (textLower === queryLower) return 100;
+    if (textLower.includes(queryLower)) return 75;
+    
+    // Check for partial word matches
+    const queryWords = queryLower.split(' ');
+    let wordMatches = 0;
+    queryWords.forEach(word => {
+      if (textLower.includes(word)) wordMatches++;
+    });
+    
+    return Math.min(wordMatches * 25, 50);
+  }
+
+  private calculateBusinessRelevance(query: string, business: any): number {
+    const queryLower = query.toLowerCase();
+    let score = 0;
+    
+    const searchableFields = [
+      business.businessName,
+      business.businessPhone,
+      business.officeManagerName,
+      business.businessEin,
+      business.partnershipDetails,
+      business.businessAddressCity,
+      business.businessAddressState
     ];
     
     searchableFields.forEach(field => {
