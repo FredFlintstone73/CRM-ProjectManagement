@@ -496,7 +496,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                             </Badge>
                           )}
                         </div>
-                        <h4 className="font-semibold text-sm mb-1">{interaction.subject}</h4>
+                        <h4 className="font-semibold text-sm mt-[0px] mb-[0px]">{interaction.subject}</h4>
                         <p className="text-sm text-muted-foreground">
                           {truncateBody(interaction.body || "")}
                         </p>
