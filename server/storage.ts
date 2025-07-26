@@ -1746,6 +1746,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteEmailInteraction(emailId: number): Promise<void> {
+    // First delete any email notifications that reference this email interaction
+    await db
+      .delete(emailNotifications)
+      .where(eq(emailNotifications.emailInteractionId, emailId));
+    
+    // Then delete the email interaction itself
     await db
       .delete(emailInteractions)
       .where(eq(emailInteractions.id, emailId));
