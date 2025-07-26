@@ -78,7 +78,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
           threadToExpand = expandEmailId;
         }
         
-        setExpandedThreads(prev => new Set([...prev, threadToExpand]));
+        setExpandedThreads(prev => new Set([...Array.from(prev), threadToExpand]));
         
         // Scroll to the email thread immediately for faster navigation
         requestAnimationFrame(() => {
@@ -297,14 +297,14 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
         result.push({
           ...interaction,
           replies: (groups[interaction.id] || []).sort((a, b) => 
-            new Date(a.sentAt || a.createdAt).getTime() - new Date(b.sentAt || b.createdAt).getTime()
+            new Date(a.sentAt || a.createdAt || '').getTime() - new Date(b.sentAt || b.createdAt || '').getTime()
           )
         });
       }
     });
     
     return result.sort((a, b) => 
-      new Date(b.sentAt || b.createdAt).getTime() - new Date(a.sentAt || a.createdAt).getTime()
+      new Date(b.sentAt || b.createdAt || '').getTime() - new Date(a.sentAt || a.createdAt || '').getTime()
     );
   };
 
@@ -548,7 +548,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                 {interaction.replies && interaction.replies.length > 0 && expandedThreads.has(interaction.id) && (
                   <div className="ml-6 mt-1 space-y-1">
                     {interaction.replies
-                      .sort((a, b) => new Date(a.sentAt || a.createdAt).getTime() - new Date(b.sentAt || b.createdAt).getTime())
+                      .sort((a, b) => new Date(a.sentAt || a.createdAt || '').getTime() - new Date(b.sentAt || b.createdAt || '').getTime())
                       .map((reply) => (
                       <Card key={reply.id} className="border-l-4 border-l-green-500">
                         <CardContent className="py-2 px-3">
