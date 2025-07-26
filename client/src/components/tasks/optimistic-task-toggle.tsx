@@ -16,6 +16,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
   
   // Add this simple test log
   console.log(`🎯 Component loaded for task ${task.id} with status ${task.status} (projectId: ${projectId})`);
+  console.log(`🎯 Component rendering with size: ${size}, className: ${className}`);
 
   const toggleMutation = useMutation({
     mutationFn: async (newStatus: string) => {
