@@ -724,9 +724,14 @@ export default function TaskDetail() {
             projectId={task?.projectId || undefined} 
             onSuccess={() => {
               setIsEditing(false);
+              // Immediate cache invalidation with refetch for better consistency
               queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
               queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
               queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+              
+              // Force refetch to ensure data consistency
+              queryClient.refetchQueries({ queryKey: ['/api/tasks', id] });
+              queryClient.refetchQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
             }} 
           />
         </DialogContent>
