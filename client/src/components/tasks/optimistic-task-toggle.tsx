@@ -32,6 +32,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       
       // COMPREHENSIVE CACHE SYNC: Update all possible cache locations immediately
       console.log(`🔥 COMPREHENSIVE cache sync for task ${task.id}...`);
+      console.log(`🔥 Updated task data:`, updatedTask);
       
       // 1. Update main tasks list
       queryClient.setQueryData(['/api/tasks'], (old: any) => 
