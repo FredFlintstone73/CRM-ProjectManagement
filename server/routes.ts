@@ -1353,6 +1353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('🔥 PATCH /api/tasks/:id received data:', JSON.stringify(req.body, null, 2));
       const taskData = insertTaskSchema.partial().parse(req.body);
       
 
@@ -1372,29 +1373,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return null;
       };
       
-      // Convert assignedTo from string to number if provided and present
+      // Handle assignedTo - can be array (from TaskForm) or single value
       let assignedTo = null;
       if (taskData.assignedTo !== undefined) {
+        console.log('🔥 Processing assignedTo:', taskData.assignedTo, 'Type:', typeof taskData.assignedTo, 'IsArray:', Array.isArray(taskData.assignedTo));
+        
         if (taskData.assignedTo && taskData.assignedTo !== "" && taskData.assignedTo !== "unassigned") {
-          // Check if assignedTo is a string before using string methods
-          if (typeof taskData.assignedTo === 'string') {
-            if (taskData.assignedTo.startsWith("me_")) {
-              // Find the current user's contact ID from the contacts table
-              const userEmail = req.user.email || req.user.claims?.email;
-              const userContacts = await storage.getContacts();
-              const userContact = userContacts.find(contact => 
-                contact.personalEmail === userEmail || 
-                contact.workEmail === userEmail
-              );
-              assignedTo = userContact ? userContact.id : null;
-            } else if (taskData.assignedTo.startsWith("team_")) {
-              assignedTo = parseInt(taskData.assignedTo.replace("team_", ""));
-            } else {
-              assignedTo = safeParseInt(taskData.assignedTo);
-            }
+          // Handle array format from TaskForm
+          if (Array.isArray(taskData.assignedTo)) {
+            assignedTo = taskData.assignedTo; // Keep as array for database
           } else {
-            // If it's already a number, use it directly
-            assignedTo = safeParseInt(taskData.assignedTo);
+            // Handle single value (legacy format)
+            if (typeof taskData.assignedTo === 'string') {
+              if (taskData.assignedTo.startsWith("me_")) {
+                const userEmail = req.user.email || req.user.claims?.email;
+                const userContacts = await storage.getContacts();
+                const userContact = userContacts.find(contact => 
+                  contact.personalEmail === userEmail || 
+                  contact.workEmail === userEmail
+                );
+                assignedTo = userContact ? [userContact.id] : null;
+              } else if (taskData.assignedTo.startsWith("team_")) {
+                const contactId = parseInt(taskData.assignedTo.replace("team_", ""));
+                assignedTo = [contactId];
+              } else {
+                const contactId = safeParseInt(taskData.assignedTo);
+                assignedTo = contactId ? [contactId] : null;
+              }
+            } else {
+              // If it's already a number, wrap in array
+              const contactId = safeParseInt(taskData.assignedTo);
+              assignedTo = contactId ? [contactId] : null;
+            }
           }
         }
       }
@@ -1408,7 +1418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const processedTaskData = {
         ...taskData,
-        ...(taskData.assignedTo !== undefined && { assignedTo: assignedTo ? [assignedTo] : null }),
+        ...(taskData.assignedTo !== undefined && { assignedTo: assignedTo }),
         ...(taskData.priority !== undefined && { priority }),
         ...(taskData.milestoneId !== undefined && {
           milestoneId: safeParseInt(taskData.milestoneId)
@@ -1418,10 +1428,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }),
       };
       
-
+      console.log('🔥 Final processedTaskData before database update:', JSON.stringify(processedTaskData, null, 2));
       
       const userId = req.user.claims.sub;
       const task = await storage.updateTask(parseInt(req.params.id), processedTaskData, userId);
+      
+      console.log('🔥 Database returned task:', JSON.stringify(task, null, 2));
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);
