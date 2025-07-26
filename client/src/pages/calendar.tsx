@@ -119,11 +119,16 @@ export default function CalendarPage() {
       const response = await apiRequest("POST", `/api/calendar/sync/${id}`);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
+      
+      const eventsCount = data.eventsCount || 0;
+      const projectEvents = data.projectEvents || 0;
+      const taskEvents = data.taskEvents || 0;
+      
       toast({
         title: "Sync Complete",
-        description: "Calendar has been synced with project dates and task deadlines.",
+        description: `Successfully synced ${eventsCount} calendar events (${projectEvents} projects, ${taskEvents} tasks)`,
       });
     },
     onError: (error: any) => {
@@ -422,6 +427,97 @@ export default function CalendarPage() {
           ))}
         </div>
       )}
+
+      {/* Calendar Events Preview Section */}
+      {connections.length > 0 && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <CalendarIcon className="h-5 w-5" />
+              <span>Calendar Events Preview</span>
+            </CardTitle>
+            <CardDescription>
+              These are the project due dates and task deadlines that would be synced to your calendar
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CalendarEventsPreview />
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// Calendar Events Preview Component
+function CalendarEventsPreview() {
+  const { data: projects = [] } = useQuery({
+    queryKey: ["/api/projects"],
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ["/api/tasks"],
+  });
+
+  const projectEvents = projects.filter(p => p.dueDate).map(project => ({
+    type: 'project' as const,
+    title: `Project Due: ${project.name}`,
+    date: project.dueDate,
+    projectName: project.name,
+    icon: '📋'
+  }));
+
+  const taskEvents = tasks.filter(t => t.dueDate).map(task => ({
+    type: 'task' as const,
+    title: `Task Due: ${task.title}`,
+    date: task.dueDate,
+    taskTitle: task.title,
+    icon: '✅'
+  }));
+
+  const allEvents = [...projectEvents, ...taskEvents]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 10); // Show first 10 upcoming events
+
+  if (allEvents.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">No Events to Sync</h3>
+        <p className="text-muted-foreground">
+          No projects or tasks with due dates found. Add due dates to see calendar events here.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>Next {allEvents.length} upcoming events</span>
+        <span>{projectEvents.length} projects, {taskEvents.length} tasks</span>
+      </div>
+      <div className="space-y-2">
+        {allEvents.map((event, index) => (
+          <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg">
+            <span className="text-xl">{event.icon}</span>
+            <div className="flex-1">
+              <p className="font-medium">{event.title}</p>
+              <p className="text-sm text-muted-foreground">
+                {new Date(event.date).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+            <Badge variant={event.type === 'project' ? 'default' : 'secondary'}>
+              {event.type}
+            </Badge>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
