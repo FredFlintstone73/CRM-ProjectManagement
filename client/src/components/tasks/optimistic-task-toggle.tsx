@@ -30,18 +30,18 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onSuccess: (updatedTask) => {
       console.log(`✅ SUCCESS: Task ${task.id} updated to ${updatedTask.status}`);
       
-      // SIMPLE: Just invalidate all caches and let them refetch fresh data
-      console.log(`🔥 Invalidating all task caches for fresh data...`);
+      // FORCE IMMEDIATE REFETCH: Don't wait for invalidation, refetch immediately
+      console.log(`🔥 FORCING immediate refetch of all task data...`);
       
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
+      queryClient.refetchQueries({ queryKey: ['/api/tasks'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tasks', task.id.toString()] });
       
       if (projectId) {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        queryClient.refetchQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
       }
       
-      console.log(`🔥 Cache invalidation completed - fresh data will load`);
+      console.log(`🔥 IMMEDIATE refetch initiated - fresh data loading NOW`);
     },
     onError: (error) => {
       console.error(`❌ ERROR: Failed to update task ${task.id}:`, error);
