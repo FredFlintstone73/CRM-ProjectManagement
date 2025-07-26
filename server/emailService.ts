@@ -16,6 +16,8 @@ interface EmailConfig {
 
 interface EmailData {
   to: string;
+  cc?: string;
+  bcc?: string;
   subject: string;
   html: string;
   text?: string;
@@ -183,13 +185,23 @@ class EmailService {
     }
 
     try {
-      await this.transporter.sendMail({
+      const mailOptions: any = {
         from: process.env.OUTLOOK_USER || process.env.GMAIL_USER || process.env.SMTP_USER,
         to: emailData.to,
         subject: emailData.subject,
         html: emailData.html,
         text: emailData.text,
-      });
+      };
+
+      // Add CC and BCC if provided
+      if (emailData.cc && emailData.cc.trim()) {
+        mailOptions.cc = emailData.cc;
+      }
+      if (emailData.bcc && emailData.bcc.trim()) {
+        mailOptions.bcc = emailData.bcc;
+      }
+
+      await this.transporter.sendMail(mailOptions);
 
       return {
         sent: true,

@@ -16,7 +16,9 @@ import { apiRequest } from "@/lib/queryClient";
 import type { EmailInteraction, Contact } from "@shared/schema";
 
 const emailSchema = z.object({
-  recipient: z.string().min(1, "Recipient is required").email("Please enter a valid email address"),
+  recipient: z.string().min(1, "At least one recipient is required"),
+  cc: z.string().optional(),
+  bcc: z.string().optional(),
   subject: z.string().min(1, "Subject is required"),
   body: z.string().min(1, "Email body is required"),
   parentEmailId: z.number().optional(),
@@ -64,6 +66,8 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
     resolver: zodResolver(emailSchema),
     defaultValues: {
       recipient: getContactEmail() || "",
+      cc: "",
+      bcc: "",
       subject: "",
       body: "",
       parentEmailId: undefined,
@@ -133,6 +137,8 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
       setReplyingTo(null);
       form.reset({
         recipient: getContactEmail() || "",
+        cc: "",
+        bcc: "",
         subject: "",
         body: "",
         parentEmailId: undefined,
@@ -191,6 +197,8 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
   const handleCompose = () => {
     form.reset({
       recipient: getContactEmail() || "",
+      cc: "",
+      bcc: "",
       subject: "",
       body: "",
       parentEmailId: undefined,
@@ -203,6 +211,8 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
   const handleAddReceived = () => {
     form.reset({
       recipient: getContactEmail() || "", // Set contact as sender for received email display
+      cc: "",
+      bcc: "",
       subject: "",
       body: "",
       parentEmailId: undefined,
@@ -486,7 +496,39 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                         <FormControl>
                           <Input 
                             {...field} 
-                            placeholder="recipient@example.com"
+                            placeholder="recipient@example.com, recipient2@example.com"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="cc"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CC</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            placeholder="cc@example.com, cc2@example.com (optional)"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bcc"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>BCC</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            placeholder="bcc@example.com, bcc2@example.com (optional)"
                           />
                         </FormControl>
                         <FormMessage />

@@ -2098,7 +2098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/contacts/:id/emails', isAuthenticated, async (req: any, res) => {
     try {
       const contactId = parseInt(req.params.id);
-      const { recipient, subject, body, parentEmailId, emailType = 'sent' } = req.body;
+      const { recipient, cc, bcc, subject, body, parentEmailId, emailType = 'sent' } = req.body;
       const userId = req.user.claims.sub;
       
       // Validate required fields
@@ -2112,9 +2112,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Send the actual email
+      // Send the actual email with CC/BCC support
       const emailResult = await emailService.sendEmail({
         to: recipient,
+        cc: cc || undefined,
+        bcc: bcc || undefined,
         subject: subject,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
