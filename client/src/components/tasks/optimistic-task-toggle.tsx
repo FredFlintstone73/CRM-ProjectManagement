@@ -30,18 +30,41 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onSuccess: (updatedTask) => {
       console.log(`✅ SUCCESS: Task ${task.id} updated to ${updatedTask.status}`);
       
-      // FORCE IMMEDIATE REFETCH: Don't wait for invalidation, refetch immediately
-      console.log(`🔥 FORCING immediate refetch of all task data...`);
+      // COMPREHENSIVE CACHE SYNC: Update all possible cache locations immediately
+      console.log(`🔥 COMPREHENSIVE cache sync for task ${task.id}...`);
       
-      queryClient.refetchQueries({ queryKey: ['/api/tasks'] });
-      queryClient.refetchQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
-      queryClient.refetchQueries({ queryKey: ['/api/tasks', task.id.toString()] });
+      // 1. Update main tasks list
+      queryClient.setQueryData(['/api/tasks'], (old: any) => 
+        old?.map((t: any) => t.id === task.id ? updatedTask : t) || old
+      );
       
+      // 2. Update my tasks with priorities (preserve userPriority field)
+      queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (old: any) => 
+        old?.map((t: any) => t.id === task.id ? { ...t, ...updatedTask, userPriority: t.userPriority } : t) || old
+      );
+      
+      // 3. Update individual task cache (used by Task Details page)
+      queryClient.setQueryData(['/api/tasks', task.id.toString()], updatedTask);
+      
+      // 4. Update project tasks cache if applicable
       if (projectId) {
-        queryClient.refetchQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (old: any) => 
+          old?.map((t: any) => t.id === task.id ? updatedTask : t) || old
+        );
       }
       
-      console.log(`🔥 IMMEDIATE refetch initiated - fresh data loading NOW`);
+      // 5. Then force refetch as backup to ensure consistency
+      requestIdleCallback(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/tasks'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tasks', task.id.toString()] });
+        
+        if (projectId) {
+          queryClient.refetchQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        }
+      });
+      
+      console.log(`🔥 Comprehensive cache sync completed`);
     },
     onError: (error) => {
       console.error(`❌ ERROR: Failed to update task ${task.id}:`, error);
