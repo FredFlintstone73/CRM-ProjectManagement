@@ -249,15 +249,44 @@ export default function Tasks() {
     mutationFn: async (taskId: number) => {
       await apiRequest('DELETE', `/api/tasks/${taskId}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+    onMutate: async (taskId: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/tasks'] });
+      await queryClient.cancelQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
       
+      // Snapshot the previous values
+      const previousTasks = queryClient.getQueryData(['/api/tasks']);
+      const previousMyTasks = queryClient.getQueryData(['/api/tasks/my-tasks-with-priorities']);
+      
+      // Optimistically remove the task from both caches
+      queryClient.setQueryData(['/api/tasks'], (old: Task[] | undefined) => {
+        if (!old) return old;
+        return old.filter(task => task.id !== taskId);
+      });
+      
+      queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (old: Task[] | undefined) => {
+        if (!old) return old;
+        return old.filter(task => task.id !== taskId);
+      });
+      
+      // Return context object with the snapshotted values
+      return { previousTasks, previousMyTasks };
+    },
+    onSuccess: () => {
       // Invalidate Messages & Notifications queries to remove deleted tasks
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-overdue'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/tasks-due'] });
       queryClient.invalidateQueries({ queryKey: ['/api/mentions'] });
     },
-    onError: (error) => {
+    onError: (error, taskId, context) => {
+      // Revert optimistic updates on error
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['/api/tasks'], context.previousTasks);
+      }
+      if (context?.previousMyTasks) {
+        queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], context.previousMyTasks);
+      }
+      
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
           window.location.href = "/api/login";

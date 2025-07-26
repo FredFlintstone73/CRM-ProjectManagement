@@ -1058,6 +1058,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteTask(id: number): Promise<void> {
+    // Delete related data in the correct order to avoid foreign key constraints
+    
+    // Delete user task priorities for this task
+    await db.delete(userTaskPriorities).where(eq(userTaskPriorities.taskId, id));
+    
+    // Delete task comments
+    await db.delete(taskComments).where(eq(taskComments.taskId, id));
+    
+    // Delete task files
+    await db.delete(taskFiles).where(eq(taskFiles.taskId, id));
+    
+    // Delete the task itself
     await db.delete(tasks).where(eq(tasks.id, id));
   }
 
