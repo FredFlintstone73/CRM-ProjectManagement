@@ -321,6 +321,7 @@ class EmailService {
           return;
         }
 
+        console.log(`🔍 IMAP search found ${results?.length || 0} unseen emails`);
         if (results.length === 0) return;
 
         // Process each new email
