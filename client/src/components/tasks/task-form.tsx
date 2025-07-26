@@ -80,6 +80,18 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
     if (!task && user) {
       return [`me_${(user as any).id}`];
     }
+    // For existing tasks, initialize with current assignments
+    if (task?.assignedTo && contacts) {
+      const currentUserContactId = getCurrentUserContactId();
+      const assignedToArray = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
+      
+      return assignedToArray.map(id => {
+        if (currentUserContactId && id === currentUserContactId) {
+          return `me_${(user as any)?.id}`;
+        }
+        return `team_${id}`;
+      });
+    }
     return [];
   });
   const [selectedRoles, setSelectedRoles] = useState<string[]>(() => 
@@ -88,7 +100,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
 
   // Initialize assignees when contacts data is available
   useEffect(() => {
-    if (contacts && task?.assignedTo) {
+    if (contacts && task?.assignedTo && selectedAssignees.length === 0) {
       const currentUserContactId = getCurrentUserContactId();
       const assignedToArray = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
       
@@ -104,7 +116,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       // Auto-assign to current user for new tasks when contacts load
       setSelectedAssignees([`me_${(user as any).id}`]);
     }
-  }, [contacts, task, user]);
+  }, [contacts, task, user, selectedAssignees.length]);
 
   // Create options for multi-select components
   const assigneeOptions: MultiSelectOption[] = [
@@ -176,12 +188,27 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       return `${year}-${month}-${day}`;
     };
 
+    // Convert assignee selections back to contact IDs
+    const convertAssignees = (assignees: string[]) => {
+      return assignees.map(assignee => {
+        if (assignee.startsWith('me_')) {
+          return getCurrentUserContactId();
+        }
+        if (assignee.startsWith('team_')) {
+          return parseInt(assignee.replace('team_', ''));
+        }
+        return null;
+      }).filter(id => id !== null);
+    };
+
+    const assignedToIds = convertAssignees(selectedAssignees);
+
     const processedData = {
       ...data,
       dueDate: dueDate ? formatDateForServer(dueDate) : undefined,
       projectId: projectId,
-      assignedTo: selectedAssignees,
-      assignedToRole: selectedRoles,
+      ...(assignedToIds.length > 0 && { assignedTo: assignedToIds }),
+      ...(selectedRoles.length > 0 && { assignedToRole: selectedRoles }),
     };
     createTaskMutation.mutate(processedData);
   };
