@@ -450,63 +450,63 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {groupedInteractions().map((interaction) => (
               <div key={interaction.id} id={`email-thread-${interaction.id}`}>
                 {/* Main Email */}
                 <Card className="border-l-4 border-l-blue-500">
-                  <CardContent className="pt-4">
-                    <div className="flex items-start justify-between mb-3">
+                  <CardContent className="py-3 px-4">
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
+                        <div className="flex items-center space-x-1 mb-1 flex-wrap gap-1">
                           {interaction.replies && interaction.replies.length > 0 && (
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => toggleThread(interaction.id)}
-                              className="h-6 w-6 p-0"
+                              className="h-5 w-5 p-0"
                             >
                               {expandedThreads.has(interaction.id) ? (
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="h-3 w-3" />
                               ) : (
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="h-3 w-3" />
                               )}
                             </Button>
                           )}
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs py-0 px-1">
                             {interaction.sender === contact.personalEmail || 
                              interaction.sender === contact.workEmail || 
                              interaction.sender === contact.spousePersonalEmail ? "Received" : "Sent"}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs py-0 px-1">
                             <User className="h-3 w-3 mr-1" />
                             {interaction.sender}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs py-0 px-1">
                             <Mail className="h-3 w-3 mr-1" />
                             To: {interaction.recipient}
                           </Badge>
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs py-0 px-1">
                             <Clock className="h-3 w-3 mr-1" />
                             {formatDate(interaction.sentAt || interaction.createdAt)}
                           </Badge>
                           {interaction.replies && interaction.replies.length > 0 && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs py-0 px-1">
                               {interaction.replies.length} {interaction.replies.length === 1 ? 'reply' : 'replies'}
                             </Badge>
                           )}
                         </div>
-                        <h4 className="font-semibold text-sm mb-2">{interaction.subject}</h4>
+                        <h4 className="font-semibold text-sm mb-1">{interaction.subject}</h4>
                         <p className="text-sm text-muted-foreground">
                           {truncateBody(interaction.body || "")}
                         </p>
                       </div>
-                      <div className="flex space-x-1 ml-4">
+                      <div className="flex space-x-1 ml-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleReply(interaction)}
-                          className="h-8 px-3"
+                          className="h-6 px-2 text-xs"
                         >
                           <Reply className="h-3 w-3 mr-1" />
                           Reply
@@ -515,7 +515,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                           size="sm"
                           variant="outline"
                           onClick={() => handleForward(interaction)}
-                          className="h-8 px-3"
+                          className="h-6 px-2 text-xs"
                         >
                           <Forward className="h-3 w-3 mr-1" />
                           Forward
@@ -524,7 +524,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                           size="sm"
                           variant="outline"
                           onClick={() => handleDelete(interaction.id)}
-                          className="h-8 px-2 text-red-600 hover:text-red-700"
+                          className="h-6 px-1 text-red-600 hover:text-red-700 text-xs"
                           disabled={deleteEmailMutation.isPending}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -532,11 +532,11 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                       </div>
                     </div>
                     {interaction.body && interaction.body.length > 150 && (
-                      <details className="mt-3">
+                      <details className="mt-2">
                         <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-800">
                           Show full message
                         </summary>
-                        <div className="mt-2 p-3 bg-muted rounded text-sm whitespace-pre-wrap">
+                        <div className="mt-1 p-2 bg-muted rounded text-sm whitespace-pre-wrap">
                           {interaction.body}
                         </div>
                       </details>
@@ -546,42 +546,42 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
 
                 {/* Replies */}
                 {interaction.replies && interaction.replies.length > 0 && expandedThreads.has(interaction.id) && (
-                  <div className="ml-8 mt-2 space-y-2">
+                  <div className="ml-6 mt-1 space-y-1">
                     {interaction.replies
                       .sort((a, b) => new Date(a.sentAt || a.createdAt).getTime() - new Date(b.sentAt || b.createdAt).getTime())
                       .map((reply) => (
                       <Card key={reply.id} className="border-l-4 border-l-green-500">
-                        <CardContent className="pt-4">
-                          <div className="flex items-start justify-between mb-3">
+                        <CardContent className="py-2 px-3">
+                          <div className="flex items-start justify-between mb-1">
                             <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <Badge variant="secondary" className="text-xs">
+                              <div className="flex items-center space-x-1 mb-1 flex-wrap gap-1">
+                                <Badge variant="secondary" className="text-xs py-0 px-1">
                                   Reply
                                 </Badge>
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-xs py-0 px-1">
                                   <User className="h-3 w-3 mr-1" />
                                   {reply.sender}
                                 </Badge>
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-xs py-0 px-1">
                                   <Mail className="h-3 w-3 mr-1" />
                                   To: {reply.recipient}
                                 </Badge>
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs py-0 px-1">
                                   <Clock className="h-3 w-3 mr-1" />
                                   {formatDate(reply.sentAt || reply.createdAt)}
                                 </Badge>
                               </div>
-                              <h4 className="font-semibold text-sm mb-2">{reply.subject}</h4>
+                              <h4 className="font-semibold text-sm mb-1">{reply.subject}</h4>
                               <p className="text-sm text-muted-foreground">
                                 {truncateBody(reply.body || "")}
                               </p>
                             </div>
-                            <div className="flex space-x-1 ml-4">
+                            <div className="flex space-x-1 ml-2">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleReply(reply)}
-                                className="h-8 px-3"
+                                className="h-6 px-2 text-xs"
                               >
                                 <Reply className="h-3 w-3 mr-1" />
                                 Reply
@@ -590,7 +590,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleForward(reply)}
-                                className="h-8 px-3"
+                                className="h-6 px-2 text-xs"
                               >
                                 <Forward className="h-3 w-3 mr-1" />
                                 Forward
@@ -599,7 +599,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleDelete(reply.id)}
-                                className="h-8 px-2 text-red-600 hover:text-red-700"
+                                className="h-6 px-1 text-red-600 hover:text-red-700 text-xs"
                                 disabled={deleteEmailMutation.isPending}
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -607,11 +607,11 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                             </div>
                           </div>
                           {reply.body && reply.body.length > 150 && (
-                            <details className="mt-3">
+                            <details className="mt-2">
                               <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-800">
                                 Show full message
                               </summary>
-                              <div className="mt-2 p-3 bg-muted rounded text-sm whitespace-pre-wrap">
+                              <div className="mt-1 p-2 bg-muted rounded text-sm whitespace-pre-wrap">
                                 {reply.body}
                               </div>
                             </details>
