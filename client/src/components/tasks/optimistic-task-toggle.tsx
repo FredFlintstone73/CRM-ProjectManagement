@@ -13,6 +13,9 @@ interface OptimisticTaskToggleProps {
 
 export function OptimisticTaskToggle({ task, projectId, className = "", size = "sm" }: OptimisticTaskToggleProps) {
   const queryClient = useQueryClient();
+  
+  // Add this simple test log
+  console.log(`🎯 Component loaded for task ${task.id} with status ${task.status} (projectId: ${projectId})`);
 
   const toggleMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -27,21 +30,44 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
     onSuccess: (updatedTask) => {
       console.log(`✅ SUCCESS: Task ${task.id} updated to ${updatedTask.status}`);
       
-      // AGGRESSIVE cache invalidation - invalidate everything
-      console.log(`🔥 Starting aggressive cache invalidation...`);
+      // DIRECT cache updates first - replace stale data immediately
+      console.log(`🔥 Starting direct cache updates...`);
       
-      // Invalidate all task-related caches without exact matching
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      // Update main tasks list
+      queryClient.setQueryData(['/api/tasks'], (oldData: any) => {
+        if (!oldData || !Array.isArray(oldData)) return oldData;
+        return oldData.map((t: any) => t.id === task.id ? updatedTask : t);
+      });
       
+      // Update my tasks list
+      queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (oldData: any) => {
+        if (!oldData || !Array.isArray(oldData)) return oldData;
+        return oldData.map((t: any) => t.id === task.id ? { ...t, ...updatedTask } : t);
+      });
+      
+      // Update individual task cache
+      queryClient.setQueryData(['/api/tasks', task.id.toString()], updatedTask);
+      
+      // Update project tasks if applicable
       if (projectId) {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+        queryClient.setQueryData(['/api/projects', projectId, 'tasks'], (oldData: any) => {
+          if (!oldData || !Array.isArray(oldData)) return oldData;
+          return oldData.map((t: any) => t.id === task.id ? updatedTask : t);
+        });
       }
       
-      // Also invalidate individual task cache
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks', task.id.toString()] });
+      console.log(`🔥 Direct cache updates completed`);
       
-      console.log(`🔥 Cache invalidation completed`);
+      // IMMEDIATE force refresh - refetch all queries NOW
+      console.log(`🔥 Starting IMMEDIATE force refresh...`);
+      queryClient.refetchQueries({ queryKey: ['/api/tasks'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+      
+      if (projectId) {
+        queryClient.refetchQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
+      }
+      
+      console.log(`🔥 Force refresh completed`);
     },
     onError: (error) => {
       console.error(`❌ ERROR: Failed to update task ${task.id}:`, error);
@@ -76,6 +102,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       className={`${buttonSize} ${className}`}
       onClick={handleClick}
       disabled={toggleMutation.isPending}
+      title={`Task ${task.id}: ${task.status} - Click to toggle`}
     >
       {isCompleted ? (
         <CheckCircle className={`${iconSize} text-green-600`} />

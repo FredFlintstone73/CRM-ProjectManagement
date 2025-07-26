@@ -416,13 +416,13 @@ export default function Tasks() {
     switch (sortConfig.key) {
       case "priority":
         // Use userPriority if available (for My Tasks view), otherwise use default priority
-        const aPriority = (taskFilter === 'my_tasks' && 'userPriority' in a && a.userPriority !== null) 
-          ? a.userPriority 
+        const aPriority: number = (taskFilter === 'my_tasks' && 'userPriority' in a && a.userPriority !== null) 
+          ? Number(a.userPriority) 
           : (a.priority || 50);
-        const bPriority = (taskFilter === 'my_tasks' && 'userPriority' in b && b.userPriority !== null) 
-          ? b.userPriority 
+        const bPriority: number = (taskFilter === 'my_tasks' && 'userPriority' in b && b.userPriority !== null) 
+          ? Number(b.userPriority) 
           : (b.priority || 50);
-        result = (aPriority || 50) - (bPriority || 50); // Sort 1-50, with null/undefined treated as 50
+        result = aPriority - bPriority; // Sort 1-50, with null/undefined treated as 50
         break;
       case "dueDate":
         if (!a.dueDate && !b.dueDate) result = 0;
@@ -789,7 +789,7 @@ export default function Tasks() {
               {editingTask && (
                 <TaskForm 
                   task={editingTask} 
-                  projectId={editingTask.projectId} 
+                  projectId={editingTask.projectId ?? undefined} 
                   onSuccess={() => {
                     setEditingTask(null);
                     queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -817,7 +817,7 @@ export default function Tasks() {
                         {taskFilter === 'my_tasks' ? (
                           <UserPriorityInput 
                             taskId={task.id} 
-                            currentPriority={('userPriority' in task && task.userPriority !== null) ? task.userPriority : null}
+                            currentPriority={('userPriority' in task && task.userPriority !== null) ? task.userPriority : undefined}
                             taskFilter={taskFilter}
                           />
                         ) : (
