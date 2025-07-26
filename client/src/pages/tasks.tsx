@@ -378,6 +378,7 @@ export default function Tasks() {
       if (completionFilter !== 'all') {
         const isCompleted = task.status === 'completed';
         if (completionFilter === 'completed' && !isCompleted) return false;
+        // 'in_progress' means not completed (includes 'todo', 'in_progress', etc.)
         if (completionFilter === 'in_progress' && isCompleted) return false;
         if (completionFilter === 'overdue' && (isCompleted || !task.dueDate || new Date(task.dueDate) >= currentDate)) return false;
       }
