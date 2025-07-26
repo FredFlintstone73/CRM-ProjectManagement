@@ -608,7 +608,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                           </div>
                           {reply.body && reply.body.length > 150 && (
                             <details className="mt-2">
-                              <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-800">
+                              <summary className="cursor-pointer text-blue-600 hover:text-blue-800 text-[12px]">
                                 Show full message
                               </summary>
                               <div className="mt-1 p-2 bg-muted rounded text-sm whitespace-pre-wrap">
