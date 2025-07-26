@@ -427,7 +427,14 @@ export default function TaskDetail() {
           <Button
             variant="outline"
             onClick={() => {
-              if (task?.projectId) {
+              // Check if we came from "My Tasks" without family name
+              const taskDetailSource = localStorage.getItem('taskDetailSource');
+              
+              if (taskDetailSource === 'my-tasks-no-client') {
+                // Clear the context and navigate back to Tasks page
+                localStorage.removeItem('taskDetailSource');
+                setLocation('/tasks');
+              } else if (task?.projectId) {
                 setLocation(`/projects/${task.projectId}`);
               } else {
                 window.history.back();

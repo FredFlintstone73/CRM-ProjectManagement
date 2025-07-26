@@ -60,8 +60,10 @@ export default function Tasks() {
     if (taskFilter === 'my_tasks') {
       const familyName = getTaskFamilyName(task);
       
-      // If task has no family/client (No Client), open full task detail page
+      // If task has no family/client (No Client), open full task detail page with context
       if (!familyName || familyName === '' || familyName === 'No Client') {
+        // Store context information for the back button
+        localStorage.setItem('taskDetailSource', 'my-tasks-no-client');
         setLocation(`/task/${task.id}`);
         return;
       }
@@ -75,7 +77,8 @@ export default function Tasks() {
       }
     }
     
-    // Default behavior: open sidebar for all other cases
+    // Default behavior: clear any existing context and open sidebar
+    localStorage.removeItem('taskDetailSource');
     setSelectedTask(task);
     setIsSidebarOpen(true);
   };
