@@ -31,22 +31,33 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       console.log(`✅ SUCCESS: Task ${task.id} updated to ${updatedTask.status}`);
       
       // DIRECT cache updates first - replace stale data immediately
-      console.log(`🔥 Starting direct cache updates...`);
+      console.log(`🔥 Starting direct cache updates for task ${task.id}...`);
       
       // Update main tasks list
-      queryClient.setQueryData(['/api/tasks'], (oldData: any) => {
-        if (!oldData || !Array.isArray(oldData)) return oldData;
-        return oldData.map((t: any) => t.id === task.id ? updatedTask : t);
+      const allTasksUpdated = queryClient.setQueryData(['/api/tasks'], (oldData: any) => {
+        if (!oldData || !Array.isArray(oldData)) {
+          console.log(`🔥 No allTasks data to update`);
+          return oldData;
+        }
+        const updated = oldData.map((t: any) => t.id === task.id ? updatedTask : t);
+        console.log(`🔥 Updated allTasks cache: task ${task.id} status = ${updatedTask.status}`);
+        return updated;
       });
       
       // Update my tasks list
-      queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (oldData: any) => {
-        if (!oldData || !Array.isArray(oldData)) return oldData;
-        return oldData.map((t: any) => t.id === task.id ? { ...t, ...updatedTask } : t);
+      const myTasksUpdated = queryClient.setQueryData(['/api/tasks/my-tasks-with-priorities'], (oldData: any) => {
+        if (!oldData || !Array.isArray(oldData)) {
+          console.log(`🔥 No myTasks data to update`);
+          return oldData;
+        }
+        const updated = oldData.map((t: any) => t.id === task.id ? { ...t, ...updatedTask } : t);
+        console.log(`🔥 Updated myTasks cache: task ${task.id} status = ${updatedTask.status}`);
+        return updated;
       });
       
       // Update individual task cache
       queryClient.setQueryData(['/api/tasks', task.id.toString()], updatedTask);
+      console.log(`🔥 Updated individual task cache: task ${task.id} status = ${updatedTask.status}`);
       
       // Update project tasks if applicable
       if (projectId) {
@@ -54,6 +65,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
           if (!oldData || !Array.isArray(oldData)) return oldData;
           return oldData.map((t: any) => t.id === task.id ? updatedTask : t);
         });
+        console.log(`🔥 Updated project tasks cache for project ${projectId}`);
       }
       
       console.log(`🔥 Direct cache updates completed`);
