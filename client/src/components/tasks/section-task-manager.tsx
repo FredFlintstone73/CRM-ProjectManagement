@@ -98,6 +98,54 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
     localStorage.setItem(`expandedSections-${projectId}`, JSON.stringify(Array.from(expandedSections)));
   }, [expandedSections, projectId]);
 
+  // Handle expandToTaskId from localStorage (when navigating from Tasks page)
+  useEffect(() => {
+    const expandToTaskId = localStorage.getItem('expandToTaskId');
+    if (expandToTaskId && tasks.length > 0 && milestones.length > 0) {
+      const taskId = parseInt(expandToTaskId);
+      const targetTask = tasks.find(task => task.id === taskId);
+      
+      if (targetTask) {
+        // Find the section containing this task
+        const targetSection = milestones.find(milestone => milestone.id === targetTask.milestoneId);
+        
+        if (targetSection) {
+          // Expand the section containing the task
+          setExpandedSections(prev => new Set([...prev, `milestone-${targetSection.id}`]));
+          
+          // Expand parent tasks to show the target task
+          const expandParentTasks = (task: Task) => {
+            if (task.parentTaskId) {
+              const parentTask = tasks.find(t => t.id === task.parentTaskId);
+              if (parentTask) {
+                setExpandedTasks(prev => new Set([...prev, parentTask.id]));
+                expandParentTasks(parentTask); // Recursively expand parents
+              }
+            }
+          };
+          
+          expandParentTasks(targetTask);
+        }
+        
+        // Clear the localStorage item after processing
+        localStorage.removeItem('expandToTaskId');
+        
+        // Scroll to the task after a brief delay to allow for expansion
+        setTimeout(() => {
+          const taskElement = document.getElementById(`task-${taskId}`);
+          if (taskElement) {
+            taskElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Briefly highlight the task
+            taskElement.classList.add('bg-yellow-100', 'ring-2', 'ring-yellow-300');
+            setTimeout(() => {
+              taskElement.classList.remove('bg-yellow-100', 'ring-2', 'ring-yellow-300');
+            }, 2000);
+          }
+        }, 300);
+      }
+    }
+  }, [tasks, milestones, projectId]);
+
   // Fetch milestones for this project
   const { data: milestones = [], isLoading: isLoadingMilestones } = useQuery({
     queryKey: ['/api/milestones', projectId, 'milestone-order-fix-v2'],
@@ -680,6 +728,7 @@ export function SectionTaskManager({ projectId, onTaskClick }: SectionTaskManage
     return (
       <div key={task.id} className="space-y-2">
         <div 
+          id={`task-${task.id}`}
           className="flex items-center gap-2 task-compact rounded-lg border bg-white border-gray-200 pt-[0px] pb-[0px]"
           style={{ marginLeft: `${level * 24}px` }}
         >

@@ -54,8 +54,28 @@ export default function Tasks() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [expandedAssignments, setExpandedAssignments] = useState<Set<number>>(new Set());
 
-  // Handler for opening task in sidebar
+  // Handler for enhanced task navigation
   const handleTaskClick = (task: Task) => {
+    // Only apply enhanced navigation when in "My Tasks" filter mode
+    if (taskFilter === 'my_tasks') {
+      const familyName = getTaskFamilyName(task);
+      
+      // If task has no family/client (No Client), open full task detail page
+      if (!familyName || familyName === '' || familyName === 'No Client') {
+        setLocation(`/task/${task.id}`);
+        return;
+      }
+      
+      // If task has a family name, navigate to project and expand to show the task
+      if (task.projectId) {
+        // Store the task ID to expand to in localStorage for the project page to use
+        localStorage.setItem('expandToTaskId', task.id.toString());
+        setLocation(`/project/${task.projectId}`);
+        return;
+      }
+    }
+    
+    // Default behavior: open sidebar for all other cases
     setSelectedTask(task);
     setIsSidebarOpen(true);
   };
