@@ -17,10 +17,10 @@ import { apiRequest } from "@/lib/queryClient";
 import type { CalendarConnection } from "@shared/schema";
 
 const calendarProviders = [
-  { value: "google", label: "Google Calendar" },
-  { value: "outlook", label: "Microsoft Outlook" },
-  { value: "apple", label: "Apple Calendar" },
-  { value: "other", label: "Other" },
+  { value: "google", label: "Google Calendar", supportsOAuth: true },
+  { value: "microsoft", label: "Microsoft Outlook", supportsOAuth: true },
+  { value: "apple", label: "Apple Calendar", supportsOAuth: false },
+  { value: "other", label: "Other", supportsOAuth: false },
 ];
 
 const connectionSchema = z.object({
@@ -67,22 +67,43 @@ export default function CalendarPage() {
 
   const createConnectionMutation = useMutation({
     mutationFn: async (data: ConnectionFormData) => {
-      const response = await apiRequest("POST", "/api/calendar/connections", data);
-      return response.json();
+      // Check if provider supports OAuth
+      const provider = calendarProviders.find(p => p.value === data.provider);
+      
+      if (provider?.supportsOAuth && ['google', 'microsoft'].includes(data.provider)) {
+        // Start OAuth flow
+        const response = await apiRequest("GET", `/api/oauth/${data.provider}/auth`);
+        const oauthData = await response.json();
+        
+        if (oauthData.authUrl) {
+          // Redirect to OAuth provider
+          window.location.href = oauthData.authUrl;
+          return { oauth: true };
+        } else {
+          throw new Error(oauthData.message || "OAuth not configured");
+        }
+      } else {
+        // Create manual connection for non-OAuth providers
+        const response = await apiRequest("POST", "/api/calendar/connections", data);
+        return response.json();
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
-      setDialogOpen(false);
-      form.reset({
-        provider: "google" as const,
-        calendarName: "",
-        calendarId: "",
-        syncEnabled: true,
-      });
-      toast({
-        title: "Calendar Connected",
-        description: "Your calendar has been connected successfully.",
-      });
+    onSuccess: (data: any) => {
+      if (!data.oauth) {
+        queryClient.invalidateQueries({ queryKey: ["/api/calendar/connections"] });
+        setDialogOpen(false);
+        form.reset({
+          provider: "google" as const,
+          calendarName: "",
+          calendarId: "",
+          syncEnabled: true,
+        });
+        toast({
+          title: "Calendar Connected",
+          description: "Your calendar has been connected successfully.",
+        });
+      }
+      // OAuth success will be handled by redirect callback
     },
     onError: (error: any) => {
       toast({
@@ -126,9 +147,10 @@ export default function CalendarPage() {
       const projectEvents = data.projectEvents || 0;
       const taskEvents = data.taskEvents || 0;
       
+      const syncStatus = data.realSync ? "to your calendar" : "(preview mode)";
       toast({
         title: "Sync Complete",
-        description: `Successfully synced ${eventsCount} calendar events (${projectEvents} projects, ${taskEvents} tasks)`,
+        description: `Successfully synced ${eventsCount} calendar events ${syncStatus} (${projectEvents} projects, ${taskEvents} tasks)`,
       });
     },
     onError: (error: any) => {

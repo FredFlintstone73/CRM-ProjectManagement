@@ -5,6 +5,8 @@ import { setupAuth, isAuthenticated, requireTwoFactor } from "./replitAuth";
 import { emailService } from "./emailService";
 import { twoFactorAuthService } from "./twoFactorAuth";
 import { aiSearchService } from "./aiSearchService";
+import { oauthService } from "./oauthService";
+import { calendarService } from "./calendarService";
 import { 
   insertContactSchema, 
   insertProjectSchema, 
@@ -2802,6 +2804,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OAuth routes for calendar authentication
+  app.get('/api/oauth/:provider/auth', isAuthenticated, async (req: any, res) => {
+    try {
+      const provider = req.params.provider;
+      const userId = req.user.claims.sub;
+      const state = `${userId}-${Date.now()}`;
+
+      let authUrl: string;
+      
+      switch (provider) {
+        case 'google':
+          if (!oauthService.isConfigured('google')) {
+            return res.status(400).json({ 
+              message: "Google OAuth not configured", 
+              requiredSecrets: oauthService.getRequiredSecrets('google')
+            });
+          }
+          authUrl = oauthService.getGoogleAuthUrl(state);
+          break;
+          
+        case 'microsoft':
+          if (!oauthService.isConfigured('microsoft')) {
+            return res.status(400).json({ 
+              message: "Microsoft OAuth not configured", 
+              requiredSecrets: oauthService.getRequiredSecrets('microsoft')
+            });
+          }
+          authUrl = oauthService.getMicrosoftAuthUrl(state);
+          break;
+          
+        default:
+          return res.status(400).json({ message: "Unsupported OAuth provider" });
+      }
+
+      // Store state for validation
+      req.session.oauthState = state;
+      res.json({ authUrl });
+    } catch (error) {
+      console.error("OAuth auth error:", error);
+      res.status(500).json({ message: "Failed to generate OAuth URL" });
+    }
+  });
+
+  app.get('/api/oauth/:provider/callback', async (req: any, res) => {
+    try {
+      const provider = req.params.provider;
+      const { code, state } = req.query;
+
+      // Validate state parameter
+      if (!req.session.oauthState || req.session.oauthState !== state) {
+        return res.status(400).json({ message: "Invalid OAuth state" });
+      }
+
+      let tokenData;
+      switch (provider) {
+        case 'google':
+          tokenData = await oauthService.exchangeGoogleCode(code);
+          break;
+        case 'microsoft':
+          tokenData = await oauthService.exchangeMicrosoftCode(code);
+          break;
+        default:
+          return res.status(400).json({ message: "Unsupported OAuth provider" });
+      }
+
+      // Store tokens in calendar connection
+      const userId = req.session.oauthState.split('-')[0];
+      const connectionData = {
+        provider,
+        calendarName: `${provider.charAt(0).toUpperCase() + provider.slice(1)} Calendar`,
+        calendarId: 'primary',
+        syncEnabled: true,
+        settings: {
+          accessToken: tokenData.accessToken,
+          refreshToken: tokenData.refreshToken,
+          expiresAt: new Date(Date.now() + tokenData.expiresIn * 1000)
+        }
+      };
+
+      const connection = await storage.createCalendarConnection(userId, connectionData);
+      
+      // Clear OAuth state
+      delete req.session.oauthState;
+
+      // Redirect to calendar page with success
+      res.redirect(`/calendar?connected=${provider}&id=${connection.id}`);
+    } catch (error) {
+      console.error("OAuth callback error:", error);
+      res.redirect(`/calendar?error=${encodeURIComponent(error.message)}`);
+    }
+  });
+
   // Calendar sync endpoint - sync project due dates and task deadlines
   app.post('/api/calendar/sync/:connectionId', isAuthenticated, async (req: any, res) => {
     try {
@@ -2822,27 +2916,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await storage.getTasks();
       const tasksWithDates = tasks.filter(t => t.dueDate);
 
-      // Create calendar events data (in a real implementation, this would sync to actual calendar)
+      // Create calendar events data
       const calendarEvents = [
         ...projectsWithDates.map(project => ({
-          type: 'project',
           title: `Project Due: ${project.name}`,
           description: `Project meeting for ${project.name}`,
-          date: project.dueDate,
-          allDay: true,
-          projectId: project.id,
-          projectName: project.name
+          start: project.dueDate,
+          end: project.dueDate,
+          allDay: true
         })),
         ...tasksWithDates.map(task => ({
-          type: 'task',
           title: `Task Due: ${task.title}`,
           description: task.description || `Task deadline for ${task.title}`,
-          date: task.dueDate,
-          allDay: false,
-          taskId: task.id,
-          taskTitle: task.title
+          start: task.dueDate,
+          end: task.dueDate,
+          allDay: false
         }))
       ];
+
+      let syncResult;
+      
+      // If connection has OAuth tokens, sync to actual calendar
+      if (connection.settings?.accessToken && ['google', 'microsoft'].includes(connection.provider)) {
+        try {
+          const credentials = {
+            accessToken: connection.settings.accessToken,
+            refreshToken: connection.settings.refreshToken
+          };
+
+          syncResult = await calendarService.syncCalendarEvents(
+            connection.provider,
+            credentials,
+            connection.calendarId || 'primary',
+            calendarEvents
+          );
+        } catch (error) {
+          console.error("Real calendar sync error:", error);
+          // Fall back to preview mode if real sync fails
+          syncResult = { success: false, error: error.message };
+        }
+      }
 
       // Update the connection with sync status
       await storage.updateCalendarConnection(connectionId, {
@@ -2850,11 +2963,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json({ 
-        message: "Calendar sync completed successfully",
+        message: syncResult?.success ? "Calendar sync completed successfully" : "Calendar sync completed (preview mode)",
         eventsCount: calendarEvents.length,
-        projectEvents: calendarEvents.filter(e => e.type === 'project').length,
-        taskEvents: calendarEvents.filter(e => e.type === 'task').length,
-        events: calendarEvents.slice(0, 10) // Return first 10 events as preview
+        projectEvents: projectsWithDates.length,
+        taskEvents: tasksWithDates.length,
+        events: calendarEvents.slice(0, 10), // Return first 10 events as preview
+        realSync: syncResult?.success || false,
+        syncResults: syncResult?.results || []
       });
     } catch (error) {
       console.error("Error syncing calendar:", error);
