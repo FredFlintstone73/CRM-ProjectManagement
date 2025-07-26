@@ -71,7 +71,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
   const [dueDate, setDueDate] = useState<Date | undefined>(() => {
     if (!task?.dueDate) return undefined;
     // Parse date string as local date (YYYY-MM-DD format)
-    const dateStr = typeof task.dueDate === 'string' ? task.dueDate.split('T')[0] : task.dueDate.toISOString().split('T')[0];
+    const dateStr = typeof task.dueDate === 'string' ? task.dueDate.split('T')[0] : (task.dueDate as Date).toISOString().split('T')[0];
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day); // month is 0-indexed
   });
@@ -221,11 +221,12 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       ...data,
       dueDate: dueDate ? formatDateForServer(dueDate) : undefined,
       projectId: projectId,
-      // For edits, always include assignment data (even if empty) to avoid clearing existing assignments
-      assignedTo: assignedToIds.length > 0 ? assignedToIds : (task ? task.assignedTo : []),
-      ...(selectedRoles.length > 0 && { assignedToRole: selectedRoles }),
+      // For edits: if user cleared all assignments, send empty array; otherwise use the converted IDs
+      // If no assignments selected but we're editing an existing task, preserve original assignments
+      assignedTo: selectedAssignees.length === 0 && task ? task.assignedTo : assignedToIds,
+      assignedToRole: selectedRoles.length > 0 ? selectedRoles : undefined,
     };
-    createTaskMutation.mutate(processedData);
+    createTaskMutation.mutate(processedData as any);
   };
 
   return (
