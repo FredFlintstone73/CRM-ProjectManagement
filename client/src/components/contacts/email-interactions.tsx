@@ -572,7 +572,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                                 </Badge>
                               </div>
                               <h4 className="font-semibold text-sm mt-[0px] mb-[0px]">{reply.subject}</h4>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-muted-foreground text-[12px]">
                                 {truncateBody(reply.body || "")}
                               </p>
                             </div>
