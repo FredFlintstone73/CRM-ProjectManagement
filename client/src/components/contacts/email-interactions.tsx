@@ -571,7 +571,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                                   {formatDate(reply.sentAt || reply.createdAt)}
                                 </Badge>
                               </div>
-                              <h4 className="font-semibold text-sm mb-1">{reply.subject}</h4>
+                              <h4 className="font-semibold text-sm mt-[0px] mb-[0px]">{reply.subject}</h4>
                               <p className="text-sm text-muted-foreground">
                                 {truncateBody(reply.body || "")}
                               </p>
