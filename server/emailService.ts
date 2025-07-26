@@ -364,7 +364,8 @@ class EmailService {
       const from = email.from?.text || '';
       const body = email.text || email.html || '';
       
-      console.log(`Processing incoming email from: ${from}, subject: ${subject}`);
+      console.log(`🔍 Processing incoming email from: ${from}, subject: ${subject}`);
+      console.log(`📧 Email body preview: ${body.substring(0, 100)}...`);
 
       // Try to find matching contact by email - extract actual email address from the from field
       const emailRegex = /<([^>]+)>/;
