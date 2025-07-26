@@ -474,7 +474,7 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                   Compose Email
                 </Button>
               </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {replyingTo ? "Reply to Email" : "Compose Email"}
@@ -503,38 +503,40 @@ export default function EmailInteractions({ contactId, contact, expandEmailId }:
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="cc"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CC</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder="cc@example.com, cc2@example.com (optional)"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="bcc"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>BCC</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder="bcc@example.com, bcc2@example.com (optional)"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="cc"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>CC</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="cc@example.com (optional)"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="bcc"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>BCC</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="bcc@example.com (optional)"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="subject"
