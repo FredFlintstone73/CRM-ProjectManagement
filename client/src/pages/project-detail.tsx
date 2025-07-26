@@ -161,9 +161,9 @@ export default function ProjectDetail() {
       queryClient.removeQueries({ queryKey: ['/api/tasks'] });
       queryClient.removeQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
       queryClient.removeQueries({ queryKey: ['/api/milestones'] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString(), 'tasks'] });
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId.toString()] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', id, 'tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', id.toString(), 'tasks'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects', id.toString()] });
       
       // Then invalidate to trigger fresh fetches
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
