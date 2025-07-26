@@ -72,7 +72,7 @@ export default function Tasks() {
       if (task.projectId) {
         // Store the task ID to expand to in localStorage for the project page to use
         localStorage.setItem('expandToTaskId', task.id.toString());
-        setLocation(`/project/${task.projectId}`);
+        setLocation(`/projects/${task.projectId}`);
         return;
       }
     }
