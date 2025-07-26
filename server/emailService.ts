@@ -434,12 +434,29 @@ class EmailService {
       // Check if we've already recorded this email to avoid duplicates
       const existingEmails = await this.storage.getEmailInteractionsByContact(targetContact.id);
       const currentTimestamp = email.date || new Date();
-      const isDuplicate = existingEmails.some(existingEmail => 
-        existingEmail.subject === subject &&
-        existingEmail.sender === from &&
-        existingEmail.emailType === 'received' &&
-        Math.abs(new Date(existingEmail.sentAt).getTime() - currentTimestamp.getTime()) < 300000 // Within 5 minutes
-      );
+      
+      // Extract the actual email address from the from field for comparison
+      const emailRegexForDupe = /<([^>]+)>/;
+      const fromEmailForDupe = from.match(emailRegexForDupe)?.[1] || from.trim();
+      
+      console.log(`🔍 Checking for duplicates - Subject: "${subject}", From email: "${fromEmailForDupe}", Timestamp: ${currentTimestamp}`);
+      console.log(`🔍 Found ${existingEmails.length} existing emails for contact ${targetContact.firstName} ${targetContact.lastName}`);
+      
+      const isDuplicate = existingEmails.some(existingEmail => {
+        const existingFromEmail = existingEmail.sender?.match(emailRegexForDupe)?.[1] || existingEmail.sender;
+        const subjectMatch = existingEmail.subject === subject;
+        const senderMatch = existingFromEmail === fromEmailForDupe;
+        const typeMatch = existingEmail.emailType === 'received';
+        const timeMatch = Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt).getTime() - currentTimestamp.getTime()) < 300000; // Within 5 minutes
+        
+        console.log(`🔍 Comparing with existing email ID ${existingEmail.id}:`);
+        console.log(`   - Subject: "${existingEmail.subject}" vs "${subject}" = ${subjectMatch}`);
+        console.log(`   - Sender: "${existingFromEmail}" vs "${fromEmailForDupe}" = ${senderMatch}`);
+        console.log(`   - Type: "${existingEmail.emailType}" vs "received" = ${typeMatch}`);
+        console.log(`   - Time diff: ${Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt).getTime() - currentTimestamp.getTime())}ms = ${timeMatch}`);
+        
+        return subjectMatch && senderMatch && typeMatch && timeMatch;
+      });
 
       if (isDuplicate) {
         console.log('Email already recorded, skipping duplicate');
