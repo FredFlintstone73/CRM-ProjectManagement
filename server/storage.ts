@@ -704,20 +704,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async searchContacts(query: string): Promise<Contact[]> {
-    return await db
-      .select()
-      .from(contacts)
-      .where(
-        or(
-          ilike(contacts.firstName, `%${query}%`),
-          ilike(contacts.lastName, `%${query}%`),
-          ilike(contacts.email, `%${query}%`),
-          ilike(contacts.company, `%${query}%`)
-        )
-      )
-      .orderBy(desc(contacts.createdAt));
-  }
+
 
   async getContactsByType(type: string): Promise<Contact[]> {
     return await db
