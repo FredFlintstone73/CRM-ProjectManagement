@@ -1006,46 +1006,15 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // Handle assignment - convert array of team_xxx to contact IDs, or handle me_xxx for current user
-    if (processedTask.assignedTo && Array.isArray(processedTask.assignedTo)) {
-      const assignedToIds: number[] = [];
-      
-      for (const assignment of processedTask.assignedTo) {
-        if (typeof assignment === 'string') {
-          if (assignment.startsWith('team_')) {
-            // Extract contact ID from team_xxx format
-            const contactId = parseInt(assignment.replace('team_', ''));
-            // Verify the contact is a team member
-            const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
-            if (contact.length > 0 && contact[0].contactType === 'team_member') {
-              assignedToIds.push(contactId);
-            }
-          } else if (assignment.startsWith('me_')) {
-            // Handle "Assign to Me" - create or find user contact
-            const currentUserId = assignment.replace('me_', '');
-            // Find or create a contact for the current user
-            const userContact = await this.findOrCreateUserContact(currentUserId);
-            assignedToIds.push(userContact.id);
-          }
-        }
-      }
-      
-      processedTask.assignedTo = assignedToIds.length > 0 ? assignedToIds : null;
-    } else if (processedTask.assignedTo && typeof processedTask.assignedTo === 'string') {
-      // Handle backward compatibility for single assignments
-      if (processedTask.assignedTo.startsWith('team_')) {
-        const contactId = parseInt(processedTask.assignedTo.replace('team_', ''));
-        const contact = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
-        if (contact.length > 0 && contact[0].contactType === 'team_member') {
-          processedTask.assignedTo = [contactId];
-        } else {
-          processedTask.assignedTo = null;
-        }
-      } else if (processedTask.assignedTo.startsWith('me_')) {
-        const currentUserId = processedTask.assignedTo.replace('me_', '');
-        const userContact = await this.findOrCreateUserContact(currentUserId);
-        processedTask.assignedTo = [userContact.id];
-      } else {
+    // Handle assignment - already processed by PATCH route as clean array
+    console.log('🔥 Storage updateTask - received assignedTo:', processedTask.assignedTo, 'Type:', typeof processedTask.assignedTo, 'IsArray:', Array.isArray(processedTask.assignedTo));
+    
+    if (processedTask.assignedTo !== undefined) {
+      if (Array.isArray(processedTask.assignedTo)) {
+        // Array is already processed by PATCH route - keep as is
+        console.log('🔥 Storage - keeping array assignment as is:', processedTask.assignedTo);
+        // processedTask.assignedTo is already correct - no changes needed
+      } else if (processedTask.assignedTo === null || processedTask.assignedTo === '') {
         processedTask.assignedTo = null;
       }
     }
