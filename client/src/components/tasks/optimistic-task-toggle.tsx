@@ -44,7 +44,10 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       );
       
       // 3. Update individual task cache (used by Task Details page)
-      queryClient.setQueryData(['/api/tasks', task.id.toString()], updatedTask);
+      // CRITICAL: Task Details page uses string ID from URL params, ensure exact match
+      const taskIdString = String(task.id);
+      console.log(`🔥 Updating individual task cache with key: ['/api/tasks', '${taskIdString}']`);
+      queryClient.setQueryData(['/api/tasks', taskIdString], updatedTask);
       
       // 4. Update project tasks cache if applicable
       if (projectId) {
@@ -57,7 +60,7 @@ export function OptimisticTaskToggle({ task, projectId, className = "", size = "
       requestIdleCallback(() => {
         queryClient.refetchQueries({ queryKey: ['/api/tasks'] });
         queryClient.refetchQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
-        queryClient.refetchQueries({ queryKey: ['/api/tasks', task.id.toString()] });
+        queryClient.refetchQueries({ queryKey: ['/api/tasks', taskIdString] });
         
         if (projectId) {
           queryClient.refetchQueries({ queryKey: ['/api/projects', projectId, 'tasks'] });
