@@ -100,7 +100,7 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
 
   // Initialize assignees when contacts data is available
   useEffect(() => {
-    if (contacts && task?.assignedTo && selectedAssignees.length === 0) {
+    if (contacts && task?.assignedTo) {
       const currentUserContactId = getCurrentUserContactId();
       const assignedToArray = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
       
@@ -111,12 +111,15 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
         return `team_${id}`;
       });
       
-      setSelectedAssignees(defaultAssignees);
+      // Only set if different from current selection to avoid infinite loops
+      if (JSON.stringify(defaultAssignees.sort()) !== JSON.stringify(selectedAssignees.sort())) {
+        setSelectedAssignees(defaultAssignees);
+      }
     } else if (!task && user && selectedAssignees.length === 0) {
       // Auto-assign to current user for new tasks when contacts load
       setSelectedAssignees([`me_${(user as any).id}`]);
     }
-  }, [contacts, task, user, selectedAssignees.length]);
+  }, [contacts, task, user]);
 
   // Create options for multi-select components
   const assigneeOptions: MultiSelectOption[] = [

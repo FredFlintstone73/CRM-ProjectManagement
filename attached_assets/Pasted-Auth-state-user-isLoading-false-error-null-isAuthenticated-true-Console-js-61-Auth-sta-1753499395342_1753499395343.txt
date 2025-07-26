@@ -1,0 +1,124 @@
+Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 🎯 Component loaded for task 5497 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 5498 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 678 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3586 with status todo (projectId: 63)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 664 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 684 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 845 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3710 with status todo (projectId: 64)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3700 with status todo (projectId: 64)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3744 with status todo (projectId: 64)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4193 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3561 with status todo (projectId: 63)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4157 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4182 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4629 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4608 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4640 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4604 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4753 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4757 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4778 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4789 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4743 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4927 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4902 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4906 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4938 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 5072 with status todo (projectId: 70)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 5171 with status todo (projectId: 70)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4161 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 Auth state: {user: {…}, isLoading: false, error: null, isAuthenticated: true}
+Console.js:61 🎯 Component loaded for task 5497 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 5498 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 678 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3586 with status todo (projectId: 63)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 664 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 684 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 845 with status todo (projectId: null)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3710 with status todo (projectId: 64)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3700 with status todo (projectId: 64)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3744 with status todo (projectId: 64)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4193 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 3561 with status todo (projectId: 63)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4157 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4182 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4629 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4608 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4640 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4604 with status todo (projectId: 67)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4753 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4757 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4778 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4789 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4743 with status todo (projectId: 68)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4927 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4902 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4906 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4938 with status todo (projectId: 69)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 5072 with status todo (projectId: 70)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 5171 with status todo (projectId: 70)
+Console.js:61 🎯 Component rendering with size: md, className: 
+Console.js:61 🎯 Component loaded for task 4161 with status todo (projectId: 66)
+Console.js:61 🎯 Component rendering with size: md, className: 

@@ -141,15 +141,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
-### Task Detail Editing and Filter Consistency Fix (July 26, 2025)
-- **Root Issue Resolution**: Fixed inconsistency where tasks appeared differently in "My Tasks" vs "All Tasks" filters
-- **Cache Synchronization**: Updated TaskForm component to invalidate both `/api/tasks` and `/api/tasks/my-tasks-with-priorities` caches when tasks are created
-- **Consistent Task Display**: New tasks now appear consistently across both "My Tasks" and "All Tasks" views immediately after creation
-- **Cache Timing Optimization**: Reduced staleTime from 60 seconds to 30 seconds for both task queries to improve data freshness
-- **Enhanced Task Creation**: Task creation now properly updates all relevant caches ensuring immediate visibility across all filters
-- **Task Detail Edit Fix**: Fixed standalone task editing by removing projectId requirement from edit dialog and adding comprehensive cache invalidation
-- **Universal Task Editing**: Task Detail edit dialog now works for both project tasks and standalone tasks with proper cache updates
-- **Edit Dialog Enhancement**: Task Detail page edit functionality now properly invalidates all task caches for immediate UI updates
+### Task Detail Editing and Assignment Preservation Fix (July 26, 2025)
+- **Root Issue Resolution**: Fixed critical bug where task assignments were being cleared during task edits from Task Detail page
+- **Assignment Preservation Logic**: Enhanced TaskForm to properly preserve existing assignments when no new assignments are selected during edits
+- **Cache Synchronization**: Updated TaskForm component to invalidate both `/api/tasks` and `/api/tasks/my-tasks-with-priorities` caches with forced refetch
+- **Task Detail Edit Enhancement**: Added comprehensive cache invalidation with refetch to Task Detail page edit dialog for immediate UI updates
+- **Assignment State Initialization**: Fixed TaskForm assignment state initialization to properly load existing assignments when editing tasks
+- **useEffect Optimization**: Improved assignment initialization logic to avoid infinite loops while maintaining proper state synchronization
+- **Universal Task Editing**: Task Detail edit dialog now works for both project tasks and standalone tasks with proper assignment preservation
+- **Data Integrity Protection**: Implemented robust assignment preservation to prevent accidental clearing of task assignments during edits
 
 ### Complete Real Calendar Integration Implementation (July 25, 2025)
 - **OAuth Authentication System**: Implemented complete OAuth flow for Google Calendar and Microsoft Outlook integration with secure token management
