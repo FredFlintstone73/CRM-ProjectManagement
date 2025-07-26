@@ -372,6 +372,7 @@ export default function TaskDetail() {
       // On error, revert optimistic updates
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
     },
   });
 
@@ -718,16 +719,16 @@ export default function TaskDetail() {
           <DialogHeader>
             <DialogTitle>Edit Task</DialogTitle>
           </DialogHeader>
-          {task?.projectId && (
-            <TaskForm 
-              task={task} 
-              projectId={task.projectId} 
-              onSuccess={() => {
-                setIsEditing(false);
-                queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
-              }} 
-            />
-          )}
+          <TaskForm 
+            task={task} 
+            projectId={task?.projectId || undefined} 
+            onSuccess={() => {
+              setIsEditing(false);
+              queryClient.invalidateQueries({ queryKey: ['/api/tasks', id] });
+              queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/tasks/my-tasks-with-priorities'] });
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>
