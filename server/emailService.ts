@@ -112,7 +112,21 @@ class EmailService {
     }
 
     const subject = 'Invitation to join ClientHub CRM';
-    const inviteUrl = `${process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000'}/accept-invitation?code=${invitation.invitationCode}`;
+    
+    // Generate invitation URL with production domain preference
+    const domains = process.env.REPLIT_DOMAINS?.split(',') || [];
+    let baseUrl = 'localhost:5000';
+    
+    if (domains.length > 0) {
+      // Use the first domain (usually deployed) and ensure HTTPS
+      baseUrl = domains[0];
+      if (!baseUrl.startsWith('http')) {
+        baseUrl = `https://${baseUrl}`;
+      }
+    }
+    
+    const inviteUrl = `${baseUrl}/accept-invitation?code=${invitation.invitationCode}`;
+    console.log(`🔗 Generated invitation URL: ${inviteUrl}`);
     
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
