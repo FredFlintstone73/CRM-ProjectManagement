@@ -210,8 +210,11 @@ export default function TaskForm({ task, projectId, onSuccess }: TaskFormProps) 
       isEditing: !!task,
       taskId: task?.id,
       selectedAssignees,
+      selectedAssigneesLength: selectedAssignees.length,
       assignedToIds,
-      originalAssignedTo: task?.assignedTo
+      assignedToIdsLength: assignedToIds.length,
+      originalAssignedTo: task?.assignedTo,
+      finalAssignedTo: selectedAssignees.length === 0 && task ? task.assignedTo : assignedToIds
     });
 
     const processedData = {
