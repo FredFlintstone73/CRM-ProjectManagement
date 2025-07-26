@@ -459,7 +459,7 @@ export default function CalendarPage() {
               <span>Calendar Events Preview</span>
             </CardTitle>
             <CardDescription>
-              These are the project due dates and task deadlines that would be synced to your calendar
+              These are your assigned tasks and project meetings that would be synced to your calendar
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -489,7 +489,24 @@ function CalendarEventsPreview() {
     icon: '📋'
   }));
 
-  const taskEvents = tasks.filter(t => t.dueDate).map(task => ({
+  // Get current user's contact ID to filter tasks
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/user"],
+  });
+
+  const { data: userContactId } = useQuery({
+    queryKey: ["/api/auth/contact-id"],
+    enabled: !!user?.id,
+  });
+
+  // Filter tasks to only show those assigned to current user
+  const userTasks = tasks.filter(task => {
+    if (!task.dueDate) return false;
+    if (!task.assignedTo || !userContactId) return false;
+    return task.assignedTo.includes(userContactId);
+  });
+
+  const taskEvents = userTasks.map(task => ({
     type: 'task' as const,
     title: `Task Due: ${task.title}`,
     date: task.dueDate,
@@ -507,7 +524,7 @@ function CalendarEventsPreview() {
         <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">No Events to Sync</h3>
         <p className="text-muted-foreground">
-          No projects or tasks with due dates found. Add due dates to see calendar events here.
+          No projects or tasks assigned to you with due dates found. Tasks must be assigned to you to appear in your calendar.
         </p>
       </div>
     );
@@ -516,8 +533,12 @@ function CalendarEventsPreview() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Next {allEvents.length} upcoming events</span>
+        <span>Next {allEvents.length} upcoming events (assigned to you)</span>
         <span>{projectEvents.length} projects, {taskEvents.length} tasks</span>
+      </div>
+      <div className="text-xs text-muted-foreground mb-2">
+        • Project meetings: 9:00 AM - 10:00 AM<br />
+        • Task deadlines: 5:00 PM - 5:30 PM
       </div>
       <div className="space-y-2">
         {allEvents.map((event, index) => (

@@ -2908,30 +2908,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Calendar connection not found" });
       }
 
-      // Get all projects with due dates for this user
+      // Get current user's contact ID for task filtering
+      const userContactId = await storage.getUserContactId(userId);
+
+      // Get all projects with due dates (projects are shared but calendar sync is per user)
       const projects = await storage.getProjects();
       const projectsWithDates = projects.filter(p => p.dueDate);
 
-      // Get all tasks with due dates for this user
-      const tasks = await storage.getTasks();
-      const tasksWithDates = tasks.filter(t => t.dueDate);
+      // Get only tasks assigned to this user with due dates
+      const allTasks = await storage.getTasks();
+      const userTasks = allTasks.filter(task => {
+        if (!task.dueDate) return false;
+        
+        // Check if task is assigned to this user
+        if (task.assignedTo && task.assignedTo.length > 0) {
+          return task.assignedTo.includes(userContactId);
+        }
+        
+        // If no specific assignment, don't include in personal calendar
+        return false;
+      });
 
-      // Create calendar events data
+      // Create calendar events data with proper timing
       const calendarEvents = [
-        ...projectsWithDates.map(project => ({
-          title: `Project Due: ${project.name}`,
-          description: `Project meeting for ${project.name}`,
-          start: project.dueDate,
-          end: project.dueDate,
-          allDay: true
-        })),
-        ...tasksWithDates.map(task => ({
-          title: `Task Due: ${task.title}`,
-          description: task.description || `Task deadline for ${task.title}`,
-          start: task.dueDate,
-          end: task.dueDate,
-          allDay: false
-        }))
+        ...projectsWithDates.map(project => {
+          const projectDate = new Date(project.dueDate);
+          // Project meetings at 9:00 AM
+          projectDate.setHours(9, 0, 0, 0);
+          const endDate = new Date(projectDate);
+          endDate.setHours(10, 0, 0, 0); // 1 hour meeting
+          
+          return {
+            title: `Project Meeting: ${project.name}`,
+            description: `Progress meeting for ${project.name} project`,
+            start: projectDate.toISOString(),
+            end: endDate.toISOString(),
+            allDay: false
+          };
+        }),
+        ...userTasks.map(task => {
+          const taskDate = new Date(task.dueDate);
+          // Task deadlines at 5:00 PM (end of business day)
+          taskDate.setHours(17, 0, 0, 0);
+          const endDate = new Date(taskDate);
+          endDate.setHours(17, 30, 0, 0); // 30 minute reminder
+          
+          return {
+            title: `Task Due: ${task.title}`,
+            description: task.description || `Deadline for ${task.title}`,
+            start: taskDate.toISOString(),
+            end: endDate.toISOString(),
+            allDay: false
+          };
+        })
       ];
 
       let syncResult;
@@ -2966,10 +2995,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: syncResult?.success ? "Calendar sync completed successfully" : "Calendar sync completed (preview mode)",
         eventsCount: calendarEvents.length,
         projectEvents: projectsWithDates.length,
-        taskEvents: tasksWithDates.length,
+        taskEvents: userTasks.length,
         events: calendarEvents.slice(0, 10), // Return first 10 events as preview
         realSync: syncResult?.success || false,
-        syncResults: syncResult?.results || []
+        syncResults: syncResult?.results || [],
+        userSpecific: true, // Indicate this sync is user-specific
+        taskFilter: "assigned_to_user" // Show which tasks are included
       });
     } catch (error) {
       console.error("Error syncing calendar:", error);
