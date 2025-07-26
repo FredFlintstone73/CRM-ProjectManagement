@@ -31,16 +31,20 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  // Generate session secret if not provided (for deployment compatibility)
+  const sessionSecret = process.env.SESSION_SECRET || `fallback-secret-${process.env.REPL_ID || 'development'}`;
+  
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: sessionSecret,
     store: sessionStore,
     resave: true, // Update session on each request to track activity
     saveUninitialized: false,
     rolling: true, // Reset expiration on activity
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production', // Only secure in production
       maxAge: sessionTtl,
+      sameSite: 'lax', // Better compatibility across environments
     },
   });
 }
@@ -131,7 +135,14 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user || !user.expires_at) {
+    console.log('Authentication failed:', {
+      isAuthenticated: req.isAuthenticated(),
+      hasUser: !!user,
+      hasExpiresAt: user?.expires_at,
+      sessionId: req.sessionID,
+      hostname: req.hostname
+    });
     return res.status(401).json({ message: "Unauthorized" });
   }
 
