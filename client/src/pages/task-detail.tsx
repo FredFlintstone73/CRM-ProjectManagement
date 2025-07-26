@@ -471,11 +471,6 @@ export default function TaskDetail() {
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             )}
-            
-            {/* Debug info - remove after testing */}
-            <div className="text-xs text-gray-500">
-              Nav: {previousTask ? 'Prev' : 'No Prev'} | {nextTask ? 'Next' : 'No Next'}
-            </div>
           </div>
         </div>
         
