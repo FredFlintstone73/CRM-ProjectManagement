@@ -537,7 +537,7 @@ function CalendarEventsPreview() {
         <span>{projectEvents.length} projects, {taskEvents.length} tasks</span>
       </div>
       <div className="text-xs text-muted-foreground mb-2">
-        • Project meetings: 9:00 AM - 10:00 AM<br />
+        • Project meetings: 7:00 AM - 8:00 AM<br />
         • Task deadlines: 5:00 PM - 5:30 PM
       </div>
       <div className="space-y-2">

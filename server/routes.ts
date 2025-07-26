@@ -2933,10 +2933,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const calendarEvents = [
         ...projectsWithDates.map(project => {
           const projectDate = new Date(project.dueDate);
-          // Project meetings at 9:00 AM
-          projectDate.setHours(9, 0, 0, 0);
+          // Project meetings at 7:00 AM
+          projectDate.setHours(7, 0, 0, 0);
           const endDate = new Date(projectDate);
-          endDate.setHours(10, 0, 0, 0); // 1 hour meeting
+          endDate.setHours(8, 0, 0, 0); // 1 hour meeting
           
           return {
             title: `Project Meeting: ${project.name}`,

@@ -145,7 +145,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **OAuth Authentication System**: Implemented complete OAuth flow for Google Calendar and Microsoft Outlook integration with secure token management
 - **Real Calendar Sync**: Created calendarService and oauthService modules for actual calendar event creation (not just preview)
 - **User-Specific Task Filtering**: Calendar sync now only includes tasks assigned to the current user - each user sees only their own tasks
-- **Smart Event Scheduling**: Project meetings scheduled at 9:00 AM (1 hour), task deadlines at 5:00 PM (30 min reminder)
+- **Smart Event Scheduling**: Project meetings scheduled at 7:00 AM (1 hour), task deadlines at 5:00 PM (30 min reminder)
 - **Comprehensive OAuth Setup**: Added OAuth routes, callback handling, and credential storage for external calendar providers
 - **Calendar Provider Support**: Google Calendar and Microsoft Outlook with real OAuth, Apple Calendar and Other with manual setup
 - **Enhanced Privacy**: Each user's calendar sync is completely private - only shows their assigned tasks and shared project meetings
