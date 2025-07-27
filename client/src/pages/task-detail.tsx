@@ -299,22 +299,28 @@ export default function TaskDetail() {
       
       const firstChild = sortedChildren[0];
       
+      // For parent tasks, still need to find previous task in hierarchical sequence
+      const hierarchicalTasks = buildHierarchicalTasks();
+      const currentIndex = hierarchicalTasks.findIndex(t => t.id === task.id);
+      const prev = currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null;
+      
       return {
-        previousTask: null, // For now, focus on next task
+        previousTask: prev, // Previous task in sequence
         nextTask: firstChild // First child
       };
     }
     
-    // If no children, use hierarchical sequence as before
+    // If no children, use hierarchical sequence for both previous and next
     const hierarchicalTasks = buildHierarchicalTasks();
     const currentIndex = hierarchicalTasks.findIndex(t => t.id === task.id);
     
+    const prev = currentIndex > 0 ? hierarchicalTasks[currentIndex - 1] : null;
     const next = currentIndex >= 0 && currentIndex < hierarchicalTasks.length - 1 
       ? hierarchicalTasks[currentIndex + 1] 
       : null;
     
     return {
-      previousTask: null,
+      previousTask: prev,
       nextTask: next
     };
   };
