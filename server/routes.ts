@@ -2396,37 +2396,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Trim and normalize the invitation code
       const code = req.params.code.trim();
-      console.log('🔍 Looking up invitation code:', code, 'Length:', code.length);
+      console.log('🔍 INVITATION LOOKUP - Code:', code, 'Length:', code.length, 'Environment:', process.env.NODE_ENV);
+      console.log('🔍 DATABASE_URL exists:', !!process.env.DATABASE_URL);
       
       const invitation = await storage.getUserInvitation(code);
       console.log('🎯 Invitation found:', invitation ? 'Yes' : 'No');
       
       if (!invitation) {
         console.log('❌ Invitation not found in database');
-        console.log('💡 Available invitation codes in database:');
+        console.log('💡 DEBUG: Checking all available invitation codes in database:');
         
         // Debug: Show available codes for troubleshooting
         try {
           const allInvitations = await storage.getAllPendingInvitations?.() || [];
           console.log(`💡 Found ${allInvitations.length} total pending invitations in database:`);
           allInvitations.forEach(inv => {
-            console.log(`   - Code: ${inv.invitationCode} | Email: ${inv.email} | Status: ${inv.status}`);
+            console.log(`   - Code: ${inv.invitationCode} | Email: ${inv.email} | Status: ${inv.status} | Created: ${inv.createdAt}`);
           });
           
           // Also check if any invitations exist at all
           const allInvitationsAnyStatus = await storage.getUserInvitations();
           console.log(`📊 Total invitations in database (any status): ${allInvitationsAnyStatus.length}`);
+          
+          // Database connection test
+          console.log('🔧 Database connection test - attempting to count all invitations...');
+          
         } catch (debugError) {
-          console.log('Could not fetch debug invitation list:', debugError);
+          console.log('❌ Could not fetch debug invitation list:', debugError);
         }
         
         return res.status(404).json({ 
           message: "Invitation not found",
-          details: "The invitation code does not exist in our system. Please check the code and try again.",
+          details: "The invitation code does not exist in our system. This may be a database environment issue.",
           debugInfo: {
             submittedCode: code,
             codeLength: code.length,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV,
+            databaseConfigured: !!process.env.DATABASE_URL
           }
         });
       }
