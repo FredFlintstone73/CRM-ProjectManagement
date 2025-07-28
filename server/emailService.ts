@@ -105,6 +105,36 @@ class EmailService {
     }
   }
 
+  // Create a temporary transporter for a specific user's email
+  private createUserTransporter(userEmail: string, userPassword?: string) {
+    // For Gmail addresses, use Gmail SMTP with app password
+    if (userEmail.includes('@gmail.com')) {
+      return nodemailer.createTransporter({
+        service: 'gmail',
+        auth: {
+          user: userEmail,
+          pass: process.env.GMAIL_APP_PASSWORD, // Use the configured Gmail app password
+        },
+      });
+    }
+    
+    // For Outlook/Microsoft addresses, use Outlook SMTP
+    if (userEmail.includes('@alignedadvisors.com') || userEmail.includes('@outlook.com') || userEmail.includes('@hotmail.com')) {
+      return nodemailer.createTransporter({
+        host: 'smtp-mail.outlook.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: userEmail,
+          pass: userPassword || process.env.OUTLOOK_PASSWORD,
+        },
+      });
+    }
+
+    // Fallback to default transporter
+    return this.transporter;
+  }
+
   async sendInvitationEmail(invitation: {
     email: string;
     firstName: string;
@@ -114,14 +144,8 @@ class EmailService {
     invitedBy: string;
     senderEmail?: string;
     senderName?: string;
+    senderPassword?: string;
   }): Promise<{ sent: boolean; message: string }> {
-    if (!this.isConfigured) {
-      return {
-        sent: false,
-        message: 'Email service not configured. Invitation code available in interface.',
-      };
-    }
-
     const subject = 'Invitation to join ClientHub CRM';
     
     // Generate invitation URL with production domain preference
@@ -180,22 +204,27 @@ class EmailService {
     `;
 
     try {
-      // CRITICAL: Use the logged-in user's email as sender - this takes priority over environment variables
-      let senderEmail = 'system@alignedadvisors.com';
-      if (invitation.senderEmail && invitation.senderEmail.trim()) {
-        senderEmail = invitation.senderEmail;
-        console.log(`✅ Using logged-in user's email as sender: ${senderEmail}`);
-      } else {
-        console.log(`⚠️ No sender email provided, falling back to environment variables`);
-        senderEmail = process.env.OUTLOOK_USER || process.env.GMAIL_USER || 'system@alignedadvisors.com';
-      }
-      
+      // Use the logged-in user's email and create their specific transporter 
+      const senderEmail = invitation.senderEmail || 'system@alignedadvisors.com';
       const senderName = invitation.senderName || 'Aligned Advisors Team';
       const fromAddress = `${senderName} <${senderEmail}>`;
       
+      console.log(`✅ Creating transporter for user's email: ${senderEmail}`);
       console.log(`📧 FINAL: Sending invitation from: ${fromAddress} to: ${invitation.email}`);
       
-      await this.transporter.sendMail({
+      // Create user-specific transporter or fallback to default
+      const userTransporter = invitation.senderEmail ? 
+        this.createUserTransporter(invitation.senderEmail, invitation.senderPassword) : 
+        this.transporter;
+      
+      if (!userTransporter) {
+        return {
+          sent: false,
+          message: 'Email service not configured. Invitation code available in interface.',
+        };
+      }
+      
+      await userTransporter.sendMail({
         from: fromAddress,
         to: invitation.email,
         subject,
