@@ -37,13 +37,7 @@ export default function InvitationRequests() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: 'approved' | 'rejected' }) => {
-      return apiRequest(`/api/invitation-requests/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      });
+      return apiRequest('PATCH', `/api/invitation-requests/${id}`, { status });
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/invitation-requests'] });
