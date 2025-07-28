@@ -1032,23 +1032,27 @@ export class DatabaseStorage implements IStorage {
     await db.delete(projectTemplates).where(eq(projectTemplates.id, id));
   }
 
-  // Dashboard methods
+  // Dashboard methods  
   async getProjectsDueSoon(days: number = 30): Promise<any[]> {
-    const today = new Date();
-    const futureDate = new Date();
-    futureDate.setDate(today.getDate() + days);
-    
-    return await db
-      .select()
-      .from(projects)
-      .where(
-        and(
-          isNotNull(projects.dueDate),
-          lte(projects.dueDate, futureDate),
-          gte(projects.dueDate, today)
+    try {
+      const today = new Date();
+      const futureDate = new Date();
+      futureDate.setDate(today.getDate() + days);
+      
+      return await db
+        .select()
+        .from(projects)
+        .where(
+          and(
+            isNotNull(projects.dueDate),
+            sql`${projects.dueDate} BETWEEN ${today.toISOString()} AND ${futureDate.toISOString()}`
+          )
         )
-      )
-      .orderBy(projects.dueDate);
+        .orderBy(projects.dueDate);
+    } catch (error) {
+      console.error('Error in getProjectsDueSoon:', error);
+      return [];
+    }
   }
 
   // Additional notification methods
@@ -1109,6 +1113,47 @@ export class DatabaseStorage implements IStorage {
       .update(mentions)
       .set({ isRead: true, updatedAt: new Date() })
       .where(eq(mentions.id, mentionId));
+  }
+
+  // Template task methods
+  async getTemplateTaskCount(templateId: number): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.templateId, templateId),
+          isNull(tasks.projectId)
+        )
+      );
+    
+    return result[0]?.count || 0;
+  }
+
+  async getTemplateTasks(templateId: number): Promise<any[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.templateId, templateId),
+          isNull(tasks.projectId)
+        )
+      )
+      .orderBy(tasks.sortOrder, tasks.createdAt);
+  }
+
+  async getTemplateMilestones(templateId: number): Promise<any[]> {
+    return await db
+      .select()
+      .from(milestones)
+      .where(
+        and(
+          eq(milestones.templateId, templateId),
+          isNull(milestones.projectId)
+        )
+      )
+      .orderBy(milestones.sortOrder, milestones.createdAt);
   }
 
   // Search methods
