@@ -81,12 +81,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Apply mandatory 2FA to all API routes except auth endpoints and invitation lookup
   app.use('/api', (req, res, next) => {
-    // Skip 2FA for auth endpoints and invitation lookup
+    // Skip 2FA for auth endpoints, invitation lookup, and invitation requests
     if (req.originalUrl.startsWith('/api/auth/') || 
         req.originalUrl.startsWith('/api/login') || 
         req.originalUrl.startsWith('/api/logout') || 
         req.originalUrl.startsWith('/api/callback') ||
-        req.originalUrl.match(/^\/api\/user-invitations\/[^\/]+$/)) {
+        req.originalUrl.match(/^\/api\/user-invitations\/[^\/]+$/) ||
+        req.originalUrl === '/api/invitation-requests') {
       return next();
     }
     // Apply authentication and 2FA to all other routes

@@ -141,6 +141,20 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Complete Self-Service Invitation Request System Implementation (July 28, 2025)
+- **Public Invitation Request Form**: Implemented complete self-service invitation request system allowing visitors to request access without authentication
+- **Database Schema**: Created invitation_requests table with fields for first_name, last_name, email, message, status, review tracking, and timestamps
+- **Backend API Integration**: Built public API endpoint `/api/invitation-requests` with proper middleware exemption from authentication requirements
+- **Frontend Form Implementation**: Enhanced landing page with professional invitation request form using React Hook Form with Zod validation
+- **Storage Layer Methods**: Added createInvitationRequest method to IStorage interface and DatabaseStorage implementation
+- **Request Status Management**: Implemented status field with pending/approved/rejected workflow for administrator review
+- **Public Access Configuration**: Fixed middleware configuration to allow unauthenticated access to invitation request endpoint
+- **Form Validation**: Complete client-side validation with error handling and user feedback through toast notifications
+- **Database Integration**: Successfully tested form submission with data persistence to PostgreSQL database
+- **Landing Page Enhancement**: Integrated request form into existing landing page with toggle functionality and professional styling
+- **User Experience**: Seamless workflow from landing page to form submission with immediate feedback and form reset on success
+- **Production Ready**: Complete invitation request system functional and ready for deployment with proper error handling and validation
+
 ### Invitation System Authentication Fix (July 28, 2025)
 - **Critical Authentication Barrier Resolved**: Fixed invitation code lookup endpoint that was incorrectly requiring authentication, creating a catch-22 where users couldn't verify codes before logging in
 - **Middleware Configuration**: Updated global authentication middleware to exclude invitation lookup endpoints using regex pattern matching
