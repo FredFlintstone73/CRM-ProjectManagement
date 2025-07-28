@@ -141,6 +141,13 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Invitation System Authentication Fix (July 28, 2025)
+- **Critical Authentication Barrier Resolved**: Fixed invitation code lookup endpoint that was incorrectly requiring authentication, creating a catch-22 where users couldn't verify codes before logging in
+- **Middleware Configuration**: Updated global authentication middleware to exclude invitation lookup endpoints using regex pattern matching
+- **Complete System Testing**: Verified invitation creation, lookup, expiration handling, and error responses work correctly
+- **Email Integration Confirmed**: Existing email invitation system automatically sends professional invitation emails when invitations are created
+- **Production Ready**: Complete invitation workflow now functional from creation through acceptance with proper email notifications
+
 ### Complete Dialpad API Integration for Automatic Call and Text Capture (July 28, 2025)
 - **Comprehensive Dialpad Service**: Created complete DialpadService class with webhook processing, contact matching, and transcript fetching capabilities
 - **Automatic Call Transcript Capture**: Implemented real-time capture of call transcripts with AI-generated moments (action items, sentiment, summaries) directly into contact interactions
