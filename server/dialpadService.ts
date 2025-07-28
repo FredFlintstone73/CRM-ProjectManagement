@@ -106,29 +106,38 @@ export class DialpadService {
   async findContactByPhoneNumber(phoneNumber: string): Promise<number | null> {
     // Clean phone number (remove formatting)
     const cleanNumber = phoneNumber.replace(/[^\d]/g, '');
+    console.log(`🔍 Searching for phone number: "${phoneNumber}" (cleaned: "${cleanNumber}")`);
     
     // Try to find contact by various phone fields
     const contacts = await this.storage.getContacts();
+    console.log(`📞 Checking ${contacts.length} contacts for phone match`);
     
     for (const contact of contacts) {
       const phoneFields = [
-        contact.cellPhone,
-        contact.workPhone,
-        contact.spouseCellPhone,
-        contact.spouseWorkPhone
+        { field: 'cellPhone', value: contact.cellPhone },
+        { field: 'workPhone', value: contact.workPhone },
+        { field: 'businessPhone', value: contact.businessPhone },
+        { field: 'spouseCellPhone', value: contact.spouseCellPhone },
+        { field: 'spouseWorkPhone', value: contact.spouseWorkPhone }
       ];
 
-      for (const phone of phoneFields) {
-        if (phone) {
-          const cleanContactPhone = phone.replace(/[^\d]/g, '');
+      console.log(`👤 Checking contact ID ${contact.id} (${contact.familyName})`);
+      
+      for (const phoneField of phoneFields) {
+        if (phoneField.value) {
+          const cleanContactPhone = phoneField.value.replace(/[^\d]/g, '');
+          console.log(`   📱 ${phoneField.field}: "${phoneField.value}" (cleaned: "${cleanContactPhone}")`);
+          
           // Match last 10 digits for US numbers
           if (cleanNumber.slice(-10) === cleanContactPhone.slice(-10)) {
+            console.log(`✅ MATCH FOUND! Contact ID ${contact.id} via ${phoneField.field}`);
             return contact.id;
           }
         }
       }
     }
 
+    console.log(`❌ No contact found for phone number: ${phoneNumber}`);
     return null;
   }
 
