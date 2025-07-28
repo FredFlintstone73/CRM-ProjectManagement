@@ -864,6 +864,94 @@ export class DatabaseStorage implements IStorage {
     await db.delete(projects).where(eq(projects.id, id));
   }
 
+  // Two-factor authentication methods
+  async isTwoFactorEnabled(userId: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    return user?.twoFactorEnabled === true;
+  }
+
+  async getTwoFactorSecret(userId: string): Promise<string | null> {
+    const user = await this.getUser(userId);
+    return user?.twoFactorSecret || null;
+  }
+
+  async setTwoFactorSecret(userId: string, secret: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        twoFactorSecret: secret,
+        twoFactorEnabled: true,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async disableTwoFactor(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        twoFactorSecret: null,
+        twoFactorEnabled: false,
+        backupCodes: [],
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getBackupCodes(userId: string): Promise<string[]> {
+    const user = await this.getUser(userId);
+    return user?.backupCodes || [];
+  }
+
+  async setBackupCodes(userId: string, codes: string[]): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        backupCodes: codes,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async useBackupCode(userId: string, code: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user?.backupCodes?.includes(code)) {
+      return false;
+    }
+
+    // Remove the used backup code
+    const remainingCodes = user.backupCodes.filter(c => c !== code);
+    await this.setBackupCodes(userId, remainingCodes);
+    return true;
+  }
+
+  // User activity logging
+  async createUserActivity(data: {
+    userId: string;
+    action: string;
+    entityType?: string;
+    entityId?: string;
+    metadata?: any;
+  }): Promise<void> {
+    await db.insert(userActivities).values({
+      userId: data.userId,
+      action: data.action,
+      entityType: data.entityType,
+      entityId: data.entityId,
+      metadata: data.metadata,
+      createdAt: new Date()
+    });
+  }
+
+  async getUserActivities(userId: string, limit: number = 50): Promise<any[]> {
+    return await db
+      .select()
+      .from(userActivities)
+      .where(eq(userActivities.userId, userId))
+      .orderBy(desc(userActivities.createdAt))
+      .limit(limit);
+  }
+
   // Search methods
   async searchContacts(query: string): Promise<Contact[]> {
     if (!query.trim()) return [];
