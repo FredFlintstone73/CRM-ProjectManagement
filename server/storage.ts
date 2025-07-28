@@ -1034,16 +1034,18 @@ export class DatabaseStorage implements IStorage {
 
   // Dashboard methods
   async getProjectsDueSoon(days: number = 30): Promise<any[]> {
+    const today = new Date();
     const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + days);
+    futureDate.setDate(today.getDate() + days);
     
     return await db
       .select()
       .from(projects)
       .where(
         and(
+          isNotNull(projects.dueDate),
           lte(projects.dueDate, futureDate),
-          gte(projects.dueDate, new Date())
+          gte(projects.dueDate, today)
         )
       )
       .orderBy(projects.dueDate);
@@ -1059,6 +1061,7 @@ export class DatabaseStorage implements IStorage {
       .from(tasks)
       .where(
         and(
+          isNotNull(tasks.dueDate),
           lt(tasks.dueDate, today),
           eq(tasks.completed, false),
           sql`${tasks.assignedTo} @> ARRAY[${userId}]::text[]`
@@ -1077,6 +1080,7 @@ export class DatabaseStorage implements IStorage {
       .from(tasks)
       .where(
         and(
+          isNotNull(tasks.dueDate),
           gte(tasks.dueDate, today),
           lte(tasks.dueDate, futureDate),
           eq(tasks.completed, false),
