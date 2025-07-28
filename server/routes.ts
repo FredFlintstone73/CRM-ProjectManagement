@@ -78,14 +78,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Activity logging middleware for authenticated routes
   app.use('/api', logUserActivity);
 
-  // Apply mandatory 2FA to all API routes except auth endpoints and invitation validation
+  // Apply mandatory 2FA to all API routes except auth endpoints
   app.use('/api', (req, res, next) => {
-    // Skip 2FA for auth endpoints and invitation validation
+    // Skip 2FA for auth endpoints
     if (req.originalUrl.startsWith('/api/auth/') || 
         req.originalUrl.startsWith('/api/login') || 
         req.originalUrl.startsWith('/api/logout') || 
-        req.originalUrl.startsWith('/api/callback') ||
-        req.originalUrl.match(/^\/api\/user-invitations\/[^/]+$/)) {
+        req.originalUrl.startsWith('/api/callback')) {
       return next();
     }
     // Apply authentication and 2FA to all other routes
@@ -2326,23 +2325,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invitedBy: userId,
       });
       
-      // Get current user's email to use as sender
-      const currentUser = await storage.getUser(userId);
-      const senderEmail = currentUser?.email || 'system@alignedadvisors.com';
-      
-      console.log(`🔍 INVITATION DEBUG - User ID: ${userId}`);
-      console.log(`🔍 Current User:`, currentUser ? {
-        id: currentUser.id,
-        email: currentUser.email,
-        firstName: currentUser.firstName,
-        lastName: currentUser.lastName
-      } : 'null');
-      console.log(`🔍 Sender Email to be used: ${senderEmail}`);
-      console.log(`🔍 Environment Variables:`, {
-        OUTLOOK_USER: process.env.OUTLOOK_USER ? 'configured' : 'not set',
-        GMAIL_USER: process.env.GMAIL_USER ? 'configured' : 'not set'
-      });
-      
       // Try to send email invitation
       const emailResult = await emailService.sendInvitationEmail({
         email: invitation.email,
@@ -2351,8 +2333,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invitationCode: invitation.invitationCode,
         accessLevel: invitation.accessLevel,
         invitedBy: userId,
-        senderEmail: senderEmail,
-        senderName: currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Aligned Advisors Team',
       });
 
       res.json({
@@ -2412,50 +2392,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public endpoint for invitation validation (no authentication required)
   app.get('/api/user-invitations/:code', async (req: any, res) => {
     try {
       // Trim and normalize the invitation code
       const code = req.params.code.trim();
-      console.log('🔍 INVITATION LOOKUP - Code:', code, 'Length:', code.length, 'Environment:', process.env.NODE_ENV);
-      console.log('🔍 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+      console.log('Looking up invitation code:', code, 'Length:', code.length);
       
       const invitation = await storage.getUserInvitation(code);
-      console.log('🎯 Invitation found:', invitation ? 'Yes' : 'No');
+      console.log('Invitation found:', invitation ? 'Yes' : 'No');
       
       if (!invitation) {
-        console.log('❌ Invitation not found in database');
-        console.log('💡 DEBUG: Checking all available invitation codes in database:');
-        
-        // Debug: Show available codes for troubleshooting
-        try {
-          const allInvitations = await storage.getAllPendingInvitations?.() || [];
-          console.log(`💡 Found ${allInvitations.length} total pending invitations in database:`);
-          allInvitations.forEach(inv => {
-            console.log(`   - Code: ${inv.invitationCode} | Email: ${inv.email} | Status: ${inv.status} | Created: ${inv.createdAt}`);
-          });
-          
-          // Also check if any invitations exist at all
-          const allInvitationsAnyStatus = await storage.getUserInvitations();
-          console.log(`📊 Total invitations in database (any status): ${allInvitationsAnyStatus.length}`);
-          
-          // Database connection test
-          console.log('🔧 Database connection test - attempting to count all invitations...');
-          
-        } catch (debugError) {
-          console.log('❌ Could not fetch debug invitation list:', debugError);
-        }
-        
+        console.log('Invitation not found in database');
         return res.status(404).json({ 
           message: "Invitation not found",
-          details: "The invitation code does not exist in our system. This may be a database environment issue.",
-          debugInfo: {
-            submittedCode: code,
-            codeLength: code.length,
-            timestamp: new Date().toISOString(),
-            environment: process.env.NODE_ENV,
-            databaseConfigured: !!process.env.DATABASE_URL
-          }
+          details: "The invitation code does not exist in our system. Please check the code and try again."
         });
       }
       

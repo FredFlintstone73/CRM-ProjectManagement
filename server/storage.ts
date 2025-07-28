@@ -79,7 +79,6 @@ export interface IStorage {
   getUserInvitations(invitedBy?: string): Promise<UserInvitation[]>;
   acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation>;
   expireInvitation(invitationCode: string): Promise<void>;
-  getAllPendingInvitations(): Promise<UserInvitation[]>;
   deleteUserInvitation(invitationId: number, userId: string): Promise<boolean>;
   
   // User access control operations  
@@ -265,52 +264,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    try {
-      // First try to find existing user by ID
-      const existingUser = await this.getUser(userData.id);
-      
-      if (existingUser) {
-        // Update existing user
-        const [updatedUser] = await db
-          .update(users)
-          .set({
-            ...userData,
-            updatedAt: new Date(),
-          })
-          .where(eq(users.id, userData.id))
-          .returning();
-        return updatedUser;
-      } else {
-        // Check if email exists with different ID
-        const [emailConflict] = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, userData.email!));
-          
-        if (emailConflict) {
-          // Update the existing user with new ID and data
-          const [updatedUser] = await db
-            .update(users)
-            .set({
-              ...userData,
-              updatedAt: new Date(),
-            })
-            .where(eq(users.email, userData.email!))
-            .returning();
-          return updatedUser;
-        } else {
-          // Create new user
-          const [newUser] = await db
-            .insert(users)
-            .values(userData)
-            .returning();
-          return newUser;
-        }
-      }
-    } catch (error) {
-      console.error('🚨 Database error in upsertUser:', error);
-      throw error;
-    }
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 
   async ensureUserHasContact(user: User): Promise<Contact> {
@@ -440,14 +405,6 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(userInvitations.invitationCode, invitationCode));
-  }
-
-  async getAllPendingInvitations(): Promise<UserInvitation[]> {
-    return await db
-      .select()
-      .from(userInvitations)
-      .where(eq(userInvitations.status, 'pending'))
-      .orderBy(desc(userInvitations.createdAt));
   }
 
   // User access control operations

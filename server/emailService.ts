@@ -52,19 +52,8 @@ class EmailService {
 
     let config: EmailConfig | null = null;
 
-    // Priority: Try Gmail first (more reliable), fallback to Outlook
-    if (gmailUser && gmailPass) {
-      // Gmail configuration (most reliable for SMTP)
-      config = {
-        service: 'gmail',
-        auth: {
-          user: gmailUser,
-          pass: gmailPass, // App-specific password
-        },
-      };
-      console.log(`🔄 Using Gmail SMTP for reliable delivery, but emails will show correct sender address`);
-    } else if (outlookUser && outlookPass) {
-      // Microsoft Outlook/365 configuration (fallback)
+    if (outlookUser && outlookPass) {
+      // Microsoft Outlook/365 configuration
       config = {
         host: 'smtp-mail.outlook.com',
         port: 587,
@@ -73,13 +62,15 @@ class EmailService {
           user: outlookUser,
           pass: outlookPass,
         },
-        // Add additional options for Microsoft 365 compatibility
-        tls: {
-          ciphers: 'SSLv3',
-          rejectUnauthorized: false
+      };
+    } else if (gmailUser && gmailPass) {
+      // Gmail configuration
+      config = {
+        service: 'gmail',
+        auth: {
+          user: gmailUser,
+          pass: gmailPass, // App-specific password
         },
-        requireTLS: true,
-        authMethod: 'LOGIN'
       };
     } else if (smtpHost && smtpUser && smtpPass) {
       config = {
@@ -96,43 +87,13 @@ class EmailService {
     if (config) {
       this.transporter = nodemailer.createTransport(config);
       this.isConfigured = true;
-      const serviceType = config.service === 'gmail' ? 'gmail-smtp' : (outlookUser ? 'outlook' : `${config.host}:${config.port}`);
-      const emailUser = gmailUser || outlookUser || smtpUser;
-      console.log(`Email service configured successfully (${serviceType}) for SMTP, sender will be user's actual email`);
+      const serviceType = outlookUser ? 'outlook' : (config.service || `${config.host}:${config.port}`);
+      const emailUser = outlookUser || gmailUser || smtpUser;
+      console.log(`Email service configured successfully (${serviceType}) for ${emailUser}`);
     } else {
       console.log('No email configuration found - invitations will show codes only');
       this.isConfigured = false;
     }
-  }
-
-  // Create a temporary transporter for a specific user's email
-  private createUserTransporter(userEmail: string, userPassword?: string) {
-    // For Gmail addresses, use Gmail SMTP with app password
-    if (userEmail.includes('@gmail.com')) {
-      return nodemailer.createTransporter({
-        service: 'gmail',
-        auth: {
-          user: userEmail,
-          pass: process.env.GMAIL_APP_PASSWORD, // Use the configured Gmail app password
-        },
-      });
-    }
-    
-    // For Outlook/Microsoft addresses, use Outlook SMTP
-    if (userEmail.includes('@alignedadvisors.com') || userEmail.includes('@outlook.com') || userEmail.includes('@hotmail.com')) {
-      return nodemailer.createTransporter({
-        host: 'smtp-mail.outlook.com',
-        port: 587,
-        secure: false,
-        auth: {
-          user: userEmail,
-          pass: userPassword || process.env.OUTLOOK_PASSWORD,
-        },
-      });
-    }
-
-    // Fallback to default transporter
-    return this.transporter;
   }
 
   async sendInvitationEmail(invitation: {
@@ -142,10 +103,14 @@ class EmailService {
     invitationCode: string;
     accessLevel: string;
     invitedBy: string;
-    senderEmail?: string;
-    senderName?: string;
-    senderPassword?: string;
   }): Promise<{ sent: boolean; message: string }> {
+    if (!this.isConfigured) {
+      return {
+        sent: false,
+        message: 'Email service not configured. Invitation code available in interface.',
+      };
+    }
+
     const subject = 'Invitation to join ClientHub CRM';
     
     // Generate invitation URL with production domain preference
@@ -204,28 +169,8 @@ class EmailService {
     `;
 
     try {
-      // Use the logged-in user's email and create their specific transporter 
-      const senderEmail = invitation.senderEmail || 'system@alignedadvisors.com';
-      const senderName = invitation.senderName || 'Aligned Advisors Team';
-      const fromAddress = `${senderName} <${senderEmail}>`;
-      
-      console.log(`✅ Creating transporter for user's email: ${senderEmail}`);
-      console.log(`📧 FINAL: Sending invitation from: ${fromAddress} to: ${invitation.email}`);
-      
-      // Create user-specific transporter or fallback to default
-      const userTransporter = invitation.senderEmail ? 
-        this.createUserTransporter(invitation.senderEmail, invitation.senderPassword) : 
-        this.transporter;
-      
-      if (!userTransporter) {
-        return {
-          sent: false,
-          message: 'Email service not configured. Invitation code available in interface.',
-        };
-      }
-      
-      await userTransporter.sendMail({
-        from: fromAddress,
+      await this.transporter.sendMail({
+        from: process.env.SMTP_FROM || process.env.OUTLOOK_USER || process.env.GMAIL_USER,
         to: invitation.email,
         subject,
         html,
@@ -234,7 +179,7 @@ class EmailService {
 
       return {
         sent: true,
-        message: `Invitation email sent successfully from ${senderEmail} to ${invitation.email}`,
+        message: 'Invitation email sent successfully',
       };
     } catch (error) {
       console.error('Failed to send email:', error);

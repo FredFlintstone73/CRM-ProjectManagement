@@ -24,40 +24,28 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 90 * 60 * 1000; // 90 minutes max session time
-  
-  // Generate robust session secret for deployment
-  const sessionSecret = process.env.SESSION_SECRET || 
-    process.env.REPL_ID || 
-    'development-fallback-secret-key';
-  
-  console.log('🔐 Session configuration:', {
-    hasSecret: !!sessionSecret,
-    hasDatabaseUrl: !!process.env.DATABASE_URL,
-    nodeEnv: process.env.NODE_ENV,
-    replId: process.env.REPL_ID?.slice(0, 8) + '...'
-  });
-
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
     createTableIfMissing: false,
-    ttl: Math.floor(sessionTtl / 1000), // Convert to seconds for PostgreSQL
+    ttl: sessionTtl,
     tableName: "sessions",
   });
+  // Generate session secret if not provided (for deployment compatibility)
+  const sessionSecret = process.env.SESSION_SECRET || `fallback-secret-${process.env.REPL_ID || 'development'}`;
   
   return session({
     secret: sessionSecret,
     store: sessionStore,
-    resave: false, // Don't save session if unmodified
-    saveUninitialized: false, // Don't create session until something stored
+    resave: true, // Update session on each request to track activity
+    saveUninitialized: false,
     rolling: true, // Reset expiration on activity
     cookie: {
       httpOnly: true,
-      secure: false, // Disable secure for deployment compatibility
+      secure: process.env.NODE_ENV === 'production', // Only secure in production
       maxAge: sessionTtl,
-      sameSite: 'lax',
+      sameSite: 'lax', // Better compatibility across environments
     },
-    name: 'connect.sid', // Standard session cookie name
   });
 }
 
@@ -74,79 +62,49 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  try {
-    console.log('🔄 Upserting user with claims:', {
-      id: claims["sub"],
-      email: claims["email"],
-      firstName: claims["first_name"],
-      lastName: claims["last_name"]
-    });
-    
-    await storage.upsertUser({
-      id: claims["sub"],
-      email: claims["email"],
-      firstName: claims["first_name"],
-      lastName: claims["last_name"],
-      profileImageUrl: claims["profile_image_url"],
-    });
-    
-    console.log('✅ User upserted successfully');
-  } catch (error) {
-    console.error('🚨 Failed to upsert user:', error);
-    console.error('🚨 Claims received:', claims);
-    throw error;
-  }
+  await storage.upsertUser({
+    id: claims["sub"],
+    email: claims["email"],
+    firstName: claims["first_name"],
+    lastName: claims["last_name"],
+    profileImageUrl: claims["profile_image_url"],
+  });
 }
 
 export async function setupAuth(app: Express) {
-  try {
-    console.log('🔧 Setting up authentication...');
-    app.set("trust proxy", 1);
-    app.use(getSession());
-    app.use(passport.initialize());
-    app.use(passport.session());
+  app.set("trust proxy", 1);
+  app.use(getSession());
+  app.use(passport.initialize());
+  app.use(passport.session());
 
-    console.log('🔍 Getting OIDC configuration...');
-    const config = await getOidcConfig();
-    console.log('✅ OIDC configuration loaded successfully');
+  const config = await getOidcConfig();
 
-    const verify: VerifyFunction = async (
-      tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-      verified: passport.AuthenticateCallback
-    ) => {
-      try {
-        const user = {};
-        updateUserSession(user, tokens);
-        await upsertUser(tokens.claims());
-        verified(null, user);
-      } catch (error) {
-        console.error('🚨 Error in auth verify function:', error);
-        verified(error, null);
-      }
-    };
+  const verify: VerifyFunction = async (
+    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
+    verified: passport.AuthenticateCallback
+  ) => {
+    const user = {};
+    updateUserSession(user, tokens);
+    await upsertUser(tokens.claims());
+    verified(null, user);
+  };
 
-    console.log('🌐 Setting up strategies for domains:', process.env.REPLIT_DOMAINS);
-    for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
-      const strategy = new Strategy(
-        {
-          name: `replitauth:${domain}`,
-          config,
-          scope: "openid email profile offline_access",
-          callbackURL: `https://${domain}/api/callback`,
-        },
-        verify,
-      );
-      passport.use(strategy);
-      console.log(`✅ Strategy configured for domain: ${domain}`);
-    }
-
-    passport.serializeUser((user: Express.User, cb) => cb(null, user));
-    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
-    console.log('✅ Passport serialization configured');
-  } catch (error) {
-    console.error('🚨 CRITICAL: Authentication setup failed:', error);
-    throw error;
+  for (const domain of process.env
+    .REPLIT_DOMAINS!.split(",")) {
+    const strategy = new Strategy(
+      {
+        name: `replitauth:${domain}`,
+        config,
+        scope: "openid email profile offline_access",
+        callbackURL: `https://${domain}/api/callback`,
+      },
+      verify,
+    );
+    passport.use(strategy);
   }
+
+  passport.serializeUser((user: Express.User, cb) => cb(null, user));
+  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, {
@@ -156,48 +114,10 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    try {
-      console.log('🔄 Callback route hit, hostname:', req.hostname);
-      console.log('🔄 Callback query params:', req.query);
-      
-      passport.authenticate(`replitauth:${req.hostname}`, (err, user, info) => {
-        if (err) {
-          console.error('🚨 Passport authentication error:', err);
-          console.error('🚨 Error stack:', err.stack);
-          return res.status(500).json({ 
-            message: "Authentication callback failed", 
-            error: err.message 
-          });
-        }
-        
-        if (!user) {
-          console.error('🚨 Authentication failed - no user returned');
-          console.error('🚨 Info:', info);
-          return res.redirect("/api/login");
-        }
-        
-        req.logIn(user, (loginErr) => {
-          if (loginErr) {
-            console.error('🚨 Login error:', loginErr);
-            console.error('🚨 Login error stack:', loginErr.stack);
-            return res.status(500).json({ 
-              message: "Login failed", 
-              error: loginErr.message 
-            });
-          }
-          
-          console.log('✅ User logged in successfully:', user.claims?.email);
-          res.redirect("/");
-        });
-      })(req, res, next);
-    } catch (error) {
-      console.error('🚨 Callback route error:', error);
-      console.error('🚨 Callback error stack:', error.stack);
-      res.status(500).json({ 
-        message: "Callback route failed", 
-        error: error.message 
-      });
-    }
+    passport.authenticate(`replitauth:${req.hostname}`, {
+      successReturnToOrRedirect: "/",
+      failureRedirect: "/api/login",
+    })(req, res, next);
   });
 
   app.get("/api/logout", (req, res) => {
