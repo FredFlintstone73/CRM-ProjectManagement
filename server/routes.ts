@@ -2396,16 +2396,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Trim and normalize the invitation code
       const code = req.params.code.trim();
-      console.log('Looking up invitation code:', code, 'Length:', code.length);
+      console.log('🔍 Looking up invitation code:', code, 'Length:', code.length);
       
       const invitation = await storage.getUserInvitation(code);
-      console.log('Invitation found:', invitation ? 'Yes' : 'No');
+      console.log('🎯 Invitation found:', invitation ? 'Yes' : 'No');
       
       if (!invitation) {
-        console.log('Invitation not found in database');
+        console.log('❌ Invitation not found in database');
+        console.log('💡 Available invitation codes in database:');
+        
+        // Debug: Show available codes for troubleshooting
+        try {
+          const allInvitations = await storage.getAllPendingInvitations?.() || [];
+          allInvitations.forEach(inv => {
+            console.log(`   - Code: ${inv.invitationCode} | Email: ${inv.email} | Status: ${inv.status}`);
+          });
+        } catch (debugError) {
+          console.log('Could not fetch debug invitation list:', debugError);
+        }
+        
         return res.status(404).json({ 
           message: "Invitation not found",
-          details: "The invitation code does not exist in our system. Please check the code and try again."
+          details: "The invitation code does not exist in our system. Please check the code and try again.",
+          debugInfo: {
+            submittedCode: code,
+            codeLength: code.length,
+            timestamp: new Date().toISOString()
+          }
         });
       }
       

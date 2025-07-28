@@ -79,6 +79,7 @@ export interface IStorage {
   getUserInvitations(invitedBy?: string): Promise<UserInvitation[]>;
   acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation>;
   expireInvitation(invitationCode: string): Promise<void>;
+  getAllPendingInvitations(): Promise<UserInvitation[]>;
   deleteUserInvitation(invitationId: number, userId: string): Promise<boolean>;
   
   // User access control operations  
@@ -405,6 +406,14 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(userInvitations.invitationCode, invitationCode));
+  }
+
+  async getAllPendingInvitations(): Promise<UserInvitation[]> {
+    return await db
+      .select()
+      .from(userInvitations)
+      .where(eq(userInvitations.status, 'pending'))
+      .orderBy(desc(userInvitations.createdAt));
   }
 
   // User access control operations

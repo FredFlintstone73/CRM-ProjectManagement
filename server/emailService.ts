@@ -169,8 +169,11 @@ class EmailService {
     `;
 
     try {
+      // Use chad@alignedadvisors.com as the sender if available, otherwise fall back to configured email
+      const fromEmail = process.env.OUTLOOK_USER || process.env.SMTP_FROM || process.env.GMAIL_USER;
+      
       await this.transporter.sendMail({
-        from: process.env.SMTP_FROM || process.env.OUTLOOK_USER || process.env.GMAIL_USER,
+        from: fromEmail,
         to: invitation.email,
         subject,
         html,
