@@ -1,10 +1,40 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, BarChart3, CheckSquare, Mail, UserPlus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Users, BarChart3, CheckSquare, Mail, UserPlus, Send } from "lucide-react";
 import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+const invitationRequestSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Valid email is required"),
+  message: z.string().optional(),
+});
+
+type InvitationRequestForm = z.infer<typeof invitationRequestSchema>;
 
 export default function Landing() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showRequestForm, setShowRequestForm] = useState(false);
+
+  const form = useForm<InvitationRequestForm>({
+    resolver: zodResolver(invitationRequestSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      message: "",
+    },
+  });
   
   const handleLogin = () => {
     window.location.href = "/api/login";
@@ -12,6 +42,39 @@ export default function Landing() {
 
   const handleJoinTeam = () => {
     setLocation("/accept-invitation");
+  };
+
+  const onSubmitRequest = async (data: InvitationRequestForm) => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/invitation-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit invitation request');
+      }
+
+      toast({
+        title: "Request Submitted",
+        description: "Your invitation request has been sent. You'll receive an email if approved.",
+      });
+
+      form.reset();
+      setShowRequestForm(false);
+    } catch (error) {
+      toast({
+        title: "Failed to Submit Request",
+        description: "There was an error submitting your request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,6 +117,107 @@ export default function Landing() {
                   Join the Team
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Request Invitation Section */}
+        <div className="text-center mb-16">
+          <Card className="max-w-md mx-auto">
+            <CardHeader>
+              <CardTitle>Need an Invitation?</CardTitle>
+              <CardDescription>
+                Don't have an invitation code? Request access to join the team
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!showRequestForm ? (
+                <Button 
+                  onClick={() => setShowRequestForm(true)} 
+                  variant="outline" 
+                  className="w-full"
+                  size="lg"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Request Invitation
+                </Button>
+              ) : (
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmitRequest)} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Address</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Message (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Why would you like to join?" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowRequestForm(false)}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1"
+                      >
+                        {isSubmitting ? "Submitting..." : "Submit Request"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              )}
             </CardContent>
           </Card>
         </div>

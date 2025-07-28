@@ -982,6 +982,20 @@ export const userInvitations = pgTable("user_invitations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Invitation requests table - for people requesting invitations
+export const invitationRequests = pgTable("invitation_requests", {
+  id: serial("id").primaryKey(),
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  email: varchar("email").notNull(),
+  message: text("message"),
+  status: varchar("status").default("pending"), // pending, approved, rejected
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Calendar connections table
 export const calendarConnections = pgTable("calendar_connections", {
   id: serial("id").primaryKey(),
@@ -1020,6 +1034,13 @@ export const userInvitationsRelations = relations(userInvitations, ({ one }) => 
   })
 }));
 
+export const invitationRequestsRelations = relations(invitationRequests, ({ one }) => ({
+  reviewedBy: one(users, {
+    fields: [invitationRequests.reviewedBy],
+    references: [users.id],
+  }),
+}));
+
 export const calendarConnectionsRelations = relations(calendarConnections, ({ one }) => ({
   user: one(users, {
     fields: [calendarConnections.userId],
@@ -1037,6 +1058,15 @@ export const insertUserInvitationSchema = createInsertSchema(userInvitations).om
   acceptedAt: true,
   invitedBy: true,
   expiresAt: true,
+});
+
+export const insertInvitationRequestSchema = createInsertSchema(invitationRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  reviewedBy: true,
+  reviewedAt: true,
 });
 
 export const insertCalendarConnectionSchema = createInsertSchema(calendarConnections).omit({
