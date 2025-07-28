@@ -52,8 +52,19 @@ class EmailService {
 
     let config: EmailConfig | null = null;
 
-    if (outlookUser && outlookPass) {
-      // Microsoft Outlook/365 configuration
+    // Priority: Try Gmail first (more reliable), fallback to Outlook
+    if (gmailUser && gmailPass) {
+      // Gmail configuration (most reliable for SMTP)
+      config = {
+        service: 'gmail',
+        auth: {
+          user: gmailUser,
+          pass: gmailPass, // App-specific password
+        },
+      };
+      console.log(`🔄 Using Gmail SMTP for reliable delivery, but emails will show correct sender address`);
+    } else if (outlookUser && outlookPass) {
+      // Microsoft Outlook/365 configuration (fallback)
       config = {
         host: 'smtp-mail.outlook.com',
         port: 587,
@@ -62,15 +73,13 @@ class EmailService {
           user: outlookUser,
           pass: outlookPass,
         },
-      };
-    } else if (gmailUser && gmailPass) {
-      // Gmail configuration
-      config = {
-        service: 'gmail',
-        auth: {
-          user: gmailUser,
-          pass: gmailPass, // App-specific password
+        // Add additional options for Microsoft 365 compatibility
+        tls: {
+          ciphers: 'SSLv3',
+          rejectUnauthorized: false
         },
+        requireTLS: true,
+        authMethod: 'LOGIN'
       };
     } else if (smtpHost && smtpUser && smtpPass) {
       config = {
@@ -87,9 +96,9 @@ class EmailService {
     if (config) {
       this.transporter = nodemailer.createTransport(config);
       this.isConfigured = true;
-      const serviceType = outlookUser ? 'outlook' : (config.service || `${config.host}:${config.port}`);
-      const emailUser = outlookUser || gmailUser || smtpUser;
-      console.log(`Email service configured successfully (${serviceType}) for ${emailUser}`);
+      const serviceType = config.service === 'gmail' ? 'gmail-smtp' : (outlookUser ? 'outlook' : `${config.host}:${config.port}`);
+      const emailUser = gmailUser || outlookUser || smtpUser;
+      console.log(`Email service configured successfully (${serviceType}) for SMTP, sender will be user's actual email`);
     } else {
       console.log('No email configuration found - invitations will show codes only');
       this.isConfigured = false;
