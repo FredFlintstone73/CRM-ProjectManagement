@@ -58,6 +58,7 @@ function Router() {
             >
               <Switch>
                 <Route path="/" component={Dashboard} />
+                <Route path="/accept-invitation" component={AcceptInvitation} />
                 <Route path="/contacts" component={Contacts} />
                 <Route path="/contacts/:id" component={ContactDetail} />
                 <Route path="/projects" component={Projects} />
