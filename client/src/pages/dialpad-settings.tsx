@@ -209,8 +209,30 @@ export default function DialpadSettings() {
               onClick={() => setupWebhooksMutation.mutate()}
               disabled={setupWebhooksMutation.isPending}
             >
-              {setupWebhooksMutation.isPending ? "Setting up..." : "Setup Webhooks"}
+              {setupWebhooksMutation.isPending ? "Setting up webhooks..." : "Setup Webhooks"}
             </Button>
+            
+            {setupWebhooksMutation.isSuccess && (
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm text-green-800 dark:text-green-200">
+                    Webhooks configured successfully! Call transcripts and text messages will now be captured automatically.
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            {setupWebhooksMutation.isError && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <span className="text-sm text-red-800 dark:text-red-200">
+                    Failed to setup webhooks. Please check your API credentials.
+                  </span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

@@ -289,6 +289,8 @@ export class DialpadService {
 
         if (response.ok) {
           console.log(`✅ Created Dialpad webhook subscription for ${subscription.event_type}`);
+        } else if (response.status === 409) {
+          console.log(`✅ Dialpad webhook for ${subscription.event_type} already exists`);
         } else {
           const errorText = await response.text();
           console.error(`❌ Failed to create webhook for ${subscription.event_type}:`, response.status, errorText);
