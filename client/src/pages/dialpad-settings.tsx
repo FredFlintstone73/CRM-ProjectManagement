@@ -50,12 +50,24 @@ export default function DialpadSettings() {
   const testContactMutation = useMutation({
     mutationFn: (phoneNumber: string) => apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber }),
     onSuccess: (data: any) => {
-      console.log('Test contact match response:', data);
+      console.log('🎯 Frontend received test contact match response:', data);
+      console.log('🔍 Response type:', typeof data, 'Keys:', Object.keys(data || {}));
+      
+      // Handle empty response case
+      if (!data || Object.keys(data).length === 0) {
+        toast({
+          title: "Error",
+          description: "Received empty response from server. Check server logs for details.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       toast({
         title: "Contact Match Test",
         description: data.matched 
-          ? `Phone number ${data.phoneNumber} matches contact ID: ${data.contactId}`
-          : `No contact found for phone number: ${data.phoneNumber}`,
+          ? `✅ Found match! Phone ${data.phoneNumber} → Contact ID: ${data.contactId}`
+          : `❌ No contact found for phone number: ${data.phoneNumber}`,
         variant: data.matched ? "default" : "destructive",
       });
     },

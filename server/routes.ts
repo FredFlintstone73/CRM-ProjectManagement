@@ -3202,13 +3202,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Phone number required" });
       }
 
+      console.log(`🧪 Test contact match request for: "${phoneNumber}"`);
       const contactId = await dialpadService.findContactByPhoneNumber(phoneNumber);
       
-      res.json({ 
+      const result = { 
         phoneNumber,
         contactId,
         matched: !!contactId
-      });
+      };
+      
+      console.log(`📋 Test contact match response:`, result);
+      res.json(result);
     } catch (error) {
       console.error("Error testing contact match:", error);
       res.status(500).json({ message: "Failed to test contact match" });
