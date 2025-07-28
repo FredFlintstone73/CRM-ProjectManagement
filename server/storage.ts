@@ -1,7 +1,3 @@
-I've identified the need to complete the `searchProjectComments` method and ensure the `DatabaseStorage` class has a closing brace. I will complete these modifications in the code.
-
-</tool_code>
-```replit_final_file>
 import {
   users,
   contacts,
@@ -839,6 +835,177 @@ export class DatabaseStorage implements IStorage {
     const projectTasks = await db
       .select({ id: tasks.id })
       .from(tasks)
-      .where(eq(tasks.projectId, id));I've identified the need to complete the `searchProjectComments` method and ensure the `DatabaseStorage` class has a closing brace. I will complete these modifications in the code.
+      .where(eq(tasks.projectId, id));
 
-</tool_code>
+    // Get task IDs for cleanup
+    const taskIds = projectTasks.map(task => task.id);
+
+    if (taskIds.length > 0) {
+      // Delete user task priorities
+      await db.delete(userTaskPriorities).where(inArray(userTaskPriorities.taskId, taskIds));
+      
+      // Delete task comments
+      await db.delete(taskComments).where(inArray(taskComments.taskId, taskIds));
+      
+      // Delete task files
+      await db.delete(taskFiles).where(inArray(taskFiles.taskId, taskIds));
+    }
+
+    // Delete project tasks
+    await db.delete(tasks).where(eq(tasks.projectId, id));
+    
+    // Delete project comments
+    await db.delete(projectComments).where(eq(projectComments.projectId, id));
+    
+    // Delete project milestones
+    await db.delete(milestones).where(eq(milestones.projectId, id));
+    
+    // Finally delete the project
+    await db.delete(projects).where(eq(projects.id, id));
+  }
+
+  // Search methods
+  async searchContacts(query: string): Promise<Contact[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(contacts)
+      .where(
+        or(
+          sql`${contacts.firstName} ILIKE ${searchPattern}`,
+          sql`${contacts.lastName} ILIKE ${searchPattern}`,
+          sql`${contacts.nickname} ILIKE ${searchPattern}`,
+          sql`${contacts.spouseFirstName} ILIKE ${searchPattern}`,
+          sql`${contacts.spouseLastName} ILIKE ${searchPattern}`,
+          sql`${contacts.spouseNickname} ILIKE ${searchPattern}`,
+          sql`${contacts.personalEmail} ILIKE ${searchPattern}`,
+          sql`${contacts.workEmail} ILIKE ${searchPattern}`,
+          sql`${contacts.spousePersonalEmail} ILIKE ${searchPattern}`,
+          sql`${contacts.spouseWorkEmail} ILIKE ${searchPattern}`,
+          sql`${contacts.cellPhone} ILIKE ${searchPattern}`,
+          sql`${contacts.workPhone} ILIKE ${searchPattern}`,
+          sql`${contacts.spouseCellPhone} ILIKE ${searchPattern}`,
+          sql`${contacts.spouseWorkPhone} ILIKE ${searchPattern}`,
+          sql`${contacts.businessName} ILIKE ${searchPattern}`,
+          sql`${contacts.businessPhone} ILIKE ${searchPattern}`,
+          sql`${contacts.mailingAddressStreet1} ILIKE ${searchPattern}`,
+          sql`${contacts.mailingAddressCity} ILIKE ${searchPattern}`,
+          sql`${contacts.mailingAddressState} ILIKE ${searchPattern}`,
+          sql`${contacts.businessAddressCity} ILIKE ${searchPattern}`,
+          sql`${contacts.businessAddressState} ILIKE ${searchPattern}`
+        )
+      )
+      .limit(50);
+  }
+
+  async searchProjects(query: string): Promise<Project[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(projects)
+      .where(
+        or(
+          sql`${projects.name} ILIKE ${searchPattern}`,
+          sql`${projects.description} ILIKE ${searchPattern}`
+        )
+      )
+      .limit(50);
+  }
+
+  async searchTasks(query: string): Promise<Task[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(tasks)
+      .where(
+        or(
+          sql`${tasks.title} ILIKE ${searchPattern}`,
+          sql`${tasks.description} ILIKE ${searchPattern}`
+        )
+      )
+      .limit(50);
+  }
+
+  async searchContactNotes(query: string): Promise<any[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(contactNotes)
+      .where(sql`${contactNotes.content} ILIKE ${searchPattern}`)
+      .limit(50);
+  }
+
+  async searchEmailInteractions(query: string): Promise<any[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(emailInteractions)
+      .where(
+        or(
+          sql`${emailInteractions.subject} ILIKE ${searchPattern}`,
+          sql`${emailInteractions.body} ILIKE ${searchPattern}`
+        )
+      )
+      .limit(50);
+  }
+
+  async searchProjectComments(query: string): Promise<any[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(projectComments)
+      .where(sql`${projectComments.content} ILIKE ${searchPattern}`)
+      .limit(50);
+  }
+
+  async searchTaskComments(query: string): Promise<any[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(taskComments)
+      .where(sql`${taskComments.content} ILIKE ${searchPattern}`)
+      .limit(50);
+  }
+
+  async searchContactBusinesses(query: string): Promise<any[]> {
+    if (!query.trim()) return [];
+    
+    const searchPattern = `%${query.toLowerCase()}%`;
+    
+    return await db
+      .select()
+      .from(contactBusinesses)
+      .where(
+        or(
+          sql`${contactBusinesses.businessName} ILIKE ${searchPattern}`,
+          sql`${contactBusinesses.businessPhone} ILIKE ${searchPattern}`,
+          sql`${contactBusinesses.officeManagerName} ILIKE ${searchPattern}`
+        )
+      )
+      .limit(50);
+  }
+}
+
+// Create storage instance
+export const storage = new DatabaseStorage();
