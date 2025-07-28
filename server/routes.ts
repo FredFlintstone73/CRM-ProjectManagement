@@ -2458,21 +2458,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!invitation) {
         return res.status(404).json({ message: "Invitation not found" });
       }
+
+      // Check if user already exists to prevent conflicts
+      const existingUser = await storage.getUser(userId);
       
       // Accept the invitation
       await storage.acceptUserInvitation(req.params.code, userId);
       
-      // Ensure user exists in the users table with invitation details
-      await storage.upsertUser({
+      // Only create/update user if needed, prioritizing OAuth claims over invitation data
+      const userData = {
         id: userId,
         email: userEmail || invitation.email,
         firstName: firstName || invitation.firstName,
         lastName: lastName || invitation.lastName,
-        accessLevel: invitation.accessLevel as any,
+        accessLevel: existingUser?.accessLevel || invitation.accessLevel as any,
         isActive: true,
         invitedBy: invitation.invitedBy,
         invitedAt: new Date(invitation.invitedAt),
-      });
+      };
+
+      try {
+        await storage.upsertUser(userData);
+        console.log(`User created/updated successfully for invitation acceptance: ${userData.email}`);
+      } catch (userError: any) {
+        console.error("Error upserting user during invitation acceptance:", {
+          email: userData.email,
+          userId: userData.id,
+          error: userError.message
+        });
+        // If user creation fails due to duplicate email, still proceed since invitation was accepted
+        if (userError.message?.includes('already exists')) {
+          console.log(`User ${userData.email} already exists, invitation accepted successfully`);
+        } else {
+          // For other errors, we need to fail the invitation acceptance
+          throw new Error(`Failed to create user account: ${userError.message}`);
+        }
+      }
       
       res.json({ message: "Invitation accepted successfully" });
     } catch (error) {

@@ -62,13 +62,23 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
-  });
+  try {
+    await storage.upsertUser({
+      id: claims["sub"],
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      profileImageUrl: claims["profile_image_url"],
+    });
+  } catch (error: any) {
+    console.error('Error creating user from Replit auth:', error);
+    // Don't throw here to prevent auth failures - user might already exist
+    if (error.message?.includes('already exists')) {
+      console.log(`User ${claims["email"]} already exists, continuing with auth`);
+      return;
+    }
+    throw error;
+  }
 }
 
 export async function setupAuth(app: Express) {

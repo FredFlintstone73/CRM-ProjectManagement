@@ -66,6 +66,18 @@ import {
 import { db } from "./db";
 import { eq, desc, sql, and, or, not, ilike, count, isNotNull, isNull, inArray, gte, lte } from "drizzle-orm";
 
+// Email normalization helper function
+function normalizeEmail(email: string | null | undefined): string | null {
+  if (!email) return null;
+  return email.trim().toLowerCase();
+}
+
+// Email validation helper function
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
@@ -264,23 +276,82 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+    // Validate and normalize email
+    const normalizedEmail = normalizeEmail(userData.email);
+    
+    if (normalizedEmail && !isValidEmail(normalizedEmail)) {
+      throw new Error(`Invalid email format: ${normalizedEmail}`);
+    }
+
+    const normalizedData = {
+      ...userData,
+      email: normalizedEmail,
+      updatedAt: new Date(),
+    };
+
+    console.log(`Upserting user: ID=${normalizedData.id}, Email=${normalizedData.email}`);
+
+    // Check for existing user with same email (different ID) to prevent conflicts
+    if (normalizedData.email) {
+      const [existingUserWithEmail] = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.email, normalizedData.email),
+          not(eq(users.id, normalizedData.id))
+        ));
+
+      if (existingUserWithEmail) {
+        console.error(`Conflict detected: User with email ${normalizedData.email} already exists with different ID: ${existingUserWithEmail.id}`);
+        throw new Error(`A user with email ${normalizedData.email} already exists with ID ${existingUserWithEmail.id}`);
+      }
+    }
+
+    try {
+      const [user] = await db
+        .insert(users)
+        .values(normalizedData)
+        .onConflictDoUpdate({
+          target: users.id,
+          set: normalizedData,
+        })
+        .returning();
+      
+      console.log(`User upserted successfully: ID=${user.id}, Email=${user.email}`);
+      return user;
+    } catch (error: any) {
+      // Handle unique constraint violations gracefully
+      if (error?.constraint === 'users_email_unique' || error?.code === '23505') {
+        console.error(`Duplicate email constraint violation for: ${normalizedData.email}`, {
+          errorCode: error.code,
+          constraint: error.constraint,
+          detail: error.detail
+        });
+        throw new Error(`A user with email ${normalizedData.email} already exists`);
+      }
+      console.error('Unexpected error upserting user:', {
+        email: normalizedData.email,
+        id: normalizedData.id,
+        error: error.message,
+        code: error.code
+      });
+      throw error;
+    }
   }
 
   async ensureUserHasContact(user: User): Promise<Contact> {
-    // Check if contact already exists
-    const [existingContact] = await db
+    // Check if contact already exists by email first, then by name
+    const [existingContactByEmail] = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.personalEmail, normalizeEmail(user.email)));
+
+    if (existingContactByEmail) {
+      return existingContactByEmail;
+    }
+
+    // Check by name as fallback
+    const [existingContactByName] = await db
       .select()
       .from(contacts)
       .where(
@@ -290,15 +361,15 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    if (existingContact) {
-      return existingContact;
+    if (existingContactByName) {
+      return existingContactByName;
     }
 
     // Create contact record for user
     const contactData: InsertContact = {
       firstName: user.firstName,
       lastName: user.lastName,
-      personalEmail: user.email,
+      personalEmail: normalizeEmail(user.email),
       contactType: 'team_member',
       status: 'active',
       createdBy: user.id,
