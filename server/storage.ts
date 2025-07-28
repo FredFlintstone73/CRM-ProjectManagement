@@ -265,18 +265,52 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+    try {
+      // First try to find existing user by ID
+      const existingUser = await this.getUser(userData.id);
+      
+      if (existingUser) {
+        // Update existing user
+        const [updatedUser] = await db
+          .update(users)
+          .set({
+            ...userData,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, userData.id))
+          .returning();
+        return updatedUser;
+      } else {
+        // Check if email exists with different ID
+        const [emailConflict] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, userData.email!));
+          
+        if (emailConflict) {
+          // Update the existing user with new ID and data
+          const [updatedUser] = await db
+            .update(users)
+            .set({
+              ...userData,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.email, userData.email!))
+            .returning();
+          return updatedUser;
+        } else {
+          // Create new user
+          const [newUser] = await db
+            .insert(users)
+            .values(userData)
+            .returning();
+          return newUser;
+        }
+      }
+    } catch (error) {
+      console.error('🚨 Database error in upsertUser:', error);
+      throw error;
+    }
   }
 
   async ensureUserHasContact(user: User): Promise<Contact> {
