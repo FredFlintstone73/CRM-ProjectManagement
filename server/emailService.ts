@@ -103,6 +103,8 @@ class EmailService {
     invitationCode: string;
     accessLevel: string;
     invitedBy: string;
+    senderEmail?: string;
+    senderName?: string;
   }): Promise<{ sent: boolean; message: string }> {
     if (!this.isConfigured) {
       return {
@@ -169,11 +171,15 @@ class EmailService {
     `;
 
     try {
-      // Use chad@alignedadvisors.com as the sender if available, otherwise fall back to configured email
-      const fromEmail = process.env.OUTLOOK_USER || process.env.SMTP_FROM || process.env.GMAIL_USER;
+      // Use the logged-in user's email as sender, with fallback hierarchy
+      const senderEmail = invitation.senderEmail || process.env.OUTLOOK_USER || process.env.GMAIL_USER || 'system@alignedadvisors.com';
+      const senderName = invitation.senderName || 'Aligned Advisors Team';
+      const fromAddress = `${senderName} <${senderEmail}>`;
+      
+      console.log(`📧 Sending invitation from: ${fromAddress} to: ${invitation.email}`);
       
       await this.transporter.sendMail({
-        from: fromEmail,
+        from: fromAddress,
         to: invitation.email,
         subject,
         html,
@@ -182,7 +188,7 @@ class EmailService {
 
       return {
         sent: true,
-        message: 'Invitation email sent successfully',
+        message: `Invitation email sent successfully from ${senderEmail} to ${invitation.email}`,
       };
     } catch (error) {
       console.error('Failed to send email:', error);

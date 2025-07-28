@@ -2326,6 +2326,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invitedBy: userId,
       });
       
+      // Get current user's email to use as sender
+      const currentUser = await storage.getUser(userId);
+      const senderEmail = currentUser?.email || 'system@alignedadvisors.com';
+      
       // Try to send email invitation
       const emailResult = await emailService.sendInvitationEmail({
         email: invitation.email,
@@ -2334,6 +2338,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invitationCode: invitation.invitationCode,
         accessLevel: invitation.accessLevel,
         invitedBy: userId,
+        senderEmail: senderEmail,
+        senderName: currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Aligned Advisors Team',
       });
 
       res.json({
