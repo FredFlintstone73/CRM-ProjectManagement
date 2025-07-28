@@ -272,19 +272,22 @@ class EmailService {
       });
 
       this.imapClient.once('error', (err: Error) => {
-        console.error('IMAP connection error:', err);
+        console.log('Email monitoring unavailable (IMAP connection failed) - manual email sending still works');
         this.monitoring = false;
+        this.imapClient = null;
       });
 
       this.imapClient.once('end', () => {
-        console.log('IMAP connection ended');
+        console.log('Email monitoring stopped');
         this.monitoring = false;
+        this.imapClient = null;
       });
 
       this.imapClient.connect();
     } catch (error) {
-      console.error('Error starting email monitoring:', error);
+      console.log('Email monitoring initialization failed - continuing without automatic email detection');
       this.monitoring = false;
+      this.imapClient = null;
     }
   }
 
