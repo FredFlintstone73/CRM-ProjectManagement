@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, AlertTriangle, UserCheck, Clock } from "lucide-react";
+import { CheckCircle, AlertTriangle, UserCheck, Clock, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -141,19 +141,32 @@ export default function AcceptInvitation() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/20 p-4">
-      <div className="w-full max-w-md">
-        <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-              <UserCheck className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-2xl">Join ClientHub</CardTitle>
-            <p className="text-muted-foreground">
-              Enter your invitation code to access the system
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header with back link */}
+      <div className="p-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => setLocation("/")}
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to ClientHub
+        </Button>
+      </div>
+      
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
+        <div className="w-full max-w-md">
+          <Card className="shadow-lg">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <UserCheck className="h-6 w-6 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Join the Team</CardTitle>
+              <p className="text-muted-foreground">
+                Welcome to ClientHub! Enter your invitation code to get started.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
             {showCodeInput ? (
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div>
@@ -283,7 +296,8 @@ export default function AcceptInvitation() {
               </div>
             ) : null}
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );

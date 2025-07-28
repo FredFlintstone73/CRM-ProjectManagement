@@ -1,10 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, BarChart3, CheckSquare, Mail } from "lucide-react";
+import { Users, BarChart3, CheckSquare, Mail, UserPlus } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
+  
   const handleLogin = () => {
     window.location.href = "/api/login";
+  };
+
+  const handleJoinTeam = () => {
+    setLocation("/accept-invitation");
   };
 
   return (
@@ -32,10 +39,21 @@ export default function Landing() {
                 Start managing your contacts and projects more efficiently
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <Button onClick={handleLogin} className="w-full" size="lg">
                 Sign In to Continue
               </Button>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>New team member?</span>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-sm text-primary font-medium" 
+                  onClick={handleJoinTeam}
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Join the Team
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
