@@ -113,16 +113,26 @@ class EmailService {
 
     const subject = 'Invitation to join ClientHub CRM';
     
-    // Generate invitation URL with production domain preference
+    // Generate invitation URL - prefer deployed domain over development
     const domains = process.env.REPLIT_DOMAINS?.split(',') || [];
-    let baseUrl = 'localhost:5000';
+    let baseUrl = '';
     
     if (domains.length > 0) {
-      // Use the first domain (usually deployed) and ensure HTTPS
-      baseUrl = domains[0];
-      if (!baseUrl.startsWith('http')) {
-        baseUrl = `https://${baseUrl}`;
+      // Find the deployed domain (not the development one with '00-')
+      const deployedDomain = domains.find(domain => 
+        !domain.includes('00-') && domain.includes('.replit.dev')
+      );
+      
+      if (deployedDomain) {
+        baseUrl = deployedDomain.startsWith('http') ? deployedDomain : `https://${deployedDomain}`;
+      } else {
+        // Fallback to first domain if no deployed domain found
+        const fallbackDomain = domains[0];
+        baseUrl = fallbackDomain.startsWith('http') ? fallbackDomain : `https://${fallbackDomain}`;
       }
+    } else {
+      // Ultimate fallback for local development
+      baseUrl = 'http://localhost:5000';
     }
     
     const inviteUrl = `${baseUrl}/accept-invitation?code=${invitation.invitationCode}`;
