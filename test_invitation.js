@@ -1,61 +1,32 @@
-// Test script to check if invitation codes work in deployed environment
-import https from 'https';
+// Test invitation creation to debug email sender issue
+const fetch = require('node-fetch');
 
-function testInvitationCode(code) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'crm-project-management.replit.app',
-      port: 443,
-      path: `/api/user-invitations/${code}`,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      
-      res.on('end', () => {
-        console.log(`\n=== Testing code: ${code} ===`);
-        console.log(`Status: ${res.statusCode}`);
-        console.log(`Response: ${data}`);
-        resolve({ statusCode: res.statusCode, data: JSON.parse(data) });
-      });
-    });
-
-    req.on('error', (error) => {
-      console.error(`Error testing ${code}:`, error);
-      reject(error);
-    });
-
-    req.end();
-  });
-}
-
-async function testAllCodes() {
-  const codes = [
-    'alex2025invite',
-    'devyn2025invite', 
-    'megan2025invite',
-    'taylor2025invite',
-    'mike2025invite'
-  ];
-
-  console.log('Testing invitation codes in deployed environment...');
+async function testInvitation() {
+  console.log('=== TESTING INVITATION EMAIL SENDER ===\n');
   
-  for (const code of codes) {
-    try {
-      await testInvitationCode(code);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between requests
-    } catch (error) {
-      console.error(`Failed to test ${code}:`, error.message);
-    }
+  try {
+    // Get session cookie first by hitting the main page
+    const response = await fetch('http://127.0.0.1:5000/api/user-invitations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Note: This will fail due to auth, but we want to see the debug logs
+      },
+      body: JSON.stringify({
+        email: 'testuser@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        accessLevel: 'team_member'
+      })
+    });
+
+    const result = await response.text();
+    console.log('Status:', response.status);
+    console.log('Response:', result);
+    
+  } catch (error) {
+    console.error('Error:', error.message);
   }
 }
 
-testAllCodes();
+testInvitation();

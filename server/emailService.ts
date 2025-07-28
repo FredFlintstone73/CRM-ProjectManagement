@@ -171,12 +171,20 @@ class EmailService {
     `;
 
     try {
-      // Use the logged-in user's email as sender, with fallback hierarchy
-      const senderEmail = invitation.senderEmail || process.env.OUTLOOK_USER || process.env.GMAIL_USER || 'system@alignedadvisors.com';
+      // CRITICAL: Use the logged-in user's email as sender - this takes priority over environment variables
+      let senderEmail = 'system@alignedadvisors.com';
+      if (invitation.senderEmail && invitation.senderEmail.trim()) {
+        senderEmail = invitation.senderEmail;
+        console.log(`✅ Using logged-in user's email as sender: ${senderEmail}`);
+      } else {
+        console.log(`⚠️ No sender email provided, falling back to environment variables`);
+        senderEmail = process.env.OUTLOOK_USER || process.env.GMAIL_USER || 'system@alignedadvisors.com';
+      }
+      
       const senderName = invitation.senderName || 'Aligned Advisors Team';
       const fromAddress = `${senderName} <${senderEmail}>`;
       
-      console.log(`📧 Sending invitation from: ${fromAddress} to: ${invitation.email}`);
+      console.log(`📧 FINAL: Sending invitation from: ${fromAddress} to: ${invitation.email}`);
       
       await this.transporter.sendMail({
         from: fromAddress,

@@ -2330,6 +2330,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentUser = await storage.getUser(userId);
       const senderEmail = currentUser?.email || 'system@alignedadvisors.com';
       
+      console.log(`🔍 INVITATION DEBUG - User ID: ${userId}`);
+      console.log(`🔍 Current User:`, currentUser ? {
+        id: currentUser.id,
+        email: currentUser.email,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName
+      } : 'null');
+      console.log(`🔍 Sender Email to be used: ${senderEmail}`);
+      console.log(`🔍 Environment Variables:`, {
+        OUTLOOK_USER: process.env.OUTLOOK_USER ? 'configured' : 'not set',
+        GMAIL_USER: process.env.GMAIL_USER ? 'configured' : 'not set'
+      });
+      
       // Try to send email invitation
       const emailResult = await emailService.sendInvitationEmail({
         email: invitation.email,
