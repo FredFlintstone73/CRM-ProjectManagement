@@ -106,38 +106,29 @@ export class DialpadService {
   async findContactByPhoneNumber(phoneNumber: string): Promise<number | null> {
     // Clean phone number (remove formatting)
     const cleanNumber = phoneNumber.replace(/[^\d]/g, '');
-    console.log(`🔍 Searching for phone number: "${phoneNumber}" (cleaned: "${cleanNumber}")`);
     
     // Try to find contact by various phone fields
     const contacts = await this.storage.getContacts();
-    console.log(`📞 Checking ${contacts.length} contacts for phone match`);
     
     for (const contact of contacts) {
       const phoneFields = [
-        { field: 'cellPhone', value: contact.cellPhone },
-        { field: 'workPhone', value: contact.workPhone },
-        { field: 'businessPhone', value: contact.businessPhone },
-        { field: 'spouseCellPhone', value: contact.spouseCellPhone },
-        { field: 'spouseWorkPhone', value: contact.spouseWorkPhone }
+        contact.cellPhone,
+        contact.workPhone,
+        contact.spouseCellPhone,
+        contact.spouseWorkPhone
       ];
 
-      console.log(`👤 Checking contact ID ${contact.id} (${contact.familyName})`);
-      
-      for (const phoneField of phoneFields) {
-        if (phoneField.value) {
-          const cleanContactPhone = phoneField.value.replace(/[^\d]/g, '');
-          console.log(`   📱 ${phoneField.field}: "${phoneField.value}" (cleaned: "${cleanContactPhone}")`);
-          
+      for (const phone of phoneFields) {
+        if (phone) {
+          const cleanContactPhone = phone.replace(/[^\d]/g, '');
           // Match last 10 digits for US numbers
           if (cleanNumber.slice(-10) === cleanContactPhone.slice(-10)) {
-            console.log(`✅ MATCH FOUND! Contact ID ${contact.id} via ${phoneField.field}`);
             return contact.id;
           }
         }
       }
     }
 
-    console.log(`❌ No contact found for phone number: ${phoneNumber}`);
     return null;
   }
 
@@ -200,8 +191,10 @@ export class DialpadService {
       // Create a communication interaction record
       await this.storage.createContactNote({
         contactId,
-        content: interactionContent
-      }, 'system');
+        note: interactionContent,
+        noteType: 'communication',
+        createdBy: 'system' // System-generated from Dialpad
+      });
 
       console.log(`Created call interaction for contact ${contactId}, call ${callEvent.call_id}`);
     } catch (error) {
@@ -249,8 +242,10 @@ export class DialpadService {
     try {
       await this.storage.createContactNote({
         contactId,
-        content: content
-      }, 'system');
+        note: content,
+        noteType: 'communication',
+        createdBy: 'system'
+      });
 
       console.log(`Created text interaction for contact ${contactId}, message ${textMessage.message_id}`);
     } catch (error) {
@@ -290,7 +285,7 @@ export class DialpadService {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            hook_url: webhookUrl,
+            url: webhookUrl,
             event_type: subscription.event_type,
             secret: this.config.webhookSecret
           })
@@ -298,11 +293,8 @@ export class DialpadService {
 
         if (response.ok) {
           console.log(`✅ Created Dialpad webhook subscription for ${subscription.event_type}`);
-        } else if (response.status === 409) {
-          console.log(`✅ Dialpad webhook for ${subscription.event_type} already exists`);
         } else {
-          const errorText = await response.text();
-          console.error(`❌ Failed to create webhook for ${subscription.event_type}:`, response.status, errorText);
+          console.error(`❌ Failed to create webhook for ${subscription.event_type}:`, response.status);
         }
       } catch (error) {
         console.error(`Error creating webhook subscription for ${subscription.event_type}:`, error);

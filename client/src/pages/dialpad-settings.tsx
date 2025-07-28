@@ -29,11 +29,13 @@ export default function DialpadSettings() {
 
   // Setup webhooks mutation
   const setupWebhooksMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/dialpad/setup-webhooks', {}),
-    onSuccess: (data: any) => {
+    mutationFn: () => apiRequest('/api/dialpad/setup-webhooks', {
+      method: 'POST',
+    }),
+    onSuccess: () => {
       toast({
         title: "Webhooks Setup Complete",
-        description: `Dialpad webhooks configured successfully for: ${data.webhookUrl}. Call transcripts and text messages will now be captured automatically.`,
+        description: "Dialpad webhooks have been configured successfully. Call transcripts and text messages will now be captured automatically.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/dialpad/status'] });
     },
@@ -48,34 +50,20 @@ export default function DialpadSettings() {
 
   // Test contact matching mutation
   const testContactMutation = useMutation({
-    mutationFn: async (phoneNumber: string) => {
-      const response = await apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber });
-      return await response.json();
-    },
+    mutationFn: (phoneNumber: string) => apiRequest('/api/dialpad/test-contact-match', {
+      method: 'POST',
+      body: JSON.stringify({ phoneNumber }),
+    }),
     onSuccess: (data: any) => {
-      console.log('🎯 Frontend received test contact match response:', data);
-      console.log('🔍 Response type:', typeof data, 'Keys:', Object.keys(data || {}));
-      
-      // Handle empty response case
-      if (!data || Object.keys(data).length === 0) {
-        toast({
-          title: "Error",
-          description: "Received empty response from server. Check server logs for details.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       toast({
         title: "Contact Match Test",
         description: data.matched 
-          ? `✅ Found match! Phone ${data.phoneNumber} → Contact ID: ${data.contactId}`
-          : `❌ No contact found for phone number: ${data.phoneNumber}`,
+          ? `Phone number ${data.phoneNumber} matches contact ID: ${data.contactId}`
+          : `No contact found for phone number: ${data.phoneNumber}`,
         variant: data.matched ? "default" : "destructive",
       });
     },
     onError: (error: any) => {
-      console.error('Test contact match error:', error);
       toast({
         title: "Test Failed",
         description: error.message || "Failed to test contact matching.",
@@ -226,30 +214,8 @@ export default function DialpadSettings() {
               onClick={() => setupWebhooksMutation.mutate()}
               disabled={setupWebhooksMutation.isPending}
             >
-              {setupWebhooksMutation.isPending ? "Setting up webhooks..." : "Setup Webhooks"}
+              {setupWebhooksMutation.isPending ? "Setting up..." : "Setup Webhooks"}
             </Button>
-            
-            {setupWebhooksMutation.isSuccess && (
-              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <span className="text-sm text-green-800 dark:text-green-200">
-                    Webhooks configured successfully! Call transcripts and text messages will now be captured automatically.
-                  </span>
-                </div>
-              </div>
-            )}
-            
-            {setupWebhooksMutation.isError && (
-              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  <span className="text-sm text-red-800 dark:text-red-200">
-                    Failed to setup webhooks. Please check your API credentials.
-                  </span>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

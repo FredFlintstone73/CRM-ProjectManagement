@@ -3118,12 +3118,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dialpad webhook endpoints (public, no authentication required)
   app.post('/api/dialpad/webhook', async (req: any, res) => {
     try {
-      console.log('🔗 Dialpad webhook received!');
-      console.log('📥 Headers:', req.headers);
-      console.log('📋 Body:', JSON.stringify(req.body, null, 2));
-
       if (!dialpadService) {
-        console.log('❌ Dialpad webhook received but service not configured');
+        console.log('Dialpad webhook received but service not configured');
         return res.status(503).json({ message: "Dialpad service not configured" });
       }
 
@@ -3131,27 +3127,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rawPayload = JSON.stringify(req.body);
       const signature = req.headers['x-dialpad-signature'] || req.headers['x-signature'];
 
-      console.log('🔐 Signature check - received:', signature ? 'YES' : 'NO');
-
       // Verify webhook signature
       if (!dialpadService.verifyWebhookSignature(rawPayload, signature)) {
-        console.log('❌ Invalid Dialpad webhook signature');
+        console.log('Invalid Dialpad webhook signature');
         return res.status(401).json({ message: "Invalid signature" });
       }
 
       const eventType = req.body.event_type || req.body.type;
       const eventData = req.body.data || req.body;
 
-      console.log('✅ Processing Dialpad webhook:', eventType);
-      console.log('📊 Event data:', JSON.stringify(eventData, null, 2));
+      console.log('Processing Dialpad webhook:', eventType);
 
       // Process the webhook event
       await dialpadService.processWebhookEvent(eventType, eventData);
 
-      console.log('🎉 Webhook processed successfully!');
       res.json({ message: "Webhook processed successfully" });
     } catch (error) {
-      console.error("❌ Error processing Dialpad webhook:", error);
+      console.error("Error processing Dialpad webhook:", error);
       res.status(500).json({ message: "Failed to process webhook" });
     }
   });
@@ -3182,7 +3174,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const webhookUrl = process.env.DIALPAD_WEBHOOK_URL || 
         `${req.protocol}://${req.get('host')}/api/dialpad/webhook`;
 
-      console.log('Setting up Dialpad webhooks with URL:', webhookUrl);
       await dialpadService.setupWebhookSubscriptions(webhookUrl);
       
       res.json({ 
@@ -3191,10 +3182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error setting up Dialpad webhooks:", error);
-      res.status(500).json({ 
-        message: "Failed to setup webhooks", 
-        error: error instanceof Error ? error.message : String(error)
-      });
+      res.status(500).json({ message: "Failed to setup webhooks" });
     }
   });
 
@@ -3210,17 +3198,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Phone number required" });
       }
 
-      console.log(`🧪 Test contact match request for: "${phoneNumber}"`);
       const contactId = await dialpadService.findContactByPhoneNumber(phoneNumber);
       
-      const result = { 
+      res.json({ 
         phoneNumber,
         contactId,
         matched: !!contactId
-      };
-      
-      console.log(`📋 Test contact match response:`, result);
-      res.json(result);
+      });
     } catch (error) {
       console.error("Error testing contact match:", error);
       res.status(500).json({ message: "Failed to test contact match" });
