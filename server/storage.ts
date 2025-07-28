@@ -86,6 +86,8 @@ export interface IStorage {
   
   // Invitation request operations
   createInvitationRequest(request: InsertInvitationRequest): Promise<InvitationRequest>;
+  getInvitationRequests(): Promise<InvitationRequest[]>;
+  updateInvitationRequestStatus(id: number, status: string, reviewedBy: string): Promise<InvitationRequest>;
   
   // User access control operations  
   getUserAccessLevel(userId: string): Promise<string | undefined>;
@@ -2422,6 +2424,28 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return created;
+  }
+
+  async getInvitationRequests(): Promise<InvitationRequest[]> {
+    return await db
+      .select()
+      .from(invitationRequests)
+      .orderBy(desc(invitationRequests.createdAt));
+  }
+
+  async updateInvitationRequestStatus(id: number, status: string, reviewedBy: string): Promise<InvitationRequest> {
+    const [updated] = await db
+      .update(invitationRequests)
+      .set({
+        status: status as any,
+        reviewedBy,
+        reviewedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(invitationRequests.id, id))
+      .returning();
+    
+    return updated;
   }
 
   // User access control methods

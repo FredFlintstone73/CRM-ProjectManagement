@@ -2412,6 +2412,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes for managing invitation requests
+  app.get('/api/invitation-requests', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const requests = await storage.getInvitationRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching invitation requests:", error);
+      res.status(500).json({ message: "Failed to fetch invitation requests" });
+    }
+  });
+
+  app.patch('/api/invitation-requests/:id', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const { status } = req.body;
+      const reviewedBy = req.user.claims.sub;
+      
+      if (isNaN(requestId)) {
+        return res.status(400).json({ message: "Invalid request ID" });
+      }
+      
+      if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Status must be 'approved' or 'rejected'" });
+      }
+      
+      const updatedRequest = await storage.updateInvitationRequestStatus(requestId, status, reviewedBy);
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error updating invitation request:", error);
+      res.status(500).json({ message: "Failed to update invitation request" });
+    }
+  });
+
   app.get('/api/user-invitations/:code', async (req: any, res) => {
     try {
       // Trim and normalize the invitation code
