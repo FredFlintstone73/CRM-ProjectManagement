@@ -191,10 +191,8 @@ export class DialpadService {
       // Create a communication interaction record
       await this.storage.createContactNote({
         contactId,
-        note: interactionContent,
-        noteType: 'communication',
-        createdBy: 'system' // System-generated from Dialpad
-      });
+        content: interactionContent
+      }, 'system');
 
       console.log(`Created call interaction for contact ${contactId}, call ${callEvent.call_id}`);
     } catch (error) {
@@ -242,10 +240,8 @@ export class DialpadService {
     try {
       await this.storage.createContactNote({
         contactId,
-        note: content,
-        noteType: 'communication',
-        createdBy: 'system'
-      });
+        content: content
+      }, 'system');
 
       console.log(`Created text interaction for contact ${contactId}, message ${textMessage.message_id}`);
     } catch (error) {
@@ -294,7 +290,8 @@ export class DialpadService {
         if (response.ok) {
           console.log(`✅ Created Dialpad webhook subscription for ${subscription.event_type}`);
         } else {
-          console.error(`❌ Failed to create webhook for ${subscription.event_type}:`, response.status);
+          const errorText = await response.text();
+          console.error(`❌ Failed to create webhook for ${subscription.event_type}:`, response.status, errorText);
         }
       } catch (error) {
         console.error(`Error creating webhook subscription for ${subscription.event_type}:`, error);

@@ -3174,6 +3174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const webhookUrl = process.env.DIALPAD_WEBHOOK_URL || 
         `${req.protocol}://${req.get('host')}/api/dialpad/webhook`;
 
+      console.log('Setting up Dialpad webhooks with URL:', webhookUrl);
       await dialpadService.setupWebhookSubscriptions(webhookUrl);
       
       res.json({ 
@@ -3182,7 +3183,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error setting up Dialpad webhooks:", error);
-      res.status(500).json({ message: "Failed to setup webhooks" });
+      res.status(500).json({ 
+        message: "Failed to setup webhooks", 
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 
