@@ -17,6 +17,7 @@ import {
   contactBusinesses,
   userTaskPriorities,
   userInvitations,
+  invitationRequests,
   userActivities,
   mentions,
   calendarConnections,
@@ -54,6 +55,8 @@ import {
   type InsertUserTaskPriority,
   type UserInvitation,
   type InsertUserInvitation,
+  type InvitationRequest,
+  type InsertInvitationRequest,
   type UserActivity,
   type InsertUserActivity,
   type Mention,
@@ -80,6 +83,9 @@ export interface IStorage {
   acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation>;
   expireInvitation(invitationCode: string): Promise<void>;
   deleteUserInvitation(invitationId: number, userId: string): Promise<boolean>;
+  
+  // Invitation request operations
+  createInvitationRequest(request: InsertInvitationRequest): Promise<InvitationRequest>;
   
   // User access control operations  
   getUserAccessLevel(userId: string): Promise<string | undefined>;
@@ -2406,6 +2412,16 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return result.length > 0;
+  }
+
+  // Invitation request methods
+  async createInvitationRequest(request: InsertInvitationRequest): Promise<InvitationRequest> {
+    const [created] = await db
+      .insert(invitationRequests)
+      .values(request)
+      .returning();
+    
+    return created;
   }
 
   // User access control methods

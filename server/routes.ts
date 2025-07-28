@@ -23,6 +23,7 @@ import {
   insertTaskFileSchema,
   insertUserTaskPrioritySchema,
   insertUserInvitationSchema,
+  insertInvitationRequestSchema,
   insertUserActivitySchema,
   insertMentionSchema
 } from "@shared/schema";
@@ -2390,6 +2391,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting user invitation:", error);
       res.status(500).json({ message: "Failed to delete user invitation" });
+    }
+  });
+
+  // Invitation request routes (public endpoint - no authentication required)
+  app.post('/api/invitation-requests', async (req: any, res) => {
+    try {
+      const requestData = insertInvitationRequestSchema.parse(req.body);
+      
+      const invitationRequest = await storage.createInvitationRequest(requestData);
+      
+      res.json({
+        message: "Invitation request submitted successfully",
+        id: invitationRequest.id
+      });
+    } catch (error) {
+      console.error("Error creating invitation request:", error);
+      res.status(500).json({ message: "Failed to submit invitation request" });
     }
   });
 
