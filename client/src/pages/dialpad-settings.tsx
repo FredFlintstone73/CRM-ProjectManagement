@@ -50,6 +50,7 @@ export default function DialpadSettings() {
   const testContactMutation = useMutation({
     mutationFn: (phoneNumber: string) => apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber }),
     onSuccess: (data: any) => {
+      console.log('Test contact match response:', data);
       toast({
         title: "Contact Match Test",
         description: data.matched 
@@ -59,6 +60,7 @@ export default function DialpadSettings() {
       });
     },
     onError: (error: any) => {
+      console.error('Test contact match error:', error);
       toast({
         title: "Test Failed",
         description: error.message || "Failed to test contact matching.",
