@@ -481,6 +481,7 @@ export class DatabaseStorage implements IStorage {
     // Delete related user records
     await db.delete(userTaskPriorities).where(eq(userTaskPriorities.userId, userId));
     await db.delete(userActivities).where(eq(userActivities.userId, userId));
+    await db.delete(activityLog).where(eq(activityLog.userId, userId));
 
     // Finally delete the user
     await db.delete(users).where(eq(users.id, userId));
