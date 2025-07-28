@@ -207,6 +207,22 @@ Summarize what was found in 1-2 sentences.`
       return `No results found for "${query}".`;
     }
 
+    // Generate insights based on results
+    const resultTypes = new Set();
+    results.forEach(result => {
+      if (result.type) resultTypes.add(result.type);
+    });
+
+    let insight = `Found ${results.length} result${results.length === 1 ? '' : 's'}`;
+    if (resultTypes.size > 0) {
+      insight += ` across ${Array.from(resultTypes).join(', ')}`;
+    }
+    insight += ` for "${query}".`;
+
+    return insight;
+  }
+    }
+
     const types = Array.from(new Set(results.map(r => r.type)));
     const typeCount = types.length > 1 ? ` across ${types.join(', ')}` : ` in ${types[0]}s`;
     

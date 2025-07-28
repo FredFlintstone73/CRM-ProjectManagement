@@ -43,6 +43,16 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    // Log session-related errors for debugging
+    if (status === 401 || message.includes('session')) {
+      console.error('Session-related error:', {
+        status,
+        message,
+        url: _req.url,
+        method: _req.method
+      });
+    }
+
     res.status(status).json({ message });
     throw err;
   });
