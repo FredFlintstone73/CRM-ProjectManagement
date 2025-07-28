@@ -74,13 +74,28 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
-  });
+  try {
+    console.log('🔄 Upserting user with claims:', {
+      id: claims["sub"],
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"]
+    });
+    
+    await storage.upsertUser({
+      id: claims["sub"],
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      profileImageUrl: claims["profile_image_url"],
+    });
+    
+    console.log('✅ User upserted successfully');
+  } catch (error) {
+    console.error('🚨 Failed to upsert user:', error);
+    console.error('🚨 Claims received:', claims);
+    throw error;
+  }
 }
 
 export async function setupAuth(app: Express) {
@@ -141,10 +156,25 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    console.log('🔄 Callback route hit, hostname:', req.hostname);
+    console.log('🔄 Callback query params:', req.query);
+    
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
-    })(req, res, next);
+    })(req, res, (err) => {
+      if (err) {
+        console.error('🚨 Callback authentication error:', err);
+        console.error('🚨 Error stack:', err.stack);
+        res.status(500).json({ 
+          message: "Authentication callback failed", 
+          error: err.message 
+        });
+      } else {
+        console.log('✅ Callback authentication successful');
+        next();
+      }
+    });
   });
 
   app.get("/api/logout", (req, res) => {
