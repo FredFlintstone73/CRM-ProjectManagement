@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import UserInvitationDialog from "@/components/admin/UserInvitationDialog";
 import EmailConfigurationStatus from "@/components/admin/EmailConfigurationStatus";
 import TeamMemberManagement from "@/components/admin/TeamMemberManagement";
+import InvitationRequestsSection from "@/components/admin/InvitationRequestsSection";
 import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy, Trash2 } from "lucide-react";
 
 interface UserInvitation {
@@ -265,6 +266,9 @@ export default function UserManagement() {
             )}
           </CardContent>
         </Card>
+
+        {/* Invitation Requests */}
+        <InvitationRequestsSection />
       </div>
     </div>
   );

@@ -40,7 +40,6 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     ...(isAdministrator ? [
       { name: 'User Management', href: '/user-management', icon: Users },
       { name: 'Administration', href: '/administration', icon: Shield },
-      { name: 'Invitation Requests', href: '/invitation-requests', icon: Mail },
       { name: 'Dialpad', href: '/dialpad', icon: Phone }
     ] : []),
     { name: 'Settings', href: '/settings', icon: Settings },

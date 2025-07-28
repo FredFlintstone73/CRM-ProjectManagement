@@ -26,7 +26,7 @@ import Messages from "@/pages/messages";
 import Calendar from "@/pages/calendar";
 import ConsolidatedMessages from "@/pages/consolidated-messages";
 import DialpadSettings from "@/pages/dialpad-settings";
-import InvitationRequests from "@/pages/invitation-requests";
+
 import Sidebar from "@/components/layout/sidebar";
 import { Mandatory2FAWrapper } from "@/components/auth/Mandatory2FAWrapper";
 import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
@@ -77,7 +77,6 @@ function Router() {
                 <Route path="/dialpad" component={DialpadSettings} />
                 <Route path="/user-management" component={UserManagement} />
                 <Route path="/administration" component={Administration} />
-                <Route path="/invitation-requests" component={InvitationRequests} />
                 <Route component={NotFound} />
               </Switch>
             </div>
