@@ -3118,8 +3118,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dialpad webhook endpoints (public, no authentication required)
   app.post('/api/dialpad/webhook', async (req: any, res) => {
     try {
+      console.log('🔗 Dialpad webhook received!');
+      console.log('📥 Headers:', req.headers);
+      console.log('📋 Body:', JSON.stringify(req.body, null, 2));
+
       if (!dialpadService) {
-        console.log('Dialpad webhook received but service not configured');
+        console.log('❌ Dialpad webhook received but service not configured');
         return res.status(503).json({ message: "Dialpad service not configured" });
       }
 
@@ -3127,23 +3131,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rawPayload = JSON.stringify(req.body);
       const signature = req.headers['x-dialpad-signature'] || req.headers['x-signature'];
 
+      console.log('🔐 Signature check - received:', signature ? 'YES' : 'NO');
+
       // Verify webhook signature
       if (!dialpadService.verifyWebhookSignature(rawPayload, signature)) {
-        console.log('Invalid Dialpad webhook signature');
+        console.log('❌ Invalid Dialpad webhook signature');
         return res.status(401).json({ message: "Invalid signature" });
       }
 
       const eventType = req.body.event_type || req.body.type;
       const eventData = req.body.data || req.body;
 
-      console.log('Processing Dialpad webhook:', eventType);
+      console.log('✅ Processing Dialpad webhook:', eventType);
+      console.log('📊 Event data:', JSON.stringify(eventData, null, 2));
 
       // Process the webhook event
       await dialpadService.processWebhookEvent(eventType, eventData);
 
+      console.log('🎉 Webhook processed successfully!');
       res.json({ message: "Webhook processed successfully" });
     } catch (error) {
-      console.error("Error processing Dialpad webhook:", error);
+      console.error("❌ Error processing Dialpad webhook:", error);
       res.status(500).json({ message: "Failed to process webhook" });
     }
   });
