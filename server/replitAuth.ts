@@ -156,25 +156,48 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    console.log('🔄 Callback route hit, hostname:', req.hostname);
-    console.log('🔄 Callback query params:', req.query);
-    
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
-    })(req, res, (err) => {
-      if (err) {
-        console.error('🚨 Callback authentication error:', err);
-        console.error('🚨 Error stack:', err.stack);
-        res.status(500).json({ 
-          message: "Authentication callback failed", 
-          error: err.message 
+    try {
+      console.log('🔄 Callback route hit, hostname:', req.hostname);
+      console.log('🔄 Callback query params:', req.query);
+      
+      passport.authenticate(`replitauth:${req.hostname}`, (err, user, info) => {
+        if (err) {
+          console.error('🚨 Passport authentication error:', err);
+          console.error('🚨 Error stack:', err.stack);
+          return res.status(500).json({ 
+            message: "Authentication callback failed", 
+            error: err.message 
+          });
+        }
+        
+        if (!user) {
+          console.error('🚨 Authentication failed - no user returned');
+          console.error('🚨 Info:', info);
+          return res.redirect("/api/login");
+        }
+        
+        req.logIn(user, (loginErr) => {
+          if (loginErr) {
+            console.error('🚨 Login error:', loginErr);
+            console.error('🚨 Login error stack:', loginErr.stack);
+            return res.status(500).json({ 
+              message: "Login failed", 
+              error: loginErr.message 
+            });
+          }
+          
+          console.log('✅ User logged in successfully:', user.claims?.email);
+          res.redirect("/");
         });
-      } else {
-        console.log('✅ Callback authentication successful');
-        next();
-      }
-    });
+      })(req, res, next);
+    } catch (error) {
+      console.error('🚨 Callback route error:', error);
+      console.error('🚨 Callback error stack:', error.stack);
+      res.status(500).json({ 
+        message: "Callback route failed", 
+        error: error.message 
+      });
+    }
   });
 
   app.get("/api/logout", (req, res) => {
