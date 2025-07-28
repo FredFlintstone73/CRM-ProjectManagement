@@ -24,28 +24,40 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 90 * 60 * 1000; // 90 minutes max session time
+  
+  // Generate robust session secret for deployment
+  const sessionSecret = process.env.SESSION_SECRET || 
+    process.env.REPL_ID || 
+    'development-fallback-secret-key';
+  
+  console.log('🔐 Session configuration:', {
+    hasSecret: !!sessionSecret,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    nodeEnv: process.env.NODE_ENV,
+    replId: process.env.REPL_ID?.slice(0, 8) + '...'
+  });
+
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
     createTableIfMissing: false,
-    ttl: sessionTtl,
+    ttl: Math.floor(sessionTtl / 1000), // Convert to seconds for PostgreSQL
     tableName: "sessions",
   });
-  // Generate session secret if not provided (for deployment compatibility)
-  const sessionSecret = process.env.SESSION_SECRET || `fallback-secret-${process.env.REPL_ID || 'development'}`;
   
   return session({
     secret: sessionSecret,
     store: sessionStore,
-    resave: true, // Update session on each request to track activity
-    saveUninitialized: false,
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: false, // Don't create session until something stored
     rolling: true, // Reset expiration on activity
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Only secure in production
+      secure: false, // Disable secure for deployment compatibility
       maxAge: sessionTtl,
-      sameSite: 'lax', // Better compatibility across environments
+      sameSite: 'lax',
     },
+    name: 'connect.sid', // Standard session cookie name
   });
 }
 
@@ -72,39 +84,54 @@ async function upsertUser(
 }
 
 export async function setupAuth(app: Express) {
-  app.set("trust proxy", 1);
-  app.use(getSession());
-  app.use(passport.initialize());
-  app.use(passport.session());
+  try {
+    console.log('🔧 Setting up authentication...');
+    app.set("trust proxy", 1);
+    app.use(getSession());
+    app.use(passport.initialize());
+    app.use(passport.session());
 
-  const config = await getOidcConfig();
+    console.log('🔍 Getting OIDC configuration...');
+    const config = await getOidcConfig();
+    console.log('✅ OIDC configuration loaded successfully');
 
-  const verify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
-  };
+    const verify: VerifyFunction = async (
+      tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
+      verified: passport.AuthenticateCallback
+    ) => {
+      try {
+        const user = {};
+        updateUserSession(user, tokens);
+        await upsertUser(tokens.claims());
+        verified(null, user);
+      } catch (error) {
+        console.error('🚨 Error in auth verify function:', error);
+        verified(error, null);
+      }
+    };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
+    console.log('🌐 Setting up strategies for domains:', process.env.REPLIT_DOMAINS);
+    for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
+      const strategy = new Strategy(
+        {
+          name: `replitauth:${domain}`,
+          config,
+          scope: "openid email profile offline_access",
+          callbackURL: `https://${domain}/api/callback`,
+        },
+        verify,
+      );
+      passport.use(strategy);
+      console.log(`✅ Strategy configured for domain: ${domain}`);
+    }
+
+    passport.serializeUser((user: Express.User, cb) => cb(null, user));
+    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+    console.log('✅ Passport serialization configured');
+  } catch (error) {
+    console.error('🚨 CRITICAL: Authentication setup failed:', error);
+    throw error;
   }
-
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, {
