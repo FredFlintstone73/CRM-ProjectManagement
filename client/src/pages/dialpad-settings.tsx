@@ -48,7 +48,10 @@ export default function DialpadSettings() {
 
   // Test contact matching mutation
   const testContactMutation = useMutation({
-    mutationFn: (phoneNumber: string) => apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber }),
+    mutationFn: async (phoneNumber: string) => {
+      const response = await apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber });
+      return await response.json();
+    },
     onSuccess: (data: any) => {
       console.log('🎯 Frontend received test contact match response:', data);
       console.log('🔍 Response type:', typeof data, 'Keys:', Object.keys(data || {}));
