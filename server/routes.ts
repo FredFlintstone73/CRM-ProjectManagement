@@ -2437,11 +2437,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Status must be 'approved' or 'rejected'" });
       }
       
-      const updatedRequest = await storage.updateInvitationRequestStatus(requestId, status, reviewedBy);
-      res.json(updatedRequest);
+      // First get the request details
+      const requests = await storage.getInvitationRequests();
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Invitation request not found" });
+      }
+      
+      if (status === 'approved') {
+        // Create a user invitation when approved
+        const invitationData = {
+          firstName: request.firstName,
+          lastName: request.lastName,
+          email: request.email,
+          accessLevel: 'team_member',
+          department: null,
+          invitedBy: reviewedBy,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Expires in 7 days
+        };
+        
+        await storage.createUserInvitation(invitationData);
+      }
+      
+      // Delete the invitation request after processing (both approved and rejected)
+      await storage.deleteInvitationRequest(requestId);
+      
+      res.json({ 
+        message: status === 'approved' 
+          ? "Invitation request approved and user invitation created" 
+          : "Invitation request rejected and removed",
+        status 
+      });
     } catch (error) {
-      console.error("Error updating invitation request:", error);
-      res.status(500).json({ message: "Failed to update invitation request" });
+      console.error("Error processing invitation request:", error);
+      res.status(500).json({ message: "Failed to process invitation request" });
     }
   });
 

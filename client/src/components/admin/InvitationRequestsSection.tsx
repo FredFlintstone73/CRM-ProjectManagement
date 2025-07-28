@@ -36,9 +36,16 @@ export default function InvitationRequestsSection() {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/invitation-requests'] });
+      // Also invalidate user invitations since approved requests create invitations
+      queryClient.invalidateQueries({ queryKey: ['/api/user-invitations'] });
+      
+      const message = variables.status === 'approved' 
+        ? 'Invitation request approved and user invitation created'
+        : 'Invitation request rejected and removed';
+        
       toast({
-        title: "Request Updated",
-        description: `Invitation request has been ${variables.status}.`,
+        title: "Request Processed",
+        description: message,
       });
     },
     onError: (error) => {
@@ -56,16 +63,8 @@ export default function InvitationRequestsSection() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-      case 'approved':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200"><Check className="w-3 h-3 mr-1" />Approved</Badge>;
-      case 'rejected':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200"><X className="w-3 h-3 mr-1" />Rejected</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+    // Only pending requests will be shown since approved/rejected are deleted
+    return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1" />Pending Review</Badge>;
   };
 
   const formatDate = (dateString: string) => {

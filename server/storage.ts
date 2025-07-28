@@ -88,6 +88,7 @@ export interface IStorage {
   createInvitationRequest(request: InsertInvitationRequest): Promise<InvitationRequest>;
   getInvitationRequests(): Promise<InvitationRequest[]>;
   updateInvitationRequestStatus(id: number, status: string, reviewedBy: string): Promise<InvitationRequest>;
+  deleteInvitationRequest(id: number): Promise<boolean>;
   
   // User access control operations  
   getUserAccessLevel(userId: string): Promise<string | undefined>;
@@ -2446,6 +2447,15 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updated;
+  }
+
+  async deleteInvitationRequest(id: number): Promise<boolean> {
+    const result = await db
+      .delete(invitationRequests)
+      .where(eq(invitationRequests.id, id))
+      .returning();
+    
+    return result.length > 0;
   }
 
   // User access control methods
