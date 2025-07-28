@@ -30,10 +30,10 @@ export default function DialpadSettings() {
   // Setup webhooks mutation
   const setupWebhooksMutation = useMutation({
     mutationFn: () => apiRequest('POST', '/api/dialpad/setup-webhooks', {}),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       toast({
         title: "Webhooks Setup Complete",
-        description: "Dialpad webhooks have been configured successfully. Call transcripts and text messages will now be captured automatically.",
+        description: `Dialpad webhooks configured successfully for: ${data.webhookUrl}. Call transcripts and text messages will now be captured automatically.`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/dialpad/status'] });
     },

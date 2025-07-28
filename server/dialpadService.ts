@@ -281,7 +281,7 @@ export class DialpadService {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            url: webhookUrl,
+            hook_url: webhookUrl,
             event_type: subscription.event_type,
             secret: this.config.webhookSecret
           })
