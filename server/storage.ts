@@ -936,6 +936,7 @@ export class DatabaseStorage implements IStorage {
     await db.insert(userActivities).values({
       userId: data.userId,
       action: data.action,
+      resource: data.entityType || 'unknown',
       entityType: data.entityType,
       entityId: data.entityId,
       metadata: data.metadata,
@@ -950,6 +951,160 @@ export class DatabaseStorage implements IStorage {
       .where(eq(userActivities.userId, userId))
       .orderBy(desc(userActivities.createdAt))
       .limit(limit);
+  }
+
+  // Email notifications
+  async getEmailNotifications(userId?: string): Promise<any[]> {
+    const query = db
+      .select()
+      .from(emailNotifications)
+      .where(eq(emailNotifications.isRead, false))
+      .orderBy(desc(emailNotifications.createdAt));
+    
+    if (userId) {
+      return await query.where(eq(emailNotifications.userId, userId));
+    }
+    
+    return await query;
+  }
+
+  async markEmailNotificationRead(notificationId: number): Promise<void> {
+    await db
+      .update(emailNotifications)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(eq(emailNotifications.id, notificationId));
+  }
+
+  async markAllEmailNotificationsRead(userId: string): Promise<void> {
+    await db
+      .update(emailNotifications)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(
+        and(
+          eq(emailNotifications.userId, userId),
+          eq(emailNotifications.isRead, false)
+        )
+      );
+  }
+
+  // Project templates
+  async getProjectTemplates(): Promise<any[]> {
+    return await db
+      .select()
+      .from(projectTemplates)
+      .orderBy(projectTemplates.name);
+  }
+
+  async getProjectTemplate(id: number): Promise<any | null> {
+    const templates = await db
+      .select()
+      .from(projectTemplates)
+      .where(eq(projectTemplates.id, id))
+      .limit(1);
+    
+    return templates[0] || null;
+  }
+
+  async createProjectTemplate(data: any): Promise<any> {
+    const [template] = await db
+      .insert(projectTemplates)
+      .values({
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    
+    return template;
+  }
+
+  async updateProjectTemplate(id: number, data: any): Promise<any> {
+    const [template] = await db
+      .update(projectTemplates)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(projectTemplates.id, id))
+      .returning();
+    
+    return template;
+  }
+
+  async deleteProjectTemplate(id: number): Promise<void> {
+    await db.delete(projectTemplates).where(eq(projectTemplates.id, id));
+  }
+
+  // Dashboard methods
+  async getProjectsDueSoon(days: number = 30): Promise<any[]> {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + days);
+    
+    return await db
+      .select()
+      .from(projects)
+      .where(
+        and(
+          lte(projects.dueDate, futureDate),
+          gte(projects.dueDate, new Date())
+        )
+      )
+      .orderBy(projects.dueDate);
+  }
+
+  // Additional notification methods
+  async getTasksOverdue(userId: string): Promise<any[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return await db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          lt(tasks.dueDate, today),
+          eq(tasks.completed, false),
+          sql`${tasks.assignedTo} @> ARRAY[${userId}]::text[]`
+        )
+      )
+      .orderBy(tasks.dueDate);
+  }
+
+  async getTasksDueSoon(userId: string, days: number = 7): Promise<any[]> {
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + days);
+    
+    return await db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          gte(tasks.dueDate, today),
+          lte(tasks.dueDate, futureDate),
+          eq(tasks.completed, false),
+          sql`${tasks.assignedTo} @> ARRAY[${userId}]::text[]`
+        )
+      )
+      .orderBy(tasks.dueDate);
+  }
+
+  // Mentions
+  async getMentions(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(mentions)
+      .where(
+        and(
+          eq(mentions.mentionedUserId, userId),
+          eq(mentions.isRead, false)
+        )
+      )
+      .orderBy(desc(mentions.createdAt));
+  }
+
+  async markMentionRead(mentionId: number): Promise<void> {
+    await db
+      .update(mentions)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(eq(mentions.id, mentionId));
   }
 
   // Search methods
