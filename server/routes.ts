@@ -2408,9 +2408,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Debug: Show available codes for troubleshooting
         try {
           const allInvitations = await storage.getAllPendingInvitations?.() || [];
+          console.log(`💡 Found ${allInvitations.length} total pending invitations in database:`);
           allInvitations.forEach(inv => {
             console.log(`   - Code: ${inv.invitationCode} | Email: ${inv.email} | Status: ${inv.status}`);
           });
+          
+          // Also check if any invitations exist at all
+          const allInvitationsAnyStatus = await storage.getUserInvitations();
+          console.log(`📊 Total invitations in database (any status): ${allInvitationsAnyStatus.length}`);
         } catch (debugError) {
           console.log('Could not fetch debug invitation list:', debugError);
         }

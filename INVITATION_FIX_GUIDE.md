@@ -14,17 +14,19 @@
 
 **Root Cause**: Environment or database connectivity issues between development and deployed app
 
-## Current Valid Invitation Codes
+## UPDATED Valid Invitation Codes (July 28, 2025)
 
-Based on the database, these are the current valid invitation codes:
+**PROBLEM RESOLVED**: The old invitation codes were in development database, not deployed database.
+
+New working invitation codes in current database:
 
 | Name | Email | Invitation Code |
 |------|-------|----------------|
-| Devyn Tennant | devyn@alignedadvisors.com | `2lw57qs0ijhjghtwdw8h28` |
-| Megan Mountain | megan@alignedadvisors.com | `iq4a2h2jotqq6ntkyqaqxh` |
-| Taylor Milata | taylor@alignedadvisors.com | `m1f99859dfezy96o8ykdh` |
-| Alex Borrero | alex@alignedadvisors.com | `llwkiu8gw7bf3jat5httic` |
-| Mike Belgard | mike@alignedadvisors.com | `gbke5d0ou98tjmz4mj5xqr` |
+| Alex Borrero | alex@alignedadvisors.com | `alex2025invite` |
+| Devyn Tennant | devyn@alignedadvisors.com | `devyn2025invite` |
+| Megan Mountain | megan@alignedadvisors.com | `megan2025invite` |
+| Taylor Milata | taylor@alignedadvisors.com | `taylor2025invite` |
+| Mike Belgard | mike@alignedadvisors.com | `mike2025invite` |
 
 ## Environment Variables Needed
 
@@ -55,13 +57,13 @@ GMAIL_APP_PASSWORD=your_gmail_app_password
 3. Verify it comes from `chad@alignedadvisors.com`
 
 ### 3. Share Working Codes with Team
-Send your team members these direct invitation links:
+Send your team members these UPDATED direct invitation links:
 
-- **Devyn**: [Your App URL]/accept-invitation?code=2lw57qs0ijhjghtwdw8h28
-- **Megan**: [Your App URL]/accept-invitation?code=iq4a2h2jotqq6ntkyqaqxh
-- **Taylor**: [Your App URL]/accept-invitation?code=m1f99859dfezy96o8ykdh
-- **Alex**: [Your App URL]/accept-invitation?code=llwkiu8gw7bf3jat5httic
-- **Mike**: [Your App URL]/accept-invitation?code=gbke5d0ou98tjmz4mj5xqr
+- **Alex**: https://crm-project-management.replit.app/accept-invitation?code=alex2025invite
+- **Devyn**: https://crm-project-management.replit.app/accept-invitation?code=devyn2025invite
+- **Megan**: https://crm-project-management.replit.app/accept-invitation?code=megan2025invite
+- **Taylor**: https://crm-project-management.replit.app/accept-invitation?code=taylor2025invite
+- **Mike**: https://crm-project-management.replit.app/accept-invitation?code=mike2025invite
 
 ### 4. Instructions for Team Members
 1. Click the direct link above
