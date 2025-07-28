@@ -25,15 +25,23 @@ export default function InvitationRequests() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: requests = [], isLoading } = useQuery({
+  const { data: requests = [], isLoading, error } = useQuery({
     queryKey: ['/api/invitation-requests'],
     staleTime: 30000,
   });
+
+  // Debug logging
+  if (error) {
+    console.error('Error fetching invitation requests:', error);
+  }
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: 'approved' | 'rejected' }) => {
       return apiRequest(`/api/invitation-requests/${id}`, {
         method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ status }),
       });
     },
@@ -44,7 +52,8 @@ export default function InvitationRequests() {
         description: `Invitation request has been ${variables.status}.`,
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error updating invitation request:', error);
       toast({
         title: "Error",
         description: "Failed to update invitation request.",
