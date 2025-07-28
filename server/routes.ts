@@ -7,6 +7,7 @@ import { twoFactorAuthService } from "./twoFactorAuth";
 import { aiSearchService } from "./aiSearchService";
 import { oauthService } from "./oauthService";
 import { calendarService } from "./calendarService";
+import { DialpadService } from "./dialpadService";
 import { 
   insertContactSchema, 
   insertProjectSchema, 
@@ -3095,6 +3096,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error refreshing emails:", error);
       res.status(500).json({ message: "Failed to refresh emails", success: false });
+    }
+  });
+
+  // Initialize Dialpad service
+  let dialpadService: DialpadService | null = null;
+  if (process.env.DIALPAD_API_TOKEN && process.env.DIALPAD_WEBHOOK_SECRET) {
+    dialpadService = new DialpadService({
+      apiToken: process.env.DIALPAD_API_TOKEN,
+      webhookSecret: process.env.DIALPAD_WEBHOOK_SECRET,
+      baseUrl: process.env.DIALPAD_BASE_URL || 'https://dialpad.com/api/v2'
+    }, storage);
+    
+    console.log('✅ Dialpad service initialized');
+  } else {
+    console.log('⚠️  Dialpad service not initialized - missing environment variables');
+    console.log('   Required: DIALPAD_API_TOKEN, DIALPAD_WEBHOOK_SECRET');
+    console.log('   Optional: DIALPAD_BASE_URL (defaults to https://dialpad.com/api/v2)');
+  }
+
+  // Dialpad webhook endpoints (public, no authentication required)
+  app.post('/api/dialpad/webhook', async (req: any, res) => {
+    try {
+      if (!dialpadService) {
+        console.log('Dialpad webhook received but service not configured');
+        return res.status(503).json({ message: "Dialpad service not configured" });
+      }
+
+      // Get the raw payload for signature verification
+      const rawPayload = JSON.stringify(req.body);
+      const signature = req.headers['x-dialpad-signature'] || req.headers['x-signature'];
+
+      // Verify webhook signature
+      if (!dialpadService.verifyWebhookSignature(rawPayload, signature)) {
+        console.log('Invalid Dialpad webhook signature');
+        return res.status(401).json({ message: "Invalid signature" });
+      }
+
+      const eventType = req.body.event_type || req.body.type;
+      const eventData = req.body.data || req.body;
+
+      console.log('Processing Dialpad webhook:', eventType);
+
+      // Process the webhook event
+      await dialpadService.processWebhookEvent(eventType, eventData);
+
+      res.json({ message: "Webhook processed successfully" });
+    } catch (error) {
+      console.error("Error processing Dialpad webhook:", error);
+      res.status(500).json({ message: "Failed to process webhook" });
+    }
+  });
+
+  // Dialpad configuration endpoints (authenticated)
+  app.get('/api/dialpad/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const configured = !!dialpadService;
+      res.json({ 
+        configured,
+        hasApiToken: !!process.env.DIALPAD_API_TOKEN,
+        hasWebhookSecret: !!process.env.DIALPAD_WEBHOOK_SECRET,
+        baseUrl: process.env.DIALPAD_BASE_URL || 'https://dialpad.com/api/v2'
+      });
+    } catch (error) {
+      console.error("Error checking Dialpad status:", error);
+      res.status(500).json({ message: "Failed to check Dialpad status" });
+    }
+  });
+
+  app.post('/api/dialpad/setup-webhooks', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!dialpadService) {
+        return res.status(503).json({ message: "Dialpad service not configured" });
+      }
+
+      // Get webhook URL from environment or construct from request
+      const webhookUrl = process.env.DIALPAD_WEBHOOK_URL || 
+        `${req.protocol}://${req.get('host')}/api/dialpad/webhook`;
+
+      await dialpadService.setupWebhookSubscriptions(webhookUrl);
+      
+      res.json({ 
+        message: "Webhook subscriptions created successfully",
+        webhookUrl 
+      });
+    } catch (error) {
+      console.error("Error setting up Dialpad webhooks:", error);
+      res.status(500).json({ message: "Failed to setup webhooks" });
+    }
+  });
+
+  // Test endpoint to manually trigger contact matching
+  app.post('/api/dialpad/test-contact-match', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!dialpadService) {
+        return res.status(503).json({ message: "Dialpad service not configured" });
+      }
+
+      const { phoneNumber } = req.body;
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number required" });
+      }
+
+      const contactId = await dialpadService.findContactByPhoneNumber(phoneNumber);
+      
+      res.json({ 
+        phoneNumber,
+        contactId,
+        matched: !!contactId
+      });
+    } catch (error) {
+      console.error("Error testing contact match:", error);
+      res.status(500).json({ message: "Failed to test contact match" });
     }
   });
 

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft, Shield } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft, Shield, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
@@ -39,7 +39,8 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     { name: 'Messages', href: '/messages', icon: MessageSquare },
     ...(isAdministrator ? [
       { name: 'User Management', href: '/user-management', icon: Users },
-      { name: 'Administration', href: '/administration', icon: Shield }
+      { name: 'Administration', href: '/administration', icon: Shield },
+      { name: 'Dialpad', href: '/dialpad', icon: Phone }
     ] : []),
     { name: 'Settings', href: '/settings', icon: Settings },
   ];

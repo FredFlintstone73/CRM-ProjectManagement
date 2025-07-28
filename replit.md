@@ -141,6 +141,21 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Complete Dialpad API Integration for Automatic Call and Text Capture (July 28, 2025)
+- **Comprehensive Dialpad Service**: Created complete DialpadService class with webhook processing, contact matching, and transcript fetching capabilities
+- **Automatic Call Transcript Capture**: Implemented real-time capture of call transcripts with AI-generated moments (action items, sentiment, summaries) directly into contact interactions
+- **Text Message Integration**: Added automatic SMS capture for both incoming and outgoing messages with media attachment support
+- **Smart Contact Matching**: Developed intelligent phone number matching system across all contact phone fields (cell, work, spouse cell/work) with formatting tolerance
+- **Webhook Security**: Implemented HMAC-SHA256 signature verification for secure webhook authentication from Dialpad servers
+- **Admin Configuration Interface**: Created comprehensive Dialpad settings page for administrators to configure API credentials, setup webhooks, and test contact matching
+- **Database Integration**: Enhanced contact interactions system to store Dialpad communications as system-generated notes with proper formatting and metadata
+- **Environment Variable Configuration**: Added support for DIALPAD_API_TOKEN, DIALPAD_WEBHOOK_SECRET, and DIALPAD_BASE_URL environment variables
+- **Multiple Event Types**: Supports call.transcription, call.hangup, sms.received, and sms.sent webhook events from Dialpad
+- **Real-time Processing**: Webhook endpoints process Dialpad events immediately and create interaction records automatically
+- **Navigation Enhancement**: Added Dialpad integration to administrator sidebar navigation with Phone icon for easy access
+- **Documentation Complete**: Created comprehensive integration guide covering setup, testing, troubleshooting, and security considerations
+- **Production Ready**: Complete system tested and ready for deployment with proper error handling, rate limiting awareness, and security measures
+
 ### Enhanced Email Compose Interface with CC/BCC Support (July 26, 2025)
 - **Complete CC/BCC Functionality**: Added full Carbon Copy (CC) and Blind Carbon Copy (BCC) support to email compose dialog
 - **Side-by-Side Layout**: CC and BCC fields positioned horizontally next to each other using CSS grid for efficient space usage
