@@ -78,13 +78,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Activity logging middleware for authenticated routes
   app.use('/api', logUserActivity);
 
-  // Apply mandatory 2FA to all API routes except auth endpoints
+  // Apply mandatory 2FA to all API routes except auth endpoints and invitation validation
   app.use('/api', (req, res, next) => {
-    // Skip 2FA for auth endpoints
+    // Skip 2FA for auth endpoints and invitation validation
     if (req.originalUrl.startsWith('/api/auth/') || 
         req.originalUrl.startsWith('/api/login') || 
         req.originalUrl.startsWith('/api/logout') || 
-        req.originalUrl.startsWith('/api/callback')) {
+        req.originalUrl.startsWith('/api/callback') ||
+        req.originalUrl.match(/^\/api\/user-invitations\/[^/]+$/)) {
       return next();
     }
     // Apply authentication and 2FA to all other routes
@@ -2392,6 +2393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for invitation validation (no authentication required)
   app.get('/api/user-invitations/:code', async (req: any, res) => {
     try {
       // Trim and normalize the invitation code
