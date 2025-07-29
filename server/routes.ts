@@ -2395,6 +2395,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/user-invitations/:id/resend', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      if (isNaN(invitationId)) {
+        return res.status(400).json({ message: "Invalid invitation ID" });
+      }
+
+      // Get the invitation details
+      const invitations = await storage.getUserInvitations(userId);
+      const invitation = invitations.find(inv => inv.id === invitationId);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+
+      if (invitation.status !== 'pending') {
+        return res.status(400).json({ message: "Can only resend pending invitations" });
+      }
+
+      // Send the invitation email again
+      const emailResult = await emailService.sendInvitationEmail(invitation);
+      
+      if (!emailResult.sent) {
+        return res.status(500).json({ message: `Failed to resend invitation: ${emailResult.message}` });
+      }
+
+      res.json({ message: "Invitation resent successfully" });
+    } catch (error) {
+      console.error("Error resending user invitation:", error);
+      res.status(500).json({ message: "Failed to resend user invitation" });
+    }
+  });
+
   // Invitation request routes (public endpoint - no authentication required)
   app.post('/api/invitation-requests', async (req: any, res) => {
     try {

@@ -10,7 +10,7 @@ import UserInvitationDialog from "@/components/admin/UserInvitationDialog";
 import EmailConfigurationStatus from "@/components/admin/EmailConfigurationStatus";
 import TeamMemberManagement from "@/components/admin/TeamMemberManagement";
 import InvitationRequestsSection from "@/components/admin/InvitationRequestsSection";
-import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy, Trash2 } from "lucide-react";
+import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy, Trash2, Send } from "lucide-react";
 import { formatAccessLevel } from "@/lib/utils/formatAccessLevel";
 
 interface UserInvitation {
@@ -63,6 +63,35 @@ export default function UserManagement() {
       toast({
         title: "Failed to delete invitation",
         description: error.message || "There was an error deleting the invitation",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resendInvitationMutation = useMutation({
+    mutationFn: async (invitationId: number) => {
+      const response = await fetch(`/api/user-invitations/${invitationId}/resend`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to resend invitation: ${errorText}`);
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitation resent",
+        description: "Invitation email has been sent again successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to resend invitation",
+        description: error.message || "There was an error resending the invitation",
         variant: "destructive",
       });
     },
@@ -275,14 +304,26 @@ export default function UserManagement() {
                       
                       <div className="flex items-center gap-2">
                         {invitation.status === "pending" && invitation.invitationCode && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => copyInvitationCode(invitation.invitationCode)}
-                          >
-                            <Copy className="mr-1 h-3 w-3" />
-                            Copy Code
-                          </Button>
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => copyInvitationCode(invitation.invitationCode)}
+                            >
+                              <Copy className="mr-1 h-3 w-3" />
+                              Copy Code
+                            </Button>
+                            
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => resendInvitationMutation.mutate(invitation.id)}
+                              disabled={resendInvitationMutation.isPending}
+                            >
+                              <Send className="mr-1 h-3 w-3" />
+                              Resend Invitation
+                            </Button>
+                          </>
                         )}
                         
                         <Button
