@@ -294,7 +294,7 @@ export default function UserManagement() {
                       </div>
                       
                       {invitation.status === "pending" && invitation.invitationCode && (
-                        <div className="p-2 bg-muted/50 rounded border mt-[5px] mb-[5px] pt-[0px] pb-[0px]">
+                        <div className="p-2 bg-muted/50 rounded border mt-[5px] mb-[5px] pt-[0px] pb-[0px] w-4/5">
                           <div className="text-xs text-muted-foreground mb-1">Invitation Code:</div>
                           <code className="text-sm font-mono">{invitation.invitationCode}</code>
                         </div>
