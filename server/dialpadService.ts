@@ -285,7 +285,7 @@ export class DialpadService {
         console.log(`Creating webhook subscription for ${subscription.event_type}...`);
         
         const requestBody = {
-          url: webhookUrl,
+          hook_url: webhookUrl,
           event_type: subscription.event_type,
           secret: this.config.webhookSecret
         };
