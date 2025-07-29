@@ -162,7 +162,7 @@ export default function Settings() {
             Security Settings
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="p-6 space-y-6 pt-[0px] pb-[0px]">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
