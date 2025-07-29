@@ -289,6 +289,7 @@ export default function TeamMemberManagement() {
                     <Button 
                       variant="outline" 
                       size="sm"
+                      className="pl-[5px] pr-[5px]"
                       onClick={() => handleChangeAccessLevel(member)}
                     >
                       <Settings className="mr-1 h-3 w-3" />
