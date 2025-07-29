@@ -2925,6 +2925,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Database export to CSV (Administrator only)
+  app.get('/api/export/database', isAuthenticated, requireAdministrator, async (req: any, res) => {
+    try {
+      console.log('Starting database export...');
+      
+      // Get all main data tables
+      const [contacts, projects, tasks, users] = await Promise.all([
+        storage.getContacts(),
+        storage.getProjects(),
+        storage.getTasks(),
+        storage.getUsers()
+      ]);
+
+      // Get additional data if methods exist
+      let emailInteractions: any[] = [];
+      let callTranscripts: any[] = [];
+      
+      try {
+        // Get all email interactions for all contacts
+        const allContacts = await storage.getContacts();
+        const allEmailPromises = allContacts.map(contact => 
+          storage.getEmailInteractions(contact.id).catch(() => [])
+        );
+        const allEmailResults = await Promise.all(allEmailPromises);
+        emailInteractions = allEmailResults.flat();
+      } catch (error) {
+        console.log('Email interactions not available');
+      }
+
+      try {
+        // Get call transcripts if available
+        callTranscripts = await storage.getCallTranscripts?.() || [];
+      } catch (error) {
+        console.log('Call transcripts not available');
+      }
+
+      // Convert to CSV format with escaping
+      const csvEscape = (value: any): string => {
+        if (value === null || value === undefined) return '';
+        const str = String(value);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const arrayToCsv = (data: any[], title: string): string => {
+        if (data.length === 0) return `${title}\nNo data\n\n`;
+        
+        const headers = Object.keys(data[0]);
+        const csvHeaders = headers.map(csvEscape).join(',');
+        const csvRows = data.map(row => 
+          headers.map(header => csvEscape(row[header])).join(',')
+        );
+        
+        return `${title}\n${csvHeaders}\n${csvRows.join('\n')}\n\n`;
+      };
+
+      // Build complete CSV export
+      let csvContent = `Database Export - ${new Date().toISOString()}\n\n`;
+      csvContent += arrayToCsv(contacts, 'CONTACTS');
+      csvContent += arrayToCsv(projects, 'PROJECTS');
+      csvContent += arrayToCsv(tasks, 'TASKS');
+      csvContent += arrayToCsv(users, 'USERS');
+      
+      if (emailInteractions.length > 0) {
+        csvContent += arrayToCsv(emailInteractions, 'EMAIL_INTERACTIONS');
+      }
+      
+      if (callTranscripts.length > 0) {
+        csvContent += arrayToCsv(callTranscripts, 'CALL_TRANSCRIPTS');
+      }
+
+      // Set headers for file download
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `database_export_${timestamp}.csv`;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(csvContent);
+      
+      console.log(`Database export completed: ${filename}`);
+    } catch (error) {
+      console.error("Error exporting database:", error);
+      res.status(500).json({ message: "Failed to export database" });
+    }
+  });
+
   // Update user status (activate/deactivate) (Administrator only)
   app.put('/api/users/:id/status', isAuthenticated, requireAdministrator, async (req: any, res) => {
     try {

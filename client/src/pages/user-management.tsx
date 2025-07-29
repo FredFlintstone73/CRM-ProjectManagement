@@ -10,7 +10,7 @@ import UserInvitationDialog from "@/components/admin/UserInvitationDialog";
 import EmailConfigurationStatus from "@/components/admin/EmailConfigurationStatus";
 import TeamMemberManagement from "@/components/admin/TeamMemberManagement";
 import InvitationRequestsSection from "@/components/admin/InvitationRequestsSection";
-import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy, Trash2, Send } from "lucide-react";
+import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy, Trash2, Send, Download } from "lucide-react";
 import { formatAccessLevel } from "@/lib/utils/formatAccessLevel";
 
 interface UserInvitation {
@@ -216,6 +216,55 @@ export default function UserManagement() {
     }
   };
 
+  const handleDatabaseExport = async () => {
+    try {
+      toast({
+        title: "Preparing export...",
+        description: "Generating database export file",
+      });
+      
+      const response = await fetch('/api/export/database', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
+
+      // Get the filename from the response headers
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition 
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : `database_export_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Export completed",
+        description: `Database exported successfully as ${filename}`,
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error('Database export error:', error);
+      toast({
+        title: "Export failed",
+        description: error instanceof Error ? error.message : "Failed to export database",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -225,7 +274,17 @@ export default function UserManagement() {
             Manage team member invitations and access levels
           </p>
         </div>
-        <UserInvitationDialog />
+        <div className="flex gap-3">
+          <Button 
+            onClick={handleDatabaseExport}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export Database
+          </Button>
+          <UserInvitationDialog />
+        </div>
       </div>
       <div className="grid gap-6">
         {/* Email Configuration Status */}
