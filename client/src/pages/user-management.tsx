@@ -30,9 +30,11 @@ export default function UserManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: invitations, isLoading } = useQuery<UserInvitation[]>({
+  const { data: invitations, isLoading, error } = useQuery<UserInvitation[]>({
     queryKey: ['/api/user-invitations'],
     enabled: isAdministrator,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const deleteInvitationMutation = useMutation({
@@ -86,6 +88,39 @@ export default function UserManagement() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's a fetch error
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+            <p className="text-muted-foreground">
+              Manage team member invitations and access levels
+            </p>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-red-800">
+            <AlertTriangle className="h-5 w-5" />
+            <h3 className="font-medium">Failed to load user management data</h3>
+          </div>
+          <p className="text-red-700 mt-2 text-sm">
+            Error: {error instanceof Error ? error.message : 'Unknown error occurred'}
+          </p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            variant="outline" 
+            size="sm" 
+            className="mt-3"
+          >
+            Refresh Page
+          </Button>
         </div>
       </div>
     );

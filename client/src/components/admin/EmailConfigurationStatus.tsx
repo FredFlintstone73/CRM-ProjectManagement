@@ -9,9 +9,11 @@ interface EmailStatus {
 }
 
 export default function EmailConfigurationStatus() {
-  const { data: emailStatus, isLoading } = useQuery<EmailStatus>({
+  const { data: emailStatus, isLoading, error } = useQuery<EmailStatus>({
     queryKey: ["/api/email-status"],
-    refetchInterval: 10000, // Check every 10 seconds
+    refetchInterval: 30000, // Check every 30 seconds (reduced frequency)
+    retry: 2,
+    retryDelay: 1000,
   });
 
   if (isLoading) {

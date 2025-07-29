@@ -31,8 +31,10 @@ export default function TeamMemberManagement() {
   const [newAccessLevel, setNewAccessLevel] = useState<string>("");
   const [newStatus, setNewStatus] = useState<boolean>(true);
 
-  const { data: teamMembers, isLoading } = useQuery({
+  const { data: teamMembers, isLoading, error } = useQuery({
     queryKey: ["/api/users"],
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const changeAccessLevelMutation = useMutation({
@@ -204,6 +206,31 @@ export default function TeamMemberManagement() {
       deleteTeamMemberMutation.mutate(selectedMember.id);
     }
   };
+
+  // Show error state if there's a fetch error
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Team Members
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-red-800">
+              <User className="h-4 w-4" />
+              <span className="font-medium">Failed to load team members</span>
+            </div>
+            <p className="text-red-700 text-sm mt-1">
+              {error instanceof Error ? error.message : 'Unknown error occurred'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
