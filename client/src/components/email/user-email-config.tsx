@@ -333,7 +333,7 @@ export function UserEmailConfig() {
                 control={form.control}
                 name="imapSecure"
                 render={({ field }) => (
-                  <FormItem className="flex items-center space-x-2">
+                  <FormItem className="flex items-center space-x-2 mt-[0px] mb-[0px]">
                     <FormControl>
                       <Switch checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
