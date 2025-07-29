@@ -302,7 +302,7 @@ export default function UserManagement() {
                     </div>
                     
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-2">
                         {invitation.status === "pending" && invitation.invitationCode && (
                           <>
                             <Button 
@@ -327,17 +327,17 @@ export default function UserManagement() {
                             </Button>
                           </>
                         )}
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => deleteInvitationMutation.mutate(invitation.id)}
-                          disabled={deleteInvitationMutation.isPending}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10 pl-[5px] pr-[5px]"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
                       </div>
+                        
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteInvitationMutation.mutate(invitation.id)}
+                        disabled={deleteInvitationMutation.isPending}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 pl-[5px] pr-[5px]"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
                 ))}
