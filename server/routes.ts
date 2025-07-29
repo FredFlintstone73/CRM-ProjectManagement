@@ -3536,6 +3536,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const userEmailRoutes = await import('./routes/userEmail');
   app.use('/api/user-email', userEmailRoutes.createUserEmailRoutes(storage));
 
+  // Ensure all unmatched API routes return proper 404 instead of HTML
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ message: `API endpoint not found: ${req.path}` });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
