@@ -24,7 +24,7 @@ export default function SearchTrigger() {
     <>
       <div 
         onClick={() => setIsSearchOpen(true)}
-        className="sidebar-nav-item cursor-pointer"
+        className="sidebar-nav-item cursor-pointer pl-[19px] pr-[19px]"
       >
         <Search size={20} />
         <span>Search with AI...</span>
