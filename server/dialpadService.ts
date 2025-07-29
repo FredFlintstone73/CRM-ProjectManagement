@@ -308,6 +308,9 @@ export class DialpadService {
         if (response.ok) {
           console.log(`✅ Created Dialpad webhook subscription for ${subscription.event_type}`);
           results.push({ event_type: subscription.event_type, success: true });
+        } else if (response.status === 409) {
+          console.log(`✅ Webhook for ${subscription.event_type} already exists (409 conflict)`);
+          results.push({ event_type: subscription.event_type, success: true, note: 'already exists' });
         } else {
           console.error(`❌ Failed to create webhook for ${subscription.event_type}: ${response.status} - ${responseText}`);
           results.push({ event_type: subscription.event_type, success: false, error: `${response.status}: ${responseText}` });
