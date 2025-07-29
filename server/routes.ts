@@ -147,6 +147,13 @@ async function configureAutoEmailSettings(user: any, invitationEmail: string) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Ensure API routes are handled first and return JSON (not HTML)
+  app.use('/api/*', (req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  });
+
   // Auth middleware
   await setupAuth(app);
 
@@ -3536,14 +3543,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const userEmailRoutes = await import('./routes/userEmail');
   app.use('/api/user-email', userEmailRoutes.createUserEmailRoutes(storage));
 
-  // Ensure all unmatched API routes return proper 404 instead of HTML
-  app.use('/api', (req, res, next) => {
-    // Only handle actual /api/* routes, not root or client routes
-    if (req.path.startsWith('/api/') && req.path !== '/api') {
-      res.status(404).json({ message: `API endpoint not found: ${req.path}` });
-    } else {
-      next();
-    }
+  // Catch-all for any unmatched API routes to return JSON 404
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ message: `API endpoint not found: ${req.path}` });
   });
 
   const httpServer = createServer(app);
