@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Settings as SettingsIcon, Shield, Smartphone, AlertTriangle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import TwoFactorAuth from "@/components/auth/two-factor-auth";
+import NavigationCustomizer from "@/components/settings/navigation-customizer";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useEffect } from "react";
 
@@ -47,10 +48,7 @@ export default function Settings() {
 
   const disableTwoFactorMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('/api/auth/2fa/disable', {
-        method: 'POST',
-      });
-      return response.json();
+      return await apiRequest('/api/auth/2fa/disable', 'POST');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/2fa/status'] });
@@ -138,18 +136,18 @@ export default function Settings() {
             <div>
               <Label className="text-sm font-medium">Name</Label>
               <p className="text-sm text-muted-foreground">
-                {user?.firstName} {user?.lastName}
+                {user?.firstName || ''} {user?.lastName || ''}
               </p>
             </div>
             <div>
               <Label className="text-sm font-medium">Email</Label>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <p className="text-sm text-muted-foreground">{user?.email || ''}</p>
             </div>
           </div>
           <div>
             <Label className="text-sm font-medium">Access Level</Label>
             <p className="text-sm text-muted-foreground capitalize">
-              {user?.accessLevel?.replace('_', ' ')}
+              {user?.accessLevel?.replace('_', ' ') || ''}
             </p>
           </div>
         </CardContent>
@@ -176,13 +174,13 @@ export default function Settings() {
             </div>
             <Switch
               id="two-factor"
-              checked={twoFactorStatus?.enabled || false}
+              checked={(twoFactorStatus as any)?.enabled || false}
               onCheckedChange={handleTwoFactorToggle}
               disabled={statusLoading || disableTwoFactorMutation.isPending}
             />
           </div>
 
-          {twoFactorStatus?.enabled && (
+          {(twoFactorStatus as any)?.enabled && (
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-center gap-2 text-green-800">
                 <Shield className="h-4 w-4" />
@@ -254,6 +252,9 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Navigation Customization */}
+      <NavigationCustomizer />
     </div>
   );
 }

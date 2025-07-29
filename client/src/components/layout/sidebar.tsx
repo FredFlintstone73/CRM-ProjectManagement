@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import SearchTrigger from "@/components/search/search-trigger";
 
 interface SidebarProps {
@@ -24,6 +24,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     const saved = localStorage.getItem('sidebarCollapsed');
     return saved === 'true' ? true : false;
   });
+  const [navigationOrder, setNavigationOrder] = useState<string[]>([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
   
   const collapsedWidth = 64;
@@ -33,22 +34,45 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
 
 
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: BarChart3 },
-    { name: 'Messages', href: '/messages', icon: MessageSquare },
-    { name: 'Contacts', href: '/contacts', icon: Users },
-    { name: 'Projects', href: '/projects', icon: FolderOpen },
-    { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-    { name: 'Marketing', href: '/marketing', icon: TrendingUp },
-    { name: 'Templates', href: '/templates', icon: FileText },
-    { name: 'Calendar', href: '/calendar', icon: Calendar },
+  const defaultNavigation = [
+    { id: 'dashboard', name: 'Dashboard', href: '/', icon: BarChart3 },
+    { id: 'messages', name: 'Messages', href: '/messages', icon: MessageSquare },
+    { id: 'contacts', name: 'Contacts', href: '/contacts', icon: Users },
+    { id: 'projects', name: 'Projects', href: '/projects', icon: FolderOpen },
+    { id: 'tasks', name: 'Tasks', href: '/tasks', icon: CheckSquare },
+    { id: 'marketing', name: 'Marketing', href: '/marketing', icon: TrendingUp },
+    { id: 'templates', name: 'Templates', href: '/templates', icon: FileText },
+    { id: 'calendar', name: 'Calendar', href: '/calendar', icon: Calendar },
     ...(isAdministrator ? [
-      { name: 'User Management', href: '/user-management', icon: UserCog },
-      { name: 'Administration', href: '/administration', icon: Shield },
-      { name: 'Dialpad', href: '/dialpad', icon: Phone }
+      { id: 'user-management', name: 'User Management', href: '/user-management', icon: UserCog },
+      { id: 'administration', name: 'Administration', href: '/administration', icon: Shield },
+      { id: 'dialpad', name: 'Dialpad', href: '/dialpad', icon: Phone }
     ] : []),
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { id: 'settings', name: 'Settings', href: '/settings', icon: Settings },
   ];
+
+  // Load saved navigation order or use default
+  const navigation = useMemo(() => {
+    const savedOrder = localStorage.getItem('navigationOrder');
+    if (!savedOrder || navigationOrder.length === 0) {
+      return defaultNavigation;
+    }
+
+    try {
+      const orderIds = JSON.parse(savedOrder);
+      const orderedItems = orderIds
+        .map((id: string) => defaultNavigation.find(item => item.id === id))
+        .filter((item): item is typeof defaultNavigation[0] => Boolean(item));
+      
+      // Add any new items that might not be in saved order
+      const existingIds = orderedItems.map(item => item.id);
+      const newItems = defaultNavigation.filter(item => !existingIds.includes(item.id));
+      
+      return [...orderedItems, ...newItems];
+    } catch {
+      return defaultNavigation;
+    }
+  }, [isAdministrator, navigationOrder]);
 
 
 
@@ -85,6 +109,32 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
+  }, []);
+
+  // Listen for navigation order changes
+  useEffect(() => {
+    const handleNavigationOrderChange = () => {
+      const savedOrder = localStorage.getItem('navigationOrder');
+      if (savedOrder) {
+        try {
+          setNavigationOrder(JSON.parse(savedOrder));
+        } catch {
+          setNavigationOrder([]);
+        }
+      } else {
+        setNavigationOrder([]);
+      }
+    };
+
+    // Load initial order
+    handleNavigationOrderChange();
+
+    // Listen for changes
+    window.addEventListener('navigationOrderChanged', handleNavigationOrderChange);
+
+    return () => {
+      window.removeEventListener('navigationOrderChanged', handleNavigationOrderChange);
+    };
   }, []);
 
   useEffect(() => {
