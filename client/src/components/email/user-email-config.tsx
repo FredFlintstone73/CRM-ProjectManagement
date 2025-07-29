@@ -294,7 +294,7 @@ export function UserEmailConfig() {
             </div>
 
             {/* IMAP Settings */}
-            <div className="space-y-4">
+            <div className="space-y-4 mt-[0px] mb-[0px]">
               <h3 className="text-lg font-medium">IMAP Settings (Incoming Mail - Optional)</h3>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
