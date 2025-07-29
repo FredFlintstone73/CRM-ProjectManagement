@@ -66,14 +66,12 @@ export default function DialpadSettings() {
         toast({
           title: "✅ Contact Match Found",
           description: `Success! Phone number ${data.phoneNumber} matches contact: ${data.contactName}\n\nThis phone number will automatically link Dialpad calls and texts to the correct contact record.`,
-          duration: 6000,
         });
       } else {
         toast({
           title: "❌ No Contact Match",
           description: `Phone number ${data.phoneNumber} was not found in your contact database.\n\nCalls and texts from this number will not be automatically captured. Consider adding this number to an existing contact.`,
           variant: "destructive",
-          duration: 8000,
         });
       }
     },
@@ -83,7 +81,6 @@ export default function DialpadSettings() {
         title: "❌ Test Failed",
         description: `Contact matching test failed:\n\n${error.message || "Network error occurred"}\n\nPlease check your connection and try again.`,
         variant: "destructive",
-        duration: 6000,
       });
     },
   });
