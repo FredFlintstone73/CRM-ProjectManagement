@@ -57,6 +57,7 @@ export default function UserManagement() {
       toast({
         title: "Invitation deleted",
         description: "Team invitation has been removed successfully",
+        duration: 5000,
       });
     },
     onError: (error: any) => {
@@ -64,6 +65,7 @@ export default function UserManagement() {
         title: "Failed to delete invitation",
         description: error.message || "There was an error deleting the invitation",
         variant: "destructive",
+        duration: 5000,
       });
     },
   });
@@ -86,6 +88,7 @@ export default function UserManagement() {
       toast({
         title: "Invitation resent",
         description: "Invitation email has been sent again successfully",
+        duration: 5000,
       });
     },
     onError: (error: any) => {
@@ -93,6 +96,7 @@ export default function UserManagement() {
         title: "Failed to resend invitation",
         description: error.message || "There was an error resending the invitation",
         variant: "destructive",
+        duration: 5000,
       });
     },
   });
@@ -104,6 +108,7 @@ export default function UserManagement() {
         title: "Access Denied",
         description: "You need administrator access to view this page.",
         variant: "destructive",
+        duration: 5000,
       });
       // In a real app, redirect to home page here
       setTimeout(() => {

@@ -72,6 +72,7 @@ export function UserEmailConfig() {
       toast({
         title: "Email Configuration Updated",
         description: "Your email settings have been saved successfully.",
+        duration: 5000,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/user-email/status'] });
     },
@@ -80,6 +81,7 @@ export function UserEmailConfig() {
         title: "Configuration Failed",
         description: "Failed to update email configuration. Please check your settings.",
         variant: "destructive",
+        duration: 5000,
       });
     },
   });
@@ -98,12 +100,14 @@ export function UserEmailConfig() {
         toast({
           title: "Configuration Test Successful",
           description: "Your email settings are working correctly.",
+          duration: 5000,
         });
       } else {
         toast({
           title: "Configuration Test Failed",
           description: "Please check your email settings and try again.",
           variant: "destructive",
+          duration: 5000,
         });
       }
     } catch (error) {
@@ -111,6 +115,7 @@ export function UserEmailConfig() {
         title: "Test Failed",
         description: "Unable to test email configuration.",
         variant: "destructive",
+        duration: 5000,
       });
     } finally {
       setIsTesting(false);

@@ -96,6 +96,7 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
         toast({
           title: "Invitation sent",
           description: `Email invitation sent to ${invitation.email}`,
+          duration: 5000,
         });
         form.reset();
         setOpen(false);
@@ -104,6 +105,7 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
         toast({
           title: "Invitation created",
           description: `Invitation code ready to share with ${invitation.firstName} ${invitation.lastName}`,
+          duration: 5000,
         });
       }
     },
@@ -112,6 +114,7 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
         title: "Failed to send invitation",
         description: error.message || "There was an error sending the invitation",
         variant: "destructive",
+        duration: 5000,
       });
     },
   });
@@ -127,12 +130,14 @@ export default function UserInvitationDialog({ trigger }: UserInvitationDialogPr
         toast({
           title: "Copied!",
           description: "Invitation code copied to clipboard",
+          duration: 5000,
         });
       } catch (err) {
         toast({
           title: "Copy failed",
           description: "Please manually copy the invitation code",
           variant: "destructive",
+          duration: 5000,
         });
       }
     }
