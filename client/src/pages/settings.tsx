@@ -180,7 +180,7 @@ export default function Settings() {
           </div>
 
           {(twoFactorStatus as any)?.enabled && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg mt-[0px] mb-[0px]">
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg mt-[0px] mb-[0px] pt-[0px] pb-[0px]">
               <div className="flex items-center gap-2 text-green-800">
                 <Shield className="h-4 w-4" />
                 <span className="text-sm font-medium">2FA is enabled</span>
