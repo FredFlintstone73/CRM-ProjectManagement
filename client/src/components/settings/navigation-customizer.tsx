@@ -198,7 +198,7 @@ export default function NavigationCustomizer() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-col space-y-1.5 p-6 pt-[5px] pb-[5px]">
         <CardTitle>Navigation Customization</CardTitle>
         <p className="text-sm text-muted-foreground">
           Drag and drop to reorder navigation items in your sidebar
