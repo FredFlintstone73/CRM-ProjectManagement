@@ -154,6 +154,16 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Complete API Integration**: Added /api/forgot-password and /api/reset-password endpoints with proper validation and error handling
 - **Production Ready**: Full password reset workflow functional end-to-end with temporary credentials (chad@alignedadvisors.com: TempPass123!)
 
+### Client-Side Routing and Logout Functionality Fix (July 29, 2025)
+- **Critical Logout Bug Resolution**: Fixed logout functionality in sidebar component that was using browser redirect instead of React Query mutation
+- **Authentication Hook Integration**: Updated sidebar to properly use useAuth hook with logoutMutation.mutate() for clean session management
+- **Production Build Fix**: Resolved client-side routing issue by ensuring built static files are properly placed in server/public/ directory
+- **Static File Serving**: Production server now correctly serves index.html for all non-API routes enabling client-side routing to work
+- **Comprehensive Build Process**: Updated build process to ensure dist/public/ files are copied to server/public/ for proper deployment
+- **Route Fallback Logic**: Verified production static file serving includes proper fallback to index.html for React Router compatibility
+- **Development vs Production Parity**: Ensured both development and production environments handle routing and authentication consistently
+- **Ready for Deployment**: Both logout functionality and client-side routing fixes ready for production deployment
+
 ### Database Connection Fix (July 29, 2025)
 - **Critical Database URL Resolution**: Fixed startup failure caused by missing DATABASE_URL environment variable
 - **PostgreSQL Database Creation**: Created new PostgreSQL database instance to provide required environment variables
