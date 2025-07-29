@@ -310,6 +310,7 @@ export default function UserManagement() {
                               variant="outline" 
                               size="sm"
                               onClick={() => copyInvitationCode(invitation.invitationCode)}
+                              className="pl-[5px] pr-[5px]"
                             >
                               <Copy className="mr-1 h-3 w-3" />
                               Copy Code
@@ -320,6 +321,7 @@ export default function UserManagement() {
                               size="sm"
                               onClick={() => resendInvitationMutation.mutate(invitation.id)}
                               disabled={resendInvitationMutation.isPending}
+                              className="pl-[5px] pr-[5px]"
                             >
                               <Send className="mr-1 h-3 w-3" />
                               Resend Invitation
@@ -332,7 +334,7 @@ export default function UserManagement() {
                           size="sm"
                           onClick={() => deleteInvitationMutation.mutate(invitation.id)}
                           disabled={deleteInvitationMutation.isPending}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 pl-[5px] pr-[5px]"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
