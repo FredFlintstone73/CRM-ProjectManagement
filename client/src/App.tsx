@@ -74,7 +74,7 @@ function Router() {
             style={{ marginLeft: 0 }}
           >
             <Switch>
-              <ProtectedRoute path="/" component={Dashboard} />
+              <Route path="/" component={Dashboard} />
               <Route path="/accept-invitation" component={AcceptInvitation} />
               <Route path="/contacts" component={Contacts} />
               <Route path="/contacts/:id" component={ContactDetail} />
