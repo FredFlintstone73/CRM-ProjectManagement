@@ -193,7 +193,7 @@ export default function Settings() {
 
           <Separator />
 
-          <div className="space-y-3">
+          <div className="space-y-3 mt-[0px] mb-[0px] pt-[3px] pb-[3px]">
             <h4 className="font-medium">Password Security</h4>
             <p className="text-sm text-muted-foreground">
               Your password is managed through your authentication provider. 
