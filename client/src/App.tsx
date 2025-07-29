@@ -35,7 +35,17 @@ import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [sidebarWidth, setSidebarWidth] = useState(256); // 16rem = 256px
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    // Load saved width from localStorage, default to 280px for better title visibility
+    const saved = localStorage.getItem('sidebarWidth');
+    return saved ? parseInt(saved, 10) : 280;
+  });
+
+  // Save sidebar width to localStorage when it changes
+  const handleSidebarWidthChange = (width: number) => {
+    setSidebarWidth(width);
+    localStorage.setItem('sidebarWidth', width.toString());
+  };
 
   if (isLoading) {
     return (
@@ -53,7 +63,7 @@ function Router() {
       ) : (
         <Mandatory2FAWrapper>
           <div className="bg-gray-50 flex h-screen">
-            <Sidebar width={sidebarWidth} onWidthChange={setSidebarWidth} />
+            <Sidebar width={sidebarWidth} onWidthChange={handleSidebarWidthChange} />
             <div 
               className="flex flex-col flex-1 min-w-0 overflow-auto"
               style={{ marginLeft: 0 }}

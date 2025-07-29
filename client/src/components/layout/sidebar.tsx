@@ -19,7 +19,11 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   const { isAdministrator } = useAccessControl();
 
   const [isResizing, setIsResizing] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Load saved collapsed state from localStorage, default to false (expanded) for full title visibility
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true' ? true : false;
+  });
   const sidebarRef = useRef<HTMLDivElement>(null);
   
   const collapsedWidth = 64;
@@ -52,7 +56,9 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   };
 
   const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    localStorage.setItem('sidebarCollapsed', newCollapsedState.toString());
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {

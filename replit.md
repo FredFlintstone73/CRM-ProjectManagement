@@ -232,6 +232,13 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Auto-Close Duration**: Set default toast duration to 5 seconds for automatic closure across all notifications
 - **Production Ready**: Complete toast notification system now functional across all application features including Dialpad integration
 
+### Sidebar Enhancement for Full Title Visibility (July 29, 2025)
+- **Increased Default Width**: Expanded sidebar default width from 256px to 280px for better title visibility
+- **localStorage Persistence**: Added localStorage persistence for both sidebar width and collapsed state across sessions
+- **Expanded by Default**: Sidebar starts in expanded state to show full menu titles at login
+- **User Preference Retention**: System remembers user's preferred sidebar width and collapsed state between sessions
+- **Enhanced User Experience**: New users see full menu titles immediately upon login with wider sidebar layout
+
 ### Enhanced Email Compose Interface with CC/BCC Support (July 26, 2025)
 - **Complete CC/BCC Functionality**: Added full Carbon Copy (CC) and Blind Carbon Copy (BCC) support to email compose dialog
 - **Side-by-Side Layout**: CC and BCC fields positioned horizontally next to each other using CSS grid for efficient space usage
