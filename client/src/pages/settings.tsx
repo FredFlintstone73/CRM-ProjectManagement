@@ -228,7 +228,7 @@ export default function Settings() {
 
       {/* Notifications */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col space-y-1.5 p-6 pt-[5px] pb-[5px]">
           <CardTitle>Notifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
