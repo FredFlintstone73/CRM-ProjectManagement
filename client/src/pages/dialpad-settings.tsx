@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Phone, Settings, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Phone, Settings, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface DialpadStatus {
@@ -30,18 +30,21 @@ export default function DialpadSettings() {
   // Setup webhooks mutation
   const setupWebhooksMutation = useMutation({
     mutationFn: () => apiRequest('POST', '/api/dialpad/setup-webhooks'),
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       toast({
-        title: "Webhooks Setup Complete",
-        description: "Dialpad webhooks have been configured successfully. Call transcripts and text messages will now be captured automatically.",
+        title: "✅ Webhooks Setup Complete",
+        description: "All Dialpad webhooks have been configured successfully! Your system will now automatically capture:\n\n• Call transcripts with AI insights\n• Incoming text messages\n• Outgoing text messages\n• Call completion events",
+        duration: 8000,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/dialpad/status'] });
     },
     onError: (error: any) => {
+      const errorMsg = error.message || "Failed to setup webhooks. Please check your API credentials and try again.";
       toast({
-        title: "Webhook Setup Failed",
-        description: error.message || "Failed to setup webhooks. Please check your API credentials.",
+        title: "❌ Webhook Setup Failed",
+        description: `Setup encountered an error:\n\n${errorMsg}\n\nPlease verify your Dialpad API credentials and webhook secret are correct.`,
         variant: "destructive",
+        duration: 10000,
       });
     },
   });
@@ -50,19 +53,27 @@ export default function DialpadSettings() {
   const testContactMutation = useMutation({
     mutationFn: (phoneNumber: string) => apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber }),
     onSuccess: (data: any) => {
-      toast({
-        title: "Contact Match Test",
-        description: data.matched 
-          ? `Phone number ${data.phoneNumber} matches contact ID: ${data.contactId}`
-          : `No contact found for phone number: ${data.phoneNumber}`,
-        variant: data.matched ? "default" : "destructive",
-      });
+      if (data.matched) {
+        toast({
+          title: "✅ Contact Match Found",
+          description: `Success! Phone number ${data.phoneNumber} matches contact ID: ${data.contactId}\n\nThis phone number will automatically link Dialpad calls and texts to the correct contact record.`,
+          duration: 6000,
+        });
+      } else {
+        toast({
+          title: "❌ No Contact Match",
+          description: `Phone number ${data.phoneNumber} was not found in your contact database.\n\nCalls and texts from this number will not be automatically captured. Consider adding this number to an existing contact.`,
+          variant: "destructive",
+          duration: 8000,
+        });
+      }
     },
     onError: (error: any) => {
       toast({
-        title: "Test Failed",
-        description: error.message || "Failed to test contact matching.",
+        title: "❌ Test Failed",
+        description: `Contact matching test failed:\n\n${error.message || "Network error occurred"}\n\nPlease check your connection and try again.`,
         variant: "destructive",
+        duration: 6000,
       });
     },
   });
@@ -70,12 +81,26 @@ export default function DialpadSettings() {
   const handleTestContact = () => {
     if (!testPhoneNumber.trim()) {
       toast({
-        title: "Phone Number Required",
-        description: "Please enter a phone number to test contact matching.",
+        title: "⚠️ Phone Number Required",
+        description: "Please enter a phone number to test contact matching.\n\nExample formats: (555) 123-4567, 555-123-4567, or 5551234567",
         variant: "destructive",
+        duration: 5000,
       });
       return;
     }
+    
+    // Basic phone number validation
+    const cleanNumber = testPhoneNumber.replace(/[^\d]/g, '');
+    if (cleanNumber.length < 10) {
+      toast({
+        title: "⚠️ Invalid Phone Number",
+        description: "Please enter a valid phone number with at least 10 digits.\n\nExample formats: (555) 123-4567, 555-123-4567, or 5551234567",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+    
     testContactMutation.mutate(testPhoneNumber);
   };
 
@@ -208,8 +233,19 @@ export default function DialpadSettings() {
             <Button 
               onClick={() => setupWebhooksMutation.mutate()}
               disabled={setupWebhooksMutation.isPending}
+              className="min-w-[140px]"
             >
-              {setupWebhooksMutation.isPending ? "Setting up..." : "Setup Webhooks"}
+              {setupWebhooksMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Setting up...
+                </>
+              ) : (
+                <>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Setup Webhooks
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -239,8 +275,19 @@ export default function DialpadSettings() {
                 <Button 
                   onClick={handleTestContact}
                   disabled={testContactMutation.isPending}
+                  className="min-w-[120px]"
                 >
-                  {testContactMutation.isPending ? "Testing..." : "Test Match"}
+                  {testContactMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Phone className="h-4 w-4 mr-2" />
+                      Test Match
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
