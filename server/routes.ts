@@ -30,7 +30,7 @@ import {
 
 // Authentication middleware
 const requireAuth = (req: any, res: any, next: any) => {
-  if (!req.requireAuth || !req.requireAuth()) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.status(401).json({ message: "Authentication required" });
   }
   next();
@@ -38,7 +38,7 @@ const requireAuth = (req: any, res: any, next: any) => {
 
 // Admin access middleware
 const requireAdmin = (req: any, res: any, next: any) => {
-  if (!req.requireAuth || !req.requireAuth()) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.status(401).json({ message: "Authentication required" });
   }
   if (req.user?.accessLevel !== "administrator") {
