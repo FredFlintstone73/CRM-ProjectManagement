@@ -138,20 +138,24 @@ class EmailService {
 
     const subject = 'Invitation to join ClientHub CRM';
     
-    // Generate invitation URL - prefer deployed domain over development
+    // Generate invitation URL - use current environment or deployed domain
     const domains = process.env.REPLIT_DOMAINS?.split(',') || [];
     let baseUrl = '';
     
     if (domains.length > 0) {
-      // Find the deployed domain (not the development one with '00-')
+      // If we're in development (has 00- pattern), use the current domain
+      const currentDomain = domains.find(domain => domain.includes('00-'));
       const deployedDomain = domains.find(domain => 
         !domain.includes('00-') && domain.includes('.replit.dev')
       );
       
-      if (deployedDomain) {
+      // Prefer current development domain if available, otherwise use deployed
+      if (currentDomain) {
+        baseUrl = currentDomain.startsWith('http') ? currentDomain : `https://${currentDomain}`;
+      } else if (deployedDomain) {
         baseUrl = deployedDomain.startsWith('http') ? deployedDomain : `https://${deployedDomain}`;
       } else {
-        // Fallback to first domain if no deployed domain found
+        // Fallback to first domain if no specific match found
         const fallbackDomain = domains[0];
         baseUrl = fallbackDomain.startsWith('http') ? fallbackDomain : `https://${fallbackDomain}`;
       }
