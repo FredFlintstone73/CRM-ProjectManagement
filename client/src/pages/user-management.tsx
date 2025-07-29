@@ -308,22 +308,22 @@ export default function UserManagement() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => copyInvitationCode(invitation.invitationCode)}
-                              className="pl-[5px] pr-[5px]"
-                            >
-                              <Copy className="mr-1 h-3 w-3" />
-                              Copy Code
-                            </Button>
-                            
-                            <Button 
-                              variant="outline" 
-                              size="sm"
                               onClick={() => resendInvitationMutation.mutate(invitation.id)}
                               disabled={resendInvitationMutation.isPending}
                               className="pl-[5px] pr-[5px]"
                             >
                               <Send className="mr-1 h-3 w-3" />
                               Resend Invitation
+                            </Button>
+                            
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => copyInvitationCode(invitation.invitationCode)}
+                              className="pl-[5px] pr-[5px]"
+                            >
+                              <Copy className="mr-1 h-3 w-3" />
+                              Copy Code
                             </Button>
                           </>
                         )}

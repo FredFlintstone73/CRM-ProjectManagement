@@ -302,7 +302,7 @@ export default function TeamMemberManagement() {
                         size="sm"
                         onClick={() => handleDeleteTeamMember(member)}
                         disabled={deleteTeamMemberMutation.isPending}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 pl-[5px] pr-[5px]"
                       >
                         <Trash2 className="mr-1 h-3 w-3" />
                         Delete
