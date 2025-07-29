@@ -35,14 +35,15 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },
+    { name: 'Messages', href: '/messages', icon: MessageSquare },
+    { name: 'Contacts', href: '/contacts', icon: Users },
     { name: 'Projects', href: '/projects', icon: FolderOpen },
-    { name: 'Templates', href: '/templates', icon: FileText },
     { name: 'Tasks', href: '/tasks', icon: CheckSquare },
     { name: 'Marketing', href: '/marketing', icon: TrendingUp },
+    { name: 'Templates', href: '/templates', icon: FileText },
     { name: 'Calendar', href: '/calendar', icon: Calendar },
-    { name: 'Messages', href: '/messages', icon: MessageSquare },
     ...(isAdministrator ? [
-      { name: 'User Management', href: '/user-management', icon: Users },
+      { name: 'User Management', href: '/user-management', icon: UserCog },
       { name: 'Administration', href: '/administration', icon: Shield },
       { name: 'Dialpad', href: '/dialpad', icon: Phone }
     ] : []),
@@ -137,30 +138,11 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {/* Search Bar */}
           {!isCollapsed && <SearchTrigger />}
-          {/* Dashboard */}
-          <Link 
-            href="/" 
-            className={`sidebar-nav-item ${isCollapsed ? 'justify-center' : ''} ${location === '/' ? 'active' : ''}`}
-            title={isCollapsed ? "Dashboard" : ""}
-          >
-            <BarChart3 size={20} />
-            {!isCollapsed && <span>Dashboard</span>}
-          </Link>
-
-          {/* Contacts */}
-          <Link 
-            href="/contacts" 
-            className={`sidebar-nav-item ${isCollapsed ? 'justify-center' : ''} ${location.startsWith('/contacts') ? 'active' : ''}`}
-            title={isCollapsed ? "Contacts" : ""}
-          >
-            <Users size={20} />
-            {!isCollapsed && <span>Contacts</span>}
-          </Link>
-
-          {/* Other navigation items */}
-          {navigation.slice(1).map((item) => {
+          
+          {/* Navigation items */}
+          {navigation.map((item) => {
             const Icon = item.icon;
-            const isActive = location === item.href;
+            const isActive = item.href === '/contacts' ? location.startsWith('/contacts') : location === item.href;
             return (
               <Link 
                 key={item.name} 
