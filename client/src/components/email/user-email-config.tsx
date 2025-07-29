@@ -179,7 +179,7 @@ export function UserEmailConfig() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-col space-y-1.5 p-6 pt-[0px] pb-[0px]">
+      <CardHeader className="flex flex-col space-y-1.5 p-6 pt-[5px] pb-[5px]">
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
           Personal Email Configuration
