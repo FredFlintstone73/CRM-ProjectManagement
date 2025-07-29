@@ -29,8 +29,12 @@ export default function DialpadSettings() {
 
   // Setup webhooks mutation
   const setupWebhooksMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/dialpad/setup-webhooks'),
-    onSuccess: (response: any) => {
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/dialpad/setup-webhooks');
+      return await response.json();
+    },
+    onSuccess: (data: any) => {
+      console.log('Webhook setup success:', data);
       toast({
         title: "✅ Webhooks Setup Complete",
         description: "All Dialpad webhooks have been configured successfully! Your system will now automatically capture:\n\n• Call transcripts with AI insights\n• Incoming text messages\n• Outgoing text messages\n• Call completion events",
@@ -39,6 +43,7 @@ export default function DialpadSettings() {
       queryClient.invalidateQueries({ queryKey: ['/api/dialpad/status'] });
     },
     onError: (error: any) => {
+      console.error('Webhook setup error:', error);
       const errorMsg = error.message || "Failed to setup webhooks. Please check your API credentials and try again.";
       toast({
         title: "❌ Webhook Setup Failed",
@@ -51,8 +56,12 @@ export default function DialpadSettings() {
 
   // Test contact matching mutation
   const testContactMutation = useMutation({
-    mutationFn: (phoneNumber: string) => apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber }),
+    mutationFn: async (phoneNumber: string) => {
+      const response = await apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber });
+      return await response.json();
+    },
     onSuccess: (data: any) => {
+      console.log('Contact match test success:', data);
       if (data.matched) {
         toast({
           title: "✅ Contact Match Found",
@@ -69,6 +78,7 @@ export default function DialpadSettings() {
       }
     },
     onError: (error: any) => {
+      console.error('Contact match test error:', error);
       toast({
         title: "❌ Test Failed",
         description: `Contact matching test failed:\n\n${error.message || "Network error occurred"}\n\nPlease check your connection and try again.`,
