@@ -173,7 +173,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
         <div className="flex items-center px-6 py-6 border-b border-white/10">
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Building2 size={24} className="text-primary" />
+              <img src="/favicon.png" alt="ClientHub" className="w-6 h-6" />
             </div>
             {!isCollapsed && (
               <div>
