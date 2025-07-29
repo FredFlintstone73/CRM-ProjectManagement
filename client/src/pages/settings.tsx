@@ -208,7 +208,7 @@ export default function Settings() {
           <CardTitle>Privacy & Data</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg pt-[0px] pb-[0px]">
             <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-blue-800">
