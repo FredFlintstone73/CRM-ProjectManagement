@@ -256,7 +256,7 @@ export function UserEmailConfig() {
                 control={form.control}
                 name="smtpUser"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="space-y-2 mt-[0px] mb-[0px]">
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="your.email@company.com" {...field} />
