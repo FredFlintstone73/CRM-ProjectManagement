@@ -29,9 +29,7 @@ export default function DialpadSettings() {
 
   // Setup webhooks mutation
   const setupWebhooksMutation = useMutation({
-    mutationFn: () => apiRequest('/api/dialpad/setup-webhooks', {
-      method: 'POST',
-    }),
+    mutationFn: () => apiRequest('POST', '/api/dialpad/setup-webhooks'),
     onSuccess: () => {
       toast({
         title: "Webhooks Setup Complete",
@@ -50,10 +48,7 @@ export default function DialpadSettings() {
 
   // Test contact matching mutation
   const testContactMutation = useMutation({
-    mutationFn: (phoneNumber: string) => apiRequest('/api/dialpad/test-contact-match', {
-      method: 'POST',
-      body: JSON.stringify({ phoneNumber }),
-    }),
+    mutationFn: (phoneNumber: string) => apiRequest('POST', '/api/dialpad/test-contact-match', { phoneNumber }),
     onSuccess: (data: any) => {
       toast({
         title: "Contact Match Test",
