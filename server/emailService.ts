@@ -52,7 +52,18 @@ class EmailService {
 
     let config: EmailConfig | null = null;
 
-    if (outlookUser && outlookPass) {
+    if (smtpHost && smtpUser && smtpPass) {
+      // Generic SMTP configuration (prioritized for corporate accounts)
+      config = {
+        host: smtpHost,
+        port: parseInt(smtpPort || '587'),
+        secure: (smtpPort === '465'),
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      };
+    } else if (outlookUser && outlookPass) {
       // Microsoft Outlook/365 configuration
       config = {
         host: 'smtp-mail.outlook.com',
@@ -72,7 +83,7 @@ class EmailService {
           pass: gmailPass, // App-specific password
         },
       };
-    } else if (smtpHost && smtpUser && smtpPass) {
+    } else if (false) { // Disabled condition to prevent fallback
       config = {
         host: smtpHost,
         port: parseInt(smtpPort || '587'),
@@ -87,8 +98,8 @@ class EmailService {
     if (config) {
       this.transporter = nodemailer.createTransport(config);
       this.isConfigured = true;
-      const serviceType = outlookUser ? 'outlook' : (config.service || `${config.host}:${config.port}`);
-      const emailUser = outlookUser || gmailUser || smtpUser;
+      const serviceType = smtpHost ? `smtp (${smtpHost})` : (outlookUser ? 'outlook' : (config.service || `${config.host}:${config.port}`));
+      const emailUser = smtpUser || outlookUser || gmailUser;
       console.log(`Email service configured successfully (${serviceType}) for ${emailUser}`);
     } else {
       console.log('No email configuration found - invitations will show codes only');
