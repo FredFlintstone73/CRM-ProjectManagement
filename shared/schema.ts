@@ -122,7 +122,7 @@ export const sessions = pgTable(
 );
 
 // User storage table (required for Replit Auth)
-export const users = pgTable("users", {
+export const users: ReturnType<typeof pgTable> = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
@@ -130,7 +130,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   accessLevel: accessLevelEnum("access_level").default("team_member"),
   isActive: boolean("is_active").default(true),
-  invitedBy: varchar("invited_by").references(() => users.id),
+  invitedBy: varchar("invited_by").references((): any => users.id),
   invitedAt: timestamp("invited_at"),
   twoFactorSecret: varchar("two_factor_secret"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
@@ -321,20 +321,20 @@ export const milestones = pgTable("milestones", {
 });
 
 // Tasks table - Enhanced with hierarchy support
-export const tasks = pgTable("tasks", {
+export const tasks: ReturnType<typeof pgTable> = pgTable("tasks", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   description: text("description"),
   projectId: integer("project_id").references(() => projects.id),
   milestoneId: integer("milestone_id").references(() => milestones.id),
-  parentTaskId: integer("parent_task_id").references(() => tasks.id),
+  parentTaskId: integer("parent_task_id").references((): any => tasks.id),
   assignedTo: integer("assigned_to").array(), // Support multiple assignees
   assignedToRole: text("assigned_to_role").array(), // Support multiple role assignments
   status: taskStatusEnum("status").default("todo"),
   priority: integer("priority").default(25), // 1-50 priority scale
   dueDate: timestamp("due_date"),
   daysFromMeeting: integer("days_from_meeting").default(0), // Days offset from meeting date for templates
-  dependsOnTaskId: integer("depends_on_task_id").references(() => tasks.id), // Task dependency for automatic due date calculation
+  dependsOnTaskId: integer("depends_on_task_id").references((): any => tasks.id), // Task dependency for automatic due date calculation
   completedAt: timestamp("completed_at"),
   sortOrder: integer("sort_order").default(0),
   level: integer("level").default(0), // 0 = parent, 1 = child, 2 = grandchild
@@ -391,10 +391,10 @@ export const projectTemplates = pgTable("project_templates", {
 });
 
 // Email interactions table
-export const emailInteractions = pgTable("email_interactions", {
+export const emailInteractions: ReturnType<typeof pgTable> = pgTable("email_interactions", {
   id: serial("id").primaryKey(),
   contactId: integer("contact_id").references(() => contacts.id),
-  parentEmailId: integer("parent_email_id").references(() => emailInteractions.id),
+  parentEmailId: integer("parent_email_id").references((): any => emailInteractions.id),
   subject: varchar("subject"),
   body: text("body"),
   sender: varchar("sender"),
