@@ -11,6 +11,7 @@ import EmailConfigurationStatus from "@/components/admin/EmailConfigurationStatu
 import TeamMemberManagement from "@/components/admin/TeamMemberManagement";
 import InvitationRequestsSection from "@/components/admin/InvitationRequestsSection";
 import { Users, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Copy, Trash2 } from "lucide-react";
+import { formatAccessLevel } from "@/lib/utils/formatAccessLevel";
 
 interface UserInvitation {
   id: number;
@@ -161,7 +162,7 @@ export default function UserManagement() {
       case "team_member":
         return <Badge variant="secondary">Team Member</Badge>;
       default:
-        return <Badge variant="outline">{accessLevel}</Badge>;
+        return <Badge variant="outline">{formatAccessLevel(accessLevel)}</Badge>;
     }
   };
 

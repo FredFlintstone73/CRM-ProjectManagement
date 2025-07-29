@@ -30,6 +30,20 @@ class EmailService {
   private storage: IStorage | null = null;
   private monitoring = false;
 
+  // Format access level for display
+  private formatAccessLevel(accessLevel: string): string {
+    switch (accessLevel) {
+      case 'team_member':
+        return 'Team Member';
+      case 'manager':
+        return 'Manager';
+      case 'administrator':
+        return 'Administrator';
+      default:
+        return accessLevel.charAt(0).toUpperCase() + accessLevel.slice(1);
+    }
+  }
+
   constructor() {
     this.initializeTransporter();
   }
@@ -154,12 +168,12 @@ class EmailService {
         <h2 style="color: #333;">You're invited to join ClientHub</h2>
         <p>Hello ${invitation.firstName} ${invitation.lastName},</p>
         
-        <p>You've been invited to join ClientHub CRM with <strong>${invitation.accessLevel.replace('_', ' ')}</strong> access.</p>
+        <p>You've been invited to join ClientHub CRM with <strong>${this.formatAccessLevel(invitation.accessLevel)}</strong> access.</p>
         
         <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0;">Your invitation details:</h3>
           <p><strong>Invitation Code:</strong> ${invitation.invitationCode}</p>
-          <p><strong>Access Level:</strong> ${invitation.accessLevel.replace('_', ' ')}</p>
+          <p><strong>Access Level:</strong> ${this.formatAccessLevel(invitation.accessLevel)}</p>
         </div>
         
         <p>
@@ -179,10 +193,10 @@ class EmailService {
       
       Hello ${invitation.firstName} ${invitation.lastName},
       
-      You've been invited to join ClientHub CRM with ${invitation.accessLevel.replace('_', ' ')} access.
+      You've been invited to join ClientHub CRM with ${this.formatAccessLevel(invitation.accessLevel)} access.
       
       Invitation Code: ${invitation.invitationCode}
-      Access Level: ${invitation.accessLevel.replace('_', ' ')}
+      Access Level: ${this.formatAccessLevel(invitation.accessLevel)}
       
       Click here to accept: ${inviteUrl}
       

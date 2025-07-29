@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, AlertTriangle, UserCheck, Clock, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { formatAccessLevel } from "@/lib/utils/formatAccessLevel";
 
 const invitationCodeSchema = z.object({
   code: z.string().min(1, "Invitation code is required"),
@@ -130,7 +131,7 @@ export default function AcceptInvitation() {
       case "team_member":
         return <Badge variant="secondary">Team Member</Badge>;
       default:
-        return <Badge variant="outline">{accessLevel}</Badge>;
+        return <Badge variant="outline">{formatAccessLevel(accessLevel)}</Badge>;
     }
   };
 
