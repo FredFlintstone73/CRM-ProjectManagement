@@ -76,13 +76,23 @@ export interface IStorage {
   ensureUserHasContact(user: User): Promise<Contact>;
   getUserContactId(user: User): Promise<number | null>;
   
+  // Authentication operations (username/password)
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: { username: string; password: string; email?: string; firstName?: string; lastName?: string; accessLevel?: string; isActive?: boolean; invitedBy?: string; invitedAt?: Date }): Promise<User>;
+  
   // User invitation operations
   createUserInvitation(invitation: InsertUserInvitation & { invitedBy: string, expiresAt?: Date }): Promise<UserInvitation>;
   getUserInvitation(invitationCode: string): Promise<UserInvitation | undefined>;
+  getUserInvitationByCode(invitationCode: string): Promise<UserInvitation | undefined>;
   getUserInvitations(invitedBy?: string): Promise<UserInvitation[]>;
   acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation>;
+  updateUserInvitation(invitationId: number, updates: Partial<UserInvitation>): Promise<UserInvitation>;
   expireInvitation(invitationCode: string): Promise<void>;
   deleteUserInvitation(invitationId: number, userId: string): Promise<boolean>;
+  
+  // Auto email configuration
+  configureAutoEmailSettings(userId: string, email: string): Promise<void>;
   
   // Invitation request operations
   createInvitationRequest(request: InsertInvitationRequest): Promise<InvitationRequest>;
@@ -348,6 +358,142 @@ export class DatabaseStorage implements IStorage {
 
     console.log('getUserContactId - found contact:', contact?.id);
     return contact?.id || null;
+  }
+
+  // Authentication operations (username/password)
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+    
+    return user;
+  }
+
+  async createUser(userData: { 
+    username: string; 
+    password: string; 
+    email?: string; 
+    firstName?: string; 
+    lastName?: string; 
+    accessLevel?: string; 
+    isActive?: boolean; 
+    invitedBy?: string; 
+    invitedAt?: Date 
+  }): Promise<User> {
+    // Generate a unique ID
+    const id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        id,
+        username: userData.username,
+        password: userData.password,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        accessLevel: userData.accessLevel || "team_member",
+        isActive: userData.isActive !== false,
+        invitedBy: userData.invitedBy,
+        invitedAt: userData.invitedAt,
+      })
+      .returning();
+
+    return newUser;
+  }
+
+  async getUserInvitationByCode(invitationCode: string): Promise<UserInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(userInvitations)
+      .where(eq(userInvitations.invitationCode, invitationCode));
+    
+    return invitation;
+  }
+
+  async updateUserInvitation(invitationId: number, updates: Partial<UserInvitation>): Promise<UserInvitation> {
+    const [updatedInvitation] = await db
+      .update(userInvitations)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(userInvitations.id, invitationId))
+      .returning();
+
+    return updatedInvitation;
+  }
+
+  async configureAutoEmailSettings(userId: string, email: string): Promise<void> {
+    const domain = email.split('@')[1]?.toLowerCase();
+    let emailConfig: any = {};
+
+    // Auto-configure based on common email providers
+    switch (domain) {
+      case 'gmail.com':
+        emailConfig = {
+          emailConfigured: true,
+          smtpHost: 'smtp.gmail.com',
+          smtpPort: 587,
+          smtpSecure: false,
+          smtpUser: email,
+          imapHost: 'imap.gmail.com',
+          imapPort: 993,
+          imapSecure: true,
+        };
+        break;
+      case 'outlook.com':
+      case 'hotmail.com':
+      case 'live.com':
+        emailConfig = {
+          emailConfigured: true,
+          smtpHost: 'smtp-mail.outlook.com',
+          smtpPort: 587,
+          smtpSecure: false,
+          smtpUser: email,
+          imapHost: 'outlook.office365.com',
+          imapPort: 993,
+          imapSecure: true,
+        };
+        break;
+      case 'yahoo.com':
+        emailConfig = {
+          emailConfigured: true,
+          smtpHost: 'smtp.mail.yahoo.com',
+          smtpPort: 587,
+          smtpSecure: false,
+          smtpUser: email,
+          imapHost: 'imap.mail.yahoo.com',
+          imapPort: 993,
+          imapSecure: true,
+        };
+        break;
+      default:
+        // Unknown domain, don't auto-configure
+        console.log(`No auto-configuration available for domain: ${domain}`);
+        return;
+    }
+
+    // Update user with auto-configured email settings
+    await db
+      .update(users)
+      .set({
+        ...emailConfig,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+
+    console.log(`Auto-configured email settings for ${email} (${domain})`);
   }
 
   // User invitation operations

@@ -5,9 +5,10 @@ import { useState } from "react";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
+import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import Contacts from "@/pages/contacts";
 import ContactDetail from "@/pages/contact-detail";
@@ -34,7 +35,7 @@ import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
 
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     // Load saved width from localStorage, default to 280px for better title visibility
     const saved = localStorage.getItem('sidebarWidth');
@@ -58,41 +59,40 @@ function Router() {
   return (
     <Switch>
       <Route path="/accept-invitation" component={AcceptInvitation} />
-      {!isAuthenticated ? (
-        <Route path="/" component={Landing} />
+      <Route path="/auth" component={AuthPage} />
+      {!user ? (
+        <Route path="/" component={AuthPage} />
       ) : (
-        <Mandatory2FAWrapper>
-          <div className="bg-gray-50 flex h-screen">
-            <Sidebar width={sidebarWidth} onWidthChange={handleSidebarWidthChange} />
-            <div 
-              className="flex flex-col flex-1 min-w-0 overflow-auto"
-              style={{ marginLeft: 0 }}
-            >
-              <Switch>
-                <Route path="/" component={Dashboard} />
-                <Route path="/accept-invitation" component={AcceptInvitation} />
-                <Route path="/contacts" component={Contacts} />
-                <Route path="/contacts/:id" component={ContactDetail} />
-                <Route path="/projects" component={Projects} />
-                <Route path="/projects/:id" component={ProjectDetail} />
-                <Route path="/templates" component={Templates} />
-                <Route path="/templates/:id" component={TemplateDetail} />
-                <Route path="/templates/:templateId/tasks/:taskId" component={TaskDetail} />
-                <Route path="/task/:id" component={TaskDetail} />
-                <Route path="/tasks" component={Tasks} />
-                <Route path="/marketing" component={Marketing} />
-                <Route path="/calendar" component={Calendar} />
-                <Route path="/messages" component={Messages} />
-                <Route path="/consolidated-messages" component={ConsolidatedMessages} />
-                <Route path="/settings" component={Settings} />
-                <Route path="/dialpad" component={DialpadSettings} />
-                <Route path="/user-management" component={UserManagement} />
-                <Route path="/administration" component={Administration} />
-                <Route component={NotFound} />
-              </Switch>
-            </div>
+        <div className="bg-gray-50 flex h-screen">
+          <Sidebar width={sidebarWidth} onWidthChange={handleSidebarWidthChange} />
+          <div 
+            className="flex flex-col flex-1 min-w-0 overflow-auto"
+            style={{ marginLeft: 0 }}
+          >
+            <Switch>
+              <ProtectedRoute path="/" component={Dashboard} />
+              <Route path="/accept-invitation" component={AcceptInvitation} />
+              <Route path="/contacts" component={Contacts} />
+              <Route path="/contacts/:id" component={ContactDetail} />
+              <Route path="/projects" component={Projects} />
+              <Route path="/projects/:id" component={ProjectDetail} />
+              <Route path="/templates" component={Templates} />
+              <Route path="/templates/:id" component={TemplateDetail} />
+              <Route path="/templates/:templateId/tasks/:taskId" component={TaskDetail} />
+              <Route path="/task/:id" component={TaskDetail} />
+              <Route path="/tasks" component={Tasks} />
+              <Route path="/marketing" component={Marketing} />
+              <Route path="/calendar" component={Calendar} />
+              <Route path="/messages" component={Messages} />
+              <Route path="/consolidated-messages" component={ConsolidatedMessages} />
+              <Route path="/settings" component={Settings} />
+              <Route path="/dialpad" component={DialpadSettings} />
+              <Route path="/user-management" component={UserManagement} />
+              <Route path="/administration" component={Administration} />
+              <Route component={NotFound} />
+            </Switch>
           </div>
-        </Mandatory2FAWrapper>
+        </div>
       )}
       <Route component={NotFound} />
     </Switch>
@@ -102,11 +102,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Router />
-        <SessionTimeoutManager />
-        <Toaster />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Router />
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
