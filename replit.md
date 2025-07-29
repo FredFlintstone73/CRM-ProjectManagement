@@ -152,6 +152,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Email Configuration Success**: Successfully configured SMTP email service for chad@alignedadvisors.com using generic SMTP settings to bypass Office 365 authentication restrictions
 - **Invitation Email System**: Email invitations now working properly - system sends professional invitation emails with proper URLs and invitation codes
 - **Team Member Auto-Creation Enhancement**: Enhanced invitation acceptance flow to automatically create team member contact records when invitations are accepted - ensures accepted team members appear in Team Members section immediately
+- **Invitation Login Flow Fix**: Fixed 404 error during invitation acceptance by implementing proper redirect handling through authentication process - invitation codes now preserved through login and users redirected back to acceptance page
 
 ### Complete Self-Service Invitation Request System Implementation (July 28, 2025)
 - **Public Invitation Request Form**: Implemented complete self-service invitation request system allowing visitors to request access without authentication

@@ -113,7 +113,9 @@ export default function AcceptInvitation() {
         description: "Please log in to accept your invitation.",
         variant: "destructive",
       });
-      setLocation("/api/login");
+      // Preserve invitation code through login process
+      const redirectUrl = encodeURIComponent(`/accept-invitation?code=${invitationCode}`);
+      setLocation(`/api/login?redirect=${redirectUrl}`);
       return;
     }
     acceptMutation.mutate();
@@ -264,7 +266,10 @@ export default function AcceptInvitation() {
                       Please log in to accept your invitation
                     </p>
                     <Button 
-                      onClick={() => setLocation("/api/login")} 
+                      onClick={() => {
+                        const redirectUrl = encodeURIComponent(`/accept-invitation?code=${invitationCode}`);
+                        setLocation(`/api/login?redirect=${redirectUrl}`);
+                      }} 
                       className="w-full"
                     >
                       Log In to Accept
