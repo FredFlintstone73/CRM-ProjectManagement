@@ -65,7 +65,7 @@ export default function DialpadSettings() {
       if (data.matched) {
         toast({
           title: "✅ Contact Match Found",
-          description: `Success! Phone number ${data.phoneNumber} matches contact ID: ${data.contactId}\n\nThis phone number will automatically link Dialpad calls and texts to the correct contact record.`,
+          description: `Success! Phone number ${data.phoneNumber} matches contact: ${data.contactName}\n\nThis phone number will automatically link Dialpad calls and texts to the correct contact record.`,
           duration: 6000,
         });
       } else {

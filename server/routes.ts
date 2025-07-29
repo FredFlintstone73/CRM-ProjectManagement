@@ -3319,12 +3319,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Phone number required" });
       }
 
-      const contactId = await dialpadService.findContactByPhoneNumber(phoneNumber);
+      const contact = await dialpadService.findContactDetailsByPhoneNumber(phoneNumber);
       
       res.json({ 
         phoneNumber,
-        contactId,
-        matched: !!contactId
+        contactId: contact?.id || null,
+        contactName: contact ? `${contact.firstName} ${contact.lastName}`.trim() : null,
+        matched: !!contact
       });
     } catch (error) {
       console.error("Error testing contact match:", error);

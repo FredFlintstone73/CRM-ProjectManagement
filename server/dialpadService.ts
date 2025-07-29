@@ -133,6 +133,38 @@ export class DialpadService {
   }
 
   /**
+   * Find contact details by phone number (returns full contact info)
+   */
+  async findContactDetailsByPhoneNumber(phoneNumber: string): Promise<any | null> {
+    // Clean phone number (remove formatting)
+    const cleanNumber = phoneNumber.replace(/[^\d]/g, '');
+    
+    // Try to find contact by various phone fields
+    const contacts = await this.storage.getContacts();
+    
+    for (const contact of contacts) {
+      const phoneFields = [
+        contact.cellPhone,
+        contact.workPhone,
+        contact.spouseCellPhone,
+        contact.spouseWorkPhone
+      ];
+
+      for (const phone of phoneFields) {
+        if (phone) {
+          const cleanContactPhone = phone.replace(/[^\d]/g, '');
+          // Match last 10 digits for US numbers
+          if (cleanNumber.slice(-10) === cleanContactPhone.slice(-10)) {
+            return contact;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Process call event webhook
    */
   async processCallEvent(callEvent: DialpadCallEvent): Promise<void> {
