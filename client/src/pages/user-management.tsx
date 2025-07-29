@@ -268,7 +268,16 @@ export default function UserManagement() {
                             {invitation.email}
                           </p>
                         </div>
-                        {getAccessLevelBadge(invitation.accessLevel)}
+                        <div className="flex items-center gap-2">
+                          {getAccessLevelBadge(invitation.accessLevel)}
+                          <Badge
+                            variant={getStatusVariant(invitation.status)}
+                            className="flex items-center gap-1"
+                          >
+                            {getStatusIcon(invitation.status)}
+                            {invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
+                          </Badge>
+                        </div>
                       </div>
                       
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -294,14 +303,6 @@ export default function UserManagement() {
                     </div>
                     
                     <div className="flex items-center gap-3">
-                      <Badge
-                        variant={getStatusVariant(invitation.status)}
-                        className="flex items-center gap-1"
-                      >
-                        {getStatusIcon(invitation.status)}
-                        {invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
-                      </Badge>
-                      
                       <div className="flex items-center gap-2">
                         {invitation.status === "pending" && invitation.invitationCode && (
                           <>
