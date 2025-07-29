@@ -39,7 +39,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
     { name: 'Messages', href: '/messages', icon: MessageSquare },
     ...(isAdministrator ? [
       { name: 'User Management', href: '/user-management', icon: Users },
-      { name: 'Administration', href: '/administration', icon: Search },
+      { name: 'Administration', href: '/administration', icon: Shield },
       { name: 'Dialpad', href: '/dialpad', icon: Phone }
     ] : []),
     { name: 'Settings', href: '/settings', icon: Settings },
