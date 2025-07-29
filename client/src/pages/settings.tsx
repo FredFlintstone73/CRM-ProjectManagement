@@ -11,6 +11,7 @@ import { Settings as SettingsIcon, Shield, Smartphone, AlertTriangle } from "luc
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import TwoFactorAuth from "@/components/auth/two-factor-auth";
 import NavigationCustomizer from "@/components/settings/navigation-customizer";
+import { UserEmailConfig } from "@/components/email/user-email-config";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useEffect } from "react";
 
@@ -252,6 +253,9 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Email Configuration */}
+      <UserEmailConfig />
 
       {/* Navigation Customization */}
       <NavigationCustomizer />

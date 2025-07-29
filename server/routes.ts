@@ -2116,22 +2116,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Send the actual email with CC/BCC support
-      const emailResult = await emailService.sendEmail({
-        to: recipient,
-        cc: cc || undefined,
-        bcc: bcc || undefined,
-        subject: subject,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <p>Hello,</p>
-            <div style="white-space: pre-wrap;">${body.replace(/\n/g, '<br>')}</div>
-            <br>
-            <p>Best regards,<br>${user.firstName} ${user.lastName}</p>
-          </div>
-        `,
-        text: body,
-      });
+      // Try to send using user's personal email configuration first
+      let emailResult: { sent: boolean; message: string };
+      let fromEmail = user.email || 'Unknown';
+      
+      try {
+        // Check if user has personal email configured
+        if (user.emailConfigured) {
+          const UserEmailService = (await import('./userEmailService')).default;
+          const userEmailService = new UserEmailService(storage);
+          
+          const sent = await userEmailService.sendEmail(userId, {
+            to: recipient,
+            cc: cc || undefined,
+            bcc: bcc || undefined,
+            subject: subject,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <p>Hello,</p>
+                <div style="white-space: pre-wrap;">${body.replace(/\n/g, '<br>')}</div>
+                <br>
+                <p>Best regards,<br>${user.firstName} ${user.lastName}</p>
+              </div>
+            `,
+            text: body,
+          });
+          
+          fromEmail = user.smtpUser || user.email || 'Unknown';
+          emailResult = {
+            sent,
+            message: sent ? 'Email sent using personal configuration' : 'Failed to send email using personal configuration'
+          };
+        } else {
+          // Fallback to system email service
+          emailResult = await emailService.sendEmail({
+            to: recipient,
+            cc: cc || undefined,
+            bcc: bcc || undefined,
+            subject: subject,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <p>Hello,</p>
+                <div style="white-space: pre-wrap;">${body.replace(/\n/g, '<br>')}</div>
+                <br>
+                <p>Best regards,<br>${user.firstName} ${user.lastName}</p>
+              </div>
+            `,
+            text: body,
+          });
+        }
+      } catch (error) {
+        console.error('Error with user email service, falling back to system email:', error);
+        // Fallback to system email service
+        emailResult = await emailService.sendEmail({
+          to: recipient,
+          cc: cc || undefined,
+          bcc: bcc || undefined,
+          subject: subject,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <p>Hello,</p>
+              <div style="white-space: pre-wrap;">${body.replace(/\n/g, '<br>')}</div>
+              <br>
+              <p>Best regards,<br>${user.firstName} ${user.lastName}</p>
+            </div>
+          `,
+          text: body,
+        });
+      }
 
       // Record the email interaction with threading information
       const interactionData = {
@@ -2139,7 +2191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parentEmailId: parentEmailId || null,
         subject,
         body,
-        sender: user.email || 'Unknown',
+        sender: fromEmail,
         recipient,
         emailType,
         sentAt: new Date(),
@@ -3332,6 +3384,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to test contact match" });
     }
   });
+
+  // User email configuration routes
+  const userEmailRoutes = await import('./routes/userEmail');
+  app.use('/api/user-email', userEmailRoutes.createUserEmailRoutes(storage));
 
   const httpServer = createServer(app);
   return httpServer;

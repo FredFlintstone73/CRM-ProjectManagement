@@ -135,6 +135,16 @@ export const users: ReturnType<typeof pgTable> = pgTable("users", {
   twoFactorSecret: varchar("two_factor_secret"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
   backupCodes: jsonb("backup_codes"),
+  // Email configuration fields
+  emailConfigured: boolean("email_configured").default(false),
+  smtpHost: varchar("smtp_host"),
+  smtpPort: integer("smtp_port"),
+  smtpSecure: boolean("smtp_secure").default(false),
+  smtpUser: varchar("smtp_user"),
+  smtpPassword: varchar("smtp_password"), // Should be encrypted in production
+  imapHost: varchar("imap_host"),
+  imapPort: integer("imap_port"),
+  imapSecure: boolean("imap_secure").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

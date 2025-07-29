@@ -94,8 +94,11 @@ export interface IStorage {
   getUserAccessLevel(userId: string): Promise<string | undefined>;
   updateUserAccessLevel(userId: string, accessLevel: string): Promise<User>;
   getAllUsers(): Promise<User[]>;
+  getUsers(): Promise<User[]>; // Alias for getAllUsers
   updateUserStatus(userId: string, isActive: boolean): Promise<User>;
   deleteUser(userId: string): Promise<void>;
+  getUserById(userId: string): Promise<User | null>;
+  updateUser(userId: string, updates: Partial<any>): Promise<User | null>;
 
   // Contact operations
   getContacts(): Promise<Contact[]>;
@@ -3373,6 +3376,28 @@ export class DatabaseStorage implements IStorage {
       .update(emailNotifications)
       .set({ isRead: true })
       .where(eq(emailNotifications.userId, userId));
+  }
+
+  // User-specific methods for email configuration
+  async getUsers(): Promise<User[]> {
+    return this.getAllUsers();
+  }
+
+  async getUserById(userId: string): Promise<User | null> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+    return user || null;
+  }
+
+  async updateUser(userId: string, updates: Partial<any>): Promise<User | null> {
+    const [updated] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, userId))
+      .returning();
+    return updated || null;
   }
 }
 
