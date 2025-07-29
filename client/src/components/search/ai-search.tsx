@@ -56,10 +56,14 @@ export default function AISearch({ isOpen, onClose }: AISearchProps) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Focus input when opened
+  // Focus input when opened and clear when closed
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+    } else if (!isOpen) {
+      // Clear the query when popup is closed
+      setQuery("");
+      setDebouncedQuery("");
     }
   }, [isOpen]);
 
