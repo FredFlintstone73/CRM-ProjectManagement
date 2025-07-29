@@ -191,10 +191,9 @@ export class DialpadService {
       // Create a communication interaction record
       await this.storage.createContactNote({
         contactId,
-        note: interactionContent,
-        noteType: 'communication',
-        createdBy: 'system' // System-generated from Dialpad
-      });
+        content: interactionContent,
+        noteType: 'communication'
+      }, 'system'); // System-generated from Dialpad
 
       console.log(`Created call interaction for contact ${contactId}, call ${callEvent.call_id}`);
     } catch (error) {
@@ -242,10 +241,9 @@ export class DialpadService {
     try {
       await this.storage.createContactNote({
         contactId,
-        note: content,
-        noteType: 'communication',
-        createdBy: 'system'
-      });
+        content: content,
+        noteType: 'communication'
+      }, 'system'); // System-generated from Dialpad
 
       console.log(`Created text interaction for contact ${contactId}, message ${textMessage.message_id}`);
     } catch (error) {
@@ -257,6 +255,11 @@ export class DialpadService {
    * Setup webhook subscriptions
    */
   async setupWebhookSubscriptions(webhookUrl: string): Promise<void> {
+    console.log(`Setting up Dialpad webhooks with URL: ${webhookUrl}`);
+    console.log(`Using API token: ${this.config.apiToken ? this.config.apiToken.substring(0, 8) + '...' : 'NOT SET'}`);
+    console.log(`Using webhook secret: ${this.config.webhookSecret ? '***SET***' : 'NOT SET'}`);
+    console.log(`Using base URL: ${this.config.baseUrl}`);
+
     const subscriptions = [
       {
         event_type: 'call.transcription',
@@ -276,29 +279,53 @@ export class DialpadService {
       }
     ];
 
+    const results = [];
     for (const subscription of subscriptions) {
       try {
+        console.log(`Creating webhook subscription for ${subscription.event_type}...`);
+        
+        const requestBody = {
+          url: webhookUrl,
+          event_type: subscription.event_type,
+          secret: this.config.webhookSecret
+        };
+        
+        console.log(`Request body:`, JSON.stringify(requestBody, null, 2));
+
         const response = await fetch(`${this.config.baseUrl}/webhooks`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.config.apiToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            url: webhookUrl,
-            event_type: subscription.event_type,
-            secret: this.config.webhookSecret
-          })
+          body: JSON.stringify(requestBody)
         });
+
+        const responseText = await response.text();
+        console.log(`Response status: ${response.status}`);
+        console.log(`Response body:`, responseText);
 
         if (response.ok) {
           console.log(`✅ Created Dialpad webhook subscription for ${subscription.event_type}`);
+          results.push({ event_type: subscription.event_type, success: true });
         } else {
-          console.error(`❌ Failed to create webhook for ${subscription.event_type}:`, response.status);
+          console.error(`❌ Failed to create webhook for ${subscription.event_type}: ${response.status} - ${responseText}`);
+          results.push({ event_type: subscription.event_type, success: false, error: `${response.status}: ${responseText}` });
         }
       } catch (error) {
         console.error(`Error creating webhook subscription for ${subscription.event_type}:`, error);
+        results.push({ event_type: subscription.event_type, success: false, error: error.message });
       }
+    }
+
+    // Log summary
+    const successful = results.filter(r => r.success).length;
+    const failed = results.filter(r => !r.success).length;
+    console.log(`Webhook setup complete: ${successful} successful, ${failed} failed`);
+    
+    if (failed > 0) {
+      const errors = results.filter(r => !r.success).map(r => `${r.event_type}: ${r.error}`);
+      throw new Error(`Failed to create ${failed} webhook subscriptions:\n${errors.join('\n')}`);
     }
   }
 
