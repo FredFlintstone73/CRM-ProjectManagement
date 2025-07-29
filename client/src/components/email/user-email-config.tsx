@@ -269,7 +269,7 @@ export function UserEmailConfig() {
                 control={form.control}
                 name="smtpPassword"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="space-y-2 mt-[0px] mb-[0px]">
                     <FormLabel>Password / App Password</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="Enter your email password" {...field} />
