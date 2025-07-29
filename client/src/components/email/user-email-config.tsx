@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -117,6 +117,44 @@ export function UserEmailConfig() {
     }
   };
 
+  // Load existing configuration when available
+  useEffect(() => {
+    const loadExistingConfig = async () => {
+      try {
+        const user = await queryClient.fetchQuery({
+          queryKey: ['/api/auth/user'],
+          staleTime: 30000,
+        });
+        
+        if (user && user.smtpHost) {
+          form.reset({
+            smtpHost: user.smtpHost || '',
+            smtpPort: user.smtpPort || 587,
+            smtpSecure: user.smtpSecure || false,
+            smtpUser: user.smtpUser || '',
+            smtpPassword: '', // Never pre-fill password for security
+            imapHost: user.imapHost || '',
+            imapPort: user.imapPort || 993,
+            imapSecure: user.imapSecure !== false, // Default to true
+          });
+          
+          // Show helpful message if settings are pre-configured but not complete
+          if (user.smtpHost && !user.emailConfigured) {
+            toast({
+              title: "Email Settings Pre-configured",
+              description: "Your email settings have been automatically configured based on your invitation. Just add your email password to complete the setup.",
+              duration: 8000,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading existing config:', error);
+      }
+    };
+
+    loadExistingConfig();
+  }, [form, queryClient, toast]);
+
   const onSubmit = (data: EmailConfigFormData) => {
     configureEmailMutation.mutate(data);
   };
@@ -143,6 +181,16 @@ export function UserEmailConfig() {
         </CardTitle>
         <CardDescription>
           Configure your personal email account to send emails directly from your own address.
+          {/* Show if settings were pre-configured from invitation */}
+          {form.watch('smtpHost') && !form.watch('smtpPassword') && (
+            <div className="flex items-center gap-2 mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-800">
+                <span className="text-sm">
+                  📧 Email settings pre-configured from your invitation! Just add your password to complete setup.
+                </span>
+              </div>
+            </div>
+          )}
           {(emailStatus as EmailStatus)?.configured && (
             <div className="flex items-center gap-2 mt-2">
               {(emailStatus as EmailStatus).tested ? (

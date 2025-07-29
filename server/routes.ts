@@ -72,6 +72,63 @@ const logUserActivity = (req: any, res: any, next: any) => {
   }
 };
 
+// Helper function to automatically configure email settings for new users
+async function configureAutoEmailSettings(user: any, invitationEmail: string) {
+  try {
+    // Extract domain from email
+    const emailDomain = invitationEmail.toLowerCase().split('@')[1];
+    
+    // Common email provider configurations
+    const emailConfigs: Record<string, { smtp: any; imap: any }> = {
+      'gmail.com': {
+        smtp: { host: 'smtp.gmail.com', port: 587, secure: false },
+        imap: { host: 'imap.gmail.com', port: 993, secure: true }
+      },
+      'outlook.com': {
+        smtp: { host: 'smtp-mail.outlook.com', port: 587, secure: false },
+        imap: { host: 'outlook.office365.com', port: 993, secure: true }
+      },
+      'hotmail.com': {
+        smtp: { host: 'smtp-mail.outlook.com', port: 587, secure: false },
+        imap: { host: 'outlook.office365.com', port: 993, secure: true }
+      },
+      'live.com': {
+        smtp: { host: 'smtp-mail.outlook.com', port: 587, secure: false },
+        imap: { host: 'outlook.office365.com', port: 993, secure: true }
+      },
+      'yahoo.com': {
+        smtp: { host: 'smtp.mail.yahoo.com', port: 587, secure: false },
+        imap: { host: 'imap.mail.yahoo.com', port: 993, secure: true }
+      }
+    };
+    
+    // Check if we have a configuration for this domain
+    const config = emailConfigs[emailDomain];
+    if (config) {
+      // Update user with pre-configured email settings (but don't mark as configured or tested)
+      await storage.updateUser(user.id, {
+        smtpHost: config.smtp.host,
+        smtpPort: config.smtp.port,
+        smtpSecure: config.smtp.secure,
+        smtpUser: invitationEmail, // Pre-fill with their email address
+        // Leave password empty - user needs to configure this
+        imapHost: config.imap.host,
+        imapPort: config.imap.port,
+        imapSecure: config.imap.secure,
+        // Don't mark as configured since password is missing
+        emailConfigured: false
+      });
+      
+      console.log(`Auto-configured email settings for ${invitationEmail} with ${emailDomain} provider`);
+    } else {
+      console.log(`No auto-configuration available for domain: ${emailDomain}`);
+    }
+  } catch (error) {
+    console.error('Error auto-configuring email settings:', error);
+    // Don't fail the invitation acceptance if email config fails
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
@@ -2646,6 +2703,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Ensure user has a corresponding contact record in Team Members
       await storage.ensureUserHasContact(user);
+      
+      // Automatically configure basic email settings based on invitation email
+      await configureAutoEmailSettings(user, invitation.email);
       
       res.json({ message: "Invitation accepted successfully" });
     } catch (error) {
