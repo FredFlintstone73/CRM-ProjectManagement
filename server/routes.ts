@@ -2545,8 +2545,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Accept the invitation
       await storage.acceptUserInvitation(req.params.code, userId);
       
-      // Ensure user exists in the users table with invitation details
-      await storage.upsertUser({
+      // Create/update user record with invitation details
+      const user = await storage.upsertUser({
         id: userId,
         email: userEmail || invitation.email,
         firstName: firstName || invitation.firstName,
@@ -2556,6 +2556,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invitedBy: invitation.invitedBy,
         invitedAt: new Date(invitation.invitedAt),
       });
+      
+      // Ensure user has a corresponding contact record in Team Members
+      await storage.ensureUserHasContact(user);
       
       res.json({ message: "Invitation accepted successfully" });
     } catch (error) {
