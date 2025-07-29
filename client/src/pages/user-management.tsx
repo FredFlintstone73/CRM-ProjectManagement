@@ -222,7 +222,6 @@ export default function UserManagement() {
         </div>
         <UserInvitationDialog />
       </div>
-
       <div className="grid gap-6">
         {/* Email Configuration Status */}
         <EmailConfigurationStatus />
@@ -254,7 +253,7 @@ export default function UserManagement() {
                 {invitations.map((invitation: UserInvitation) => (
                   <div
                     key={invitation.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="flex items-center justify-between p-4 border rounded-lg pt-[0px] pb-[0px] pl-[5px] pr-[5px]"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
