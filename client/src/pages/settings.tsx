@@ -126,7 +126,6 @@ export default function Settings() {
           <p className="text-muted-foreground">Manage your account preferences and security</p>
         </div>
       </div>
-
       {/* Account Information */}
       <Card>
         <CardHeader className="flex flex-col space-y-1.5 p-6 pt-[5px] pb-[5px]">
@@ -153,7 +152,6 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Security Settings */}
       <Card>
         <CardHeader>
@@ -182,7 +180,7 @@ export default function Settings() {
           </div>
 
           {(twoFactorStatus as any)?.enabled && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg mt-[0px] mb-[0px]">
               <div className="flex items-center gap-2 text-green-800">
                 <Shield className="h-4 w-4" />
                 <span className="text-sm font-medium">2FA is enabled</span>
@@ -204,7 +202,6 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Privacy & Data */}
       <Card>
         <CardHeader>
@@ -225,7 +222,6 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Notifications */}
       <Card>
         <CardHeader className="flex flex-col space-y-1.5 p-6 pt-[5px] pb-[5px]">
@@ -253,10 +249,8 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Email Configuration */}
       <UserEmailConfig />
-
       {/* Navigation Customization */}
       <NavigationCustomizer />
     </div>
