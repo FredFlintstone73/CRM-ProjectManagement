@@ -133,15 +133,10 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
           </div>
         </div>
         
-        {/* Search Bar */}
-        {!isCollapsed && (
-          <div className="px-4 py-3">
-            <SearchTrigger />
-          </div>
-        )}
-
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          {/* Search Bar */}
+          {!isCollapsed && <SearchTrigger />}
           {/* Dashboard */}
           <Link 
             href="/" 
