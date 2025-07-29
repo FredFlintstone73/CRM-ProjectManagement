@@ -204,7 +204,7 @@ export default function Settings() {
       </Card>
       {/* Privacy & Data */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col space-y-1.5 p-6 pt-[5px] pb-[5px]">
           <CardTitle>Privacy & Data</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
