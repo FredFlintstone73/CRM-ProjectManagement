@@ -102,9 +102,7 @@ function SortableItem({ item }: SortableItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 p-3 bg-white border rounded-lg cursor-grab active:cursor-grabbing ${
-        isDragging ? 'shadow-lg' : 'shadow-sm'
-      }`}
+      className="flex items-center gap-3 p-3 bg-white border rounded-lg cursor-grab active:cursor-grabbing shadow-sm pt-[0px] pb-[0px]"
       {...attributes}
       {...listeners}
     >
