@@ -155,6 +155,16 @@ export default function AuthPage() {
                         "Sign In"
                       )}
                     </Button>
+                    
+                    <div className="text-center mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setLocation("/forgot-password")}
+                        className="text-sm text-muted-foreground hover:text-primary underline"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>

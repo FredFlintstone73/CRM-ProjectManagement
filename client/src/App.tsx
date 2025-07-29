@@ -24,6 +24,8 @@ import Administration from "@/pages/administration";
 import Marketing from "@/pages/marketing";
 import Settings from "@/pages/settings";
 import AcceptInvitation from "@/pages/accept-invitation";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import Messages from "@/pages/messages";
 import Calendar from "@/pages/calendar";
 import ConsolidatedMessages from "@/pages/consolidated-messages";
@@ -60,6 +62,8 @@ function Router() {
     <Switch>
       <Route path="/accept-invitation" component={AcceptInvitation} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       {!user ? (
         <Route path="/" component={AuthPage} />
       ) : (

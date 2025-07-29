@@ -79,6 +79,7 @@ export interface IStorage {
   // Authentication operations (username/password)
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
   createUser(user: { username: string; password: string; email?: string; firstName?: string; lastName?: string; accessLevel?: string; isActive?: boolean; invitedBy?: string; invitedAt?: Date }): Promise<User>;
   
   // User invitation operations
@@ -375,6 +376,15 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.email, email));
+    
+    return user;
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.resetToken, token));
     
     return user;
   }

@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Users, Settings, UserCheck, UserX, User, Trash2 } from "lucide-react";
+import { AdminPasswordReset } from "./AdminPasswordReset";
 
 interface TeamMember {
   id: string;
@@ -295,6 +296,8 @@ export default function TeamMemberManagement() {
                       <Settings className="mr-1 h-3 w-3" />
                       Change Access
                     </Button>
+                    
+                    <AdminPasswordReset user={member} />
                     
                     {!member.isActive && (
                       <Button

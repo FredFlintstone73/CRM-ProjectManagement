@@ -134,6 +134,8 @@ export const users: ReturnType<typeof pgTable> = pgTable("users", {
   isActive: boolean("is_active").default(true),
   invitedBy: varchar("invited_by").references((): any => users.id),
   invitedAt: timestamp("invited_at"),
+  resetToken: varchar("reset_token"),
+  resetTokenExpires: timestamp("reset_token_expires"),
   twoFactorSecret: varchar("two_factor_secret"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
   backupCodes: jsonb("backup_codes"),
