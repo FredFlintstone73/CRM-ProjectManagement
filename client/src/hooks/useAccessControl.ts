@@ -21,7 +21,11 @@ export interface AccessPermissions {
 export function useAccessControl() {
   const { data: accessLevelData, isLoading } = useQuery({
     queryKey: ['/api/auth/access-level'],
-    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
+    retry: 1,
   });
 
   const accessLevel: AccessLevel = (accessLevelData as any)?.accessLevel || "team_member";

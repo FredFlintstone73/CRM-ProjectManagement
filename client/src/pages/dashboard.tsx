@@ -12,7 +12,8 @@ import ProjectsTimelineChart from "@/components/dashboard/projects-timeline-char
 import ActionCard from "@/components/dashboard/action-card";
 
 export default function Dashboard() {
-  const { isAuthenticated, isLoading, logoutMutation } = useAuth();
+  const { user, isLoading, logoutMutation } = useAuth();
+  const isAuthenticated = !!user;
   const queryClient = useQueryClient();
   const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
   const [customStartDate, setCustomStartDate] = useState<string>("");
