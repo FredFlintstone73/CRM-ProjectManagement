@@ -33,7 +33,7 @@ import DialpadSettings from "@/pages/dialpad-settings";
 
 import Sidebar from "@/components/layout/sidebar";
 import { Mandatory2FAWrapper } from "@/components/auth/Mandatory2FAWrapper";
-import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
+// import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
 
 
 function Router() {

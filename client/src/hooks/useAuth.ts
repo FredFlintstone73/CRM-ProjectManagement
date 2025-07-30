@@ -9,8 +9,7 @@ export function useAuth() {
     refetchOnWindowFocus: false,
   });
 
-  // Log auth state for debugging
-  console.log('Auth state:', { user, isLoading, error, isAuthenticated: !!user });
+
 
   return {
     user,
