@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import EmailNotificationIcon from "@/components/layout/email-notification-icon";
 
@@ -18,17 +18,9 @@ export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("next-4-months");
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
   const handleCustomDateChange = (startDate: string, endDate: string) => {
     setCustomStartDate(startDate);
     setCustomEndDate(endDate);
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await queryClient.invalidateQueries();
-    setTimeout(() => setIsRefreshing(false), 1000); // Show refresh animation for 1 second
   };
 
   const handleLogout = () => {
@@ -67,15 +59,6 @@ export default function Dashboard() {
           
           <div className="flex items-center space-x-2">
             <EmailNotificationIcon />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="hover:bg-gray-100"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
             <Button
               variant="ghost"
               size="sm"
