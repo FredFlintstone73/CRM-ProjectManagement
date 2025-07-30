@@ -652,11 +652,37 @@ export class DatabaseStorage implements IStorage {
       await db.delete(contacts).where(eq(contacts.id, userContact.id));
     }
 
-    // Delete related user records
+    // Delete all related user records in the correct order (child tables first)
+    await db.delete(contactNotes).where(eq(contactNotes.userId, userId));
+    await db.delete(contactFiles).where(eq(contactFiles.userId, userId));
+    await db.delete(emailInteractions).where(eq(emailInteractions.createdBy, userId));
+    await db.delete(projectComments).where(eq(projectComments.userId, userId));
+    await db.delete(callTranscripts).where(eq(callTranscripts.createdBy, userId));
     await db.delete(userTaskPriorities).where(eq(userTaskPriorities.userId, userId));
-    await db.delete(userActivities).where(eq(userActivities.userId, userId));
-    await db.delete(activityLog).where(eq(activityLog.userId, userId));
     await db.delete(emailNotifications).where(eq(emailNotifications.userId, userId));
+    await db.delete(activityLog).where(eq(activityLog.userId, userId));
+    
+    // Handle mentions (both as mentioned and mentioning user)
+    await db.delete(mentions).where(eq(mentions.mentionedUserId, userId));
+    await db.delete(mentions).where(eq(mentions.mentionedByUserId, userId));
+    
+    // Update invitation requests that were reviewed by this user
+    await db.update(invitationRequests)
+      .set({ reviewedBy: null })
+      .where(eq(invitationRequests.reviewedBy, userId));
+    
+    // Update user invitations that were created by this user
+    await db.update(userInvitations)
+      .set({ invitedBy: null })
+      .where(eq(userInvitations.invitedBy, userId));
+    
+    // Update users that were invited by this user
+    await db.update(users)
+      .set({ invitedBy: null })
+      .where(eq(users.invitedBy, userId));
+    
+    // Delete calendar connections
+    await db.delete(calendarConnections).where(eq(calendarConnections.userId, userId));
 
     // Finally delete the user
     await db.delete(users).where(eq(users.id, userId));
