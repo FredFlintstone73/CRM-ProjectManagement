@@ -1,5 +1,7 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
+import path from "path";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { emailService } from "./emailService";
@@ -147,6 +149,12 @@ async function configureAutoEmailSettings(user: any, invitationEmail: string) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve static files in production
+  if (app.get("env") === "production") {
+    const staticPath = path.resolve(import.meta.dirname, 'public');
+    app.use(express.static(staticPath));
+  }
+
   // Ensure API routes are handled first and return JSON (not HTML)
   app.use('/api/*', (req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -3556,7 +3564,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // For all other routes, serve the React app
-    res.sendFile('index.html', { root: 'server/public' });
+    const indexPath = path.resolve(import.meta.dirname, 'public', 'index.html');
+    res.sendFile(indexPath);
   });
 
   const httpServer = createServer(app);
