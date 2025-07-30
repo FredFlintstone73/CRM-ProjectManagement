@@ -241,5 +241,3 @@ export default function RegistrationTwoFactorSetup({
 
   return null;
 }
-
-export default RegistrationTwoFactorSetup;

@@ -513,13 +513,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const newProject = await storage.createProject(projectData, userId);
           
           // Create milestones first, sorted by sortOrder to preserve template ordering
-          const createdMilestones = [];
+          const createdMilestones: any[] = [];
           const sortedMilestones = [...templateMilestones].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
           for (const milestone of sortedMilestones) {
             const createdMilestone = await storage.createMilestone({
               title: milestone.title,
               projectId: newProject.id,
-              dueDate: null,
+              dueDate: undefined,
               description: milestone.description || '',
               status: 'active',
               sortOrder: milestone.sortOrder || 0
@@ -528,7 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Create tasks from template with calculated due dates
-          const createdTasks = [];
+          const createdTasks: any[] = [];
           const taskMapping = new Map(); // Map template task IDs to created task IDs
           
           // Sort template tasks to preserve original template order
@@ -598,7 +598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: 'todo',
               priority: templateTask.priority || 25,
               estimatedDays: 1,
-              dueDate: taskDueDate,
+              dueDate: taskDueDate ? taskDueDate.toISOString() : undefined,
               assignedTo: assignedToId,
               assignedToRole: roleAssignment || templateTask.assignedToRole || null,
               parentTaskId: mappedParentTaskId,
@@ -730,7 +730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: 'todo',
               priority: templateTask.priority || 25,
               estimatedDays: 1,
-              dueDate: taskDueDate,
+              dueDate: taskDueDate ? taskDueDate.toISOString() : undefined,
               assignedTo: assignedToId,
               assignedToRole: roleAssignment || templateTask.assignedToRole || null,
               parentTaskId: mappedParentTaskId,
@@ -789,8 +789,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       )
     );
     
-    const assignedContactIds = [];
-    const unassignedRoles = [];
+    const assignedContactIds: any[] = [];
+    const unassignedRoles: string[] = [];
     
     // Resolve each role to contact IDs
     for (const role of roleArray) {
@@ -833,13 +833,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priority: 'medium' as const,
         projectType: 'csr' as const,
         estimatedDays: 90,
-        dueDate: meetingDate ? new Date(meetingDate) : null
+        dueDate: meetingDate ? new Date(meetingDate).toISOString() : undefined
       };
 
       const newProject = await storage.createProject(projectData, userId);
 
       // Create tasks from the calculated task data
-      const createdTasks = [];
+      const createdTasks: any[] = [];
       for (const taskData of tasks || []) {
         // Resolve role-based assignment if assignedToRole is provided
         let assignedToId = null;
@@ -858,7 +858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: (taskData.status || 'todo') as const,
           priority: taskData.priority || 25,
           estimatedDays: 1,
-          dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
+          dueDate: taskData.dueDate ? new Date(taskData.dueDate).toISOString() : undefined,
           assignedTo: assignedToId
         }, userId);
         createdTasks.push(task);

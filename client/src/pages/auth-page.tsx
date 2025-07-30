@@ -39,7 +39,7 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -217,9 +217,8 @@ export default function AuthPage() {
   if (showTwoFactor && tempUserId) {
     return (
       <TwoFactorLogin 
-        tempUserId={tempUserId}
         onSuccess={handleTwoFactorSuccess}
-        onBack={() => {
+        onCancel={() => {
           setShowTwoFactor(false);
           setTempUserId(null);
         }}

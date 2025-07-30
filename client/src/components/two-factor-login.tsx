@@ -15,7 +15,7 @@ interface TwoFactorLoginProps {
   onCancel: () => void;
 }
 
-function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
+export default function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
   const [verificationCode, setVerificationCode] = useState('');
   const [backupCode, setBackupCode] = useState('');
   const [useBackupCode, setUseBackupCode] = useState(false);
@@ -290,5 +290,3 @@ function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
     </Card>
   );
 }
-
-export default TwoFactorLogin;
