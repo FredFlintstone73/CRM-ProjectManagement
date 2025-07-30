@@ -196,23 +196,14 @@ export function TwoFactorSetup() {
                 {setupMutation.isPending ? "Setting up..." : "Enable 2FA"}
               </Button>
             ) : (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsRegenerateOpen(true)}
-                  disabled={regenerateMutation.isPending}
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Regenerate Codes
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  onClick={() => setIsDisableOpen(true)}
-                  disabled={disableMutation.isPending}
-                >
-                  Disable 2FA
-                </Button>
-              </>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsRegenerateOpen(true)}
+                disabled={regenerateMutation.isPending}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Regenerate Backup Codes
+              </Button>
             )}
           </div>
         </div>
@@ -329,66 +320,7 @@ export function TwoFactorSetup() {
           </DialogContent>
         </Dialog>
 
-        {/* Disable Dialog */}
-        <Dialog open={isDisableOpen} onOpenChange={setIsDisableOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Disable Two-Factor Authentication</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  This will remove the extra security layer from your account.
-                </AlertDescription>
-              </Alert>
 
-              <div>
-                <Label>Verification Code</Label>
-                <Input
-                  value={disableToken}
-                  onChange={(e) => setDisableToken(e.target.value)}
-                  placeholder="123456"
-                  maxLength={6}
-                />
-              </div>
-
-              <div className="text-center text-sm text-muted-foreground">
-                OR
-              </div>
-
-              <div>
-                <Label>Backup Code</Label>
-                <Input
-                  value={disableBackupCode}
-                  onChange={(e) => setDisableBackupCode(e.target.value)}
-                  placeholder="Enter backup code"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleDisable2FA}
-                  disabled={(!disableToken && !disableBackupCode) || disableMutation.isPending}
-                  variant="destructive"
-                  className="flex-1"
-                >
-                  {disableMutation.isPending ? "Disabling..." : "Disable 2FA"}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setIsDisableOpen(false);
-                    setDisableToken('');
-                    setDisableBackupCode('');
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         {/* Regenerate Backup Codes Dialog */}
         <Dialog open={isRegenerateOpen} onOpenChange={(open) => {

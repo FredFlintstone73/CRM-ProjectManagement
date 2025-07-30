@@ -11,6 +11,8 @@ import { Loader2, Building2, Users, Calendar, MessageSquare, Eye, EyeOff } from 
 import React from "react";
 import { validatePassword } from "@/lib/password-validation";
 import { TwoFactorLogin } from "@/components/two-factor-login";
+import { TwoFactorSetup } from "@/components/two-factor-setup";
+import { RegistrationTwoFactorSetup } from "@/components/registration-two-factor-setup";
 import { queryClient } from "@/lib/queryClient";
 
 export default function AuthPage() {
@@ -45,6 +47,10 @@ export default function AuthPage() {
 
   // State for 2FA login flow
   const [showTwoFactor, setShowTwoFactor] = useState(false);
+  
+  // State for 2FA setup after registration
+  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
+  const [twoFactorSetupData, setTwoFactorSetupData] = useState<any>(null);
 
   // Get invitation code and tab from URL params
   const urlParams = new URLSearchParams(window.location.search);
@@ -109,6 +115,36 @@ export default function AuthPage() {
     setLoginData({ username: "", password: "" });
   };
 
+  const handleTwoFactorSetupComplete = (success: boolean) => {
+    if (success) {
+      toast({
+        title: "2FA Setup Complete",
+        description: "Account created successfully! Please sign in with your new credentials.",
+      });
+      
+      // Reset registration form
+      setRegisterData({
+        username: "",
+        password: "",
+        confirmPassword: "",
+        email: "",
+        firstName: "",
+        lastName: "",
+        invitationCode: "",
+      });
+      
+      // Redirect to login tab
+      setTimeout(() => {
+        setShowTwoFactorSetup(false);
+        setTwoFactorSetupData(null);
+        setActiveTab("login");
+      }, 1500);
+    } else {
+      setShowTwoFactorSetup(false);
+      setTwoFactorSetupData(null);
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -141,7 +177,14 @@ export default function AuthPage() {
     const { confirmPassword, ...registrationData } = registerData;
     registrationData.username = registrationData.email;
     
-    registerMutation.mutate(registrationData);
+    registerMutation.mutate(registrationData, {
+      onSuccess: (response: any) => {
+        if (response.requiresTwoFactorSetup) {
+          setTwoFactorSetupData(response);
+          setShowTwoFactorSetup(true);
+        }
+      }
+    });
   };
 
   // Show 2FA login if required
@@ -152,6 +195,31 @@ export default function AuthPage() {
           onSuccess={handleTwoFactorSuccess}
           onCancel={handleTwoFactorCancel}
         />
+      </div>
+    );
+  }
+
+  // Show 2FA setup after registration
+  if (showTwoFactorSetup && twoFactorSetupData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-gray-50">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">Setup Two-Factor Authentication</h1>
+            <p className="text-muted-foreground mt-2">
+              Complete your account setup by configuring 2FA
+            </p>
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <RegistrationTwoFactorSetup 
+                setupData={twoFactorSetupData.twoFactorSetup}
+                userId={twoFactorSetupData.userId}
+                onComplete={handleTwoFactorSetupComplete}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }

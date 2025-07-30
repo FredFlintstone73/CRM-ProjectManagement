@@ -78,13 +78,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
+    onSuccess: (response: any) => {
+      // Registration now requires mandatory 2FA setup
+      if (response.requiresTwoFactorSetup) {
+        toast({
+          title: "Registration successful",
+          description: `Account created! Now set up Two-Factor Authentication to complete registration.`,
+        });
+        // Let the auth page handle the 2FA setup flow
+        return;
+      }
+      
+      // Fallback (shouldn't happen with mandatory 2FA)
       toast({
         title: "Registration successful",
         description: `Account created successfully! Please sign in with your new credentials.`,
       });
       
-      // Refresh the page and redirect to Sign In tab
       setTimeout(() => {
         window.location.href = "/auth?tab=login";
       }, 1500);

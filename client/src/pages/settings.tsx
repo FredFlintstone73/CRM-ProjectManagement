@@ -163,18 +163,19 @@ export default function Settings() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Smartphone className="h-4 w-4" />
-                <Label htmlFor="two-factor">Two-Factor Authentication</Label>
+                <Label>Two-Factor Authentication (Required)</Label>
               </div>
               <p className="text-sm text-muted-foreground">
-                Add an extra layer of security to your account
+                Two-factor authentication is mandatory for all accounts
               </p>
             </div>
-            <Switch
-              id="two-factor"
-              checked={(twoFactorStatus as any)?.enabled || false}
-              onCheckedChange={handleTwoFactorToggle}
-              disabled={statusLoading || disableTwoFactorMutation.isPending}
-            />
+            <Button 
+              onClick={() => setShowTwoFactorSetup(true)}
+              variant="outline"
+              disabled={statusLoading}
+            >
+              Manage 2FA
+            </Button>
           </div>
 
           {(twoFactorStatus as any)?.enabled && (

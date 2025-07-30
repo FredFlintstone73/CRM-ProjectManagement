@@ -130,4 +130,25 @@ export class TwoFactorService {
   static regenerateBackupCodes(): string[] {
     return this.generateBackupCodes(8);
   }
+
+  /**
+   * Generate a new 2FA secret with QR code for user registration
+   */
+  static generateSecret(email: string): {
+    secret: string;
+    backupCodes: string[];
+    qrCodeDataUrl: string;
+    manualEntryKey: string;
+  } {
+    const setup = this.generateSetup(email);
+    return {
+      secret: setup.secret,
+      backupCodes: setup.backupCodes,
+      qrCodeDataUrl: setup.qrCodeUrl, // This needs to be converted to data URL
+      manualEntryKey: setup.manualEntryKey
+    };
+  }
 }
+
+// Export singleton instance for convenience
+export const twoFactorService = new TwoFactorService();
