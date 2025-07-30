@@ -72,11 +72,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Registration successful",
-        description: `Welcome to ClientHub, ${user.firstName || user.username}!`,
+        description: `Account created successfully! Please sign in with your new credentials.`,
       });
+      
+      // Refresh the page and redirect to Sign In tab
+      setTimeout(() => {
+        window.location.href = "/auth?tab=login";
+      }, 1500);
     },
     onError: (error: Error) => {
       toast({
