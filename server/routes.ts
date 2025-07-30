@@ -150,33 +150,40 @@ async function configureAutoEmailSettings(user: any, invitationEmail: string) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // CRITICAL: Handle frontend routes ONLY in production before any auth middleware
-  // This prevents Replit Auth from intercepting invitation URLs in deployed environment
-  if (app.get("env") === "production") {
-    app.get('/auth', (req, res) => {
-      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
-      console.log(`Serving /auth route with index.html from: ${indexPath}`);
-      res.sendFile(indexPath);
+  // CRITICAL: Handle frontend routes FIRST - MUST be registered before any middleware
+  // This prevents Replit Auth integration from intercepting invitation URLs in deployed environment
+  const indexPath = app.get("env") === "production" ? 
+    path.resolve(process.cwd(), 'dist', 'public', 'index.html') : null;
+
+  // Handle ALL auth-related routes that Replit Auth might intercept
+  const authRoutes = ['/auth', '/accept-invitation', '/forgot-password', '/reset-password'];
+  
+  authRoutes.forEach(route => {
+    app.get(route, (req, res, next) => {
+      if (app.get("env") === "production" && indexPath) {
+        console.log(`Serving ${route} route with query params:`, req.query);
+        res.sendFile(indexPath);
+      } else {
+        // Development handled by Vite, don't interfere
+        next();
+      }
     });
+  });
+
+  // Handle any URL with invitation parameter - CRITICAL for Replit Auth bypass
+  app.get('*', (req, res, next) => {
+    const hasInvitation = req.query.invitation;
+    const hasTabParam = req.query.tab;
+    const isAuthRoute = req.path === '/auth' || req.path === '/accept-invitation';
     
-    app.get('/accept-invitation', (req, res) => {
-      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
-      console.log(`Serving /accept-invitation route with index.html from: ${indexPath}`);
+    if ((hasInvitation || hasTabParam) && app.get("env") === "production" && indexPath) {
+      console.log(`Bypassing auth middleware for invitation URL: ${req.url}`);
       res.sendFile(indexPath);
-    });
+      return;
+    }
     
-    app.get('/forgot-password', (req, res) => {
-      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
-      console.log(`Serving /forgot-password route with index.html from: ${indexPath}`);
-      res.sendFile(indexPath);
-    });
-    
-    app.get('/reset-password', (req, res) => {
-      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
-      console.log(`Serving /reset-password route with index.html from: ${indexPath}`);
-      res.sendFile(indexPath);
-    });
-  }
+    next();
+  });
 
   // Serve static files in production with proper configuration
   if (app.get("env") === "production") {

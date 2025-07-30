@@ -3,6 +3,25 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// CRITICAL: Invitation URL bypass MUST be the very first middleware
+// This intercepts invitation URLs before any other middleware including Replit Auth
+app.use((req, res, next) => {
+  const hasInvitation = req.query.invitation;
+  const hasTabParam = req.query.tab;
+  const isAuthRelated = req.path === '/auth' || req.path === '/accept-invitation' || 
+                       req.path === '/forgot-password' || req.path === '/reset-password';
+  
+  // In production, immediately serve index.html for invitation URLs to bypass all auth
+  if ((hasInvitation || (hasTabParam && isAuthRelated)) && app.get("env") === "production") {
+    const indexPath = require('path').resolve(process.cwd(), 'dist', 'public', 'index.html');
+    console.log(`🚀 BYPASSING ALL MIDDLEWARE for invitation URL: ${req.url}`);
+    return res.sendFile(indexPath);
+  }
+  
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
