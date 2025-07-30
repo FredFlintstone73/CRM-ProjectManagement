@@ -1,0 +1,63 @@
+Looking at your deployed app returning 404 errors and "API endpoint not found: /", I can identify several critical issues in your codebase that need immediate attention.
+
+Key Issues Identified
+1. Critical Route Handler Problem
+In server/routes.ts around line 2400, there's a catch-all route that's incorrectly handling non-API requests:
+
+// Catch-all for non-API routes - serve React app (client-side routing)
+app.get('*', (req, res) => {
+  // Don't serve HTML for API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: `API endpoint not found: ${req.path}` });
+  }
+  
+  // For all other routes, serve the React app
+  res.sendFile('index.html', { root: 'server/public' });
+});
+The issue is { root: 'server/public' } - this path doesn't exist in production builds.
+
+2. Missing Static File Serving Configuration
+The static files aren't being served correctly because the build output directory structure doesn't match what the code expects.
+
+3. Build Configuration Mismatch
+Your vite.config.ts builds to dist/public, but the route handler looks for server/public.
+
+Specific Remediation Plan
+Step 1: Fix the Static File Serving
+server/routes.ts
+Step 2: Add Missing Import
+Step 3: Ensure Static Middleware is Properly Configured
+Step 4: Add Express Import
+Deployment Strategy
+Immediate Actions:
+Test in Development First: Run the app locally with npm run dev to ensure these changes don't break the development environment.
+
+Build and Test Locally:
+
+Run npm run build
+Run npm start to test production mode locally
+Verify both API endpoints and static routes work
+Deploy to Replit: Once confirmed working locally, deploy to your Replit deployment.
+
+Additional Considerations
+Check Build Output Structure
+Your build process should create this structure:
+
+dist/
+├── public/
+│   ├── index.html
+│   ├── assets/
+│   └── other static files
+└── index.js (server)
+Verify Environment Variables
+Ensure all production environment variables are set in your Replit Deployment settings, not just in Secrets.
+
+Root Cause Analysis
+The issue stems from the mismatch between:
+
+Where the build process puts files (dist/public/)
+Where the server looks for files (server/public/)
+Missing static file middleware in production
+The serveStatic function in server/vite.ts handles this correctly, but it's only called in the main server file when NODE_ENV !== "development". The route registration happens before static file serving is set up, causing the catch-all route to fire before static files can be served.
+
+Recommendation: Apply these fixes in development first, test thoroughly, then deploy. This approach ensures you can debug any remaining issues in a controlled environment before pushing to production.

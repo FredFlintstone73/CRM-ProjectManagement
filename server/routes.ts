@@ -3568,6 +3568,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(404).json({ message: `API endpoint not found: ${req.path}` });
   });
 
+  // Add static file serving middleware for production
+  const staticPath = path.resolve(process.cwd(), 'dist', 'public');
+  console.log(`Setting up static file serving from: ${staticPath}`);
+  app.use(express.static(staticPath));
+
   // Catch-all for non-API routes - serve React app (client-side routing)
   app.get('*', (req, res) => {
     console.log(`Route requested: ${req.path}, Environment: ${app.get("env")}`);
