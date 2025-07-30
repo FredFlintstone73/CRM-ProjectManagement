@@ -164,7 +164,7 @@ class EmailService {
       baseUrl = 'http://localhost:5000';
     }
 
-    const inviteUrl = `${baseUrl}/accept-invitation?code=${invitation.invitationCode}`;
+    const inviteUrl = `${baseUrl}/auth?invitation=${invitation.invitationCode}&tab=register`;
     console.log(`🔗 Generated invitation URL: ${inviteUrl}`);
 
     const html = `
@@ -175,14 +175,15 @@ class EmailService {
         <p>You've been invited to join ClientHub CRM with <strong>${this.formatAccessLevel(invitation.accessLevel)}</strong> access.</p>
 
         <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Your invitation details:</h3>
-          <p><strong>Invitation Code:</strong> ${invitation.invitationCode}</p>
+          <h3 style="margin-top: 0;">To get started:</h3>
+          <p>1. Click the button below to create your account</p>
+          <p>2. Use your invitation code: <strong>${invitation.invitationCode}</strong></p>
           <p><strong>Access Level:</strong> ${this.formatAccessLevel(invitation.accessLevel)}</p>
         </div>
 
         <p>
           <a href="${inviteUrl}" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-            Accept Invitation
+            Create Account & Join
           </a>
         </p>
 
@@ -199,10 +200,13 @@ class EmailService {
 
       You've been invited to join ClientHub CRM with ${this.formatAccessLevel(invitation.accessLevel)} access.
 
-      Invitation Code: ${invitation.invitationCode}
+      To get started:
+      1. Click the link below to create your account
+      2. Use your invitation code: ${invitation.invitationCode}
+
       Access Level: ${this.formatAccessLevel(invitation.accessLevel)}
 
-      Click here to accept: ${inviteUrl}
+      Create your account: ${inviteUrl}
 
       This invitation will expire in 7 days.
     `;

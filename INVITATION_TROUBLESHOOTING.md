@@ -42,9 +42,9 @@ Here are the currently active invitation codes:
 - **Clear cookies and cache**: Old data might cause conflicts
 
 ### Account Issues
-- **Make sure you have a Replit account**: You need to be logged into Replit
+- **Use the invitation link provided**: Click the "Create Account & Join" button in your invitation email
+- **Enter your invitation code**: You must provide the invitation code during registration
 - **Use the correct email**: The invitation is tied to a specific email address
-- **Enable 2FA**: Two-factor authentication is required after accepting
 
 ## 5. If Nothing Works
 
@@ -53,9 +53,9 @@ Contact the administrator who sent your invitation. They can:
 - Check if your original code is still valid
 - Verify you're using the correct email address
 
-## 6. Direct Link Method
+## 6. Direct Registration Method
 
-You can also use a direct link with your code:
-[Your App URL]/accept-invitation?code=YOUR_CODE_HERE
+You can also access the registration page directly with your code:
+[Your App URL]/auth?invitation=YOUR_CODE_HERE&tab=register
 
-Replace `YOUR_CODE_HERE` with your actual invitation code.
+Replace `YOUR_CODE_HERE` with your actual invitation code. This will take you directly to the registration page with your invitation code pre-filled.

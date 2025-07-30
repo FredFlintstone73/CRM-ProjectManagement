@@ -85,9 +85,9 @@ export default function AuthPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!registerData.username || !registerData.password) {
+    if (!registerData.username || !registerData.password || !registerData.invitationCode) {
       toast({
-        title: "Please fill in required fields",
+        title: "Please fill in all required fields including invitation code",
         variant: "destructive",
       });
       return;
@@ -223,25 +223,29 @@ export default function AuthPage() {
                   <CardDescription>
                     {invitationCodeFromUrl 
                       ? "Complete your registration using the invitation code"
-                      : "Create a new account to get started"
+                      : "Registration requires a valid invitation code"
                     }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleRegister} className="space-y-4">
-                    {invitationCodeFromUrl && (
-                      <div className="space-y-2">
-                        <Label htmlFor="invitation-code">Invitation Code</Label>
-                        <Input
-                          id="invitation-code"
-                          type="text"
-                          value={registerData.invitationCode}
-                          onChange={(e) => setRegisterData(prev => ({ ...prev, invitationCode: e.target.value }))}
-                          placeholder="Enter invitation code"
-                          readOnly={!!invitationCodeFromUrl}
-                        />
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="invitation-code">Invitation Code *</Label>
+                      <Input
+                        id="invitation-code"
+                        type="text"
+                        value={registerData.invitationCode}
+                        onChange={(e) => setRegisterData(prev => ({ ...prev, invitationCode: e.target.value }))}
+                        placeholder="Enter invitation code"
+                        readOnly={!!invitationCodeFromUrl}
+                        required
+                      />
+                      {invitationCodeFromUrl && (
+                        <p className="text-sm text-muted-foreground">
+                          Invitation code has been automatically filled from your invitation link.
+                        </p>
+                      )}
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="first-name">First Name</Label>
