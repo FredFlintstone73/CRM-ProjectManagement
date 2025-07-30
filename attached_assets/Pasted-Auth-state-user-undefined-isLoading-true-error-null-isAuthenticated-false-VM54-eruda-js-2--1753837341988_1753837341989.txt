@@ -1,0 +1,98 @@
+Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM54 eruda.js:2 Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM54 eruda.js:2 Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM54 eruda.js:2 Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM54 eruda.js:2  GET https://8d860892-829b-4328-82a0-9f5e7eccde94-00-2tcj7jtrjb8f4.janeway.replit.dev/api/auth/user 404 (Not Found)
+window.fetch @ VM54 eruda.js:2
+(anonymous) @ VM56 index-D9LRicT0.js:48
+i @ VM56 index-D9LRicT0.js:48
+b @ VM56 index-D9LRicT0.js:48
+start @ VM56 index-D9LRicT0.js:48
+fetch @ VM56 index-D9LRicT0.js:48
+lh @ VM56 index-D9LRicT0.js:48
+onSubscribe @ VM56 index-D9LRicT0.js:48
+subscribe @ VM56 index-D9LRicT0.js:48
+(anonymous) @ VM56 index-D9LRicT0.js:48
+HF @ VM56 index-D9LRicT0.js:38
+$x @ VM56 index-D9LRicT0.js:40
+wu @ VM56 index-D9LRicT0.js:40
+YG @ VM56 index-D9LRicT0.js:40
+El @ VM56 index-D9LRicT0.js:40
+DE @ VM56 index-D9LRicT0.js:40
+pl @ VM56 index-D9LRicT0.js:38
+(anonymous) @ VM56 index-D9LRicT0.js:40
+setTimeout
+s @ VM56 index-D9LRicT0.js:48
+o @ VM56 index-D9LRicT0.js:48
+batch @ VM56 index-D9LRicT0.js:48
+Ni @ VM56 index-D9LRicT0.js:48
+setData @ VM56 index-D9LRicT0.js:48
+setQueryData @ VM56 index-D9LRicT0.js:48
+onSuccess @ VM56 index-D9LRicT0.js:458
+execute @ VM56 index-D9LRicT0.js:48
+await in execute
+mutate @ VM56 index-D9LRicT0.js:48
+(anonymous) @ VM56 index-D9LRicT0.js:48
+f @ VM56 index-D9LRicT0.js:458
+pH @ VM56 index-D9LRicT0.js:37
+vH @ VM56 index-D9LRicT0.js:37
+yH @ VM56 index-D9LRicT0.js:37
+rE @ VM56 index-D9LRicT0.js:37
+AF @ VM56 index-D9LRicT0.js:37
+(anonymous) @ VM56 index-D9LRicT0.js:37
+T_ @ VM56 index-D9LRicT0.js:40
+tF @ VM56 index-D9LRicT0.js:37
+W0 @ VM56 index-D9LRicT0.js:37
+n_ @ VM56 index-D9LRicT0.js:37
+MH @ VM56 index-D9LRicT0.js:37Understand this error
+VM54 eruda.js:2 Auth state: {user: undefined, isLoading: false, error: Error: 404: {"message":"API endpoint not found: /"}
+    at c3 (https://8d860892-829b-4328-82a0-9f5e…, isAuthenticated: false}
+VM54 eruda.js:2 Auth state: {user: undefined, isLoading: false, error: Error: 404: {"message":"API endpoint not found: /"}
+    at c3 (https://8d860892-829b-4328-82a0-9f5e…, isAuthenticated: false}
+VM54 eruda.js:2 Auth state: {user: undefined, isLoading: false, error: Error: 404: {"message":"API endpoint not found: /"}
+    at c3 (https://8d860892-829b-4328-82a0-9f5e…, isAuthenticated: false}
+VM56 index-D9LRicT0.js:574  GET https://8d860892-829b-4328-82a0-9f5e7eccde94-00-2tcj7jtrjb8f4.janeway.replit.dev/api/login 404 (Not Found)
+(anonymous) @ VM56 index-D9LRicT0.js:574
+setTimeout
+(anonymous) @ VM56 index-D9LRicT0.js:574
+$x @ VM56 index-D9LRicT0.js:40
+wu @ VM56 index-D9LRicT0.js:40
+YG @ VM56 index-D9LRicT0.js:40
+El @ VM56 index-D9LRicT0.js:40
+DE @ VM56 index-D9LRicT0.js:40
+pl @ VM56 index-D9LRicT0.js:38
+(anonymous) @ VM56 index-D9LRicT0.js:40Understand this error
+index.ts-7f325e85.js:1 [Long Running Recorder] Content script initialised
+index.ts-7f325e85.js:3 [Long Running Recorder] Recorder disabled
+bootstrap-autofill-overlay.js:187 Uncaught (in promise) Error: Extension context invalidated.
+    at bootstrap-autofill-overlay.js:187:56
+    at new Promise (<anonymous>)
+    at AutofillOverlayContentService.<anonymous> (bootstrap-autofill-overlay.js:187:16)
+    at Generator.next (<anonymous>)
+    at bootstrap-autofill-overlay.js:93:71
+    at new Promise (<anonymous>)
+    at __awaiter (bootstrap-autofill-overlay.js:89:12)
+    at AutofillOverlayContentService.sendExtensionMessage (bootstrap-autofill-overlay.js:181:12)
+    at AutofillOverlayContentService.handleWindowFocusOutEvent (bootstrap-autofill-overlay.js:3814:23)
+(anonymous) @ bootstrap-autofill-overlay.js:187
+(anonymous) @ bootstrap-autofill-overlay.js:187
+(anonymous) @ bootstrap-autofill-overlay.js:93
+__awaiter @ bootstrap-autofill-overlay.js:89
+sendExtensionMessage @ bootstrap-autofill-overlay.js:181
+AutofillOverlayContentService.handleWindowFocusOutEvent @ bootstrap-autofill-overlay.js:3814Understand this error
+bootstrap-autofill-overlay.js:187 Uncaught (in promise) Error: Extension context invalidated.
+    at bootstrap-autofill-overlay.js:187:56
+    at new Promise (<anonymous>)
+    at AutofillOverlayContentService.<anonymous> (bootstrap-autofill-overlay.js:187:16)
+    at Generator.next (<anonymous>)
+    at bootstrap-autofill-overlay.js:93:71
+    at new Promise (<anonymous>)
+    at __awaiter (bootstrap-autofill-overlay.js:89:12)
+    at AutofillOverlayContentService.sendExtensionMessage (bootstrap-autofill-overlay.js:181:12)
+    at AutofillOverlayContentService.handleWindowFocusOutEvent (bootstrap-autofill-overlay.js:3814:23)
+(anonymous) @ bootstrap-autofill-overlay.js:187
+(anonymous) @ bootstrap-autofill-overlay.js:187
+(anonymous) @ bootstrap-autofill-overlay.js:93
+__awaiter @ bootstrap-autofill-overlay.js:89
+sendExtensionMessage @ bootstrap-autofill-overlay.js:181
+AutofillOverlayContentService.handleWindowFocusOutEvent @ bootstrap-autofill-overlay.js:3814Understand this error
