@@ -37,21 +37,28 @@ export default function AuthPage() {
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Get invitation code from URL params
+  // Get invitation code and tab from URL params
   const urlParams = new URLSearchParams(window.location.search);
   const invitationCodeFromUrl = urlParams.get("invitation");
+  const tabFromUrl = urlParams.get("tab");
 
-  // Set invitation code if it exists in URL
-  if (invitationCodeFromUrl && !registerData.invitationCode) {
-    setRegisterData(prev => ({ ...prev, invitationCode: invitationCodeFromUrl }));
-  }
+  // Set invitation code if it exists in URL (moved to useEffect to prevent render-time state updates)
+  React.useEffect(() => {
+    if (invitationCodeFromUrl && !registerData.invitationCode) {
+      setRegisterData(prev => ({ ...prev, invitationCode: invitationCodeFromUrl }));
+    }
+  }, [invitationCodeFromUrl, registerData.invitationCode]);
 
   // Redirect if already logged in
   React.useEffect(() => {
-    if (user) {
-      setLocation("/");
+    if (isAuthenticated && user) {
+      setLocation("/dashboard");
     }
-  }, [user, setLocation]);
+  }, [isAuthenticated, user, setLocation]);
+
+  if (isAuthenticated && user) {
+    return null;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,17 +104,6 @@ export default function AuthPage() {
     registerMutation.mutate(registrationData);
   };
 
-  // Check if user is already authenticated and redirect
-  React.useEffect(() => {
-    if (isAuthenticated && user) {
-      setLocation('/dashboard');
-    }
-  }, [isAuthenticated, user, setLocation]);
-
-  if (isAuthenticated && user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen flex">
       {/* Left side - Forms */}
@@ -120,7 +116,7 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <Tabs defaultValue={invitationCodeFromUrl ? "register" : "login"} className="w-full">
+          <Tabs defaultValue={tabFromUrl || (invitationCodeFromUrl ? "register" : "login")} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Sign In</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>

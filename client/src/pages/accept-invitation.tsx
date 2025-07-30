@@ -114,9 +114,8 @@ export default function AcceptInvitation() {
         description: "Please log in to accept your invitation.",
         variant: "destructive",
       });
-      // Preserve invitation code through login process
-      const redirectUrl = encodeURIComponent(`/accept-invitation?code=${invitationCode}`);
-      setLocation(`/api/login?redirect=${redirectUrl}`);
+      // Redirect to auth page with invitation code
+      setLocation(`/auth?invitation=${invitationCode}&tab=register`);
       return;
     }
     acceptMutation.mutate();
@@ -264,16 +263,16 @@ export default function AcceptInvitation() {
                 {!isAuthenticated ? (
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground text-center">
-                      Please log in to accept your invitation
+                      Please create an account or log in to accept your invitation
                     </p>
                     <Button 
                       onClick={() => {
-                        const redirectUrl = encodeURIComponent(`/accept-invitation?code=${invitationCode}`);
-                        setLocation(`/api/login?redirect=${redirectUrl}`);
+                        // Redirect to auth page with invitation code and registration tab selected
+                        setLocation(`/auth?invitation=${invitationCode}&tab=register`);
                       }} 
                       className="w-full"
                     >
-                      Log In to Accept
+                      Create Account / Log In
                     </Button>
                   </div>
                 ) : (
