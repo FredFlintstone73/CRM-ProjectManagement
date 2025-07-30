@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, UserPlus, LogIn, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import TwoFactorLogin from "@/components/two-factor-login";
-import RegistrationTwoFactorSetup from "@/components/registration-two-factor-setup";
+import { default as RegistrationTwoFactorSetup } from "@/components/registration-two-factor-setup";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -39,7 +39,7 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
