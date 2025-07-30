@@ -334,14 +334,6 @@ export function setupAuth(app: Express) {
       lastName: req.user.lastName,
       accessLevel: req.user.accessLevel,
       isActive: req.user.isActive,
-      emailConfigured: req.user.emailConfigured,
-      smtpHost: req.user.smtpHost,
-      smtpPort: req.user.smtpPort,
-      smtpSecure: req.user.smtpSecure,
-      smtpUser: req.user.smtpUser,
-      imapHost: req.user.imapHost,
-      imapPort: req.user.imapPort,
-      imapSecure: req.user.imapSecure,
     });
   });
 
