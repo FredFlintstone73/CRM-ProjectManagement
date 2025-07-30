@@ -122,7 +122,7 @@ export const sessions = pgTable(
 );
 
 // User storage table (required for Replit Auth)
-export const users: ReturnType<typeof pgTable> = pgTable("users", {
+export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   username: varchar("username").unique().notNull(),
   password: varchar("password").notNull(),
@@ -335,7 +335,7 @@ export const milestones = pgTable("milestones", {
 });
 
 // Tasks table - Enhanced with hierarchy support
-export const tasks: ReturnType<typeof pgTable> = pgTable("tasks", {
+export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   description: text("description"),
@@ -405,7 +405,7 @@ export const projectTemplates = pgTable("project_templates", {
 });
 
 // Email interactions table
-export const emailInteractions: ReturnType<typeof pgTable> = pgTable("email_interactions", {
+export const emailInteractions = pgTable("email_interactions", {
   id: serial("id").primaryKey(),
   contactId: integer("contact_id").references(() => contacts.id),
   parentEmailId: integer("parent_email_id").references((): any => emailInteractions.id),

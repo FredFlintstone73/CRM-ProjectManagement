@@ -316,7 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Updated contact:", JSON.stringify(contact, null, 2));
       
       res.json(contact);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating contact:", error);
       console.error("Error details:", error.message);
       console.error("Error stack:", error.stack);
@@ -328,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.deleteContact(parseInt(req.params.id));
       res.json({ message: "Contact deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting contact:", error);
       if (error.message.includes("Cannot delete contact")) {
         res.status(400).json({ message: error.message });
@@ -773,14 +773,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const task = await storage.createTask({
           title: taskData.title,
-          description: taskData.description || '',
+          description: `${taskData.description || ''}\nMilestone: ${taskData.milestone || 'N/A'}\nParent Task: ${taskData.parentTask || 'N/A'}\nSub-Task: ${taskData.subTask || 'N/A'}\nSub-Sub-Task: ${taskData.subSubTask || 'N/A'}\nDaysFromMeeting: ${taskData.daysFromMeeting || 0}\nBasedOnDrpm: ${taskData.basedOnDrpm || false}`,
           projectId: newProject.id,
           status: (taskData.status || 'todo') as const,
-          priority: (taskData.priority || 'medium') as const,
+          priority: taskData.priority || 25,
           estimatedDays: 1,
           dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
-          assignedTo: assignedToId,
-          description: `${taskData.description || ''}\nMilestone: ${taskData.milestone || 'N/A'}\nParent Task: ${taskData.parentTask || 'N/A'}\nSub-Task: ${taskData.subTask || 'N/A'}\nSub-Sub-Task: ${taskData.subSubTask || 'N/A'}\nDaysFromMeeting: ${taskData.daysFromMeeting || 0}\nBasedOnDrpm: ${taskData.basedOnDrpm || false}`
+          assignedTo: assignedToId
         }, userId);
         createdTasks.push(task);
       }
@@ -833,8 +832,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updatePromises = tasks.map(async (task) => {
           if (task.description) {
             // Parse the offset information from description
-            const daysFromMeetingMatch = task.description.match(/DaysFromMeeting: (-?\d+)/);
-            const basedOnDrpmMatch = task.description.match(/BasedOnDrpm: (true|false)/);
+            const daysFromMeetingMatch = task.description?.match(/DaysFromMeeting: (-?\d+)/);
+            const basedOnDrpmMatch = task.description?.match(/BasedOnDrpm: (true|false)/);
             
             if (daysFromMeetingMatch) {
               const daysFromMeeting = parseInt(daysFromMeetingMatch[1]);
@@ -886,7 +885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Project deleted successfully" });
     } catch (error) {
       console.error("Error deleting project:", error);
-      res.status(500).json({ message: `Failed to delete project: ${error.message}` });
+      res.status(500).json({ message: `Failed to delete project: ${(error as any).message}` });
     }
   });
 
@@ -1817,7 +1816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let tasks = [];
       try {
-        const taskData = typeof template.tasks === 'string' ? JSON.parse(template.tasks) : template.tasks || [];
+        const taskData = typeof (template as any).tasks === 'string' ? JSON.parse((template as any).tasks) : (template as any).tasks || [];
         
         // Convert sectioned data to flat array format
         if (taskData.sections) {
@@ -2029,7 +2028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Project template deleted successfully" });
     } catch (error) {
       console.error("Error deleting project template:", error);
-      res.status(500).json({ message: `Failed to delete project template: ${error.message}` });
+      res.status(500).json({ message: `Failed to delete project template: ${(error as any).message}` });
     }
   });
 
@@ -2095,7 +2094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const task of originalTasks) {
           if (task.parentTaskId) {
             const newTaskId = taskIdMap.get(task.id);
-            const newParentTaskId = taskIdMap.get(task.parentTaskId);
+            const newParentTaskId = taskIdMap.get(task.parentTaskId!);
             
             if (newTaskId && newParentTaskId) {
               await storage.updateTask(newTaskId, {
@@ -2109,7 +2108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const task of originalTasks) {
           if (task.dependsOnTaskId) {
             const newTaskId = taskIdMap.get(task.id);
-            const newDependentTaskId = taskIdMap.get(task.dependsOnTaskId);
+            const newDependentTaskId = taskIdMap.get(task.dependsOnTaskId!);
             
             if (newTaskId && newDependentTaskId) {
               await storage.updateTask(newTaskId, {
@@ -2341,7 +2340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { emailService } = await import('./emailService');
       const status = {
-        monitoring: emailService.monitoring || false,
+        monitoring: (emailService as any).monitoring || false,
         configured: emailService.isEmailConfigured(),
         serviceType: emailService.getConfigurationStatus().serviceType,
       };
@@ -2466,8 +2465,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try to send email invitation
       const emailResult = await emailService.sendInvitationEmail({
         email: invitation.email,
-        firstName: invitation.firstName,
-        lastName: invitation.lastName,
+        firstName: invitation.firstName || '',
+        lastName: invitation.lastName || '',
         invitationCode: invitation.invitationCode,
         accessLevel: invitation.accessLevel,
         invitedBy: userId,
@@ -2724,7 +2723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accessLevel: invitation.accessLevel as any,
         isActive: true,
         invitedBy: invitation.invitedBy,
-        invitedAt: new Date(invitation.invitedAt),
+        invitedAt: invitation.invitedAt ? new Date(invitation.invitedAt) : null,
       });
       
       // Ensure user has a corresponding contact record in Team Members
@@ -2902,7 +2901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Test search error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as any).message });
     }
   });
 
