@@ -543,17 +543,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserInvitations(invitedBy?: string): Promise<UserInvitation[]> {
+    let conditions = [eq(userInvitations.status, 'pending')]; // Only show pending invitations
+    
     if (invitedBy) {
-      return await db
-        .select()
-        .from(userInvitations)
-        .where(eq(userInvitations.invitedBy, invitedBy))
-        .orderBy(desc(userInvitations.createdAt));
+      conditions.push(eq(userInvitations.invitedBy, invitedBy));
     }
 
     return await db
       .select()
       .from(userInvitations)
+      .where(and(...conditions))
       .orderBy(desc(userInvitations.createdAt));
   }
 
