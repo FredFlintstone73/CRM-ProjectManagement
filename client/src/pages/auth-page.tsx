@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, UserPlus, LogIn, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import TwoFactorLogin from "@/components/two-factor-login";
-import { default as RegistrationTwoFactorSetup } from "@/components/registration-two-factor-setup";
+import RegistrationTwoFactorSetup from "@/components/registration-two-factor-setup";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
