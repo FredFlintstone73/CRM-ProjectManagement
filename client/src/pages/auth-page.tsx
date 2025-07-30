@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2, Users, Calendar, MessageSquare, Eye, EyeOff } from "lucide-react";
 import React from "react";
 import { validatePassword } from "@/lib/password-validation";
+import { TwoFactorLogin } from "@/components/two-factor-login";
+import { queryClient } from "@/lib/queryClient";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
@@ -40,6 +42,9 @@ export default function AuthPage() {
 
   // State for active tab
   const [activeTab, setActiveTab] = useState<string>("login");
+
+  // State for 2FA login flow
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
 
   // Get invitation code and tab from URL params
   const urlParams = new URLSearchParams(window.location.search);
@@ -80,7 +85,28 @@ export default function AuthPage() {
       return;
     }
 
-    loginMutation.mutate(loginData);
+    loginMutation.mutate(loginData, {
+      onSuccess: (response: any) => {
+        if (response.requiresTwoFactor) {
+          setShowTwoFactor(true);
+          toast({
+            title: "Two-Factor Authentication Required",
+            description: "Please enter your verification code to continue.",
+          });
+        }
+      },
+    });
+  };
+
+  const handleTwoFactorSuccess = (user: any) => {
+    queryClient.setQueryData(["/api/user"], user);
+    setShowTwoFactor(false);
+    setLocation("/dashboard");
+  };
+
+  const handleTwoFactorCancel = () => {
+    setShowTwoFactor(false);
+    setLoginData({ username: "", password: "" });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -117,6 +143,18 @@ export default function AuthPage() {
     
     registerMutation.mutate(registrationData);
   };
+
+  // Show 2FA login if required
+  if (showTwoFactor) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-gray-50">
+        <TwoFactorLogin
+          onSuccess={handleTwoFactorSuccess}
+          onCancel={handleTwoFactorCancel}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">

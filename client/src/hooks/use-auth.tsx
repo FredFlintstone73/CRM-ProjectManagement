@@ -50,11 +50,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: (response: any) => {
+      // Handle 2FA response
+      if (response.requiresTwoFactor) {
+        // Don't show toast here, let the auth page handle it
+        return;
+      }
+      
+      // Normal login success
+      queryClient.setQueryData(["/api/user"], response);
       toast({
         title: "Login successful",
-        description: `Welcome back, ${user.firstName || user.username}!`,
+        description: `Welcome back, ${response.firstName || response.username}!`,
       });
     },
     onError: (error: Error) => {

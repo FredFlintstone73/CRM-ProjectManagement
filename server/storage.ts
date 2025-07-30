@@ -111,6 +111,12 @@ export interface IStorage {
   getUserById(userId: string): Promise<User | null>;
   updateUser(userId: string, updates: Partial<any>): Promise<User | null>;
 
+  // Two-Factor Authentication operations
+  enable2FA(userId: string, secret: string, backupCodes: any[]): Promise<User>;
+  disable2FA(userId: string): Promise<User>;
+  update2FABackupCodes(userId: string, backupCodes: any[]): Promise<User>;
+  get2FAStatus(userId: string): Promise<{ enabled: boolean; backupCodesRemaining: number }>;
+
   // Contact operations
   getContacts(): Promise<Contact[]>;
   getContact(id: number): Promise<Contact | undefined>;
@@ -3554,6 +3560,85 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return updated || null;
+  }
+
+  // Two-Factor Authentication operations
+  async enable2FA(userId: string, secret: string, backupCodes: any[]): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        twoFactorSecret: secret,
+        twoFactorEnabled: true,
+        backupCodes: backupCodes,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updated) {
+      throw new Error('User not found');
+    }
+    
+    return updated;
+  }
+
+  async disable2FA(userId: string): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        twoFactorSecret: null,
+        twoFactorEnabled: false,
+        backupCodes: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updated) {
+      throw new Error('User not found');
+    }
+    
+    return updated;
+  }
+
+  async update2FABackupCodes(userId: string, backupCodes: any[]): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        backupCodes: backupCodes,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updated) {
+      throw new Error('User not found');
+    }
+    
+    return updated;
+  }
+
+  async get2FAStatus(userId: string): Promise<{ enabled: boolean; backupCodesRemaining: number }> {
+    const [user] = await db
+      .select({
+        twoFactorEnabled: users.twoFactorEnabled,
+        backupCodes: users.backupCodes,
+      })
+      .from(users)
+      .where(eq(users.id, userId));
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const backupCodesRemaining = user.backupCodes 
+      ? (user.backupCodes as any[]).filter((code: any) => !code.used).length 
+      : 0;
+    
+    return {
+      enabled: user.twoFactorEnabled || false,
+      backupCodesRemaining,
+    };
   }
 }
 

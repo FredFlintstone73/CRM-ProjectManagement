@@ -159,7 +159,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Login user
+  // Login user (Step 1: Username/Password)
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
@@ -169,6 +169,19 @@ export function setupAuth(app: Express) {
       if (!user) {
         return res.status(401).json({ message: info?.message || "Invalid credentials" });
       }
+      
+      // Check if user has 2FA enabled
+      if (user.twoFactorEnabled) {
+        // Don't log the user in yet, require 2FA verification
+        // Store user ID in session temporarily for 2FA verification
+        req.session.pendingUserId = user.id;
+        return res.json({ 
+          requiresTwoFactor: true,
+          message: "Two-factor authentication required"
+        });
+      }
+      
+      // No 2FA required, log user in normally
       req.login(user, (loginErr) => {
         if (loginErr) {
           console.error("Login session error:", loginErr);
@@ -185,6 +198,76 @@ export function setupAuth(app: Express) {
         });
       });
     })(req, res, next);
+  });
+
+  // Login Step 2: 2FA Verification
+  app.post("/api/login/2fa", async (req, res, next) => {
+    try {
+      const { token, backupCode } = req.body;
+      const pendingUserId = req.session.pendingUserId;
+
+      if (!pendingUserId) {
+        return res.status(400).json({ message: "No pending login session" });
+      }
+
+      if (!token && !backupCode) {
+        return res.status(400).json({ message: "Verification code or backup code is required" });
+      }
+
+      const user = await storage.getUser(pendingUserId);
+      if (!user || !user.twoFactorEnabled) {
+        return res.status(400).json({ message: "Invalid session" });
+      }
+
+      const { TwoFactorService } = await import('./twoFactorService');
+      let isValid = false;
+      let updatedBackupCodes = null;
+
+      // Verify TOTP token
+      if (token && user.twoFactorSecret) {
+        isValid = TwoFactorService.verifyToken(token, user.twoFactorSecret);
+      }
+
+      // If token failed or not provided, try backup code
+      if (!isValid && backupCode && user.backupCodes) {
+        const result = TwoFactorService.verifyBackupCode(backupCode, user.backupCodes as any[]);
+        isValid = result.valid;
+        if (result.valid && result.updatedCodes) {
+          updatedBackupCodes = result.updatedCodes;
+        }
+      }
+
+      if (!isValid) {
+        return res.status(400).json({ message: "Invalid verification code" });
+      }
+
+      // Update backup codes if one was used
+      if (updatedBackupCodes) {
+        await storage.update2FABackupCodes(user.id, updatedBackupCodes);
+      }
+
+      // Clear pending session and log user in
+      delete req.session.pendingUserId;
+      
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error("2FA login session error:", loginErr);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        res.json({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          accessLevel: user.accessLevel,
+          isActive: user.isActive,
+        });
+      });
+    } catch (error) {
+      console.error("2FA login error:", error);
+      res.status(500).json({ message: "2FA verification failed" });
+    }
   });
 
   // Logout user

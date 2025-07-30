@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Settings as SettingsIcon, Shield, Smartphone, AlertTriangle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import TwoFactorAuth from "@/components/auth/two-factor-auth";
+import { TwoFactorSetup } from "@/components/two-factor-setup";
 import NavigationCustomizer from "@/components/settings/navigation-customizer";
 import { UserEmailConfig } from "@/components/email/user-email-config";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useEffect } from "react";
 
 export default function Settings() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
+  const isAuthenticated = !!user;
   const { toast } = useToast();
   const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
 
@@ -100,7 +101,7 @@ export default function Settings() {
 
   if (showTwoFactorSetup) {
     return (
-      <div className="space-y-6 max-w-md mx-auto">
+      <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
           <Button 
             variant="outline" 
@@ -109,10 +110,7 @@ export default function Settings() {
             ← Back to Settings
           </Button>
         </div>
-        <TwoFactorAuth 
-          isSetup={true} 
-          onComplete={handleTwoFactorComplete}
-        />
+        <TwoFactorSetup />
       </div>
     );
   }
