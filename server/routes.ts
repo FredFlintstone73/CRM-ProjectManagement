@@ -150,51 +150,33 @@ async function configureAutoEmailSettings(user: any, invitationEmail: string) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // CRITICAL: Handle frontend routes FIRST before any auth middleware
-  // This prevents Replit Auth from intercepting invitation URLs
-  app.get('/auth', (req, res) => {
-    if (app.get("env") === "production") {
+  // CRITICAL: Handle frontend routes ONLY in production before any auth middleware
+  // This prevents Replit Auth from intercepting invitation URLs in deployed environment
+  if (app.get("env") === "production") {
+    app.get('/auth', (req, res) => {
       const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
       console.log(`Serving /auth route with index.html from: ${indexPath}`);
       res.sendFile(indexPath);
-    } else {
-      // Development handled by Vite
-      res.redirect('/');
-    }
-  });
-  
-  app.get('/accept-invitation', (req, res) => {
-    if (app.get("env") === "production") {
+    });
+    
+    app.get('/accept-invitation', (req, res) => {
       const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
       console.log(`Serving /accept-invitation route with index.html from: ${indexPath}`);
       res.sendFile(indexPath);
-    } else {
-      // Development handled by Vite
-      res.redirect('/');
-    }
-  });
-  
-  app.get('/forgot-password', (req, res) => {
-    if (app.get("env") === "production") {
+    });
+    
+    app.get('/forgot-password', (req, res) => {
       const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
       console.log(`Serving /forgot-password route with index.html from: ${indexPath}`);
       res.sendFile(indexPath);
-    } else {
-      // Development handled by Vite  
-      res.redirect('/');
-    }
-  });
-  
-  app.get('/reset-password', (req, res) => {
-    if (app.get("env") === "production") {
+    });
+    
+    app.get('/reset-password', (req, res) => {
       const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
       console.log(`Serving /reset-password route with index.html from: ${indexPath}`);
       res.sendFile(indexPath);
-    } else {
-      // Development handled by Vite
-      res.redirect('/');
-    }
-  });
+    });
+  }
 
   // Serve static files in production with proper configuration
   if (app.get("env") === "production") {
