@@ -647,21 +647,17 @@ export class DatabaseStorage implements IStorage {
       );
 
     // Handle contacts created by this user
-    // First, find another admin user to reassign contacts to
-    const [adminUser] = await db
+    // Find the chad@alignedadvisors.com admin user to reassign everything to
+    const [chadAdmin] = await db
       .select()
       .from(users)
-      .where(and(
-        eq(users.accessLevel, 'administrator'),
-        not(eq(users.id, userId)),
-        eq(users.isActive, true)
-      ))
+      .where(eq(users.email, 'chad@alignedadvisors.com'))
       .limit(1);
 
-    if (adminUser) {
-      // Reassign all contacts (except the user's own team member contact) to another admin
+    if (chadAdmin) {
+      // Reassign all contacts (except the user's own team member contact) to chad@alignedadvisors.com
       await db.update(contacts)
-        .set({ createdBy: adminUser.id })
+        .set({ createdBy: chadAdmin.id })
         .where(and(
           eq(contacts.createdBy, userId),
           not(eq(contacts.id, userContact?.id || -1))
@@ -677,11 +673,11 @@ export class DatabaseStorage implements IStorage {
     await db.delete(contactNotes).where(eq(contactNotes.userId, userId));
     await db.delete(contactFiles).where(eq(contactFiles.userId, userId));
     
-    // Reassign other database records to the admin user if available
-    if (adminUser) {
-      await db.update(projects).set({ createdBy: adminUser.id }).where(eq(projects.createdBy, userId));
-      await db.update(tasks).set({ createdBy: adminUser.id }).where(eq(tasks.createdBy, userId));
-      await db.update(projectTemplates).set({ createdBy: adminUser.id }).where(eq(projectTemplates.createdBy, userId));
+    // Reassign other database records to chad@alignedadvisors.com if available
+    if (chadAdmin) {
+      await db.update(projects).set({ createdBy: chadAdmin.id }).where(eq(projects.createdBy, userId));
+      await db.update(tasks).set({ createdBy: chadAdmin.id }).where(eq(tasks.createdBy, userId));
+      await db.update(projectTemplates).set({ createdBy: chadAdmin.id }).where(eq(projectTemplates.createdBy, userId));
     }
     
     // Handle email interactions with self-referencing foreign keys
