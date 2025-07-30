@@ -205,21 +205,27 @@ export default function ResetPassword() {
                   placeholder="Enter new password"
                   {...form.register("password")}
                   disabled={resetPasswordMutation.isPending}
-                  className="pr-10"
+                  style={{ paddingRight: '2.5rem' }}
                 />
-                <button
-                  type="button"
+                <div
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 z-10 cursor-pointer bg-transparent border-none"
-                  disabled={resetPasswordMutation.isPending}
-                  tabIndex={-1}
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer select-none"
+                  style={{ 
+                    zIndex: 10,
+                    color: '#6b7280',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff size={20} />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye size={20} />
                   )}
-                </button>
+                </div>
               </div>
               {form.formState.errors.password && (
                 <p className="text-sm text-red-500">
@@ -237,21 +243,27 @@ export default function ResetPassword() {
                   placeholder="Confirm new password"
                   {...form.register("confirmPassword")}
                   disabled={resetPasswordMutation.isPending}
-                  className="pr-10"
+                  style={{ paddingRight: '2.5rem' }}
                 />
-                <button
-                  type="button"
+                <div
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 z-10 cursor-pointer bg-transparent border-none"
-                  disabled={resetPasswordMutation.isPending}
-                  tabIndex={-1}
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer select-none"
+                  style={{ 
+                    zIndex: 10,
+                    color: '#6b7280',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff size={20} />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye size={20} />
                   )}
-                </button>
+                </div>
               </div>
               {form.formState.errors.confirmPassword && (
                 <p className="text-sm text-red-500">

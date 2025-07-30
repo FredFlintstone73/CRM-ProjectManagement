@@ -145,20 +145,27 @@ export default function AuthPage() {
                           onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
                           placeholder="Enter your password"
                           required
-                          className="pr-10"
+                          style={{ paddingRight: '2.5rem' }}
                         />
-                        <button
-                          type="button"
+                        <div
                           onClick={() => setShowLoginPassword(!showLoginPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 z-10 cursor-pointer bg-transparent border-none"
-                          tabIndex={-1}
+                          className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer select-none"
+                          style={{ 
+                            zIndex: 10,
+                            color: '#6b7280',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
                         >
                           {showLoginPassword ? (
-                            <EyeOff className="h-5 w-5" />
+                            <EyeOff size={20} />
                           ) : (
-                            <Eye className="h-5 w-5" />
+                            <Eye size={20} />
                           )}
-                        </button>
+                        </div>
                       </div>
                     </div>
                     <Button 
@@ -270,20 +277,27 @@ export default function AuthPage() {
                           onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
                           placeholder="Create a password (min 6 characters)"
                           required
-                          className="pr-10"
+                          style={{ paddingRight: '2.5rem' }}
                         />
-                        <button
-                          type="button"
+                        <div
                           onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 z-10 cursor-pointer bg-transparent border-none"
-                          tabIndex={-1}
+                          className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer select-none"
+                          style={{ 
+                            zIndex: 10,
+                            color: '#6b7280',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
                         >
                           {showRegisterPassword ? (
-                            <EyeOff className="h-5 w-5" />
+                            <EyeOff size={20} />
                           ) : (
-                            <Eye className="h-5 w-5" />
+                            <Eye size={20} />
                           )}
-                        </button>
+                        </div>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -296,20 +310,27 @@ export default function AuthPage() {
                           onChange={(e) => setRegisterData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                           placeholder="Confirm your password"
                           required
-                          className="pr-10"
+                          style={{ paddingRight: '2.5rem' }}
                         />
-                        <button
-                          type="button"
+                        <div
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 z-10 cursor-pointer bg-transparent border-none"
-                          tabIndex={-1}
+                          className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer select-none"
+                          style={{ 
+                            zIndex: 10,
+                            color: '#6b7280',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
                         >
                           {showConfirmPassword ? (
-                            <EyeOff className="h-5 w-5" />
+                            <EyeOff size={20} />
                           ) : (
-                            <Eye className="h-5 w-5" />
+                            <Eye size={20} />
                           )}
-                        </button>
+                        </div>
                       </div>
                     </div>
                     <Button 
