@@ -37,6 +37,9 @@ export default function AuthPage() {
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // State for active tab
+  const [activeTab, setActiveTab] = useState<string>("login");
+
   // Get invitation code and tab from URL params
   const urlParams = new URLSearchParams(window.location.search);
   const invitationCodeFromUrl = urlParams.get("invitation");
@@ -48,6 +51,12 @@ export default function AuthPage() {
       setRegisterData(prev => ({ ...prev, invitationCode: invitationCodeFromUrl }));
     }
   }, [invitationCodeFromUrl, registerData.invitationCode]);
+
+  // Set active tab based on URL parameters
+  React.useEffect(() => {
+    const defaultTab = tabFromUrl || (invitationCodeFromUrl ? "register" : "login");
+    setActiveTab(defaultTab);
+  }, [tabFromUrl, invitationCodeFromUrl]);
 
   // Redirect if already logged in
   React.useEffect(() => {
@@ -116,7 +125,7 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <Tabs defaultValue={tabFromUrl || (invitationCodeFromUrl ? "register" : "login")} className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Sign In</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>

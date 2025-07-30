@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, AlertTriangle, UserCheck, Clock, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { formatAccessLevel } from "@/lib/utils/formatAccessLevel";
 
 const invitationCodeSchema = z.object({
