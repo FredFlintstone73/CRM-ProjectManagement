@@ -11,10 +11,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Shield, CheckCircle, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { strongPasswordSchema } from "@/lib/password-validation";
 
 const resetPasswordSchema = z.object({
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password confirmation is required"),
+  password: strongPasswordSchema,
+  confirmPassword: z.string().min(12, "Password confirmation is required"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -202,7 +203,7 @@ export default function ResetPassword() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter new password"
+                  placeholder="Min 12 chars with letters, numbers & symbols"
                   {...form.register("password")}
                   disabled={resetPasswordMutation.isPending}
                   style={{ paddingRight: '2.5rem' }}
@@ -232,6 +233,9 @@ export default function ResetPassword() {
                   {form.formState.errors.password.message}
                 </p>
               )}
+              <p className="text-sm text-muted-foreground">
+                Password must be at least 12 characters with letters, numbers, and special characters
+              </p>
             </div>
 
             <div className="space-y-2">

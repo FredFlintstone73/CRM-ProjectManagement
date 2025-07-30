@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2, Users, Calendar, MessageSquare, Eye, EyeOff } from "lucide-react";
 import React from "react";
+import { validatePassword } from "@/lib/password-validation";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
@@ -85,7 +86,7 @@ export default function AuthPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!registerData.username || !registerData.password || !registerData.invitationCode) {
+    if (!registerData.email || !registerData.password || !registerData.invitationCode) {
       toast({
         title: "Please fill in all required fields including invitation code",
         variant: "destructive",
@@ -101,15 +102,19 @@ export default function AuthPage() {
       return;
     }
 
-    if (registerData.password.length < 6) {
+    const passwordError = validatePassword(registerData.password);
+    if (passwordError) {
       toast({
-        title: "Password must be at least 6 characters",
+        title: passwordError,
         variant: "destructive",
       });
       return;
     }
 
+    // Use email as username
     const { confirmPassword, ...registrationData } = registerData;
+    registrationData.username = registrationData.email;
+    
     registerMutation.mutate(registrationData);
   };
 
@@ -143,13 +148,13 @@ export default function AuthPage() {
                 <CardContent>
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-username">Username</Label>
+                      <Label htmlFor="login-username">Email</Label>
                       <Input
                         id="login-username"
-                        type="text"
+                        type="email"
                         value={loginData.username}
                         onChange={(e) => setLoginData(prev => ({ ...prev, username: e.target.value }))}
-                        placeholder="Enter your username"
+                        placeholder="Enter your email address"
                         required
                       />
                     </div>
@@ -269,23 +274,13 @@ export default function AuthPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">Email (will be used as your username)</Label>
                       <Input
                         id="email"
                         type="email"
                         value={registerData.email}
                         onChange={(e) => setRegisterData(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="username">Username</Label>
-                      <Input
-                        id="username"
-                        type="text"
-                        value={registerData.username}
-                        onChange={(e) => setRegisterData(prev => ({ ...prev, username: e.target.value }))}
-                        placeholder="Choose a username"
+                        placeholder="Enter your email address"
                         required
                       />
                     </div>
@@ -297,7 +292,7 @@ export default function AuthPage() {
                           type={showRegisterPassword ? "text" : "password"}
                           value={registerData.password}
                           onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
-                          placeholder="Create a password (min 6 characters)"
+                          placeholder="Min 12 chars with letters, numbers & symbols"
                           required
                           style={{ paddingRight: '2.5rem' }}
                         />
@@ -321,6 +316,9 @@ export default function AuthPage() {
                           )}
                         </div>
                       </div>
+                      <p className="text-sm text-muted-foreground">
+                        Password must be at least 12 characters with letters, numbers, and special characters
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirm Password</Label>

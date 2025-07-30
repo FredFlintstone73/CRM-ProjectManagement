@@ -12,10 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { KeyRound, Shield } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
+import { strongPasswordSchema } from "@/lib/password-validation";
 
 const adminResetPasswordSchema = z.object({
-  newPassword: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password confirmation is required"),
+  newPassword: strongPasswordSchema,
+  confirmPassword: z.string().min(12, "Password confirmation is required"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -99,7 +100,7 @@ export function AdminPasswordReset({ user }: AdminPasswordResetProps) {
                 <Input
                   id="newPassword"
                   type="password"
-                  placeholder="Enter new password"
+                  placeholder="Min 12 chars with letters, numbers & symbols"
                   {...form.register("newPassword")}
                   disabled={resetPasswordMutation.isPending}
                 />
@@ -108,6 +109,9 @@ export function AdminPasswordReset({ user }: AdminPasswordResetProps) {
                     {form.formState.errors.newPassword.message}
                   </p>
                 )}
+                <p className="text-sm text-muted-foreground">
+                  Password must be at least 12 characters with letters, numbers, and special characters
+                </p>
               </div>
 
               <div className="space-y-2">
