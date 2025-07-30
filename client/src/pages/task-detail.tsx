@@ -82,11 +82,14 @@ export default function TaskDetail() {
     },
   });
 
-  // Get all tasks for standalone task navigation
-  const { data: allTasks } = useQuery<Task[]>({
-    queryKey: ['/api/tasks'],
+  // Get user's assigned tasks for standalone task navigation  
+  const { data: myTasks } = useQuery<Task[]>({
+    queryKey: ['/api/tasks/my-tasks-with-priorities'],
     enabled: !task?.projectId, // Only fetch when task has no project
   });
+  
+  // For standalone tasks, use myTasks instead of allTasks
+  const allTasks = !task?.projectId ? myTasks : undefined;
 
   const teamMembers = contacts?.filter(contact => contact.contactType === 'team_member') || [];
   
