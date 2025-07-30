@@ -267,10 +267,10 @@ export function UserEmailConfig() {
                       <div className="font-medium text-sm mb-2">🔑 App Password Required</div>
                       <div className="text-xs space-y-1">
                         <div>Gmail requires an App Password. Do the following:</div>
-                        <div>1) Enable 2-Factor Authentication if not already active</div>
-                        <div>2) Go to Google Account Security or <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">https://myaccount.google.com/security</a></div>
-                        <div>3) Search for "App passwords" (may need to scroll down)</div>
-                        <div>4) Generate app password and copy it below</div>
+                        <div>1) Go to Google Account Security or <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">https://myaccount.google.com/security</a></div>
+                        <div>2) Enable 2-Factor Authentication if not already active, and when it is select 2-Step Verification</div>
+                        <div>3) Search for "App passwords" (may need to scroll down) and click on the chevron &gt;</div>
+                        <div>4) Enter an App name, create app password, and copy it below</div>
                       </div>
                     </div>
                   </div>
