@@ -7,7 +7,7 @@ import { useAccessControl } from "@/hooks/useAccessControl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import SearchTrigger from "@/components/search/search-trigger";
-import hubIcon from "@assets/hub_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png";
+import hubIcon from "@assets/hub_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24_1753841337488.png";
 
 interface SidebarProps {
   width: number;
