@@ -67,7 +67,7 @@ class UserEmailService {
       throw new Error('User email not configured');
     }
 
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: config.smtpHost,
       port: config.smtpPort,
       secure: config.smtpSecure,
@@ -242,11 +242,11 @@ class UserEmailService {
         contactId: matchingContact.id,
         subject: email.subject || '',
         body: email.html || email.text || '',
-        isIncoming: true,
+        emailType: 'received',
         sender: senderEmail,
         recipient: email.to?.value?.[0]?.address || '',
-        userId: userId,
-      });
+        sentAt: email.date || new Date(),
+      }, userId);
 
       console.log(`Email saved to database for contact ${matchingContact.id} (user ${userId})`);
     } catch (error) {
