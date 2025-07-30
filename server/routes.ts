@@ -151,7 +151,7 @@ async function configureAutoEmailSettings(user: any, invitationEmail: string) {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files in production
   if (app.get("env") === "production") {
-    const staticPath = path.resolve(import.meta.dirname, 'public');
+    const staticPath = path.resolve(process.cwd(), 'dist', 'public');
     app.use(express.static(staticPath));
   }
 
@@ -3558,13 +3558,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Catch-all for non-API routes - serve React app (client-side routing)
   app.get('*', (req, res) => {
+    console.log(`Route requested: ${req.path}, Environment: ${app.get("env")}`);
+    
     // Don't serve HTML for API routes
     if (req.path.startsWith('/api/')) {
       return res.status(404).json({ message: `API endpoint not found: ${req.path}` });
     }
     
     // For all other routes, serve the React app
-    const indexPath = path.resolve(import.meta.dirname, 'public', 'index.html');
+    const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
+    console.log(`Trying to serve index.html from: ${indexPath}`);
+    
+    // Check if file exists before serving
+    if (!require('fs').existsSync(indexPath)) {
+      console.error(`Index file not found at: ${indexPath}`);
+      return res.status(404).send('Application not built properly');
+    }
+    
     res.sendFile(indexPath);
   });
 
