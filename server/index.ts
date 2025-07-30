@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
 
 const app = express();
 
@@ -11,14 +12,14 @@ app.use((req, res, next) => {
   const hasTabParam = req.query.tab;
   const isAuthRelated = req.path === '/auth' || req.path === '/accept-invitation' || 
                        req.path === '/forgot-password' || req.path === '/reset-password';
-  
+
   // In production, immediately serve index.html for invitation URLs to bypass all auth
   if ((hasInvitation || (hasTabParam && isAuthRelated)) && app.get("env") === "production") {
     const indexPath = require('path').resolve(process.cwd(), 'dist', 'public', 'index.html');
     console.log(`🚀 BYPASSING ALL MIDDLEWARE for invitation URL: ${req.url}`);
     return res.sendFile(indexPath);
   }
-  
+
   next();
 });
 
@@ -80,20 +81,20 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  
+
   // Log environment information for deployment debugging
   console.log(`Environment: ${app.get("env")}`);
   console.log(`Node Environment: ${process.env.NODE_ENV}`);
   console.log(`Database URL configured: ${!!process.env.DATABASE_URL}`);
-  
+
   // Validate critical environment variables
   const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
   const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
+
   if (missingEnvVars.length > 0) {
     console.warn(`⚠️  Missing environment variables: ${missingEnvVars.join(', ')}`);
   }
-  
+
   // Optional but recommended environment variables
   const optionalEnvVars = {
     'SMTP_HOST': 'Email sending',
@@ -102,7 +103,7 @@ app.use((req, res, next) => {
     'DIALPAD_API_TOKEN': 'Dialpad integration',
     'DIALPAD_WEBHOOK_SECRET': 'Dialpad integration'
   };
-  
+
   Object.entries(optionalEnvVars).forEach(([varName, feature]) => {
     if (!process.env[varName]) {
       console.log(`ℹ️  ${varName} not set - ${feature} will be disabled`);
@@ -110,15 +111,15 @@ app.use((req, res, next) => {
   });
   server.listen(port, "0.0.0.0", async () => {
     log(`serving on port ${port}`);
-    
+
     // Initialize email monitoring after server starts
     try {
       const { emailService } = await import("./emailService");
       const { storage } = await import("./storage");
-      
+
       // Set storage reference for email service
       emailService.setStorage(storage);
-      
+
       // Start email monitoring for automatic threading
       await emailService.startEmailMonitoring();
       console.log('Email monitoring initialized');

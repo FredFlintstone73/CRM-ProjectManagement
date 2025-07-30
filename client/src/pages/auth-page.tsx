@@ -16,7 +16,7 @@ import { RegistrationTwoFactorSetup } from "@/components/registration-two-factor
 import { queryClient } from "@/lib/queryClient";
 
 export default function AuthPage() {
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { isAuthenticated = false, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -47,7 +47,7 @@ export default function AuthPage() {
 
   // State for 2FA login flow
   const [showTwoFactor, setShowTwoFactor] = useState(false);
-  
+
   // State for 2FA setup after registration
   const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
   const [twoFactorSetupData, setTwoFactorSetupData] = useState<any>(null);
@@ -72,12 +72,12 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   React.useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       setLocation("/dashboard");
     }
-  }, [user, setLocation]);
+  }, [isAuthenticated, setLocation]);
 
-  if (user) {
+  if (isAuthenticated) {
     return null;
   }
 
@@ -121,7 +121,7 @@ export default function AuthPage() {
         title: "2FA Setup Complete",
         description: "Account created successfully! Please sign in with your new credentials.",
       });
-      
+
       // Reset registration form
       setRegisterData({
         username: "",
@@ -132,7 +132,7 @@ export default function AuthPage() {
         lastName: "",
         invitationCode: "",
       });
-      
+
       // Redirect to login tab
       setTimeout(() => {
         setShowTwoFactorSetup(false);
@@ -176,7 +176,7 @@ export default function AuthPage() {
     // Use email as username
     const { confirmPassword, ...registrationData } = registerData;
     registrationData.username = registrationData.email;
-    
+
     registerMutation.mutate(registrationData, {
       onSuccess: (response: any) => {
         if (response.requiresTwoFactorSetup) {
