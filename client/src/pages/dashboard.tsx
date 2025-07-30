@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, LogOut } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import EmailNotificationIcon from "@/components/layout/email-notification-icon";
 
 import Header from "@/components/layout/header";
 
@@ -64,6 +65,7 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center space-x-2">
+            <EmailNotificationIcon />
             <Button
               variant="ghost"
               size="sm"

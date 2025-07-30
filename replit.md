@@ -163,6 +163,9 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Enhanced Dashboard Header**: Custom dashboard header with refresh icon (with spin animation) and logout button positioned to the right
 - **Improved User Experience**: Dashboard header includes refresh functionality that invalidates all queries and provides visual feedback during refresh
 - **Sidebar Cleanup**: Removed logout-related code from sidebar component and cleaned up unused imports and functions
+- **Email Notification Integration**: Added EmailNotificationIcon to Dashboard header positioned left of refresh button for easy access to Messages page
+- **Custom Date Range Dialog Fix**: Enhanced projects timeline chart with automatic dialog closure after applying custom date ranges  
+- **Route Compatibility**: Added /dashboard route alongside / route to handle login redirects without 404 errors
 
 ### Registration Redirect and Strong Password Security Implementation (July 30, 2025)
 - **Post-Registration Flow Enhancement**: Successfully implemented automatic page refresh and redirect to Sign In tab after successful registration
