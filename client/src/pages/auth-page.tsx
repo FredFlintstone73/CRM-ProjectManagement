@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
@@ -14,9 +15,10 @@ import { TwoFactorLogin } from "@/components/two-factor-login";
 import { TwoFactorSetup } from "@/components/two-factor-setup";
 import { RegistrationTwoFactorSetup } from "@/components/registration-two-factor-setup";
 import { queryClient } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
 
 export default function AuthPage() {
-  const { isAuthenticated = false, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated = false, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -57,9 +59,64 @@ export default function AuthPage() {
   const invitationCodeFromUrl = urlParams.get("invitation");
   const tabFromUrl = urlParams.get("tab");
 
+  console.log("URL Parameters:", { invitationCodeFromUrl, tabFromUrl });
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { username: string; password: string }) => {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+
+      return response.json();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Login failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Registration mutation
+  const registerMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Registration failed");
+      }
+
+      return response.json();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Set invitation code if it exists in URL (moved to useEffect to prevent render-time state updates)
   React.useEffect(() => {
     if (invitationCodeFromUrl && !registerData.invitationCode) {
+      console.log("Setting invitation code from URL:", invitationCodeFromUrl);
       setRegisterData(prev => ({ ...prev, invitationCode: invitationCodeFromUrl }));
     }
   }, [invitationCodeFromUrl, registerData.invitationCode]);
@@ -67,6 +124,7 @@ export default function AuthPage() {
   // Set active tab based on URL parameters
   React.useEffect(() => {
     const defaultTab = tabFromUrl || (invitationCodeFromUrl ? "register" : "login");
+    console.log("Setting active tab:", defaultTab, "from params:", { tabFromUrl, invitationCodeFromUrl });
     setActiveTab(defaultTab);
   }, [tabFromUrl, invitationCodeFromUrl]);
 
