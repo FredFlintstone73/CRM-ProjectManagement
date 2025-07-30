@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 
   // In production, immediately serve index.html for invitation URLs to bypass all auth
   if ((hasInvitation || (hasTabParam && isAuthRelated)) && app.get("env") === "production") {
-    const indexPath = require('path').resolve(process.cwd(), 'dist', 'public', 'index.html');
+    const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
     console.log(`🚀 BYPASSING ALL MIDDLEWARE for invitation URL: ${req.url}`);
     console.log(`📂 Serving index.html from: ${indexPath}`);
     
