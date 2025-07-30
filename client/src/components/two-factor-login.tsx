@@ -47,7 +47,7 @@ export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
 
   const getQRCodeMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest('POST', '/api/auth/2fa/setup');
+      const res = await apiRequest('POST', '/api/login/2fa/get-qr');
       return await res.json();
     },
     onSuccess: (data) => {

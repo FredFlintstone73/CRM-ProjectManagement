@@ -234,6 +234,36 @@ export function setupAuth(app: Express) {
     })(req, res, next);
   });
 
+  // Get QR code for pending login session (for users who lost their authenticator)
+  app.post("/api/login/2fa/get-qr", async (req, res) => {
+    try {
+      const pendingUserId = req.session.pendingUserId;
+
+      if (!pendingUserId) {
+        return res.status(400).json({ message: "No pending login session" });
+      }
+
+      const user = await storage.getUser(pendingUserId);
+      if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+        return res.status(400).json({ message: "Invalid session or 2FA not properly configured" });
+      }
+
+      // Generate QR code for existing secret
+      const { TwoFactorService } = await import('./twoFactorService');
+      const userEmail = user.email || user.username;
+      const qrCodeUrl = `otpauth://totp/ClientHub%20CRM:${encodeURIComponent(userEmail)}?secret=${user.twoFactorSecret}&issuer=ClientHub%20CRM`;
+      const qrCodeDataUrl = await TwoFactorService.generateQRCode(qrCodeUrl);
+
+      res.json({
+        qrCodeDataUrl,
+        manualEntryKey: user.twoFactorSecret
+      });
+    } catch (error) {
+      console.error("Get QR code error:", error);
+      res.status(500).json({ message: "Failed to generate QR code" });
+    }
+  });
+
   // Login Step 2: 2FA Verification
   app.post("/api/login/2fa", async (req, res, next) => {
     try {
