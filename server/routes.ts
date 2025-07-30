@@ -3548,6 +3548,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(404).json({ message: `API endpoint not found: ${req.path}` });
   });
 
+  // Catch-all for non-API routes - serve React app (client-side routing)
+  app.get('*', (req, res) => {
+    // Don't serve HTML for API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ message: `API endpoint not found: ${req.path}` });
+    }
+    
+    // For all other routes, serve the React app
+    res.sendFile('index.html', { root: 'server/public' });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
