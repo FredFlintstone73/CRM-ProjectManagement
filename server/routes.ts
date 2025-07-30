@@ -406,6 +406,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/contacts/:id', requireAuth, async (req: any, res) => {
     try {
+      // Check access level - only Administrators and Managers can delete contacts
+      const userId = req.user?.claims?.sub;
+      const userAccessLevel = await storage.getUserAccessLevel(userId);
+      
+      if (userAccessLevel === 'team_member') {
+        return res.status(403).json({ message: "Access denied. Team Members cannot delete contacts." });
+      }
+      
       await storage.deleteContact(parseInt(req.params.id));
       res.json({ message: "Contact deleted successfully" });
     } catch (error: any) {
