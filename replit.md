@@ -157,6 +157,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Login QR Code Recovery**: Added "Lost your authenticator? Get QR code" feature during login with dedicated /api/login/2fa/get-qr endpoint for users who need to reconfigure their authenticator apps
 - **User Verified System**: Complete mandatory 2FA workflow tested and confirmed working end-to-end with QR code scanning, TOTP verification, and successful dashboard access
 
+### Critical Invitation System Deployment Fix (July 30, 2025)
+- **Replit Auth Middleware Bypass**: Fixed critical deployment issue where Replit Auth integration (`javascript_log_in_with_replit==1.0.0`) was intercepting invitation URLs and redirecting to Replit login instead of app registration
+- **Early Route Registration**: Moved frontend route handlers (`/auth`, `/accept-invitation`, `/forgot-password`, `/reset-password`) to the very beginning of middleware stack to prevent auth interference
+- **Production Route Handling**: Added explicit route handlers that serve React app's index.html for authentication-related routes in production environment
+- **Deployment-Specific Fix**: Resolved issue where invitees clicking invitation links were taken to Replit login instead of internal registration page
+- **Middleware Order Priority**: Ensured frontend routes are registered before any authentication middleware can intercept them
+- **Debug Logging**: Added comprehensive logging for route serving to troubleshoot deployment issues
+- **Ready for Deployment**: Complete fix addresses root cause of invitation system failure in deployed environment
+
 ### Dashboard Landing Page and Logout Button Relocation (July 30, 2025)
 - **Dashboard Default Landing Page**: Dashboard now serves as the default splash page after successful login - users land directly on dashboard instead of generic page
 - **Logout Button Relocation**: Removed logout button from sidebar bottom and relocated to Dashboard page header in upper right corner

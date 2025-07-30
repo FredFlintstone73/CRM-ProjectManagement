@@ -150,6 +150,52 @@ async function configureAutoEmailSettings(user: any, invitationEmail: string) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // CRITICAL: Handle frontend routes FIRST before any auth middleware
+  // This prevents Replit Auth from intercepting invitation URLs
+  app.get('/auth', (req, res) => {
+    if (app.get("env") === "production") {
+      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
+      console.log(`Serving /auth route with index.html from: ${indexPath}`);
+      res.sendFile(indexPath);
+    } else {
+      // Development handled by Vite
+      res.redirect('/');
+    }
+  });
+  
+  app.get('/accept-invitation', (req, res) => {
+    if (app.get("env") === "production") {
+      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
+      console.log(`Serving /accept-invitation route with index.html from: ${indexPath}`);
+      res.sendFile(indexPath);
+    } else {
+      // Development handled by Vite
+      res.redirect('/');
+    }
+  });
+  
+  app.get('/forgot-password', (req, res) => {
+    if (app.get("env") === "production") {
+      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
+      console.log(`Serving /forgot-password route with index.html from: ${indexPath}`);
+      res.sendFile(indexPath);
+    } else {
+      // Development handled by Vite  
+      res.redirect('/');
+    }
+  });
+  
+  app.get('/reset-password', (req, res) => {
+    if (app.get("env") === "production") {
+      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
+      console.log(`Serving /reset-password route with index.html from: ${indexPath}`);
+      res.sendFile(indexPath);
+    } else {
+      // Development handled by Vite
+      res.redirect('/');
+    }
+  });
+
   // Serve static files in production with proper configuration
   if (app.get("env") === "production") {
     const staticPath = path.resolve(process.cwd(), 'dist', 'public');
@@ -3729,7 +3775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(404).json({ message: `API endpoint not found: ${req.path}` });
   });
 
-  // REMOVED: Static file serving - handled by Vite in dev mode and serveStatic in production
+
   // Don't add static file serving here as it conflicts with Vite middleware
 
   // Catch-all for non-API routes - only for production builds
