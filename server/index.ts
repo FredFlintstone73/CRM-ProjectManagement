@@ -13,10 +13,29 @@ app.use((req, res, next) => {
   const isAuthRelated = req.path === '/auth' || req.path === '/accept-invitation' || 
                        req.path === '/forgot-password' || req.path === '/reset-password';
 
+  // Enhanced logging for debugging deployed environment
+  if (hasInvitation || (hasTabParam && isAuthRelated)) {
+    console.log(`🔍 MIDDLEWARE INTERCEPT ATTEMPT:`);
+    console.log(`   Environment: ${app.get("env")}`);
+    console.log(`   Host: ${req.get('host')}`);
+    console.log(`   Path: ${req.path}`);
+    console.log(`   Query: ${JSON.stringify(req.query)}`);
+    console.log(`   Full URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+  }
+
   // In production, immediately serve index.html for invitation URLs to bypass all auth
   if ((hasInvitation || (hasTabParam && isAuthRelated)) && app.get("env") === "production") {
     const indexPath = require('path').resolve(process.cwd(), 'dist', 'public', 'index.html');
     console.log(`🚀 BYPASSING ALL MIDDLEWARE for invitation URL: ${req.url}`);
+    console.log(`📂 Serving index.html from: ${indexPath}`);
+    
+    // Add comprehensive headers to prevent any middleware interference
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('X-Invitation-Bypass', 'true');
+    
     return res.sendFile(indexPath);
   }
 

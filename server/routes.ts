@@ -155,13 +155,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const indexPath = app.get("env") === "production" ? 
     path.resolve(process.cwd(), 'dist', 'public', 'index.html') : null;
 
+  // Log deployment domain for debugging
+  if (app.get("env") === "production") {
+    console.log(`🚀 Production deployment detected - index path: ${indexPath}`);
+    console.log(`🌐 Deployment domain: aligned-client-hub.replit.app`);
+  }
+
   // Handle ALL auth-related routes that Replit Auth might intercept
   const authRoutes = ['/auth', '/accept-invitation', '/forgot-password', '/reset-password'];
   
   authRoutes.forEach(route => {
     app.get(route, (req, res, next) => {
       if (app.get("env") === "production" && indexPath) {
-        console.log(`Serving ${route} route with query params:`, req.query);
+        console.log(`🔄 Serving ${route} route with query params:`, req.query);
+        console.log(`🔗 Full URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+        
+        // Add headers to prevent caching of auth pages
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        
         res.sendFile(indexPath);
       } else {
         // Development handled by Vite, don't interfere
@@ -177,7 +190,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const isAuthRoute = req.path === '/auth' || req.path === '/accept-invitation';
     
     if ((hasInvitation || hasTabParam) && app.get("env") === "production" && indexPath) {
-      console.log(`Bypassing auth middleware for invitation URL: ${req.url}`);
+      console.log(`🛡️ BYPASSING AUTH MIDDLEWARE for invitation URL: ${req.url}`);
+      console.log(`📍 Host: ${req.get('host')}, Path: ${req.path}`);
+      console.log(`🎯 Invitation code: ${hasInvitation}, Tab: ${hasTabParam}`);
+      
+      // Add headers to prevent caching
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       res.sendFile(indexPath);
       return;
     }
