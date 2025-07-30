@@ -11,7 +11,7 @@ import { Loader2, Building2, Users, Calendar, MessageSquare, Eye, EyeOff } from 
 import React from "react";
 
 export default function AuthPage() {
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -96,6 +96,17 @@ export default function AuthPage() {
     const { confirmPassword, ...registrationData } = registerData;
     registerMutation.mutate(registrationData);
   };
+
+  // Check if user is already authenticated and redirect
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      setLocation('/dashboard');
+    }
+  }, [isAuthenticated, user, setLocation]);
+
+  if (isAuthenticated && user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex">

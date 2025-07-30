@@ -38,5 +38,18 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Production Build"
+author = 44913188
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+
 [agent]
 integrations = ["javascript_openai==1.0.0", "javascript_log_in_with_replit==1.0.0", "javascript_sendgrid==1.0.0", "javascript_auth_all_persistance==1.0.0", "javascript_database==1.0.0"]

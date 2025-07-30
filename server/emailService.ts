@@ -295,9 +295,13 @@ class EmailService {
     const outlookPass = process.env.OUTLOOK_PASSWORD;
     const gmailUser = process.env.GMAIL_USER;
     const gmailPass = process.env.GMAIL_APP_PASSWORD;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
     
-    // Check if we have valid credential pairs
-    return (outlookUser && outlookPass) || (gmailUser && gmailPass);
+    // Check if we have valid credential pairs for any service
+    return (outlookUser && outlookPass) || 
+           (gmailUser && gmailPass) || 
+           (smtpUser && smtpPass);
   }
 
   // Start monitoring incoming emails for automatic threading
@@ -370,6 +374,14 @@ class EmailService {
     const outlookPass = process.env.OUTLOOK_PASSWORD;
     const gmailUser = process.env.GMAIL_USER;
     const gmailPass = process.env.GMAIL_APP_PASSWORD;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    // For SMTP-only configurations, don't try IMAP
+    if (smtpUser && smtpPass && !outlookUser && !gmailUser) {
+      console.log('SMTP-only configuration detected, skipping IMAP setup');
+      return null;
+    }
 
     if (outlookUser && outlookPass) {
       return {

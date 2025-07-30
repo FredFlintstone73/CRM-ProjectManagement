@@ -82,6 +82,7 @@ app.use((req, res, next) => {
       console.log('Email monitoring initialized');
     } catch (error) {
       console.error('Error initializing email monitoring:', error);
+      console.log('Continuing without email monitoring - SMTP sending will still work');
     }
   });
 })();
