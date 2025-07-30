@@ -153,7 +153,7 @@ export function UserEmailConfig() {
           imapPort: 993,
           imapSecure: true,
           requiresAppPassword: true,
-          instructions: 'Outlook requires an App Password. Go to Microsoft Account Security → Additional security options → App passwords.'
+          instructions: 'Outlook requires an App Password. Go to Microsoft Account Security or https://mysignins.microsoft.com → Additional security options → App passwords. Then copy the App password below'
         };
       case 'yahoo.com':
         return {
