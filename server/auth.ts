@@ -110,11 +110,7 @@ export function setupAuth(app: Express) {
         }
       }
 
-      // Generate 2FA setup data (mandatory for all new users)
-      const twoFactorSetup = await TwoFactorService.generateSetup(email || username);
-      const qrCodeDataUrl = await TwoFactorService.generateQRCode(twoFactorSetup.qrCodeUrl);
-
-      // Create user with 2FA setup
+      // Create user without mandatory 2FA
       const hashedPassword = await hashPassword(password);
       const user = await storage.createUser({
         username,
@@ -126,9 +122,7 @@ export function setupAuth(app: Express) {
         isActive: true,
         invitedBy: invitation?.invitedBy,
         invitedAt: invitation ? new Date() : undefined,
-        twoFactorSecret: twoFactorSetup.secret,
-        twoFactorEnabled: false, // Will be enabled after verification
-        backupCodes: JSON.stringify(twoFactorSetup.backupCodes)
+        twoFactorEnabled: false,
       });
 
       // If this was an invitation, mark it as accepted and create team member contact
@@ -153,16 +147,23 @@ export function setupAuth(app: Express) {
         });
       }
 
-      // Return 2FA setup data for mandatory configuration
-      res.status(201).json({
-        message: "User registered successfully - 2FA setup required",
-        userId: user.id,
-        requiresTwoFactorSetup: true,
-        twoFactorSetup: {
-          qrCodeDataUrl: qrCodeDataUrl,
-          manualEntryKey: twoFactorSetup.manualEntryKey,
-          backupCodes: twoFactorSetup.backupCodes
+      // Registration successful - log user in automatically
+      req.logIn(user, (err: any) => {
+        if (err) {
+          console.error("Auto-login after registration error:", err);
+          return res.status(500).json({ message: "Registration successful but login failed" });
         }
+        
+        res.status(201).json({
+          message: "User registered and logged in successfully",
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            accessLevel: user.accessLevel
+          }
+        });
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -170,45 +171,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Verify 2FA setup for new registration (no auth required)
-  app.post("/api/register/2fa/verify", async (req, res) => {
-    try {
-      const { userId, token } = req.body;
 
-      if (!userId || !token) {
-        return res.status(400).json({ message: "User ID and verification code are required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      if (!user.twoFactorSecret) {
-        return res.status(400).json({ message: "2FA not set up for this user" });
-      }
-
-      // Verify the token
-      const isValid = TwoFactorService.verifyToken(token, user.twoFactorSecret);
-      
-      if (!isValid) {
-        return res.status(400).json({ message: "Invalid verification code" });
-      }
-
-      // Enable 2FA for the user
-      await storage.updateUser(userId, {
-        twoFactorEnabled: true
-      });
-
-      res.json({ 
-        success: true,
-        message: "2FA setup completed successfully" 
-      });
-    } catch (error) {
-      console.error("2FA registration verification error:", error);
-      res.status(500).json({ message: "2FA verification failed" });
-    }
-  });
 
   // Login user (Step 1: Username/Password)
   app.post("/api/login", (req, res, next) => {
@@ -221,20 +184,34 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Invalid credentials" });
       }
       
-      // 2FA is mandatory for all users
-      if (!user.twoFactorEnabled) {
-        return res.status(403).json({ 
-          message: "Two-factor authentication setup required. Please contact administrator.",
-          requiresSetup: true
+      // Check if user has 2FA enabled (optional)
+      if (user.twoFactorEnabled) {
+        // Don't log the user in yet, require 2FA verification
+        // Store user ID in session temporarily for 2FA verification
+        req.session.pendingUserId = user.id;
+        return res.json({ 
+          requiresTwoFactor: true,
+          message: "Two-factor authentication required"
         });
       }
       
-      // Don't log the user in yet, require 2FA verification
-      // Store user ID in session temporarily for 2FA verification
-      req.session.pendingUserId = user.id;
-      return res.json({ 
-        requiresTwoFactor: true,
-        message: "Two-factor authentication required"
+      // For users without 2FA, log them in directly
+      req.logIn(user, (err: any) => {
+        if (err) {
+          console.error("Login session error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        
+        res.json({ 
+          message: "Login successful",
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            accessLevel: user.accessLevel
+          }
+        });
       });
     })(req, res, next);
   });

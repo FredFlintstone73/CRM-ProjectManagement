@@ -141,6 +141,18 @@ The architecture prioritizes type safety, developer experience, and scalability 
 
 ## Recent Changes (July 2025)
 
+### Simplified Authentication - Removed Mandatory 2FA Requirement (July 30, 2025)
+- **Optional 2FA Implementation**: Removed mandatory 2FA requirement to simplify invitee onboarding process - 2FA is now optional for enhanced security
+- **Streamlined Registration Flow**: Modified registration to automatically log users in upon completion without requiring 2FA setup
+- **Direct Login Support**: Users without 2FA can now log in directly with username/password without additional verification steps
+- **Enhanced Settings UI**: Updated settings page to show 2FA as "Optional" with clear enabled/disabled status indicators
+- **Backward Compatibility**: Users who previously enabled 2FA continue to use 2FA during login - existing security settings preserved
+- **Simplified Client Components**: Removed Mandatory2FAWrapper component and related forced 2FA setup flows
+- **Improved User Experience**: New users can join immediately after registration, with option to enable 2FA later for enhanced security
+- **Registration Auto-Login**: Registration now immediately logs users in and redirects to dashboard for seamless onboarding
+- **Settings Page Enhancement**: 2FA section now shows "Setup 2FA" button for users without 2FA and "Manage 2FA" for those with it enabled
+- **Clean Authentication Flow**: Removed registration 2FA verification endpoint and simplified backend authentication logic
+
 ### Authentication System Debugging and Repair (July 30, 2025)
 - **Passport.js LocalStrategy Configuration Fix**: Resolved critical "Missing credentials" authentication error by configuring LocalStrategy to accept email field instead of username, matching frontend form submission format
 - **Frontend Authentication Flow Repair**: Fixed two-factor authentication display issue by removing tempUserId requirement that was preventing 2FA screen from appearing after successful email/password authentication  

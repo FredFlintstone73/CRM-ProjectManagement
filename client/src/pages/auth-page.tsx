@@ -159,17 +159,13 @@ export default function AuthPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      if (data.requiresTwoFactorSetup) {
-        setRegistrationData(data);
-        setShowRegistrationTwoFactor(true);
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-        toast({
-          title: "Registration successful",
-          description: "Welcome to ClientHub!",
-        });
-        setLocation("/");
-      }
+      // Registration now automatically logs user in
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      toast({
+        title: "Registration successful",
+        description: "Welcome to ClientHub!",
+      });
+      setLocation("/");
     },
     onError: (error: any) => {
       toast({

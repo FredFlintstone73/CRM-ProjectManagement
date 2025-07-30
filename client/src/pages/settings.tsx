@@ -163,10 +163,10 @@ export default function Settings() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Smartphone className="h-4 w-4" />
-                <Label>Two-Factor Authentication (Required)</Label>
+                <Label>Two-Factor Authentication (Optional)</Label>
               </div>
               <p className="text-sm text-muted-foreground">
-                Two-factor authentication is mandatory for all accounts
+                Add an extra layer of security to your account with 2FA
               </p>
             </div>
             <Button 
@@ -174,11 +174,11 @@ export default function Settings() {
               variant="outline"
               disabled={statusLoading}
             >
-              Manage 2FA
+              {(twoFactorStatus as any)?.enabled ? 'Manage 2FA' : 'Setup 2FA'}
             </Button>
           </div>
 
-          {(twoFactorStatus as any)?.enabled && (
+          {(twoFactorStatus as any)?.enabled ? (
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg mt-[0px] mb-[0px] pt-[0px] pb-[0px]">
               <div className="flex items-center gap-2 text-green-800">
                 <Shield className="h-4 w-4" />
@@ -186,6 +186,16 @@ export default function Settings() {
               </div>
               <p className="text-sm text-green-700 mt-1">
                 Your account is protected with two-factor authentication
+              </p>
+            </div>
+          ) : (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg mt-[0px] mb-[0px] pt-[0px] pb-[0px]">
+              <div className="flex items-center gap-2 text-gray-700">
+                <Smartphone className="h-4 w-4" />
+                <span className="text-sm font-medium">2FA not enabled</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                Your account is secured with password authentication only
               </p>
             </div>
           )}

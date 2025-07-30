@@ -56,17 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (response: any) => {
-      // Handle 2FA response
+      // Handle 2FA response for users who have it enabled
       if (response.requiresTwoFactor) {
         // Don't show toast here, let the auth page handle it
         return;
       }
       
-      // Normal login success
-      queryClient.setQueryData(["/api/user"], response);
+      // Normal login success (either direct or with user data)
+      const userData = response.user || response;
+      queryClient.setQueryData(["/api/user"], userData);
       toast({
         title: "Login successful",
-        description: `Welcome back, ${response.firstName || response.username}!`,
+        description: `Welcome back, ${userData.firstName || userData.username}!`,
       });
     },
     onError: (error: Error) => {
@@ -84,24 +85,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (response: any) => {
-      // Registration now requires mandatory 2FA setup
-      if (response.requiresTwoFactorSetup) {
-        toast({
-          title: "Registration successful",
-          description: `Account created! Now set up Two-Factor Authentication to complete registration.`,
-        });
-        // Let the auth page handle the 2FA setup flow
-        return;
-      }
-      
-      // Fallback (shouldn't happen with mandatory 2FA)
+      // Registration successful - user is now logged in automatically
+      queryClient.setQueryData(["/api/user"], response.user);
       toast({
         title: "Registration successful",
-        description: `Account created successfully! Please sign in with your new credentials.`,
+        description: `Account created and logged in successfully! Welcome, ${response.user.firstName || response.user.username}!`,
       });
       
+      // Redirect to dashboard
       setTimeout(() => {
-        window.location.href = "/auth?tab=login";
+        window.location.href = "/";
       }, 1500);
     },
     onError: (error: Error) => {
