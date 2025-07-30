@@ -271,6 +271,7 @@ export function UserEmailConfig() {
                         <div>2) Enable 2-Factor Authentication if not already active, and when it is select 2-Step Verification</div>
                         <div>3) Search for "App passwords" (may need to scroll down) and click on the chevron &gt;</div>
                         <div>4) Enter an App name, create app password, and copy it below</div>
+                        <div>5) Save Configuration</div>
                       </div>
                     </div>
                   </div>
