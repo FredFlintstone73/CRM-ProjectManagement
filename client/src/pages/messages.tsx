@@ -75,44 +75,58 @@ export default function Messages() {
   const { data: mentions = [], isLoading: mentionsLoading } = useQuery({
     queryKey: ['/api/mentions', user?.id],
     enabled: !!user?.id,
-    staleTime: 30000, // 30 seconds
-    gcTime: 300000 // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes for faster navigation
+    gcTime: 10 * 60 * 1000, // 10 minutes cache retention
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   const { data: taskNotifications = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['/api/notifications/tasks-due', user?.id],
     enabled: !!user?.id,
-    staleTime: 60000, // 60 seconds
-    gcTime: 300000 // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes for faster navigation
+    gcTime: 10 * 60 * 1000, // 10 minutes cache retention
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   const { data: overdueTasks = [], isLoading: overdueLoading } = useQuery({
     queryKey: ['/api/notifications/tasks-overdue', user?.id],
     enabled: !!user?.id,
-    staleTime: 60000, // 60 seconds
-    gcTime: 300000 // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes for faster navigation
+    gcTime: 10 * 60 * 1000, // 10 minutes cache retention
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   const { data: emailNotifications = [], isLoading: emailsLoading } = useQuery<EmailNotification[]>({
     queryKey: ['/api/email-notifications'],
     enabled: !!user?.id,
-    refetchInterval: 60000, // Check for new emails every 60 seconds (reduced from 30s)
-    staleTime: 30000, // Consider data stale after 30 seconds (increased from 10s)
-    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    refetchInterval: false, // Disable polling for faster page load
+    staleTime: 2 * 60 * 1000, // 2 minutes for faster navigation
+    gcTime: 10 * 60 * 1000, // 10 minutes cache retention
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
-  const markAsRead = async (mentionId: number) => {
-    try {
-      await fetch(`/api/mentions/${mentionId}/read`, {
-        method: 'PATCH',
-        credentials: 'include',
+  const markAsReadMutation = useMutation({
+    mutationFn: async (mentionId: number) => {
+      await apiRequest('PATCH', `/api/mentions/${mentionId}/read`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/mentions', user?.id] });
+      toast({
+        title: "Mention marked as read",
       });
-      // Refresh mentions
-      window.location.reload();
-    } catch (error) {
-      console.error('Failed to mark mention as read:', error);
-    }
-  };
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to mark mention as read",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const markEmailAsReadMutation = useMutation({
     mutationFn: (notificationId: number) =>
@@ -505,7 +519,8 @@ export default function Messages() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => markAsRead(mention.id)}
+                          onClick={() => markAsReadMutation.mutate(mention.id)}
+                          disabled={markAsReadMutation.isPending}
                         >
                           Mark Read
                         </Button>

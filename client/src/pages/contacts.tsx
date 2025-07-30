@@ -194,8 +194,10 @@ export default function Contacts() {
   const { data: contacts, isLoading: contactsLoading } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
     enabled: isAuthenticated,
-    staleTime: 120000, // 2 minutes - increased for better performance
-    gcTime: 600000, // 10 minutes - longer cache time
+    staleTime: 5 * 60 * 1000, // 5 minutes for faster navigation
+    gcTime: 15 * 60 * 1000, // 15 minutes cache retention
+    refetchOnWindowFocus: false, // Prevent refetch on tab focus
+    retry: 1, // Reduce retry attempts for faster loading
   });
 
   const deleteContactMutation = useMutation({

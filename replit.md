@@ -165,6 +165,7 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Sidebar Cleanup**: Removed logout-related code from sidebar component and cleaned up unused imports and functions
 - **Email Notification Integration**: Added EmailNotificationIcon to Dashboard header positioned left of logout button for easy access to Messages page
 - **Single Refresh Button**: Removed duplicate refresh button from Dashboard header - EmailNotificationIcon now provides the sole refresh functionality for checking emails
+- **Navigation Performance Optimization**: Enhanced Contacts and Messages page performance with improved caching (5-minute staleTime for Contacts, 2-minute for Messages), disabled unnecessary polling and window focus refetching, reduced retry attempts, and replaced page reloads with proper React Query cache invalidation
 - **Custom Date Range Dialog Fix**: Enhanced projects timeline chart with automatic dialog closure after applying custom date ranges  
 - **Route Compatibility**: Added /dashboard route alongside / route to handle login redirects without 404 errors
 
