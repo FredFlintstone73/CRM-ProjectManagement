@@ -189,30 +189,30 @@ export function UserEmailConfig() {
           staleTime: 30000,
         });
         
-        if (user) {
+        if (user && typeof user === 'object') {
           // Auto-populate email address from user account
-          const userEmail = user.email || '';
+          const userEmail = (user as any).email || '';
           const autoConfig = autoConfigureEmailSettings(userEmail);
           
           form.reset({
-            smtpHost: user.smtpHost || autoConfig.smtpHost || '',
-            smtpPort: user.smtpPort || autoConfig.smtpPort || 587,
-            smtpSecure: user.smtpSecure !== undefined ? user.smtpSecure : autoConfig.smtpSecure || false,
-            smtpUser: user.smtpUser || userEmail, // Use user's email if smtpUser not set
+            smtpHost: (user as any).smtpHost || autoConfig.smtpHost || '',
+            smtpPort: (user as any).smtpPort || autoConfig.smtpPort || 587,
+            smtpSecure: (user as any).smtpSecure !== undefined ? (user as any).smtpSecure : autoConfig.smtpSecure || false,
+            smtpUser: (user as any).smtpUser || userEmail, // Use user's email if smtpUser not set
             smtpPassword: '', // Never pre-fill password for security
-            imapHost: user.imapHost || autoConfig.imapHost || '',
-            imapPort: user.imapPort || autoConfig.imapPort || 993,
-            imapSecure: user.imapSecure !== undefined ? user.imapSecure : autoConfig.imapSecure !== false,
+            imapHost: (user as any).imapHost || autoConfig.imapHost || '',
+            imapPort: (user as any).imapPort || autoConfig.imapPort || 993,
+            imapSecure: (user as any).imapSecure !== undefined ? (user as any).imapSecure : autoConfig.imapSecure !== false,
           });
           
           // Show helpful message if settings are pre-configured but not complete
-          if (user.smtpHost && !user.emailConfigured) {
+          if ((user as any).smtpHost && !(user as any).emailConfigured) {
             toast({
               title: "Email Settings Pre-configured",
               description: "Your email settings have been automatically configured based on your invitation. Just add your email password to complete the setup.",
               duration: 8000,
             });
-          } else if (!user.smtpHost && autoConfig.smtpHost) {
+          } else if (!(user as any).smtpHost && autoConfig.smtpHost) {
             // Show auto-configuration message
             toast({
               title: "Email Settings Auto-configured",
