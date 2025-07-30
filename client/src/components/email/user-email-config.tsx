@@ -267,8 +267,8 @@ export function UserEmailConfig() {
                     <div className="text-xs space-y-1">
                       <div>Outlook requires an App Password. Do the following:</div>
                       <div>1) Go to Microsoft Account Security or <a href="https://mysignins.microsoft.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">https://mysignins.microsoft.com</a></div>
-                      <div>2) Additional security options</div>
-                      <div>3) Select App passwords</div>
+                      <div>2) Select Security Info or Additional Security Options</div>
+                      <div>3) Click Add sign-in method and select App password</div>
                       <div>4) Create and copy the App password below</div>
                     </div>
                   </div>
