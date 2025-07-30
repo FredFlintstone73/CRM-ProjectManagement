@@ -120,7 +120,7 @@ export default function AuthPage() {
     },
     onSuccess: (data) => {
       if (data.requiresTwoFactor) {
-        setTempUserId(data.tempUserId);
+        setTempUserId("pending"); // Set a placeholder since the backend uses session storage
         setShowTwoFactor(true);
       } else {
         queryClient.invalidateQueries({ queryKey: ['/api/user'] });
@@ -214,7 +214,7 @@ export default function AuthPage() {
     );
   }
 
-  if (showTwoFactor && tempUserId) {
+  if (showTwoFactor) {
     return (
       <TwoFactorLogin 
         onSuccess={handleTwoFactorSuccess}
