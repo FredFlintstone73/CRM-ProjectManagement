@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Smartphone, Key } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Shield, Smartphone, Key, QrCode, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -18,12 +19,16 @@ export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
   const [verificationCode, setVerificationCode] = useState('');
   const [backupCode, setBackupCode] = useState('');
   const [useBackupCode, setUseBackupCode] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState<any>(null);
   
   const { toast } = useToast();
 
   const verifyMutation = useMutation({
-    mutationFn: (data: { token?: string; backupCode?: string }) =>
-      apiRequest('/api/login/2fa', { method: 'POST', body: data }),
+    mutationFn: async (data: { token?: string; backupCode?: string }) => {
+      const res = await apiRequest('POST', '/api/login/2fa', data);
+      return await res.json();
+    },
     onSuccess: (user: any) => {
       toast({
         title: "Login Successful",
@@ -39,6 +44,32 @@ export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
       });
     },
   });
+
+  const getQRCodeMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest('POST', '/api/auth/2fa/setup');
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      setQrCodeData(data);
+      setShowQRCode(true);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Generate QR Code",
+        description: error.message || "Unable to generate new QR code. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "The code has been copied to your clipboard.",
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,15 +143,26 @@ export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
                 {verifyMutation.isPending ? "Verifying..." : "Verify"}
               </Button>
 
-              <div className="text-center">
+              <div className="text-center space-y-2">
                 <Button
                   type="button"
                   variant="link"
                   size="sm"
                   onClick={() => setUseBackupCode(true)}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground block mx-auto"
                 >
                   Use backup code instead
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  onClick={() => getQRCodeMutation.mutate()}
+                  disabled={getQRCodeMutation.isPending}
+                  className="text-muted-foreground flex items-center gap-1 mx-auto"
+                >
+                  <QrCode className="h-3 w-3" />
+                  {getQRCodeMutation.isPending ? "Getting QR code..." : "Lost your authenticator? Get QR code"}
                 </Button>
               </div>
             </>
@@ -190,6 +232,61 @@ export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
           </div>
         </form>
       </CardContent>
+
+      {/* QR Code Dialog */}
+      <Dialog open={showQRCode} onOpenChange={setShowQRCode}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set up Your Authenticator App</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {qrCodeData && (
+              <>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Scan this QR code with your authenticator app
+                  </p>
+                  <div className="flex justify-center p-4 bg-white rounded-lg border">
+                    <img 
+                      src={qrCodeData.qrCodeDataUrl} 
+                      alt="2FA QR Code" 
+                      className="w-48 h-48"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Manual Entry Key</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={qrCodeData.manualEntryKey} 
+                      readOnly 
+                      className="font-mono text-sm"
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => copyToClipboard(qrCodeData.manualEntryKey)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter this key manually if you can't scan the QR code
+                  </p>
+                </div>
+
+                <Alert>
+                  <QrCode className="h-4 w-4" />
+                  <AlertDescription>
+                    After scanning the QR code or entering the key manually, your authenticator app will generate a 6-digit code. Enter that code above to complete the login.
+                  </AlertDescription>
+                </Alert>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
