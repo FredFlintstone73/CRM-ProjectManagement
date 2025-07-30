@@ -2604,18 +2604,7 @@ export class DatabaseStorage implements IStorage {
     return invitation;
   }
 
-  async getUserInvitations(invitedBy?: string): Promise<UserInvitation[]> {
-    let query = db
-      .select()
-      .from(userInvitations)
-      .orderBy(desc(userInvitations.createdAt));
 
-    if (invitedBy) {
-      query = query.where(eq(userInvitations.invitedBy, invitedBy));
-    }
-
-    return await query;
-  }
 
   async acceptUserInvitation(invitationCode: string, userId: string): Promise<UserInvitation> {
     const [updated] = await db
