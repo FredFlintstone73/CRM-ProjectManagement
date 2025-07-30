@@ -193,30 +193,48 @@ export function UserEmailConfig() {
           // Auto-populate email address from user account
           const userEmail = (user as any).email || '';
           const autoConfig = autoConfigureEmailSettings(userEmail);
+          const hasExistingConfig = (user as any).emailConfigured && (user as any).smtpHost;
           
-          form.reset({
-            smtpHost: (user as any).smtpHost || autoConfig.smtpHost || '',
-            smtpPort: (user as any).smtpPort || autoConfig.smtpPort || 587,
-            smtpSecure: (user as any).smtpSecure !== undefined ? (user as any).smtpSecure : autoConfig.smtpSecure || false,
-            smtpUser: (user as any).smtpUser || userEmail, // Use user's email if smtpUser not set
-            smtpPassword: '', // Never pre-fill password for security
-            imapHost: (user as any).imapHost || autoConfig.imapHost || '',
-            imapPort: (user as any).imapPort || autoConfig.imapPort || 993,
-            imapSecure: (user as any).imapSecure !== undefined ? (user as any).imapSecure : autoConfig.imapSecure !== false,
-          });
+          // If user has existing email configuration, use it; otherwise use auto-config
+          if (hasExistingConfig) {
+            form.reset({
+              smtpHost: (user as any).smtpHost || '',
+              smtpPort: (user as any).smtpPort || 587,
+              smtpSecure: (user as any).smtpSecure !== undefined ? (user as any).smtpSecure : false,
+              smtpUser: (user as any).smtpUser || userEmail,
+              smtpPassword: '', // Never pre-fill password for security
+              imapHost: (user as any).imapHost || '',
+              imapPort: (user as any).imapPort || 993,
+              imapSecure: (user as any).imapSecure !== undefined ? (user as any).imapSecure : true,
+            });
+          } else {
+            // Use auto-configuration for new users
+            form.reset({
+              smtpHost: autoConfig.smtpHost || '',
+              smtpPort: autoConfig.smtpPort || 587,
+              smtpSecure: autoConfig.smtpSecure || false,
+              smtpUser: userEmail,
+              smtpPassword: '', // Never pre-fill password for security
+              imapHost: autoConfig.imapHost || '',
+              imapPort: autoConfig.imapPort || 993,
+              imapSecure: autoConfig.imapSecure !== false,
+            });
+            
+            // Show auto-configuration message only for new configurations
+            if (autoConfig.smtpHost) {
+              toast({
+                title: "Email Settings Auto-configured",
+                description: `Settings automatically configured for ${userEmail.split('@')[1]}. ${autoConfig.requiresAppPassword ? 'App password required.' : 'Enter your email password.'}`,
+                duration: 8000,
+              });
+            }
+          }
           
-          // Show helpful message if settings are pre-configured but not complete
+          // Show helpful message if settings are pre-configured from invitation but not yet saved
           if ((user as any).smtpHost && !(user as any).emailConfigured) {
             toast({
               title: "Email Settings Pre-configured",
               description: "Your email settings have been automatically configured based on your invitation. Just add your email password to complete the setup.",
-              duration: 8000,
-            });
-          } else if (!(user as any).smtpHost && autoConfig.smtpHost) {
-            // Show auto-configuration message
-            toast({
-              title: "Email Settings Auto-configured",
-              description: `Settings automatically configured for ${userEmail.split('@')[1]}. ${autoConfig.requiresAppPassword ? 'App password required.' : 'Enter your email password.'}`,
               duration: 8000,
             });
           }

@@ -2,7 +2,13 @@ import { Router } from 'express';
 import { z } from 'zod';
 import type { IStorage } from '../storage';
 import UserEmailService from '../userEmailService';
-import { isAuthenticated } from '../replitAuth';
+// requireAuth middleware function
+const requireAuth = (req: any, res: any, next: any) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+  next();
+};
 
 const userEmailConfigSchema = z.object({
   smtpHost: z.string().min(1),
@@ -20,9 +26,9 @@ export function createUserEmailRoutes(storage: IStorage): Router {
   const userEmailService = new UserEmailService(storage);
 
   // Get user's email configuration status
-  router.get('/status', isAuthenticated, async (req, res) => {
+  router.get('/status', requireAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
@@ -36,9 +42,9 @@ export function createUserEmailRoutes(storage: IStorage): Router {
   });
 
   // Update user's email configuration
-  router.post('/configure', isAuthenticated, async (req, res) => {
+  router.post('/configure', requireAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
@@ -64,9 +70,9 @@ export function createUserEmailRoutes(storage: IStorage): Router {
   });
 
   // Test user's email configuration
-  router.post('/test', isAuthenticated, async (req, res) => {
+  router.post('/test', requireAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
@@ -80,9 +86,9 @@ export function createUserEmailRoutes(storage: IStorage): Router {
   });
 
   // Send email using user's configuration
-  router.post('/send', isAuthenticated, async (req, res) => {
+  router.post('/send', requireAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
