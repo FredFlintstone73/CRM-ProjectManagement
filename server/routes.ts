@@ -2,6 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { emailService } from "./emailService";
@@ -3570,7 +3571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log(`Trying to serve index.html from: ${indexPath}`);
     
     // Check if file exists before serving
-    if (!require('fs').existsSync(indexPath)) {
+    if (!fs.existsSync(indexPath)) {
       console.error(`Index file not found at: ${indexPath}`);
       return res.status(404).send('Application not built properly');
     }
