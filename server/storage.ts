@@ -646,15 +646,43 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    // If there's a corresponding contact and it's a team member, delete the contact first
+    // Handle contacts created by this user
+    // First, find another admin user to reassign contacts to
+    const [adminUser] = await db
+      .select()
+      .from(users)
+      .where(and(
+        eq(users.accessLevel, 'administrator'),
+        not(eq(users.id, userId)),
+        eq(users.isActive, true)
+      ))
+      .limit(1);
+
+    if (adminUser) {
+      // Reassign all contacts (except the user's own team member contact) to another admin
+      await db.update(contacts)
+        .set({ createdBy: adminUser.id })
+        .where(and(
+          eq(contacts.createdBy, userId),
+          not(eq(contacts.id, userContact?.id || -1))
+        ));
+    }
+
+    // Delete the user's own team member contact record if it exists
     if (userContact && userContact.contactType === 'team_member') {
-      // Delete the corresponding contact record
       await db.delete(contacts).where(eq(contacts.id, userContact.id));
     }
 
     // Delete all related user records in the correct order (child tables first)
     await db.delete(contactNotes).where(eq(contactNotes.userId, userId));
     await db.delete(contactFiles).where(eq(contactFiles.userId, userId));
+    
+    // Reassign other database records to the admin user if available
+    if (adminUser) {
+      await db.update(projects).set({ createdBy: adminUser.id }).where(eq(projects.createdBy, userId));
+      await db.update(tasks).set({ createdBy: adminUser.id }).where(eq(tasks.createdBy, userId));
+      await db.update(projectTemplates).set({ createdBy: adminUser.id }).where(eq(projectTemplates.createdBy, userId));
+    }
     
     // Handle email interactions with self-referencing foreign keys
     // First get all email interaction IDs created by this user
