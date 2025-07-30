@@ -137,18 +137,18 @@ class EmailService {
     }
 
     const subject = 'Invitation to join ClientHub CRM';
-    
+
     // Generate invitation URL - use current environment or deployed domain
     const domains = process.env.REPLIT_DOMAINS?.split(',') || [];
     let baseUrl = '';
-    
+
     if (domains.length > 0) {
       // If we're in development (has 00- pattern), use the current domain
       const currentDomain = domains.find(domain => domain.includes('00-'));
       const deployedDomain = domains.find(domain => 
         !domain.includes('00-') && domain.includes('.replit.dev')
       );
-      
+
       // Prefer current development domain if available, otherwise use deployed
       if (currentDomain) {
         baseUrl = currentDomain.startsWith('http') ? currentDomain : `https://${currentDomain}`;
@@ -163,29 +163,29 @@ class EmailService {
       // Ultimate fallback for local development
       baseUrl = 'http://localhost:5000';
     }
-    
+
     const inviteUrl = `${baseUrl}/accept-invitation?code=${invitation.invitationCode}`;
     console.log(`🔗 Generated invitation URL: ${inviteUrl}`);
-    
+
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">You're invited to join ClientHub</h2>
         <p>Hello ${invitation.firstName} ${invitation.lastName},</p>
-        
+
         <p>You've been invited to join ClientHub CRM with <strong>${this.formatAccessLevel(invitation.accessLevel)}</strong> access.</p>
-        
+
         <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0;">Your invitation details:</h3>
           <p><strong>Invitation Code:</strong> ${invitation.invitationCode}</p>
           <p><strong>Access Level:</strong> ${this.formatAccessLevel(invitation.accessLevel)}</p>
         </div>
-        
+
         <p>
           <a href="${inviteUrl}" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
             Accept Invitation
           </a>
         </p>
-        
+
         <p style="color: #666; font-size: 14px;">
           This invitation will expire in 7 days. If you have any questions, please contact your administrator.
         </p>
@@ -194,16 +194,16 @@ class EmailService {
 
     const text = `
       You're invited to join ClientHub CRM
-      
+
       Hello ${invitation.firstName} ${invitation.lastName},
-      
+
       You've been invited to join ClientHub CRM with ${this.formatAccessLevel(invitation.accessLevel)} access.
-      
+
       Invitation Code: ${invitation.invitationCode}
       Access Level: ${this.formatAccessLevel(invitation.accessLevel)}
-      
+
       Click here to accept: ${inviteUrl}
-      
+
       This invitation will expire in 7 days.
     `;
 
@@ -277,7 +277,7 @@ class EmailService {
     const outlookUser = process.env.OUTLOOK_USER;
     const gmailUser = process.env.GMAIL_USER;
     const smtpUser = process.env.SMTP_USER;
-    
+
     return {
       isConfigured: this.isConfigured,
       serviceType: outlookUser ? 'outlook' : (gmailUser ? 'gmail' : (smtpUser ? 'smtp' : 'none')),
@@ -291,9 +291,18 @@ class EmailService {
 
   // Start monitoring incoming emails for automatic threading
   async startEmailMonitoring() {
-    if (this.monitoring || !this.storage) {
+    if (!this.isEmailConfigured()) {
+      console.log('Email not configured, skipping monitoring');
       return;
     }
+
+    if (this.monitoring) {
+      console.log('Email monitoring already running');
+      return;
+    }
+
+    console.log('Starting email monitoring...');
+    this.monitoring = true;
 
     try {
       const imapConfig = this.getImapConfig();
@@ -313,6 +322,13 @@ class EmailService {
       this.imapClient.once('error', (err: Error) => {
         console.error('IMAP connection error:', err);
         this.monitoring = false;
+        // Don't try to reconnect immediately to avoid spam
+        setTimeout(() => {
+          if (!this.monitoring) {
+            console.log('Attempting to reconnect IMAP...');
+            this.startEmailMonitoring();
+          }
+        }, 30000); // Wait 30 seconds before retry
       });
 
       this.imapClient.once('end', () => {
@@ -366,7 +382,7 @@ class EmailService {
       }
 
       console.log('Inbox opened, watching for new emails...');
-      
+
       // Listen for new emails
       this.imapClient!.on('mail', (numNewMsgs: number) => {
         console.log(`${numNewMsgs} new email(s) received`);
@@ -401,7 +417,7 @@ class EmailService {
             stream.on('data', (chunk: any) => {
               buffer += chunk.toString('utf8');
             });
-            
+
             stream.once('end', async () => {
               try {
                 const parsed = await simpleParser(buffer);
@@ -429,7 +445,7 @@ class EmailService {
       const subject = email.subject || '';
       const from = email.from?.text || '';
       const body = email.text || email.html || '';
-      
+
       console.log(`🔍 Processing incoming email from: ${from}, subject: ${subject}`);
       console.log(`📧 Email body preview: ${body.substring(0, 100)}...`);
 
@@ -437,7 +453,7 @@ class EmailService {
       const emailRegex = /<([^>]+)>/;
       const emailMatch = from.match(emailRegex);
       const fromEmail = emailMatch ? emailMatch[1] : from.trim();
-      
+
       const contacts = await this.storage.getContacts();
       const matchingContact = contacts.find(contact => 
         (contact.personalEmail && fromEmail.toLowerCase() === contact.personalEmail.toLowerCase()) ||
@@ -454,18 +470,18 @@ class EmailService {
         // For replies, we need to find the original conversation across ALL contacts
         const originalSubject = subject.replace(/^re:\s*/i, '').trim();
         console.log(`Looking for original email with subject: ${originalSubject}`);
-        
+
         // Search all contacts for the original email
         const allContacts = await this.storage.getContacts();
         let originalEmail = null;
-        
+
         for (const contact of allContacts) {
           const contactEmails = await this.storage.getEmailInteractionsByContact(contact.id);
           const foundEmail = contactEmails.find(email => 
             email.subject?.toLowerCase().includes(originalSubject.toLowerCase()) &&
             email.emailType === 'sent'
           );
-          
+
           if (foundEmail) {
             originalEmail = foundEmail;
             targetContact = contact; // The reply should be associated with the contact who received the original email
@@ -487,27 +503,27 @@ class EmailService {
       // Check if we've already recorded this email to avoid duplicates
       const existingEmails = await this.storage.getEmailInteractionsByContact(targetContact.id);
       const currentTimestamp = email.date || new Date();
-      
+
       // Extract the actual email address from the from field for comparison
       const emailRegexForDupe = /<([^>]+)>/;
       const fromEmailForDupe = from.match(emailRegexForDupe)?.[1] || from.trim();
-      
+
       console.log(`🔍 Checking for duplicates - Subject: "${subject}", From email: "${fromEmailForDupe}", Timestamp: ${currentTimestamp}`);
       console.log(`🔍 Found ${existingEmails.length} existing emails for contact ${targetContact.firstName} ${targetContact.lastName}`);
-      
+
       const isDuplicate = existingEmails.some(existingEmail => {
         const existingFromEmail = existingEmail.sender?.match(emailRegexForDupe)?.[1] || existingEmail.sender;
         const subjectMatch = existingEmail.subject === subject;
         const senderMatch = existingFromEmail === fromEmailForDupe;
         const typeMatch = existingEmail.emailType === 'received';
         const timeMatch = Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt).getTime() - currentTimestamp.getTime()) < 300000; // Within 5 minutes
-        
+
         console.log(`🔍 Comparing with existing email ID ${existingEmail.id}:`);
         console.log(`   - Subject: "${existingEmail.subject}" vs "${subject}" = ${subjectMatch}`);
         console.log(`   - Sender: "${existingFromEmail}" vs "${fromEmailForDupe}" = ${senderMatch}`);
         console.log(`   - Type: "${existingEmail.emailType}" vs "received" = ${typeMatch}`);
         console.log(`   - Time diff: ${Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt).getTime() - currentTimestamp.getTime())}ms = ${timeMatch}`);
-        
+
         return subjectMatch && senderMatch && typeMatch && timeMatch;
       });
 
@@ -532,7 +548,7 @@ class EmailService {
       try {
         const allUsers = await this.storage.getAllUsers();
         console.log(`📧 Creating email notifications for ${allUsers.length} users for email interaction ${emailInteraction.id}`);
-        
+
         for (const user of allUsers) {
           const notification = await this.storage.createEmailNotification({
             userId: user.id,

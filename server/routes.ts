@@ -150,10 +150,21 @@ async function configureAutoEmailSettings(user: any, invitationEmail: string) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve static files in production
+  // Serve static files in production with proper configuration
   if (app.get("env") === "production") {
     const staticPath = path.resolve(process.cwd(), 'dist', 'public');
-    app.use(express.static(staticPath));
+    console.log(`Serving static files from: ${staticPath}`);
+    
+    // Serve static assets with proper headers
+    app.use('/assets', express.static(path.join(staticPath, 'assets'), {
+      maxAge: '1y',
+      etag: true
+    }));
+    
+    // Serve other static files
+    app.use(express.static(staticPath, {
+      index: false // Don't serve index.html for static requests
+    }));
   }
 
   // Ensure API routes are handled first and return JSON (not HTML)
