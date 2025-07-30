@@ -106,44 +106,47 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req: any, res, next) => {
-    // Store redirect parameter in session for post-login redirect
-    if (req.query.redirect) {
-      req.session.postLoginRedirect = decodeURIComponent(req.query.redirect as string);
-    }
-    
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
-  });
+  // DISABLED: Replit Auth login route - using username/password auth instead
+  // app.get("/api/login", (req: any, res, next) => {
+  //   // Store redirect parameter in session for post-login redirect
+  //   if (req.query.redirect) {
+  //     req.session.postLoginRedirect = decodeURIComponent(req.query.redirect as string);
+  //   }
+  //   
+  //   passport.authenticate(`replitauth:${req.hostname}`, {
+  //     prompt: "login consent",
+  //     scope: ["openid", "email", "profile", "offline_access"],
+  //   })(req, res, next);
+  // });
 
-  app.get("/api/callback", (req: any, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      failureRedirect: "/api/login",
-    })(req, res, (err: any) => {
-      if (err) {
-        return next(err);
-      }
-      
-      // Check for stored redirect URL
-      const redirectUrl = req.session.postLoginRedirect || "/";
-      delete req.session.postLoginRedirect; // Clear the stored redirect
-      
-      res.redirect(redirectUrl);
-    });
-  });
+  // DISABLED: Replit Auth callback route - using username/password auth instead
+  // app.get("/api/callback", (req: any, res, next) => {
+  //   passport.authenticate(`replitauth:${req.hostname}`, {
+  //     failureRedirect: "/api/login",
+  //   })(req, res, (err: any) => {
+  //     if (err) {
+  //       return next(err);
+  //     }
+  //     
+  //     // Check for stored redirect URL
+  //     const redirectUrl = req.session.postLoginRedirect || "/";
+  //     delete req.session.postLoginRedirect; // Clear the stored redirect
+  //     
+  //     res.redirect(redirectUrl);
+  //   });
+  // });
 
-  app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
-    });
-  });
+  // DISABLED: Replit Auth logout route - using username/password auth instead
+  // app.get("/api/logout", (req, res) => {
+  //   req.logout(() => {
+  //     res.redirect(
+  //       client.buildEndSessionUrl(config, {
+  //         client_id: process.env.REPL_ID!,
+  //         post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+  //       }).href
+  //     );
+  //   });
+  // });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
