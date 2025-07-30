@@ -152,6 +152,15 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Email Configuration**: Auto-configures email settings for new team members based on email domain detection
 - **Production Ready**: Complete invitation and registration system verified working with real email delivery and successful account creation
 
+### Enhanced Personal Email Configuration with Gmail & Google Workspace Support (July 30, 2025)
+- **Email Address Auto-Population**: Enhanced Personal Email Configuration component to automatically populate user's email address from their account information
+- **Smart SMTP Server Detection**: Added automatic SMTP server and port configuration based on email domain (Gmail, Outlook, Yahoo, Hotmail, Live)
+- **Comprehensive App Password Guidance**: Implemented provider-specific instructions for generating app passwords with detailed step-by-step processes
+- **Gmail & Google Workspace Support**: Added comprehensive support for both regular Gmail and Google Workspace accounts with 2FA prerequisite guidance
+- **Structured Instructions**: Created numbered step-by-step instructions with clickable direct links to Microsoft (https://mysignins.microsoft.com) and Google (https://myaccount.google.com/security) security pages
+- **Enhanced User Experience**: Clear visual formatting with separate instruction sets for Gmail vs Outlook/Hotmail accounts
+- **Security Best Practices**: Never pre-fills password fields while auto-configuring all other email settings for seamless setup
+
 ### Simplified Authentication - Removed Mandatory 2FA Requirement (July 30, 2025)
 - **Optional 2FA Implementation**: Removed mandatory 2FA requirement to simplify invitee onboarding process - 2FA is now optional for enhanced security
 - **Streamlined Registration Flow**: Modified registration to automatically log users in upon completion without requiring 2FA setup
