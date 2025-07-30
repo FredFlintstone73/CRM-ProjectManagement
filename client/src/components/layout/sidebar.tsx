@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, BarChart3, CheckSquare, FolderOpen, LogOut, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft, Shield, Phone, Mail, Search } from "lucide-react";
+import { Users, BarChart3, CheckSquare, FolderOpen, Building2, TrendingUp, Calendar, MessageSquare, Settings, ChevronDown, ChevronRight, UserCheck, UserPlus, UserCog, Handshake, FileText, ChevronLeft, Shield, Phone, Mail, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import type { User } from "@shared/schema";
@@ -16,7 +16,7 @@ interface SidebarProps {
 
 export default function Sidebar({ width, onWidthChange }: SidebarProps) {
   const [location] = useLocation();
-  const { user, isLoading, logoutMutation } = useAuth();
+  const { user, isLoading } = useAuth();
   const { isAdministrator } = useAccessControl();
 
   const [isResizing, setIsResizing] = useState(false);
@@ -77,9 +77,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
 
 
 
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
+
 
   const toggleCollapse = () => {
     const newCollapsedState = !isCollapsed;
@@ -227,16 +225,7 @@ export default function Sidebar({ width, onWidthChange }: SidebarProps) {
                 </div>
               )}
             </div>
-            {!isCollapsed && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="ml-2 text-sidebar-foreground/70 hover:text-white hover:bg-white/5"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
-            )}
+
           </div>
         </div>
       </div>

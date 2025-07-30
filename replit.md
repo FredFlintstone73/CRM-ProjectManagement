@@ -157,6 +157,13 @@ The architecture prioritizes type safety, developer experience, and scalability 
 - **Login QR Code Recovery**: Added "Lost your authenticator? Get QR code" feature during login with dedicated /api/login/2fa/get-qr endpoint for users who need to reconfigure their authenticator apps
 - **User Verified System**: Complete mandatory 2FA workflow tested and confirmed working end-to-end with QR code scanning, TOTP verification, and successful dashboard access
 
+### Dashboard Landing Page and Logout Button Relocation (July 30, 2025)
+- **Dashboard Default Landing Page**: Dashboard now serves as the default splash page after successful login - users land directly on dashboard instead of generic page
+- **Logout Button Relocation**: Removed logout button from sidebar bottom and relocated to Dashboard page header in upper right corner
+- **Enhanced Dashboard Header**: Custom dashboard header with refresh icon (with spin animation) and logout button positioned to the right
+- **Improved User Experience**: Dashboard header includes refresh functionality that invalidates all queries and provides visual feedback during refresh
+- **Sidebar Cleanup**: Removed logout-related code from sidebar component and cleaned up unused imports and functions
+
 ### Registration Redirect and Strong Password Security Implementation (July 30, 2025)
 - **Post-Registration Flow Enhancement**: Successfully implemented automatic page refresh and redirect to Sign In tab after successful registration
 - **Registration Success Feedback**: Updated registration mutation to show "Account created successfully! Please sign in with your new credentials" message
