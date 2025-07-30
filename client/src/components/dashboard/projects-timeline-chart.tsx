@@ -70,6 +70,7 @@ export default function ProjectsTimelineChart({
 }: ProjectsTimelineChartProps) {
   const [tempStartDate, setTempStartDate] = useState(customStartDate || format(new Date(), 'yyyy-MM-dd'));
   const [tempEndDate, setTempEndDate] = useState(customEndDate || format(addMonths(new Date(), 1), 'yyyy-MM-dd'));
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
   const getPeriodMonths = (period: string) => {
     const now = new Date();
@@ -417,7 +418,7 @@ export default function ProjectsTimelineChart({
               </SelectContent>
             </Select>
             {selectedPeriod === "custom-range" && (
-              <Popover>
+              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="h-10">
                     <CalendarDays className="w-4 h-4 mr-2" />
@@ -459,6 +460,7 @@ export default function ProjectsTimelineChart({
                         if (onCustomDateChange) {
                           onCustomDateChange(tempStartDate, tempEndDate);
                         }
+                        setIsDatePickerOpen(false); // Close the popover
                       }}
                       className="w-full"
                     >
