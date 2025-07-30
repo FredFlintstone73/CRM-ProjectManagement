@@ -690,9 +690,8 @@ export class DatabaseStorage implements IStorage {
       .set({ reviewedBy: null })
       .where(eq(invitationRequests.reviewedBy, userId));
     
-    // Update user invitations that were created by this user
-    await db.update(userInvitations)
-      .set({ invitedBy: null })
+    // Delete user invitations that were created by this user
+    await db.delete(userInvitations)
       .where(eq(userInvitations.invitedBy, userId));
     
     // Update users that were invited by this user
