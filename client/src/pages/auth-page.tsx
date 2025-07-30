@@ -17,7 +17,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 
 export default function AuthPage() {
-  const { user, isAuthenticated = false, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -129,12 +129,12 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   React.useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated === true) {
       setLocation("/dashboard");
     }
   }, [isAuthenticated, setLocation]);
 
-  if (isAuthenticated) {
+  if (isAuthenticated === true) {
     return null;
   }
 
