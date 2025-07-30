@@ -40,7 +40,7 @@ export default function ContactNotes({ contactId, contactName, isOpen, onClose }
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }

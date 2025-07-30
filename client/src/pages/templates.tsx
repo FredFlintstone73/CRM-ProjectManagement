@@ -33,7 +33,7 @@ export default function Templates() {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/";
       }, 500);
       return;
     }
@@ -63,7 +63,7 @@ export default function Templates() {
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }
@@ -82,7 +82,7 @@ export default function Templates() {
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }

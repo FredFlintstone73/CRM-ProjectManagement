@@ -110,7 +110,7 @@ export default function Tasks() {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/";
       }, 500);
       return;
     }
@@ -312,7 +312,7 @@ export default function Tasks() {
       
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }
@@ -348,7 +348,7 @@ export default function Tasks() {
       
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }

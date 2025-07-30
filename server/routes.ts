@@ -3567,32 +3567,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(404).json({ message: `API endpoint not found: ${req.path}` });
   });
 
-  // Add static file serving middleware for production
-  const staticPath = path.resolve(process.cwd(), 'dist', 'public');
-  console.log(`Setting up static file serving from: ${staticPath}`);
-  app.use(express.static(staticPath));
+  // REMOVED: Static file serving - handled by Vite in dev mode and serveStatic in production
+  // Don't add static file serving here as it conflicts with Vite middleware
 
-  // Catch-all for non-API routes - serve React app (client-side routing)
-  app.get('*', (req, res) => {
-    console.log(`Route requested: ${req.path}, Environment: ${app.get("env")}`);
-    
-    // Don't serve HTML for API routes
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ message: `API endpoint not found: ${req.path}` });
-    }
-    
-    // For all other routes, serve the React app
-    const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
-    console.log(`Trying to serve index.html from: ${indexPath}`);
-    
-    // Check if file exists before serving
-    if (!fs.existsSync(indexPath)) {
-      console.error(`Index file not found at: ${indexPath}`);
-      return res.status(404).send('Application not built properly');
-    }
-    
-    res.sendFile(indexPath);
-  });
+  // Catch-all for non-API routes - only for production builds
+  // In development, Vite middleware handles this
+  if (app.get("env") === "production") {
+    app.get('*', (req, res) => {
+      console.log(`Route requested: ${req.path}, Environment: ${app.get("env")}`);
+      
+      // Don't serve HTML for API routes
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ message: `API endpoint not found: ${req.path}` });
+      }
+      
+      // For all other routes, serve the React app
+      const indexPath = path.resolve(process.cwd(), 'dist', 'public', 'index.html');
+      console.log(`Trying to serve index.html from: ${indexPath}`);
+      
+      // Check if file exists before serving
+      if (!fs.existsSync(indexPath)) {
+        console.error(`Index file not found at: ${indexPath}`);
+        return res.status(404).send('Application not built properly');
+      }
+      
+      res.sendFile(indexPath);
+    });
+  }
 
   const httpServer = createServer(app);
   return httpServer;

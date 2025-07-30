@@ -40,7 +40,7 @@ export default function ProjectComments({ projectId, projectName, isOpen, onClos
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }
