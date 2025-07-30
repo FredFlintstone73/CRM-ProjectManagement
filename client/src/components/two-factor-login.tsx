@@ -15,13 +15,13 @@ interface TwoFactorLoginProps {
   onCancel: () => void;
 }
 
-export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
+function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
   const [verificationCode, setVerificationCode] = useState('');
   const [backupCode, setBackupCode] = useState('');
   const [useBackupCode, setUseBackupCode] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<any>(null);
-  
+
   const { toast } = useToast();
 
   const verifyMutation = useMutation({
@@ -73,7 +73,7 @@ export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (useBackupCode) {
       if (!backupCode) {
         toast({
@@ -290,3 +290,5 @@ export function TwoFactorLogin({ onSuccess, onCancel }: TwoFactorLoginProps) {
     </Card>
   );
 }
+
+export default TwoFactorLogin;
