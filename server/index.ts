@@ -66,6 +66,29 @@ app.use((req, res, next) => {
   console.log(`Environment: ${app.get("env")}`);
   console.log(`Node Environment: ${process.env.NODE_ENV}`);
   console.log(`Database URL configured: ${!!process.env.DATABASE_URL}`);
+  
+  // Validate critical environment variables
+  const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
+  const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missingEnvVars.length > 0) {
+    console.warn(`⚠️  Missing environment variables: ${missingEnvVars.join(', ')}`);
+  }
+  
+  // Optional but recommended environment variables
+  const optionalEnvVars = {
+    'SMTP_HOST': 'Email sending',
+    'SMTP_USER': 'Email sending',
+    'SMTP_PASS': 'Email sending',
+    'DIALPAD_API_TOKEN': 'Dialpad integration',
+    'DIALPAD_WEBHOOK_SECRET': 'Dialpad integration'
+  };
+  
+  Object.entries(optionalEnvVars).forEach(([varName, feature]) => {
+    if (!process.env[varName]) {
+      console.log(`ℹ️  ${varName} not set - ${feature} will be disabled`);
+    }
+  });
   server.listen(port, "0.0.0.0", async () => {
     log(`serving on port ${port}`);
     

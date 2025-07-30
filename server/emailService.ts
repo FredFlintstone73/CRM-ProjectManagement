@@ -301,7 +301,7 @@ class EmailService {
     const gmailPass = process.env.GMAIL_APP_PASSWORD;
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
-    
+
     // Check if we have valid credential pairs for any service
     return (outlookUser && outlookPass) || 
            (gmailUser && gmailPass) || 
@@ -347,9 +347,9 @@ class EmailService {
       this.imapClient.once('error', (err: Error) => {
         console.error('IMAP connection error:', err.message);
         this.monitoring = false;
-        
-        // Only retry if it's not an authentication error
-        if (!err.message.includes('LOGIN failed') && !err.message.includes('authentication')) {
+
+        // Only retry if it's not an authentication error and not in production
+        if (!err.message.includes('LOGIN failed') && !err.message.includes('authentication') && process.env.NODE_ENV !== 'production') {
           setTimeout(() => {
             if (!this.monitoring) {
               console.log('Attempting to reconnect IMAP...');
@@ -357,7 +357,7 @@ class EmailService {
             }
           }, 300000); // Wait 5 minutes before retry for non-auth errors
         } else {
-          console.log('Email monitoring stopped due to authentication failure. Please check credentials.');
+          console.log('Email monitoring disabled due to authentication failure or production mode.');
         }
       });
 

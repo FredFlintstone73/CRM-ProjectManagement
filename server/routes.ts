@@ -155,16 +155,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const staticPath = path.resolve(process.cwd(), 'dist', 'public');
     console.log(`Serving static files from: ${staticPath}`);
     
-    // Serve static assets with proper headers
-    app.use('/assets', express.static(path.join(staticPath, 'assets'), {
-      maxAge: '1y',
-      etag: true
-    }));
-    
-    // Serve other static files
-    app.use(express.static(staticPath, {
-      index: false // Don't serve index.html for static requests
-    }));
+    // Check if static files exist
+    if (!fs.existsSync(staticPath)) {
+      console.error(`❌ Static files directory not found: ${staticPath}`);
+      console.error(`Please run 'npm run build' before deploying`);
+    } else {
+      console.log(`✅ Static files directory found: ${staticPath}`);
+      
+      // Serve static assets with proper headers
+      app.use('/assets', express.static(path.join(staticPath, 'assets'), {
+        maxAge: '1y',
+        etag: true,
+        fallthrough: false
+      }));
+      
+      // Serve other static files
+      app.use(express.static(staticPath, {
+        index: false, // Don't serve index.html for static requests
+        maxAge: '1d'
+      }));
+    }
   }
 
   // Ensure API routes are handled first and return JSON (not HTML)

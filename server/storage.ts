@@ -75,13 +75,13 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   ensureUserHasContact(user: User): Promise<Contact>;
   getUserContactId(user: User): Promise<number | null>;
-  
+
   // Authentication operations (username/password)
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByResetToken(token: string): Promise<User | undefined>;
   createUser(user: { username: string; password: string; email?: string; firstName?: string; lastName?: string; accessLevel?: string; isActive?: boolean; invitedBy?: string; invitedAt?: Date }): Promise<User>;
-  
+
   // User invitation operations
   createUserInvitation(invitation: InsertUserInvitation & { invitedBy: string, expiresAt?: Date }): Promise<UserInvitation>;
   getUserInvitation(invitationCode: string): Promise<UserInvitation | undefined>;
@@ -91,16 +91,16 @@ export interface IStorage {
   updateUserInvitation(invitationId: number, updates: Partial<UserInvitation>): Promise<UserInvitation>;
   expireInvitation(invitationCode: string): Promise<void>;
   deleteUserInvitation(invitationId: number, userId: string): Promise<boolean>;
-  
+
   // Auto email configuration
   configureAutoEmailSettings(userId: string, email: string): Promise<void>;
-  
+
   // Invitation request operations
   createInvitationRequest(request: InsertInvitationRequest): Promise<InvitationRequest>;
   getInvitationRequests(): Promise<InvitationRequest[]>;
   updateInvitationRequestStatus(id: number, status: string, reviewedBy: string): Promise<InvitationRequest>;
   deleteInvitationRequest(id: number): Promise<boolean>;
-  
+
   // User access control operations  
   getUserAccessLevel(userId: string): Promise<string | undefined>;
   updateUserAccessLevel(userId: string, accessLevel: string): Promise<User>;
@@ -266,11 +266,11 @@ export interface IStorage {
   createMention(mention: InsertMention): Promise<Mention>;
   markMentionAsRead(mentionId: number, userId: string): Promise<void>;
   processMentionsInText(text: string, sourceType: string, sourceId: number, authorId: string): Promise<void>;
-  
+
   // Task due date notifications
   getTasksDueSoon(userId: string): Promise<(Task & { projectName?: string; daysUntilDue: number })[]>;
   getOverdueTasks(userId: string): Promise<(Task & { projectName?: string; daysOverdue: number })[]>;
-  
+
   // Calendar operations
   getUserCalendarConnections(userId: string): Promise<CalendarConnection[]>;
   createCalendarConnection(connection: InsertCalendarConnection): Promise<CalendarConnection>;
@@ -352,7 +352,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUserContactId(user: User): Promise<number | null> {
     console.log('getUserContactId - searching for:', user.firstName, user.lastName);
-    
+
     const [contact] = await db
       .select({ id: contacts.id })
       .from(contacts)
@@ -373,7 +373,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.username, username));
-    
+
     return user;
   }
 
@@ -382,7 +382,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.email, email));
-    
+
     return user;
   }
 
@@ -391,7 +391,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.resetToken, token));
-    
+
     return user;
   }
 
@@ -408,7 +408,7 @@ export class DatabaseStorage implements IStorage {
   }): Promise<User> {
     // Generate a unique ID
     const id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    
+
     const [newUser] = await db
       .insert(users)
       .values({
@@ -433,7 +433,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(userInvitations)
       .where(eq(userInvitations.invitationCode, invitationCode));
-    
+
     return invitation;
   }
 
@@ -516,7 +516,7 @@ export class DatabaseStorage implements IStorage {
   async createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation> {
     // Generate unique invitation code
     const invitationCode = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    
+
     // Set expiration date (7 days from now)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
@@ -538,7 +538,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(userInvitations)
       .where(eq(userInvitations.invitationCode, invitationCode));
-    
+
     return invitation;
   }
 
@@ -550,7 +550,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(userInvitations.invitedBy, invitedBy))
         .orderBy(desc(userInvitations.createdAt));
     }
-    
+
     return await db
       .select()
       .from(userInvitations)
@@ -587,7 +587,7 @@ export class DatabaseStorage implements IStorage {
       .select({ accessLevel: users.accessLevel })
       .from(users)
       .where(eq(users.id, userId));
-    
+
     return user?.accessLevel || undefined;
   }
 
@@ -675,7 +675,7 @@ export class DatabaseStorage implements IStorage {
   async createContact(contact: InsertContact, userId: string): Promise<Contact> {
     // Convert date strings to Date objects
     const processedContact = { ...contact } as any;
-    
+
     // Handle date conversions
     const dateFields = [
       'dateOfBirth', 'dateOfDeath', 'govIdExpiration', 'spouseDateOfBirth', 
@@ -685,7 +685,7 @@ export class DatabaseStorage implements IStorage {
       'child5DateOfBirth', 'child5DateOfDeath', 'child6DateOfBirth', 'child6DateOfDeath',
       'child7DateOfBirth', 'child7DateOfDeath'
     ];
-    
+
     dateFields.forEach(field => {
       if (processedContact[field] && processedContact[field].trim()) {
         processedContact[field] = new Date(processedContact[field]);
@@ -693,13 +693,13 @@ export class DatabaseStorage implements IStorage {
         processedContact[field] = null;
       }
     });
-    
+
     const contactData = { ...processedContact, createdBy: userId };
     const [newContact] = await db
       .insert(contacts)
       .values(contactData)
       .returning();
-    
+
     // Log activity
     await this.createActivityLog({
       userId,
@@ -719,9 +719,9 @@ export class DatabaseStorage implements IStorage {
       .from(contacts)
       .where(eq(contacts.id, id))
       .limit(1);
-    
+
     const original = originalContact[0];
-    
+
     // Process date fields - convert string dates to Date objects
     const processedContact = { ...contact };
     const dateFields = [
@@ -736,7 +736,7 @@ export class DatabaseStorage implements IStorage {
       'child6DateOfBirth', 'child6DateOfDeath',
       'child7DateOfBirth', 'child7DateOfDeath'
     ];
-    
+
     dateFields.forEach(field => {
       if (processedContact[field] && typeof processedContact[field] === 'string' && processedContact[field].trim()) {
         processedContact[field] = new Date(processedContact[field]);
@@ -744,26 +744,26 @@ export class DatabaseStorage implements IStorage {
         processedContact[field] = null;
       }
     });
-    
+
     const [updatedContact] = await db
       .update(contacts)
       .set({ ...processedContact, updatedAt: new Date() })
       .where(eq(contacts.id, id))
       .returning();
-    
+
     // Check if this is a team member status change that affects task assignments
     if (original && original.contactType === 'team_member' && 
         (contact.status === 'inactive' || contact.status === 'archived') && 
         original.status === 'active') {
-      
+
       console.log(`Team member ${original.firstName} ${original.lastName} (ID: ${id}) changed from active to ${contact.status}. Processing task reassignments...`);
-      
+
       // Find all tasks assigned to this team member
       const assignedTasks = await db
         .select()
         .from(tasks)
         .where(sql`${id} = ANY(${tasks.assignedTo})`);
-      
+
       // Convert these assignments back to role assignments if the team member had a role
       if (original.role && assignedTasks.length > 0) {
         for (const task of assignedTasks) {
@@ -771,11 +771,11 @@ export class DatabaseStorage implements IStorage {
           const updatedAssignedTo = Array.isArray(task.assignedTo) 
             ? task.assignedTo.filter(contactId => contactId !== id)
             : task.assignedTo === id ? null : task.assignedTo;
-          
+
           // Add their role to assignedToRole array if not already present
           const currentRoles = Array.isArray(task.assignedToRole) ? task.assignedToRole : (task.assignedToRole ? [task.assignedToRole] : []);
           const updatedRoles = currentRoles.includes(original.role) ? currentRoles : [...currentRoles, original.role];
-          
+
           await db
             .update(tasks)
             .set({
@@ -784,10 +784,10 @@ export class DatabaseStorage implements IStorage {
               updatedAt: new Date()
             })
             .where(eq(tasks.id, task.id));
-          
+
           console.log(`Task ${task.id} (${task.title}) - reassigned from contact ${id} to role ${original.role}`);
         }
-        
+
         // Log activity
         await this.createActivityLog({
           userId: 'system',
@@ -798,7 +798,7 @@ export class DatabaseStorage implements IStorage {
         });
       }
     }
-    
+
     return updatedContact;
   }
 
@@ -810,27 +810,27 @@ export class DatabaseStorage implements IStorage {
         .from(contacts)
         .where(eq(contacts.id, id))
         .limit(1);
-      
+
       // Check if contact has assigned tasks
       const assignedTasks = await db
         .select()
         .from(tasks)
         .where(sql`${id} = ANY(${tasks.assignedTo})`);
-      
+
       // For team members with a role, automatically reassign tasks to role instead of blocking deletion
       if (assignedTasks.length > 0 && contactToDelete?.contactType === 'team_member' && contactToDelete.role) {
         console.log(`Reassigning ${assignedTasks.length} tasks from deleted team member ${contactToDelete.firstName} ${contactToDelete.lastName} (ID: ${id}) to role ${contactToDelete.role}`);
-        
+
         for (const task of assignedTasks) {
           // Remove this contact from assignedTo array
           const updatedAssignedTo = Array.isArray(task.assignedTo) 
             ? task.assignedTo.filter(contactId => contactId !== id)
             : task.assignedTo === id ? null : task.assignedTo;
-          
+
           // Add their role to assignedToRole array if not already present
           const currentRoles = Array.isArray(task.assignedToRole) ? task.assignedToRole : (task.assignedToRole ? [task.assignedToRole] : []);
           const updatedRoles = currentRoles.includes(contactToDelete.role) ? currentRoles : [...currentRoles, contactToDelete.role];
-          
+
           await db
             .update(tasks)
             .set({
@@ -839,10 +839,10 @@ export class DatabaseStorage implements IStorage {
               updatedAt: new Date()
             })
             .where(eq(tasks.id, task.id));
-          
+
           console.log(`Task ${task.id} (${task.title}) - reassigned from deleted contact ${id} to role ${contactToDelete.role}`);
         }
-        
+
         // Log activity
         await this.createActivityLog({
           userId: 'system',
@@ -855,17 +855,17 @@ export class DatabaseStorage implements IStorage {
         // For non-team members or team members without roles, still block deletion
         throw new Error(`Cannot delete contact. This contact is assigned to ${assignedTasks.length} task(s). Please reassign or delete these tasks first.`);
       }
-      
+
       // Check if contact has created projects
       const createdProjects = await db
         .select()
         .from(projects)
         .where(eq(projects.clientId, id));
-      
+
       if (createdProjects.length > 0) {
         throw new Error(`Cannot delete contact. This contact is associated with ${createdProjects.length} project(s). Please reassign or delete these projects first.`);
       }
-      
+
       await db.delete(contacts).where(eq(contacts.id, id));
     } catch (error) {
       // If it's our custom error, re-throw it
@@ -904,7 +904,7 @@ export class DatabaseStorage implements IStorage {
     // Process date fields - convert string dates to Date objects
     const processedProject = { ...project };
     const dateFields = ['startDate', 'endDate', 'dueDate'];
-    
+
     dateFields.forEach(field => {
       if (processedProject[field] && typeof processedProject[field] === 'string' && processedProject[field].trim()) {
         processedProject[field] = new Date(processedProject[field]);
@@ -912,13 +912,13 @@ export class DatabaseStorage implements IStorage {
         processedProject[field] = null;
       }
     });
-    
+
     const projectData = { ...processedProject, createdBy: userId } as any;
     const [newProject] = await db
       .insert(projects)
       .values(projectData)
       .returning();
-    
+
     // Log activity
     await this.createActivityLog({
       userId,
@@ -935,7 +935,7 @@ export class DatabaseStorage implements IStorage {
     // Process date fields - convert string dates to Date objects
     const processedProject = { ...project };
     const dateFields = ['startDate', 'endDate', 'dueDate'];
-    
+
     dateFields.forEach(field => {
       if (processedProject[field] && typeof processedProject[field] === 'string' && processedProject[field].trim()) {
         processedProject[field] = new Date(processedProject[field]);
@@ -943,7 +943,7 @@ export class DatabaseStorage implements IStorage {
         processedProject[field] = null;
       }
     });
-    
+
     const [updatedProject] = await db
       .update(projects)
       .set({ ...processedProject, updatedAt: new Date() })
@@ -964,7 +964,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`=== CSR Meeting Task Sync Started ===`);
     console.log(`Project ID: ${projectId}`);
     console.log(`New project due date: ${projectDueDate}`);
-    
+
     // Find the CSR Meeting task in the project
     const csrMeetingTasks = await db
       .select()
@@ -981,7 +981,7 @@ export class DatabaseStorage implements IStorage {
     if (csrMeetingTasks.length > 0) {
       const csrTask = csrMeetingTasks[0];
       console.log(`Updating CSR Meeting task ${csrTask.id}: "${csrTask.title}"`);
-      
+
       // Update the CSR Meeting task due date to match project due date
       await db
         .update(tasks)
@@ -990,16 +990,16 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date() 
         })
         .where(eq(tasks.id, csrTask.id));
-      
+
       console.log(`CSR Meeting task updated successfully`);
-      
+
       // Now trigger P-Day dependency updates for all other tasks
       console.log(`Triggering P-Day dependency updates...`);
       await this.updatePDayDependentTasks(projectId, projectDueDate);
     } else {
       console.log(`No CSR Meeting task found in project ${projectId}`);
     }
-    
+
     console.log(`=== CSR Meeting Task Sync Completed ===`);
   }
 
@@ -1009,27 +1009,27 @@ export class DatabaseStorage implements IStorage {
       .select({ id: tasks.id })
       .from(tasks)
       .where(eq(tasks.projectId, id));
-    
+
     const taskIds = projectTasks.map(task => task.id);
-    
+
     // Delete all related records to avoid foreign key constraint issues
-    
+
     // Delete user task priorities for all project tasks
     if (taskIds.length > 0) {
       await db.delete(userTaskPriorities).where(inArray(userTaskPriorities.taskId, taskIds));
     }
-    
+
     // Delete all task comments for project tasks
     if (taskIds.length > 0) {
       await db.delete(taskComments).where(inArray(taskComments.taskId, taskIds));
     }
-    
+
     // Delete all tasks associated with the project
     await db.delete(tasks).where(eq(tasks.projectId, id));
-    
+
     // Delete all project comments associated with the project
     await db.delete(projectComments).where(eq(projectComments.projectId, id));
-    
+
     // Delete the project itself
     await db.delete(projects).where(eq(projects.id, id));
   }
@@ -1126,18 +1126,18 @@ export class DatabaseStorage implements IStorage {
     } else if (processedTask.dueDate === '') {
       processedTask.dueDate = null;
     }
-    
-    // Assignment processing is handled by the route layer, just pass through
-    
-    const taskData = { ...processedTask, createdBy: userId } as any;
-    
 
-    
+    // Assignment processing is handled by the route layer, just pass through
+
+    const taskData = { ...processedTask, createdBy: userId } as any;
+
+
+
     const [newTask] = await db
       .insert(tasks)
       .values(taskData)
       .returning();
-    
+
     // Log activity
     await this.createActivityLog({
       userId,
@@ -1168,10 +1168,10 @@ export class DatabaseStorage implements IStorage {
         }
       }
     }
-    
+
     // Handle assignment - already processed by PATCH route as clean array
     console.log('🔥 Storage updateTask - received assignedTo:', processedTask.assignedTo, 'Type:', typeof processedTask.assignedTo, 'IsArray:', Array.isArray(processedTask.assignedTo));
-    
+
     if (processedTask.assignedTo !== undefined) {
       if (Array.isArray(processedTask.assignedTo)) {
         // Array is already processed by PATCH route - keep as is
@@ -1181,9 +1181,9 @@ export class DatabaseStorage implements IStorage {
         processedTask.assignedTo = null;
       }
     }
-    
 
-    
+
+
     const [updatedTask] = await db
       .update(tasks)
       .set({ ...processedTask, updatedAt: new Date() })
@@ -1195,7 +1195,7 @@ export class DatabaseStorage implements IStorage {
       console.log(`P-Day reference task detected: ${updatedTask.title}`);
       console.log(`New due date: ${processedTask.dueDate}`);
       console.log(`Project ID: ${updatedTask.projectId}`);
-      
+
       // Get the project ID and update all P-Day dependent tasks
       const projectId = updatedTask.projectId;
       if (projectId) {
@@ -1214,7 +1214,7 @@ export class DatabaseStorage implements IStorage {
     if (processedTask.status === 'completed' && userId) {
       await this.completeAllChildTasks(id, userId);
     }
-    
+
     // Handle downward cascading: if task was uncompleted, uncomplete all child tasks
     if (processedTask.status === 'todo' && userId) {
       await this.uncompleteAllChildTasks(id, userId);
@@ -1224,7 +1224,7 @@ export class DatabaseStorage implements IStorage {
     if (processedTask.status === 'completed' && updatedTask.parentTaskId && userId) {
       await this.checkAndCompleteParentTask(updatedTask.parentTaskId, userId);
     }
-    
+
     // Handle upward cascading completion: if task was uncompleted, check if parent should auto-uncomplete
     if (processedTask.status === 'todo' && updatedTask.parentTaskId && userId) {
       await this.checkAndUncompleteparentTask(updatedTask.parentTaskId, userId);
@@ -1235,16 +1235,16 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTask(id: number): Promise<void> {
     // Delete related data in the correct order to avoid foreign key constraints
-    
+
     // Delete user task priorities for this task
     await db.delete(userTaskPriorities).where(eq(userTaskPriorities.taskId, id));
-    
+
     // Delete task comments
     await db.delete(taskComments).where(eq(taskComments.taskId, id));
-    
+
     // Delete task files
     await db.delete(taskFiles).where(eq(taskFiles.taskId, id));
-    
+
     // Delete the task itself
     await db.delete(tasks).where(eq(tasks.id, id));
   }
@@ -1273,7 +1273,7 @@ export class DatabaseStorage implements IStorage {
   async getUpcomingTasks(): Promise<Task[]> {
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    
+
     return await db
       .select()
       .from(tasks)
@@ -1289,7 +1289,7 @@ export class DatabaseStorage implements IStorage {
 
   async getOverdueTasks(): Promise<Task[]> {
     const now = new Date();
-    
+
     return await db
       .select()
       .from(tasks)
@@ -1345,7 +1345,7 @@ export class DatabaseStorage implements IStorage {
     } else if (processedMilestone.dueDate === '') {
       processedMilestone.dueDate = null;
     }
-    
+
     // Calculate the next sort order to place the new milestone at the end
     let maxSortOrder = 0;
     if (processedMilestone.templateId) {
@@ -1354,7 +1354,7 @@ export class DatabaseStorage implements IStorage {
         .from(milestones)
         .where(eq(milestones.templateId, processedMilestone.templateId))
         .orderBy(desc(milestones.sortOrder));
-      
+
       if (existingMilestones.length > 0) {
         maxSortOrder = existingMilestones[0].sortOrder || 0;
       }
@@ -1364,23 +1364,23 @@ export class DatabaseStorage implements IStorage {
         .from(milestones)
         .where(eq(milestones.projectId, processedMilestone.projectId))
         .orderBy(desc(milestones.sortOrder));
-      
+
       if (existingMilestones.length > 0) {
         maxSortOrder = existingMilestones[0].sortOrder || 0;
       }
     }
-    
+
     const milestoneData = { 
       ...processedMilestone, 
       createdBy: userId,
       sortOrder: maxSortOrder + 1
     } as any;
-    
+
     const [newMilestone] = await db
       .insert(milestones)
       .values(milestoneData)
       .returning();
-    
+
     // Log activity
     await this.createActivityLog({
       userId,
@@ -1401,7 +1401,7 @@ export class DatabaseStorage implements IStorage {
     } else if (processedMilestone.dueDate === '') {
       processedMilestone.dueDate = null;
     }
-    
+
     const [updatedMilestone] = await db
       .update(milestones)
       .set({ ...processedMilestone, updatedAt: new Date() })
@@ -1416,7 +1416,7 @@ export class DatabaseStorage implements IStorage {
       .update(tasks)
       .set({ milestoneId: null })
       .where(eq(tasks.milestoneId, id));
-    
+
     // Then delete the milestone
     await db.delete(milestones).where(eq(milestones.id, id));
   }
@@ -1472,7 +1472,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(taskComments.userId, users.id))
       .where(eq(taskComments.taskId, taskId))
       .orderBy(desc(taskComments.createdAt));
-    
+
     return result as any;
   }
 
@@ -1482,7 +1482,7 @@ export class DatabaseStorage implements IStorage {
       .insert(taskComments)
       .values(commentData)
       .returning();
-    
+
     // Log activity
     await this.createActivityLog({
       userId,
@@ -1523,7 +1523,7 @@ export class DatabaseStorage implements IStorage {
       .insert(taskFiles)
       .values(fileData)
       .returning();
-    
+
     // Log activity
     await this.createActivityLog({
       userId,
@@ -1593,7 +1593,7 @@ export class DatabaseStorage implements IStorage {
       .from(tasks)
       .leftJoin(milestones, eq(tasks.milestoneId, milestones.id))
       .where(eq(milestones.templateId, templateId));
-    
+
     return result[0]?.count || 0;
   }
 
@@ -1604,7 +1604,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(milestones, eq(tasks.milestoneId, milestones.id))
       .where(eq(milestones.templateId, templateId))
       .orderBy(tasks.createdAt);
-    
+
     // Extract just the task data from the joined result
     return result.map(row => row.tasks);
   }
@@ -1636,7 +1636,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`=== P-Day Dependency Update Started ===`);
     console.log(`Project ID: ${projectId}`);
     console.log(`P-Day reference date: ${pDayDate}`);
-    
+
     // Find all tasks in the project that have daysFromMeeting values (P-Day dependent)
     const pDayTasks = await db
       .select()
@@ -1675,11 +1675,11 @@ export class DatabaseStorage implements IStorage {
             updatedAt: new Date() 
           })
           .where(eq(tasks.id, task.id));
-          
+
         console.log(`  Task ${task.id} updated successfully`);
       }
     }
-    
+
     console.log(`=== P-Day Dependency Update Completed ===`);
   }
 
@@ -1688,22 +1688,22 @@ export class DatabaseStorage implements IStorage {
     // Get the parent task
     const parentTask = await this.getTask(parentTaskId);
     if (!parentTask) return;
-    
+
     // Skip if parent is already completed
     if (parentTask.status === 'completed') return;
-    
+
     // Get all child tasks of this parent
     const childTasks = await db
       .select()
       .from(tasks)
       .where(eq(tasks.parentTaskId, parentTaskId));
-    
+
     // Check if all child tasks are completed
     const allChildrenCompleted = childTasks.length > 0 && childTasks.every(child => child.status === 'completed');
-    
+
     if (allChildrenCompleted) {
       console.log(`All child tasks completed for parent task "${parentTask.title}" (ID: ${parentTaskId}). Auto-completing parent.`);
-      
+
       // Auto-complete the parent task
       await db
         .update(tasks)
@@ -1713,7 +1713,7 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date()
         })
         .where(eq(tasks.id, parentTaskId));
-      
+
       // Log activity for auto-completion
       await this.createActivityLog({
         userId,
@@ -1722,7 +1722,7 @@ export class DatabaseStorage implements IStorage {
         entityId: parentTaskId,
         metadata: { taskTitle: parentTask.title, reason: "all_children_completed" },
       });
-      
+
       // Recursively check if this parent's parent should also be completed
       if (parentTask.parentTaskId) {
         await this.checkAndCompleteParentTask(parentTask.parentTaskId, userId);
@@ -1734,12 +1734,12 @@ export class DatabaseStorage implements IStorage {
     // Get the parent task
     const parentTask = await this.getTask(parentTaskId);
     if (!parentTask) return;
-    
+
     // Skip if parent is already incomplete
     if (parentTask.status !== 'completed') return;
-    
+
     console.log(`Child task unchecked for parent task "${parentTask.title}" (ID: ${parentTaskId}). Auto-uncompleting parent.`);
-    
+
     // Auto-uncomplete the parent task since at least one child is now incomplete
     await db
       .update(tasks)
@@ -1749,7 +1749,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(tasks.id, parentTaskId));
-    
+
     // Log activity for auto-uncompletion
     await this.createActivityLog({
       userId,
@@ -1758,7 +1758,7 @@ export class DatabaseStorage implements IStorage {
       entityId: parentTaskId,
       metadata: { taskTitle: parentTask.title, reason: "child_task_uncompleted" },
     });
-    
+
     // Recursively check if this parent's parent should also be uncompleted
     if (parentTask.parentTaskId) {
       await this.checkAndUncompleteparentTask(parentTask.parentTaskId, userId);
@@ -1771,11 +1771,11 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(tasks)
       .where(eq(tasks.parentTaskId, parentTaskId));
-    
+
     if (childTasks.length === 0) return;
-    
+
     console.log(`Parent task completed. Auto-completing ${childTasks.length} child tasks.`);
-    
+
     // Complete all child tasks
     for (const childTask of childTasks) {
       if (childTask.status !== 'completed') {
@@ -1787,7 +1787,7 @@ export class DatabaseStorage implements IStorage {
             updatedAt: new Date()
           })
           .where(eq(tasks.id, childTask.id));
-        
+
         // Log activity for auto-completion
         await this.createActivityLog({
           userId,
@@ -1796,7 +1796,7 @@ export class DatabaseStorage implements IStorage {
           entityId: childTask.id,
           metadata: { taskTitle: childTask.title, reason: "parent_task_completed" },
         });
-        
+
         // Recursively complete any sub-children of this child task
         await this.completeAllChildTasks(childTask.id, userId);
       }
@@ -1809,11 +1809,11 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(tasks)
       .where(eq(tasks.parentTaskId, parentTaskId));
-    
+
     if (childTasks.length === 0) return;
-    
+
     console.log(`Parent task uncompleted. Auto-uncompleting ${childTasks.length} child tasks.`);
-    
+
     // Uncomplete all child tasks
     for (const childTask of childTasks) {
       if (childTask.status === 'completed') {
@@ -1825,7 +1825,7 @@ export class DatabaseStorage implements IStorage {
             updatedAt: new Date()
           })
           .where(eq(tasks.id, childTask.id));
-        
+
         // Log activity for auto-uncompletion
         await this.createActivityLog({
           userId,
@@ -1834,7 +1834,7 @@ export class DatabaseStorage implements IStorage {
           entityId: childTask.id,
           metadata: { taskTitle: childTask.title, reason: "parent_task_uncompleted" },
         });
-        
+
         // Recursively uncomplete any sub-children of this child task
         await this.uncompleteAllChildTasks(childTask.id, userId);
       }
@@ -1851,7 +1851,7 @@ export class DatabaseStorage implements IStorage {
 
     for (const dependentTask of dependentTasks) {
       let newDueDate: Date;
-      
+
       // Calculate due date based on task type
       if (dependentTask.title.includes('Corrections from DRPM Notes')) {
         // 1 day after DRPM
@@ -1938,7 +1938,7 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(emailNotifications)
       .where(eq(emailNotifications.emailInteractionId, emailId));
-    
+
     // Then delete the email interaction itself
     await db
       .delete(emailInteractions)
@@ -2083,7 +2083,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(contactNotes.userId, users.id))
       .where(eq(contactNotes.contactId, contactId))
       .orderBy(desc(contactNotes.createdAt));
-    
+
     return notes.map(note => ({
       id: note.id,
       contactId: note.contactId,
@@ -2104,7 +2104,7 @@ export class DatabaseStorage implements IStorage {
         userId,
       })
       .returning();
-    
+
     // Return the created note with user information
     const [newNote] = await db
       .select({
@@ -2120,7 +2120,7 @@ export class DatabaseStorage implements IStorage {
       .from(contactNotes)
       .leftJoin(users, eq(contactNotes.userId, users.id))
       .where(eq(contactNotes.id, contactNote.id));
-    
+
     return newNote as ContactNote;
   }
 
@@ -2132,7 +2132,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(contactNotes.id, noteId));
-    
+
     // Return the updated note with user information
     const [updatedNote] = await db
       .select({
@@ -2148,7 +2148,7 @@ export class DatabaseStorage implements IStorage {
       .from(contactNotes)
       .leftJoin(users, eq(contactNotes.userId, users.id))
       .where(eq(contactNotes.id, noteId));
-    
+
     return updatedNote as ContactNote;
   }
 
@@ -2181,7 +2181,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(contactFiles.userId, users.id))
       .where(eq(contactFiles.contactId, contactId))
       .orderBy(desc(contactFiles.createdAt));
-    
+
     return files as ContactFile[];
   }
 
@@ -2195,7 +2195,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .returning();
-    
+
     // Return the created file with user information
     const [fileWithUser] = await db
       .select({
@@ -2217,7 +2217,7 @@ export class DatabaseStorage implements IStorage {
       .from(contactFiles)
       .leftJoin(users, eq(contactFiles.userId, users.id))
       .where(eq(contactFiles.id, createdFile.id));
-    
+
     return fileWithUser as ContactFile;
   }
 
@@ -2229,7 +2229,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(contactFiles.id, fileId));
-    
+
     // Return the updated file with user information
     const [updatedFile] = await db
       .select({
@@ -2251,7 +2251,7 @@ export class DatabaseStorage implements IStorage {
       .from(contactFiles)
       .leftJoin(users, eq(contactFiles.userId, users.id))
       .where(eq(contactFiles.id, fileId));
-    
+
     return updatedFile as ContactFile;
   }
 
@@ -2266,7 +2266,7 @@ export class DatabaseStorage implements IStorage {
     // First, try to find an existing contact that represents this user
     // Look for a team member contact with the same email as the user
     const user = await this.getUser(userId);
-    
+
     if (user?.email) {
       const existingContact = await db
         .select()
@@ -2279,12 +2279,12 @@ export class DatabaseStorage implements IStorage {
           eq(contacts.contactType, 'team_member')
         ))
         .limit(1);
-      
+
       if (existingContact.length > 0) {
         return existingContact[0];
       }
     }
-    
+
     // If no contact exists, create a new one for this user
     const newContact = await this.createContact({
       contactType: 'team_member',
@@ -2294,7 +2294,7 @@ export class DatabaseStorage implements IStorage {
       personalEmail: user?.email || '',
       status: 'active',
     }, userId);
-    
+
     return newContact;
   }
 
@@ -2342,7 +2342,7 @@ export class DatabaseStorage implements IStorage {
       // Resolve each role to contact IDs
       for (const role of task.assignedToRole) {
         const matchingContacts = teamMembers.filter(contact => contact.role === role);
-        
+
         if (matchingContacts.length > 0) {
           // Found active team members for this role
           for (const contact of matchingContacts) {
@@ -2403,7 +2403,7 @@ export class DatabaseStorage implements IStorage {
   async setUserTaskPriority(taskId: number, userId: string, contactId: number | null, priority: number): Promise<UserTaskPriority> {
     // Check if priority record already exists
     const existing = await this.getUserTaskPriority(taskId, userId);
-    
+
     if (existing) {
       // Update existing priority
       const [updated] = await db
@@ -2497,7 +2497,7 @@ export class DatabaseStorage implements IStorage {
       );
 
     console.log('getUserTasksWithPriorities - found', results.length, 'tasks');
-    
+
     return results.map(task => ({
       ...task,
       userPriority: task.userPriority || task.priority || 50
@@ -2508,7 +2508,7 @@ export class DatabaseStorage implements IStorage {
   async createUserInvitation(invitation: InsertUserInvitation & { invitedBy: string, expiresAt?: Date }): Promise<UserInvitation> {
     // Generate a unique invitation code
     const invitationCode = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    
+
     // Set expiration to 7 days from now if not provided
     const expiresAt = invitation.expiresAt || (() => {
       const date = new Date();
@@ -2578,7 +2578,7 @@ export class DatabaseStorage implements IStorage {
         eq(userInvitations.invitedBy, userId)
       ))
       .returning();
-    
+
     return result.length > 0;
   }
 
@@ -2588,7 +2588,7 @@ export class DatabaseStorage implements IStorage {
       .insert(invitationRequests)
       .values(request)
       .returning();
-    
+
     return created;
   }
 
@@ -2610,7 +2610,7 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(invitationRequests.id, id))
       .returning();
-    
+
     return updated;
   }
 
@@ -2619,7 +2619,7 @@ export class DatabaseStorage implements IStorage {
       .delete(invitationRequests)
       .where(eq(invitationRequests.id, id))
       .returning();
-    
+
     return result.length > 0;
   }
 
@@ -2692,17 +2692,17 @@ export class DatabaseStorage implements IStorage {
   // Batch insert for better performance (optional for future use)
   batchUserActivity(activity: InsertUserActivity): void {
     this.activityBuffer.push(activity);
-    
+
     // Clear existing timeout
     if (this.bufferTimeout) {
       clearTimeout(this.bufferTimeout);
     }
-    
+
     // Set new timeout to flush buffer after 5 seconds or when buffer reaches 10 items
     this.bufferTimeout = setTimeout(() => {
       this.flushActivityBuffer();
     }, 5000);
-    
+
     // Flush immediately if buffer is full
     if (this.activityBuffer.length >= 10) {
       this.flushActivityBuffer();
@@ -2711,16 +2711,16 @@ export class DatabaseStorage implements IStorage {
 
   private async flushActivityBuffer(): void {
     if (this.activityBuffer.length === 0) return;
-    
+
     try {
       const activities = [...this.activityBuffer];
       this.activityBuffer = [];
-      
+
       if (this.bufferTimeout) {
         clearTimeout(this.bufferTimeout);
         this.bufferTimeout = null;
       }
-      
+
       await db.insert(userActivities).values(activities);
     } catch (error) {
       console.error('Failed to flush activity buffer:', error);
@@ -2729,11 +2729,11 @@ export class DatabaseStorage implements IStorage {
 
   async getUserActivities(timeRange: string, actionFilter: string, userFilter: string): Promise<UserActivity[]> {
     let query = db.select().from(userActivities);
-    
+
     // Apply time range filter
     const now = new Date();
     let timeThreshold: Date;
-    
+
     switch (timeRange) {
       case '1h':
         timeThreshold = new Date(now.getTime() - 60 * 60 * 1000);
@@ -2750,21 +2750,21 @@ export class DatabaseStorage implements IStorage {
       default:
         timeThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
-    
+
     const conditions = [sql`${userActivities.timestamp} >= ${timeThreshold}`];
-    
+
     // Apply action filter
     if (actionFilter !== 'all') {
       conditions.push(eq(userActivities.action, actionFilter));
     }
-    
+
     // Apply user filter
     if (userFilter !== 'all') {
       conditions.push(eq(userActivities.userId, userFilter));
     }
-    
+
     query = query.where(and(...conditions));
-    
+
     // Limit to 50 records and add index hint for better performance
     return await query.orderBy(desc(userActivities.timestamp)).limit(50);
   }
@@ -2777,7 +2777,7 @@ export class DatabaseStorage implements IStorage {
   }> {
     const now = new Date();
     let timeThreshold: Date;
-    
+
     switch (timeRange) {
       case '1h':
         timeThreshold = new Date(now.getTime() - 60 * 60 * 1000);
@@ -2794,34 +2794,34 @@ export class DatabaseStorage implements IStorage {
       default:
         timeThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
-    
+
     const timeCondition = sql`${userActivities.timestamp} >= ${timeThreshold}`;
-    
+
     // Get active users count
     const [activeUsersResult] = await db
       .select({ count: sql<number>`COUNT(DISTINCT ${userActivities.userId})` })
       .from(userActivities)
       .where(timeCondition);
-    
+
     // Get total activities count
     const [totalActivitiesResult] = await db
       .select({ count: count() })
       .from(userActivities)
       .where(timeCondition);
-    
+
     // Get login sessions count - count unique user sessions (first page_view per IP+User combo)
     // Since Replit Auth doesn't create explicit 'login' events, we'll count unique sessions
     const [loginSessionsResult] = await db
       .select({ count: sql<number>`COUNT(DISTINCT CONCAT(${userActivities.userId}, ':', COALESCE(${userActivities.ipAddress}, 'unknown')))` })
       .from(userActivities)
       .where(and(timeCondition, eq(userActivities.action, 'page_view')));
-    
+
     // Get unique IPs count
     const [uniqueIPsResult] = await db
       .select({ count: sql<number>`COUNT(DISTINCT ${userActivities.ipAddress})` })
       .from(userActivities)
       .where(and(timeCondition, isNotNull(userActivities.ipAddress)));
-    
+
     return {
       activeUsers: activeUsersResult.count || 0,
       totalActivities: totalActivitiesResult.count || 0,
@@ -2894,7 +2894,7 @@ export class DatabaseStorage implements IStorage {
 
     // Import speakeasy for verification
     const speakeasy = require('speakeasy');
-    
+
     return speakeasy.totp.verify({
       secret: user.twoFactorSecret,
       encoding: 'base32',
@@ -2916,12 +2916,12 @@ export class DatabaseStorage implements IStorage {
           ilike(contacts.lastName, `%${query}%`),
           ilike(contacts.familyName, `%${query}%`),
           ilike(contacts.nickname, `%${query}%`),
-          
+
           // Spouse information (key for Ted Smith search)
           ilike(contacts.spouseFirstName, `%${query}%`),
           ilike(contacts.spouseLastName, `%${query}%`),
           ilike(contacts.spouseNickname, `%${query}%`),
-          
+
           // Contact details
           ilike(contacts.personalEmail, `%${query}%`),
           ilike(contacts.workEmail, `%${query}%`),
@@ -2932,7 +2932,7 @@ export class DatabaseStorage implements IStorage {
           ilike(contacts.businessPhone, `%${query}%`),
           ilike(contacts.spouseCellPhone, `%${query}%`),
           ilike(contacts.spouseWorkPhone, `%${query}%`),
-          
+
           // Business and location
           ilike(contacts.businessName, `%${query}%`),
           ilike(contacts.mailingAddressCity, `%${query}%`),
@@ -3106,7 +3106,7 @@ export class DatabaseStorage implements IStorage {
     const enrichedMentions = await Promise.all(
       mentionsWithSources.map(async (mention) => {
         let source = {};
-        
+
         try {
           switch (mention.sourceType) {
             case 'task_comment':
@@ -3187,7 +3187,7 @@ export class DatabaseStorage implements IStorage {
   async processMentionsInText(text: string, sourceType: string, sourceId: number, authorId: string): Promise<void> {
     // Find @mentions in text - support both @FirstName and @FirstLast formats
     const mentionMatches = text.match(/@([A-Za-z]+(?:[A-Za-z]+)?)/g);
-    
+
     if (!mentionMatches) return;
 
     // Get all team members to match names
@@ -3202,20 +3202,20 @@ export class DatabaseStorage implements IStorage {
 
     for (const match of mentionMatches) {
       const mentionText = match.substring(1).toLowerCase(); // Remove @ and lowercase
-      
+
       // Try different matching strategies
       let mentionedUsers = [];
-      
+
       // Strategy 1: Exact first name match
       const firstNameMatches = teamMembers.filter(
         user => user.firstName.toLowerCase() === mentionText
       );
-      
+
       // Strategy 2: FirstLast format (e.g., @ChadTennant)
       const firstLastMatches = teamMembers.filter(
         user => (user.firstName + user.lastName).toLowerCase() === mentionText
       );
-      
+
       // Strategy 3: First name + last initial (e.g., @ChadT)
       const firstLastInitialMatches = teamMembers.filter(
         user => (user.firstName + user.lastName.charAt(0)).toLowerCase() === mentionText
@@ -3230,7 +3230,7 @@ export class DatabaseStorage implements IStorage {
         // Only use first name if there's exactly one match
         mentionedUsers = firstNameMatches;
       }
-      
+
       // If multiple people have the same first name and no unique identifier was used, skip
       if (firstNameMatches.length > 1 && mentionedUsers.length === 0) {
         console.log(`Ambiguous mention @${mentionText} - multiple users with name: ${firstNameMatches.map(u => `${u.firstName} ${u.lastName}`).join(', ')}`);
@@ -3316,7 +3316,7 @@ export class DatabaseStorage implements IStorage {
       const dueDate = new Date(task.dueDate);
       const timeDiff = dueDate.getTime() - now.getTime();
       const daysUntilDue = Math.ceil(timeDiff / (1000 * 3600 * 24));
-      
+
       return {
         ...task,
         daysUntilDue
@@ -3385,7 +3385,7 @@ export class DatabaseStorage implements IStorage {
       const dueDate = new Date(task.dueDate);
       const timeDiff = now.getTime() - dueDate.getTime();
       const daysOverdue = Math.ceil(timeDiff / (1000 * 3600 * 24));
-      
+
       return {
         ...task,
         daysOverdue
@@ -3574,11 +3574,11 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(users.id, userId))
       .returning();
-    
+
     if (!updated) {
       throw new Error('User not found');
     }
-    
+
     return updated;
   }
 
@@ -3593,11 +3593,11 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(users.id, userId))
       .returning();
-    
+
     if (!updated) {
       throw new Error('User not found');
     }
-    
+
     return updated;
   }
 
@@ -3610,11 +3610,11 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(users.id, userId))
       .returning();
-    
+
     if (!updated) {
       throw new Error('User not found');
     }
-    
+
     return updated;
   }
 
@@ -3626,15 +3626,15 @@ export class DatabaseStorage implements IStorage {
       })
       .from(users)
       .where(eq(users.id, userId));
-    
+
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     const backupCodesRemaining = user.backupCodes 
       ? (user.backupCodes as any[]).filter((code: any) => !code.used).length 
       : 0;
-    
+
     return {
       enabled: user.twoFactorEnabled || false,
       backupCodesRemaining,
