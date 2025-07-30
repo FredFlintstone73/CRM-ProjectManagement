@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Loader2, Mail, TestTube, CheckCircle, XCircle } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 const emailConfigSchema = z.object({
   smtpHost: z.string().min(1, "SMTP host is required"),
@@ -28,6 +29,7 @@ type EmailConfigFormData = z.infer<typeof emailConfigSchema>;
 export function UserEmailConfig() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [isTesting, setIsTesting] = useState(false);
 
   // Get user's email status
@@ -47,7 +49,7 @@ export function UserEmailConfig() {
       smtpHost: "",
       smtpPort: 587,
       smtpSecure: false,
-      smtpUser: "",
+      smtpUser: user?.email || "", // Auto-populate with user's email
       smtpPassword: "",
       imapHost: "",
       imapPort: 993,
@@ -131,12 +133,15 @@ export function UserEmailConfig() {
           staleTime: 30000,
         });
         
-        if (user && user.smtpHost) {
+        if (user) {
+          // Auto-populate email address from user account
+          const userEmail = user.email || '';
+          
           form.reset({
             smtpHost: user.smtpHost || '',
             smtpPort: user.smtpPort || 587,
             smtpSecure: user.smtpSecure || false,
-            smtpUser: user.smtpUser || '',
+            smtpUser: user.smtpUser || userEmail, // Use user's email if smtpUser not set
             smtpPassword: '', // Never pre-fill password for security
             imapHost: user.imapHost || '',
             imapPort: user.imapPort || 993,
