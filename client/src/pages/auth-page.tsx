@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Building2, Users, Calendar, MessageSquare } from "lucide-react";
+import { Loader2, Building2, Users, Calendar, MessageSquare, Eye, EyeOff } from "lucide-react";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -30,6 +30,11 @@ export default function AuthPage() {
     lastName: "",
     invitationCode: "",
   });
+
+  // State for password visibility
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Get invitation code from URL params
   const urlParams = new URLSearchParams(window.location.search);
@@ -132,14 +137,28 @@ export default function AuthPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="login-password">Password</Label>
-                      <Input
-                        id="login-password"
-                        type="password"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                        placeholder="Enter your password"
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          id="login-password"
+                          type={showLoginPassword ? "text" : "password"}
+                          value={loginData.password}
+                          onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                          placeholder="Enter your password"
+                          required
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowLoginPassword(!showLoginPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                        >
+                          {showLoginPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <Button 
                       type="submit" 
@@ -242,25 +261,53 @@ export default function AuthPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={registerData.password}
-                        onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
-                        placeholder="Create a password (min 6 characters)"
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showRegisterPassword ? "text" : "password"}
+                          value={registerData.password}
+                          onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
+                          placeholder="Create a password (min 6 characters)"
+                          required
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                        >
+                          {showRegisterPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirm Password</Label>
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        value={registerData.confirmPassword}
-                        onChange={(e) => setRegisterData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        placeholder="Confirm your password"
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          id="confirm-password"
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={registerData.confirmPassword}
+                          onChange={(e) => setRegisterData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                          placeholder="Confirm your password"
+                          required
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <Button 
                       type="submit" 

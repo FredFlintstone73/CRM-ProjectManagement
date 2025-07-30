@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Shield, CheckCircle, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Shield, CheckCircle, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 const resetPasswordSchema = z.object({
@@ -27,6 +27,8 @@ export default function ResetPassword() {
   const { toast } = useToast();
   const [resetToken, setResetToken] = useState<string>("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -196,13 +198,28 @@ export default function ResetPassword() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">New Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter new password"
-                {...form.register("password")}
-                disabled={resetPasswordMutation.isPending}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter new password"
+                  {...form.register("password")}
+                  disabled={resetPasswordMutation.isPending}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  disabled={resetPasswordMutation.isPending}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {form.formState.errors.password && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.password.message}
@@ -212,13 +229,28 @@ export default function ResetPassword() {
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm new password"
-                {...form.register("confirmPassword")}
-                disabled={resetPasswordMutation.isPending}
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  {...form.register("confirmPassword")}
+                  disabled={resetPasswordMutation.isPending}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  disabled={resetPasswordMutation.isPending}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {form.formState.errors.confirmPassword && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.confirmPassword.message}
