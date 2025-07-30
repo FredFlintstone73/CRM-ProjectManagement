@@ -655,7 +655,26 @@ export class DatabaseStorage implements IStorage {
     // Delete all related user records in the correct order (child tables first)
     await db.delete(contactNotes).where(eq(contactNotes.userId, userId));
     await db.delete(contactFiles).where(eq(contactFiles.userId, userId));
+    
+    // Handle email interactions with self-referencing foreign keys
+    // First get all email interaction IDs created by this user
+    const userEmailInteractions = await db
+      .select({ id: emailInteractions.id })
+      .from(emailInteractions)
+      .where(eq(emailInteractions.createdBy, userId));
+    
+    const emailIds = userEmailInteractions.map(e => e.id);
+    
+    // Update any child emails that reference these parent emails
+    if (emailIds.length > 0) {
+      await db.update(emailInteractions)
+        .set({ parentEmailId: null })
+        .where(inArray(emailInteractions.parentEmailId, emailIds));
+    }
+    
+    // Then delete the email interactions
     await db.delete(emailInteractions).where(eq(emailInteractions.createdBy, userId));
+    
     await db.delete(projectComments).where(eq(projectComments.userId, userId));
     await db.delete(callTranscripts).where(eq(callTranscripts.createdBy, userId));
     await db.delete(userTaskPriorities).where(eq(userTaskPriorities.userId, userId));
