@@ -16,7 +16,7 @@ import { RegistrationTwoFactorSetup } from "@/components/registration-two-factor
 import { queryClient } from "@/lib/queryClient";
 
 export default function AuthPage() {
-  const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
+  const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -59,9 +59,7 @@ export default function AuthPage() {
 
   // Set invitation code if it exists in URL (moved to useEffect to prevent render-time state updates)
   React.useEffect(() => {
-    console.log('URL Parameters:', { invitationCodeFromUrl, tabFromUrl });
     if (invitationCodeFromUrl && !registerData.invitationCode) {
-      console.log('Setting invitation code from URL:', invitationCodeFromUrl);
       setRegisterData(prev => ({ ...prev, invitationCode: invitationCodeFromUrl }));
     }
   }, [invitationCodeFromUrl, registerData.invitationCode]);
@@ -69,7 +67,6 @@ export default function AuthPage() {
   // Set active tab based on URL parameters
   React.useEffect(() => {
     const defaultTab = tabFromUrl || (invitationCodeFromUrl ? "register" : "login");
-    console.log('Setting active tab:', defaultTab, 'from params:', { tabFromUrl, invitationCodeFromUrl });
     setActiveTab(defaultTab);
   }, [tabFromUrl, invitationCodeFromUrl]);
 
