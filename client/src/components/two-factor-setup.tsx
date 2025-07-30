@@ -46,7 +46,10 @@ export function TwoFactorSetup() {
 
   // Setup 2FA mutation
   const setupMutation = useMutation({
-    mutationFn: () => apiRequest('/api/auth/2fa/setup', { method: 'POST' }),
+    mutationFn: async () => {
+      const res = await apiRequest('POST', '/api/auth/2fa/setup');
+      return await res.json();
+    },
     onSuccess: (data: SetupData) => {
       setSetupData(data);
     },
@@ -61,8 +64,10 @@ export function TwoFactorSetup() {
 
   // Verify setup mutation
   const verifySetupMutation = useMutation({
-    mutationFn: (data: { token: string; secret: string; backupCodes: string[] }) =>
-      apiRequest('/api/auth/2fa/verify-setup', { method: 'POST', body: data }),
+    mutationFn: async (data: { token: string; secret: string; backupCodes: string[] }) => {
+      const res = await apiRequest('POST', '/api/auth/2fa/verify-setup', data);
+      return await res.json();
+    },
     onSuccess: () => {
       toast({
         title: "2FA Enabled",
@@ -84,8 +89,10 @@ export function TwoFactorSetup() {
 
   // Disable 2FA mutation
   const disableMutation = useMutation({
-    mutationFn: (data: { token?: string; backupCode?: string }) =>
-      apiRequest('/api/auth/2fa/disable', { method: 'POST', body: data }),
+    mutationFn: async (data: { token?: string; backupCode?: string }) => {
+      const res = await apiRequest('POST', '/api/auth/2fa/disable', data);
+      return await res.json();
+    },
     onSuccess: () => {
       toast({
         title: "2FA Disabled",
@@ -107,8 +114,10 @@ export function TwoFactorSetup() {
 
   // Regenerate backup codes mutation
   const regenerateMutation = useMutation({
-    mutationFn: (data: { token: string }) =>
-      apiRequest('/api/auth/2fa/regenerate-backup-codes', { method: 'POST', body: data }),
+    mutationFn: async (data: { token: string }) => {
+      const res = await apiRequest('POST', '/api/auth/2fa/regenerate-backup-codes', data);
+      return await res.json();
+    },
     onSuccess: (data: { backupCodes: string[] }) => {
       setNewBackupCodes(data.backupCodes);
       setRegenerateToken('');
