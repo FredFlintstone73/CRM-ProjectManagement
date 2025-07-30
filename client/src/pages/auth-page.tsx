@@ -72,12 +72,12 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   React.useEffect(() => {
-    if (isAuthenticated && user) {
+    if (user) {
       setLocation("/dashboard");
     }
-  }, [isAuthenticated, user, setLocation]);
+  }, [user, setLocation]);
 
-  if (isAuthenticated && user) {
+  if (user) {
     return null;
   }
 
