@@ -153,7 +153,7 @@ export function UserEmailConfig() {
           imapPort: 993,
           imapSecure: true,
           requiresAppPassword: true,
-          instructions: 'Outlook requires an App Password. Go to Microsoft Account Security or https://mysignins.microsoft.com → Additional security options → App passwords. Then copy the App password below'
+          instructions: 'Outlook requires an App Password. Do the following: 1) Go to Microsoft Account Security or https://mysignins.microsoft.com 2) Additional security options 3) Select App passwords. 4) Create and copy the App password below.'
         };
       case 'yahoo.com':
         return {
@@ -263,8 +263,14 @@ export function UserEmailConfig() {
               return (
                 <div className="flex items-center gap-2 mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                   <div className="text-orange-800">
-                    <div className="font-medium text-sm mb-1">🔑 App Password Required</div>
-                    <div className="text-xs">{autoConfig.instructions}</div>
+                    <div className="font-medium text-sm mb-2">🔑 App Password Required</div>
+                    <div className="text-xs space-y-1">
+                      <div>Outlook requires an App Password. Do the following:</div>
+                      <div>1) Go to Microsoft Account Security or <a href="https://mysignins.microsoft.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">https://mysignins.microsoft.com</a></div>
+                      <div>2) Additional security options</div>
+                      <div>3) Select App passwords</div>
+                      <div>4) Create and copy the App password below</div>
+                    </div>
                   </div>
                 </div>
               );
