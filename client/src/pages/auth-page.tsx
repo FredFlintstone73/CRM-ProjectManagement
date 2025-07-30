@@ -8,18 +8,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2, Users, Calendar, MessageSquare, Eye, EyeOff } from "lucide-react";
+import React from "react";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
+
   // State for login form
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
   });
-  
+
   // State for registration form
   const [registerData, setRegisterData] = useState({
     username: "",
@@ -39,17 +40,18 @@ export default function AuthPage() {
   // Get invitation code from URL params
   const urlParams = new URLSearchParams(window.location.search);
   const invitationCodeFromUrl = urlParams.get("invitation");
-  
+
   // Set invitation code if it exists in URL
   if (invitationCodeFromUrl && !registerData.invitationCode) {
     setRegisterData(prev => ({ ...prev, invitationCode: invitationCodeFromUrl }));
   }
 
   // Redirect if already logged in
-  if (user) {
-    setLocation("/");
-    return null;
-  }
+  React.useEffect(() => {
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,13 +62,13 @@ export default function AuthPage() {
       });
       return;
     }
-    
+
     loginMutation.mutate(loginData);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!registerData.username || !registerData.password) {
       toast({
         title: "Please fill in required fields",
@@ -74,7 +76,7 @@ export default function AuthPage() {
       });
       return;
     }
-    
+
     if (registerData.password !== registerData.confirmPassword) {
       toast({
         title: "Passwords don't match",
@@ -82,7 +84,7 @@ export default function AuthPage() {
       });
       return;
     }
-    
+
     if (registerData.password.length < 6) {
       toast({
         title: "Password must be at least 6 characters",
@@ -182,7 +184,7 @@ export default function AuthPage() {
                         "Sign In"
                       )}
                     </Button>
-                    
+
                     <div className="text-center mt-4">
                       <button
                         type="button"
@@ -361,7 +363,7 @@ export default function AuthPage() {
           <h2 className="text-2xl font-bold mb-6">
             Everything you need to manage your business
           </h2>
-          
+
           <div className="space-y-6">
             <div className="flex items-center space-x-4">
               <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
@@ -374,7 +376,7 @@ export default function AuthPage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg">
                 <Calendar className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -386,7 +388,7 @@ export default function AuthPage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg">
                 <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -398,7 +400,7 @@ export default function AuthPage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="bg-orange-100 dark:bg-orange-900 p-3 rounded-lg">
                 <MessageSquare className="h-6 w-6 text-orange-600 dark:text-orange-400" />

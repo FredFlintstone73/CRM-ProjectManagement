@@ -289,6 +289,17 @@ class EmailService {
     return this.isConfigured;
   }
 
+  // Validate email credentials before attempting connection
+  private validateEmailCredentials(): boolean {
+    const outlookUser = process.env.OUTLOOK_USER;
+    const outlookPass = process.env.OUTLOOK_PASSWORD;
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailPass = process.env.GMAIL_APP_PASSWORD;
+    
+    // Check if we have valid credential pairs
+    return (outlookUser && outlookPass) || (gmailUser && gmailPass);
+  }
+
   // Start monitoring incoming emails for automatic threading
   async startEmailMonitoring() {
     if (!this.isEmailConfigured()) {
@@ -298,6 +309,12 @@ class EmailService {
 
     if (this.monitoring) {
       console.log('Email monitoring already running');
+      return;
+    }
+
+    // Disable email monitoring in production if credentials are invalid
+    if (process.env.NODE_ENV === 'production' && !this.validateEmailCredentials()) {
+      console.log('Email monitoring disabled in production due to invalid credentials');
       return;
     }
 
@@ -320,15 +337,20 @@ class EmailService {
       });
 
       this.imapClient.once('error', (err: Error) => {
-        console.error('IMAP connection error:', err);
+        console.error('IMAP connection error:', err.message);
         this.monitoring = false;
-        // Don't try to reconnect immediately to avoid spam
-        setTimeout(() => {
-          if (!this.monitoring) {
-            console.log('Attempting to reconnect IMAP...');
-            this.startEmailMonitoring();
-          }
-        }, 30000); // Wait 30 seconds before retry
+        
+        // Only retry if it's not an authentication error
+        if (!err.message.includes('LOGIN failed') && !err.message.includes('authentication')) {
+          setTimeout(() => {
+            if (!this.monitoring) {
+              console.log('Attempting to reconnect IMAP...');
+              this.startEmailMonitoring();
+            }
+          }, 300000); // Wait 5 minutes before retry for non-auth errors
+        } else {
+          console.log('Email monitoring stopped due to authentication failure. Please check credentials.');
+        }
       });
 
       this.imapClient.once('end', () => {

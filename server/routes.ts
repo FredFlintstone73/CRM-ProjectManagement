@@ -180,13 +180,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Activity logging middleware for authenticated routes
   app.use('/api', logUserActivity);
 
+  // Health check endpoint for deployment monitoring
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: !!process.env.DATABASE_URL,
+      emailConfigured: emailService.isEmailConfigured()
+    });
+  });
+
   // Apply authentication to all API routes except auth endpoints and invitation lookup
   app.use('/api', (req, res, next) => {
-    // Skip auth for auth endpoints, invitation lookup, and invitation requests
+    // Skip auth for auth endpoints, invitation lookup, health check, and invitation requests
     if (req.originalUrl.startsWith('/api/login') || 
         req.originalUrl.startsWith('/api/register') || 
         req.originalUrl.startsWith('/api/logout') || 
         req.originalUrl.startsWith('/api/user') ||
+        req.originalUrl.startsWith('/api/health') ||
         req.originalUrl.match(/^\/api\/user-invitations\/[^\/]+$/) ||
         req.originalUrl === '/api/invitation-requests') {
       return next();
