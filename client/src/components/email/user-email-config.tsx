@@ -124,6 +124,62 @@ export function UserEmailConfig() {
     }
   };
 
+  // Auto-configure SMTP settings based on email domain
+  const autoConfigureEmailSettings = (email: string) => {
+    if (!email) return {};
+    
+    const domain = email.split('@')[1]?.toLowerCase();
+    
+    switch (domain) {
+      case 'gmail.com':
+        return {
+          smtpHost: 'smtp.gmail.com',
+          smtpPort: 587,
+          smtpSecure: false,
+          imapHost: 'imap.gmail.com',
+          imapPort: 993,
+          imapSecure: true,
+          requiresAppPassword: true,
+          instructions: 'Gmail requires an App Password. Go to Google Account Settings → Security → App passwords to generate one.'
+        };
+      case 'outlook.com':
+      case 'hotmail.com':
+      case 'live.com':
+        return {
+          smtpHost: 'smtp-mail.outlook.com',
+          smtpPort: 587,
+          smtpSecure: false,
+          imapHost: 'outlook.office365.com',
+          imapPort: 993,
+          imapSecure: true,
+          requiresAppPassword: true,
+          instructions: 'Outlook requires an App Password. Go to Microsoft Account Security → Additional security options → App passwords.'
+        };
+      case 'yahoo.com':
+        return {
+          smtpHost: 'smtp.mail.yahoo.com',
+          smtpPort: 587,
+          smtpSecure: false,
+          imapHost: 'imap.mail.yahoo.com',
+          imapPort: 993,
+          imapSecure: true,
+          requiresAppPassword: true,
+          instructions: 'Yahoo requires an App Password. Go to Yahoo Account Security → Generate app password.'
+        };
+      default:
+        return {
+          smtpHost: '',
+          smtpPort: 587,
+          smtpSecure: false,
+          imapHost: '',
+          imapPort: 993,
+          imapSecure: true,
+          requiresAppPassword: false,
+          instructions: 'Contact your IT department or email provider for SMTP/IMAP settings.'
+        };
+    }
+  };
+
   // Load existing configuration when available
   useEffect(() => {
     const loadExistingConfig = async () => {
@@ -136,16 +192,17 @@ export function UserEmailConfig() {
         if (user) {
           // Auto-populate email address from user account
           const userEmail = user.email || '';
+          const autoConfig = autoConfigureEmailSettings(userEmail);
           
           form.reset({
-            smtpHost: user.smtpHost || '',
-            smtpPort: user.smtpPort || 587,
-            smtpSecure: user.smtpSecure || false,
+            smtpHost: user.smtpHost || autoConfig.smtpHost || '',
+            smtpPort: user.smtpPort || autoConfig.smtpPort || 587,
+            smtpSecure: user.smtpSecure !== undefined ? user.smtpSecure : autoConfig.smtpSecure || false,
             smtpUser: user.smtpUser || userEmail, // Use user's email if smtpUser not set
             smtpPassword: '', // Never pre-fill password for security
-            imapHost: user.imapHost || '',
-            imapPort: user.imapPort || 993,
-            imapSecure: user.imapSecure !== false, // Default to true
+            imapHost: user.imapHost || autoConfig.imapHost || '',
+            imapPort: user.imapPort || autoConfig.imapPort || 993,
+            imapSecure: user.imapSecure !== undefined ? user.imapSecure : autoConfig.imapSecure !== false,
           });
           
           // Show helpful message if settings are pre-configured but not complete
@@ -153,6 +210,13 @@ export function UserEmailConfig() {
             toast({
               title: "Email Settings Pre-configured",
               description: "Your email settings have been automatically configured based on your invitation. Just add your email password to complete the setup.",
+              duration: 8000,
+            });
+          } else if (!user.smtpHost && autoConfig.smtpHost) {
+            // Show auto-configuration message
+            toast({
+              title: "Email Settings Auto-configured",
+              description: `Settings automatically configured for ${userEmail.split('@')[1]}. ${autoConfig.requiresAppPassword ? 'App password required.' : 'Enter your email password.'}`,
               duration: 8000,
             });
           }
@@ -191,6 +255,21 @@ export function UserEmailConfig() {
         </CardTitle>
         <CardDescription>
           Configure your personal email account to send emails directly from your own address.
+          {/* Show password requirements based on email domain */}
+          {user?.email && (() => {
+            const domain = user.email.split('@')[1]?.toLowerCase();
+            const autoConfig = autoConfigureEmailSettings(user.email);
+            if (autoConfig.requiresAppPassword) {
+              return (
+                <div className="flex items-center gap-2 mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="text-orange-800">
+                    <div className="font-medium text-sm mb-1">🔑 App Password Required</div>
+                    <div className="text-xs">{autoConfig.instructions}</div>
+                  </div>
+                </div>
+              );
+            }
+          })()}
           {/* Show if settings were pre-configured from invitation */}
           {form.watch('smtpHost') && !form.watch('smtpPassword') && (
             <div className="flex items-center gap-2 mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
@@ -273,15 +352,21 @@ export function UserEmailConfig() {
               <FormField
                 control={form.control}
                 name="smtpPassword"
-                render={({ field }) => (
-                  <FormItem className="space-y-2 mt-[0px] mb-[0px]">
-                    <FormLabel>Password / App Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Enter your email password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const autoConfig = user?.email ? autoConfigureEmailSettings(user.email) : {};
+                  const passwordLabel = autoConfig.requiresAppPassword ? "App Password (Required)" : "Email Password";
+                  const placeholder = autoConfig.requiresAppPassword ? "Enter your app password" : "Enter your email password";
+                  
+                  return (
+                    <FormItem className="space-y-2 mt-[0px] mb-[0px]">
+                      <FormLabel>{passwordLabel}</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder={placeholder} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={form.control}
