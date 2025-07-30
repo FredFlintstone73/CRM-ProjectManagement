@@ -10,7 +10,7 @@ export default function ActivityFeed() {
   });
 
   const { data: user } = useQuery<User>({
-    queryKey: ['/api/auth/user'],
+    queryKey: ['/api/user'],
   });
 
   const getActivityIcon = (action: string) => {

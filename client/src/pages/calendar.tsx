@@ -491,7 +491,7 @@ function CalendarEventsPreview() {
 
   // Get current user's contact ID to filter tasks
   const { data: user } = useQuery({
-    queryKey: ["/api/auth/user"],
+    queryKey: ["/api/user"],
   });
 
   const { data: userContactId } = useQuery({

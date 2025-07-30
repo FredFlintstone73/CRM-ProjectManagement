@@ -127,7 +127,7 @@ export function UserEmailConfig() {
     const loadExistingConfig = async () => {
       try {
         const user = await queryClient.fetchQuery({
-          queryKey: ['/api/auth/user'],
+          queryKey: ['/api/user'],
           staleTime: 30000,
         });
         

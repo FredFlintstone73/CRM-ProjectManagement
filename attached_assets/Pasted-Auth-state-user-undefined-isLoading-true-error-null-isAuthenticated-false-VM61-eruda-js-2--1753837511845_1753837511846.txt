@@ -1,0 +1,66 @@
+Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM61 eruda.js:2 Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM61 eruda.js:2 Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM61 eruda.js:2 Auth state: {user: undefined, isLoading: true, error: null, isAuthenticated: false}
+VM61 eruda.js:2  GET https://8d860892-829b-4328-82a0-9f5e7eccde94-00-2tcj7jtrjb8f4.janeway.replit.dev/api/auth/user 404 (Not Found)
+window.fetch @ VM61 eruda.js:2
+(anonymous) @ VM63 index-D9LRicT0.js:48
+i @ VM63 index-D9LRicT0.js:48
+b @ VM63 index-D9LRicT0.js:48
+start @ VM63 index-D9LRicT0.js:48
+fetch @ VM63 index-D9LRicT0.js:48
+lh @ VM63 index-D9LRicT0.js:48
+onSubscribe @ VM63 index-D9LRicT0.js:48
+subscribe @ VM63 index-D9LRicT0.js:48
+(anonymous) @ VM63 index-D9LRicT0.js:48
+HF @ VM63 index-D9LRicT0.js:38
+$x @ VM63 index-D9LRicT0.js:40
+wu @ VM63 index-D9LRicT0.js:40
+YG @ VM63 index-D9LRicT0.js:40
+El @ VM63 index-D9LRicT0.js:40
+DE @ VM63 index-D9LRicT0.js:40
+pl @ VM63 index-D9LRicT0.js:38
+(anonymous) @ VM63 index-D9LRicT0.js:40
+setTimeout
+s @ VM63 index-D9LRicT0.js:48
+o @ VM63 index-D9LRicT0.js:48
+batch @ VM63 index-D9LRicT0.js:48
+Ni @ VM63 index-D9LRicT0.js:48
+setData @ VM63 index-D9LRicT0.js:48
+setQueryData @ VM63 index-D9LRicT0.js:48
+onSuccess @ VM63 index-D9LRicT0.js:458
+execute @ VM63 index-D9LRicT0.js:48
+await in execute
+mutate @ VM63 index-D9LRicT0.js:48
+(anonymous) @ VM63 index-D9LRicT0.js:48
+f @ VM63 index-D9LRicT0.js:458
+pH @ VM63 index-D9LRicT0.js:37
+vH @ VM63 index-D9LRicT0.js:37
+yH @ VM63 index-D9LRicT0.js:37
+rE @ VM63 index-D9LRicT0.js:37
+AF @ VM63 index-D9LRicT0.js:37
+(anonymous) @ VM63 index-D9LRicT0.js:37
+T_ @ VM63 index-D9LRicT0.js:40
+tF @ VM63 index-D9LRicT0.js:37
+W0 @ VM63 index-D9LRicT0.js:37
+n_ @ VM63 index-D9LRicT0.js:37
+MH @ VM63 index-D9LRicT0.js:37Understand this error
+VM61 eruda.js:2 Auth state: {user: undefined, isLoading: false, error: Error: 404: {"message":"API endpoint not found: /"}
+    at c3 (https://8d860892-829b-4328-82a0-9f5e…, isAuthenticated: false}
+VM61 eruda.js:2 Auth state: {user: undefined, isLoading: false, error: Error: 404: {"message":"API endpoint not found: /"}
+    at c3 (https://8d860892-829b-4328-82a0-9f5e…, isAuthenticated: false}
+VM61 eruda.js:2 Auth state: {user: undefined, isLoading: false, error: Error: 404: {"message":"API endpoint not found: /"}
+    at c3 (https://8d860892-829b-4328-82a0-9f5e…, isAuthenticated: false}
+VM63 index-D9LRicT0.js:574  GET https://8d860892-829b-4328-82a0-9f5e7eccde94-00-2tcj7jtrjb8f4.janeway.replit.dev/api/login 404 (Not Found)
+(anonymous) @ VM63 index-D9LRicT0.js:574
+setTimeout
+(anonymous) @ VM63 index-D9LRicT0.js:574
+$x @ VM63 index-D9LRicT0.js:40
+wu @ VM63 index-D9LRicT0.js:40
+YG @ VM63 index-D9LRicT0.js:40
+El @ VM63 index-D9LRicT0.js:40
+DE @ VM63 index-D9LRicT0.js:40
+pl @ VM63 index-D9LRicT0.js:38
+(anonymous) @ VM63 index-D9LRicT0.js:40Understand this error
+index.ts-7f325e85.js:1 [Long Running Recorder] Content script initialised
+index.ts-7f325e85.js:3 [Long Running Recorder] Recorder disabled

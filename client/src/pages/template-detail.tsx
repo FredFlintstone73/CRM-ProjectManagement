@@ -882,7 +882,7 @@ export default function TemplateDetail() {
 
   // Fetch current user for "Assign to Me" option
   const { data: currentUser } = useQuery({
-    queryKey: ['/api/auth/user'],
+    queryKey: ['/api/user'],
     enabled: isAuthenticated,
   });
 

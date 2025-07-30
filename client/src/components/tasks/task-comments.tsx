@@ -24,7 +24,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
 
   // Fetch current user
   const { data: currentUser } = useQuery<User>({
-    queryKey: ["/api/auth/user"],
+    queryKey: ["/api/user"],
   });
 
   // Fetch task comments with user data
