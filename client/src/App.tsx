@@ -39,9 +39,9 @@ import { SessionTimeoutManager } from "@/components/auth/SessionTimeoutManager";
 function Router() {
   const { user, isLoading } = useAuth();
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    // Load saved width from localStorage, default to 280px for better title visibility
+    // Load saved width from localStorage, default to 320px for better logout button visibility
     const saved = localStorage.getItem('sidebarWidth');
-    return saved ? parseInt(saved, 10) : 280;
+    return saved ? parseInt(saved, 10) : 320;
   });
 
   // Save sidebar width to localStorage when it changes
