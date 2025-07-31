@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
+import connectPg from "connect-pg-simple";
 import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
@@ -11,6 +12,9 @@ import { TwoFactorService } from "./twoFactorService";
 declare global {
   namespace Express {
     interface User extends SelectUser {}
+    interface Session {
+      pendingUserId?: string;
+    }
   }
 }
 
@@ -24,11 +28,20 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Create session store
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: false,
+    ttl: 90 * 60, // 90 minutes in seconds
+    tableName: "sessions",
+  });
+
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "default-secret-change-in-production",
     resave: false,
     saveUninitialized: false,
-    store: storage.sessionStore,
+    store: sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
@@ -119,14 +132,12 @@ export function setupAuth(app: Express) {
         isActive: true,
         invitedBy: invitation?.invitedBy,
         invitedAt: invitation ? new Date() : undefined,
-        twoFactorEnabled: false,
       });
 
       // If this was an invitation, mark it as accepted and create team member contact
       if (invitation) {
         await storage.updateUserInvitation(invitation.id, { 
-          status: "accepted",
-          acceptedAt: new Date() 
+          status: "accepted"
         });
 
         // Auto-configure email settings if possible
