@@ -99,12 +99,12 @@ class EmailService {
       };
     } else if (false) { // Disabled condition to prevent fallback
       config = {
-        host: smtpHost,
+        host: smtpHost!,
         port: parseInt(smtpPort || '587'),
         secure: (smtpPort === '465'),
         auth: {
-          user: smtpUser,
-          pass: smtpPass,
+          user: smtpUser!,
+          pass: smtpPass!,
         },
       };
     }
@@ -303,9 +303,9 @@ class EmailService {
     const smtpPass = process.env.SMTP_PASS;
 
     // Check if we have valid credential pairs for any service
-    return (outlookUser && outlookPass) || 
-           (gmailUser && gmailPass) || 
-           (smtpUser && smtpPass);
+    return !!(outlookUser && outlookPass) || 
+           !!(gmailUser && gmailPass) || 
+           !!(smtpUser && smtpPass);
   }
 
   // Start monitoring incoming emails for automatic threading
@@ -529,7 +529,7 @@ class EmailService {
 
         if (originalEmail) {
           parentEmailId = originalEmail.id;
-          console.log(`Found parent email ID: ${parentEmailId} for reply, associating with contact: ${targetContact.firstName} ${targetContact.lastName}`);
+          console.log(`Found parent email ID: ${parentEmailId} for reply, associating with contact: ${targetContact?.firstName} ${targetContact?.lastName}`);
         }
       }
 
@@ -554,13 +554,13 @@ class EmailService {
         const subjectMatch = existingEmail.subject === subject;
         const senderMatch = existingFromEmail === fromEmailForDupe;
         const typeMatch = existingEmail.emailType === 'received';
-        const timeMatch = Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt).getTime() - currentTimestamp.getTime()) < 300000; // Within 5 minutes
+        const timeMatch = Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt || new Date()).getTime() - currentTimestamp.getTime()) < 300000; // Within 5 minutes
 
         console.log(`🔍 Comparing with existing email ID ${existingEmail.id}:`);
         console.log(`   - Subject: "${existingEmail.subject}" vs "${subject}" = ${subjectMatch}`);
         console.log(`   - Sender: "${existingFromEmail}" vs "${fromEmailForDupe}" = ${senderMatch}`);
         console.log(`   - Type: "${existingEmail.emailType}" vs "received" = ${typeMatch}`);
-        console.log(`   - Time diff: ${Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt).getTime() - currentTimestamp.getTime())}ms = ${timeMatch}`);
+        console.log(`   - Time diff: ${Math.abs(new Date(existingEmail.sentAt || existingEmail.createdAt || new Date()).getTime() - currentTimestamp.getTime())}ms = ${timeMatch}`);
 
         return subjectMatch && senderMatch && typeMatch && timeMatch;
       });
