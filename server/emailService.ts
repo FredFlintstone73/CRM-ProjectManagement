@@ -2,6 +2,8 @@ import nodemailer from 'nodemailer';
 import Imap from 'imap';
 import { simpleParser } from 'mailparser';
 import type { IStorage } from './storage';
+import { validateSafeInput, sanitizeEmailAddress, safeTruncate, validateEmailHeader, emailProcessingRateLimit } from './securityUtils';
+import { secureEmailProcessor } from './secureEmailWrapper';
 
 interface EmailConfig {
   service?: string; // 'gmail', 'outlook', etc.
@@ -51,6 +53,8 @@ class EmailService {
   // Set storage reference for email monitoring
   setStorage(storage: IStorage) {
     this.storage = storage;
+    // Also configure the secure email processor
+    secureEmailProcessor.setStorage(storage);
   }
 
   private initializeTransporter() {
@@ -459,7 +463,8 @@ class EmailService {
             stream.once('end', async () => {
               try {
                 const parsed = await simpleParser(buffer);
-                await this.processIncomingEmail(parsed);
+                // Use secure email processor to handle potential vulnerabilities
+                await secureEmailProcessor.processEmailSecurely(parsed);
               } catch (error) {
                 console.error('Error parsing email:', error);
               }
@@ -484,19 +489,33 @@ class EmailService {
       const from = email.from?.text || '';
       const body = email.text || email.html || '';
 
-      console.log(`🔍 Processing incoming email from: ${from}, subject: ${subject}`);
-      console.log(`📧 Email body preview: ${body.substring(0, 100)}...`);
+      // Security: Validate inputs to prevent ReDoS and other attacks
+      if (!validateSafeInput(subject, 500) || !validateSafeInput(from, 200) || !validateEmailHeader(subject)) {
+        console.warn('Potentially unsafe email detected, skipping processing');
+        return;
+      }
+
+      // Rate limiting for email processing to prevent abuse
+      const fromEmail = sanitizeEmailAddress(from);
+      if (!emailProcessingRateLimit.isAllowed(fromEmail, 20, 300000)) { // 20 emails per 5 minutes per sender
+        console.warn(`Rate limit exceeded for email from: ${fromEmail}`);
+        return;
+      }
+
+      console.log(`🔍 Processing incoming email from: ${safeTruncate(from)}, subject: ${safeTruncate(subject)}`);
+      console.log(`📧 Email body preview: ${safeTruncate(body, 100)}...`);
 
       // Try to find matching contact by email - extract actual email address from the from field
       const emailRegex = /<([^>]+)>/;
       const emailMatch = from.match(emailRegex);
-      const fromEmail = emailMatch ? emailMatch[1] : from.trim();
+      const fromEmailUnsafe = emailMatch ? emailMatch[1] : from.trim();
+      const fromEmailSafe = sanitizeEmailAddress(fromEmailUnsafe);
 
       const contacts = await this.storage.getContacts();
       const matchingContact = contacts.find(contact => 
-        (contact.personalEmail && fromEmail.toLowerCase() === contact.personalEmail.toLowerCase()) ||
-        (contact.workEmail && fromEmail.toLowerCase() === contact.workEmail.toLowerCase()) ||
-        (contact.spousePersonalEmail && fromEmail.toLowerCase() === contact.spousePersonalEmail.toLowerCase())
+        (contact.personalEmail && fromEmailSafe.toLowerCase() === contact.personalEmail.toLowerCase()) ||
+        (contact.workEmail && fromEmailSafe.toLowerCase() === contact.workEmail.toLowerCase()) ||
+        (contact.spousePersonalEmail && fromEmailSafe.toLowerCase() === contact.spousePersonalEmail.toLowerCase())
       );
 
       // Check if this is a reply (contains "Re:" or "RE:")
